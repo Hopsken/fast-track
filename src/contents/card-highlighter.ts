@@ -20,6 +20,7 @@ function highlightCard(card: HTMLElement) {
 function main() {
   if (!isJiraWebPage(document)) return
 
+
   const jiraApp = document.getElementById("jira-frontend")
   function updateColors() {
     const kanban = getKanbanBoard(document)

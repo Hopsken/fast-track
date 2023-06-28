@@ -1,5 +1,6 @@
 import darkModeStyle from "data-text:~styles/dark-mode.css"
 import type { PlasmoCSConfig } from "plasmo"
+import { StorageKey, PersistLayer } from "~storage"
 
 import { isJiraWebPage } from "~utils/is-jira-page"
 
@@ -10,15 +11,33 @@ export const config: PlasmoCSConfig = {
   run_at: "document_end"
 }
 
-function injectDarkModeCSS() {
-  const styleElement = document.createElement("style")
-  styleElement.textContent = darkModeStyle
-  document.head.appendChild(styleElement)
+let styleElement: HTMLStyleElement
+
+function getDarkModeStyle() {
+  if (styleElement) return styleElement
+  const newElement = document.createElement("style")
+  newElement.textContent = darkModeStyle
+  styleElement = newElement
+  return newElement
 }
 
-function main() {
+async function main() {
   if (!isJiraWebPage(document)) return
-  injectDarkModeCSS()
+  const persistLayer = new PersistLayer()
+  const isDarkModeEnabled = await persistLayer.get(StorageKey.DarkMode)
+
+  if (isDarkModeEnabled) {
+    document.head.appendChild(getDarkModeStyle())
+  }
+
+  persistLayer.watch(StorageKey.DarkMode, ({ newValue }) => {
+    const el = getDarkModeStyle()
+    if (newValue) {
+      document.head.appendChild(el)
+    } else {
+      el.remove()
+    }
+  })
 }
 
 main()
