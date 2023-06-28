@@ -25,12 +25,12 @@ iframe,
   filter: invert(100%) hue-rotate(180deg) brightness(105%) contrast(105%);
   border-color: transparent;
 }
-#gh {
+/* #gh {
   padding: 0 40px;
 }
 #content {
   margin: 0;
-}
+} */
 [data-testid="Content"] > div:first-child {
   background: white;
 }
