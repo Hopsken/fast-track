@@ -1,7 +1,7 @@
 import { TinyColor } from "@ctrl/tinycolor"
 import type { PlasmoCSConfig } from "plasmo"
 
-import { isJiraWebPage } from "~utils/is-jira-page"
+import { getKanbanBoard, isJiraWebPage } from "~utils/is-jira-page"
 
 export const config: PlasmoCSConfig = {
   matches: ["<all_urls>"],
@@ -20,18 +20,18 @@ function highlightCard(card: HTMLElement) {
 function main() {
   if (!isJiraWebPage(document)) return
 
-  const poolContainer = document.getElementById("ghx-pool-column")
-  if (!poolContainer) return
-
+  const jiraApp = document.getElementById("jira-frontend")
   function updateColors() {
-    let grabbers = poolContainer.querySelectorAll(`[class*="ghx-type-"]`)
+    const kanban = getKanbanBoard(document)
+    if (!kanban) return
+    let grabbers = kanban.querySelectorAll(`[class*="ghx-type-"]`)
     grabbers.forEach((el) => {
       highlightCard(el as HTMLElement)
     })
   }
 
   const containerObserver = new MutationObserver(() => updateColors())
-  containerObserver.observe(poolContainer, { childList: true, subtree: true })
+  containerObserver.observe(jiraApp, { childList: true, subtree: true })
   updateColors()
 }
 
