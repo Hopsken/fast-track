@@ -1,10 +1,9 @@
 import darkModeStyle from "data-text:~styles/dark-mode.css"
 import type { PlasmoCSConfig } from "plasmo"
-import { StorageKey, PersistLayer } from "~storage"
 
+import { PersistLayer, StorageKey } from "~storage"
 import { isJiraWebPage } from "~utils/is-jira-page"
 
-// TODO: runs at document start, if domain match, then inject, else delay to document load
 export const config: PlasmoCSConfig = {
   matches: ["<all_urls>"],
   all_frames: true,
@@ -13,26 +12,34 @@ export const config: PlasmoCSConfig = {
 
 let styleElement: HTMLStyleElement
 
-function getDarkModeStyle() {
-  if (styleElement) return styleElement
-  const newElement = document.createElement("style")
-  newElement.textContent = darkModeStyle
-  styleElement = newElement
-  return newElement
+function createStyleElement(auto: boolean) {
+  const element = styleElement ?? document.createElement("style")
+
+  if (auto) {
+    element.textContent = `
+    @media (prefers-color-scheme: dark) {
+      ${darkModeStyle}
+    }`
+  } else {
+    element.textContent = darkModeStyle
+  }
+
+  styleElement = element
+  return element
 }
 
 async function main() {
   if (!isJiraWebPage(document)) return
   const persistLayer = new PersistLayer()
-  const isDarkModeEnabled = await persistLayer.get(StorageKey.DarkMode)
+  const darkMode = (await persistLayer.get(StorageKey.DarkMode)) ?? "auto"
 
-  if (isDarkModeEnabled) {
-    document.head.appendChild(getDarkModeStyle())
+  if (darkMode !== "disable") {
+    document.head.appendChild(createStyleElement(darkMode === "auto"))
   }
 
   persistLayer.watch(StorageKey.DarkMode, ({ newValue }) => {
-    const el = getDarkModeStyle()
-    if (newValue) {
+    const el = createStyleElement(newValue === "auto")
+    if (newValue !== "disable") {
       document.head.appendChild(el)
     } else {
       el.remove()

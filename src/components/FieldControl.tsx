@@ -1,0 +1,20 @@
+import type { PropsWithChildren } from "react"
+
+export type FieldControlProps = {
+  title: string
+  description: string
+}
+
+export function FieldControl(props: PropsWithChildren<FieldControlProps>) {
+  return (
+    <div className="field flex items-center">
+      <div className="flex flex-1 flex-col space-y-1">
+        <div className="text-sm">{props.title}</div>
+        <div className="text-xs text-slate-500">{props.description}</div>
+      </div>
+      <div className="flex flex-none items-center justify-center">
+        {props.children}
+      </div>
+    </div>
+  )
+}

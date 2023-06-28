@@ -12,7 +12,7 @@ module.exports = {
   bracketSameLine: true,
   plugins: [
     require.resolve("@plasmohq/prettier-plugin-sort-imports"),
-    require.resolve("prettier-plugin-tailwindcss")
+    // require.resolve("prettier-plugin-tailwindcss")
   ],
   importOrder: ["^@plasmohq/(.*)$", "^~(.*)$", "^[./]"],
   importOrderSeparation: true,

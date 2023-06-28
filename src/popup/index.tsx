@@ -1,5 +1,7 @@
+import { DarkModeControl } from "~components/DarkModeControl"
 import { ToggleField } from "~components/ToggleField"
 import { StorageKey } from "~storage"
+
 import "~styles/style.css"
 
 function Popup() {
@@ -10,11 +12,7 @@ function Popup() {
       <div className="divider" />
 
       <div className="flex flex-col space-y-4">
-        <ToggleField
-          title="Dark Mode"
-          description="Enable dark mode on Jira pages"
-          storageKey={StorageKey.DarkMode}
-        />
+        <DarkModeControl />
         <ToggleField
           title="Highlight issue color"
           description="Highlight background color of issues"

@@ -6,7 +6,7 @@ export enum StorageKey {
 }
 
 type StorageValueRecord = {
-  [StorageKey.DarkMode]: boolean
+  [StorageKey.DarkMode]: "always" | "auto" | "disable"
   [StorageKey.ColorCard]: boolean
 }
 
