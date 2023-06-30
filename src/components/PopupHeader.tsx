@@ -1,3 +1,4 @@
+import iconPNG from "data-base64:~assets/logo.png"
 import { HiChevronLeft } from "react-icons/hi2"
 import {
   Outlet,
@@ -21,6 +22,7 @@ export function PopupHeader() {
   if (pathname === "/") {
     return (
       <header className="flex items-center space-x-2">
+        <img src={iconPNG} className="w-6 h-6" alt="Jira Boost" />
         <h1 className="text-lg font-medium text-slate-900">Jira Boost</h1>
         <ProBadge isPro={license?.valid} />
       </header>
