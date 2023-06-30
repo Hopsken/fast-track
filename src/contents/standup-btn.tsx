@@ -4,10 +4,12 @@ import type {
   PlasmoCSUIJSXContainer,
   PlasmoRender
 } from "plasmo"
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { createRoot } from "react-dom/client"
 import { FaChild, FaCompressAlt } from "react-icons/fa"
 import screenfull from "screenfull"
+
+import { useStorage } from "@plasmohq/storage/hook"
 
 import { PersistLayer, StorageKey } from "~storage"
 import { isJiraWebPage } from "~utils/is-jira-page"
@@ -44,10 +46,27 @@ const FullScreenStyle = `
 
 function StandupBtn() {
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isAutoEnterFullScreen] = useStorage(StorageKey.AutoFullScreen, false)
+
+  useEffect(() => {
+    const onFullScreenChange = () => {
+      setIsFullscreen(screenfull.isFullscreen)
+    }
+    screenfull.on("change", onFullScreenChange)
+    return () => {
+      screenfull.off("change", onFullScreenChange)
+    }
+  }, [])
 
   const onClick = useCallback(() => {
-    setIsFullscreen((prev) => !prev)
-  }, [])
+    setIsFullscreen((prev) => {
+      const nextVal = !prev
+      if (!isAutoEnterFullScreen) return nextVal
+      if (nextVal) screenfull.request()
+      else screenfull.exit()
+      return nextVal
+    })
+  }, [isAutoEnterFullScreen])
 
   return (
     <div>
@@ -70,6 +89,10 @@ function StandupBtn() {
   )
 }
 
+function isInJiraNativeFullScreenMode() {
+  return $("#fullscreen-global-style").length > 0
+}
+
 async function registerAutoEnterFullScreen() {
   if (!isJiraWebPage(document)) return
   if (!screenfull.isEnabled) return
@@ -83,16 +106,20 @@ async function registerAutoEnterFullScreen() {
 
   const triggerSelectors = [
     'button[data-testid="platform.ui.fullscreen-button.fullscreen-button"]',
-    'button[data-testid="jira-boost.fullscreen-button"]',
     "button.js-compact-toggle"
   ].join(", ")
 
   $("#jira").on("click", triggerSelectors, () => {
     if (!isAutoEnterFullScreen) return
+
     if (screenfull.isFullscreen) {
-      screenfull.exit()
+      if (isInJiraNativeFullScreenMode()) {
+        screenfull.exit()
+      }
     } else {
-      screenfull.request()
+      if (!isInJiraNativeFullScreenMode()) {
+        screenfull.request()
+      }
     }
   })
 }
