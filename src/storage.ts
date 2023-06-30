@@ -3,13 +3,21 @@ import { Storage, type StorageWatchCallback } from "@plasmohq/storage"
 export enum StorageKey {
   DarkMode = "dark-mode",
   ColorCard = "color-card",
-  AutoFullScreen = "auto-fullscreen"
+  AutoFullScreen = "auto-fullscreen",
+  CustomBackground = "custom-background"
 }
 
 export type StorageValueRecord = {
   [StorageKey.DarkMode]: "always" | "auto" | "disable"
   [StorageKey.ColorCard]: boolean
   [StorageKey.AutoFullScreen]: boolean
+  [StorageKey.CustomBackground]:
+    | undefined
+    | {
+        id: string
+        url: string
+        thumb_url: string
+      }
 }
 
 export class PersistLayer {
@@ -43,3 +51,5 @@ export class PersistLayer {
     })
   }
 }
+
+export const persistLayer = new PersistLayer()

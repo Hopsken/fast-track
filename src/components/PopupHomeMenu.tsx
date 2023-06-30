@@ -1,0 +1,55 @@
+import { HiChevronRight } from "react-icons/hi2"
+import { Link } from "react-router-dom"
+
+import { useStorage } from "@plasmohq/storage/hook"
+
+import { StorageKey } from "~storage"
+
+import { DarkModeControl } from "./DarkModeControl"
+import { FieldControl } from "./FieldControl"
+import { ToggleField } from "./ToggleField"
+
+function CustomBackgroundPreview() {
+  const [custom] = useStorage<{ thumb_url: string }>(
+    StorageKey.CustomBackground
+  )
+
+  if (!custom) return null
+  return (
+    <img
+      className="w-12 aspect-[4/3] rounded shadow-sm"
+      src={custom.thumb_url}
+      alt="custom"
+    />
+  )
+}
+
+export function PopupHomeMenu() {
+  return (
+    <div className="flex flex-col space-y-4">
+      <Link to={"/themes"}>
+        <FieldControl
+          title="Background"
+          description="Set the background image of Kanban board">
+          <div className="flex space-x-2 items-center">
+            <CustomBackgroundPreview />
+            <HiChevronRight />
+          </div>
+        </FieldControl>
+      </Link>
+
+      <DarkModeControl />
+
+      <ToggleField
+        title="Highlight issue color"
+        description="Highlight background color of issues"
+        storageKey={StorageKey.ColorCard}
+      />
+      <ToggleField
+        title="Enable browser fullscreen"
+        description="Enter browser-level fullscreen when click on fullscreen button"
+        storageKey={StorageKey.AutoFullScreen}
+      />
+    </div>
+  )
+}
