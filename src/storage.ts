@@ -4,7 +4,8 @@ export enum StorageKey {
   DarkMode = "dark-mode",
   ColorCard = "color-card",
   AutoFullScreen = "auto-fullscreen",
-  CustomBackground = "custom-background"
+  CustomBackground = "custom-background",
+  License = "ls-license"
 }
 
 export type StorageValueRecord = {
@@ -17,7 +18,13 @@ export type StorageValueRecord = {
         id: string
         url: string
         thumb_url: string
+        instance_id: string
       }
+  [StorageKey.License]: {
+    valid: boolean
+    license: string
+    lastChecked: string
+  }
 }
 
 export class PersistLayer {

@@ -7,14 +7,22 @@ import {
   useNavigate
 } from "react-router-dom"
 
+import { useStorage } from "@plasmohq/storage/hook"
+
+import { StorageKey } from "~storage"
+
+import { ProBadge } from "./ProBadge"
+
 export function PopupHeader() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
+  const [license] = useStorage<LicenseState>(StorageKey.License)
 
   if (pathname === "/") {
     return (
-      <header className="flex items-center justify-between">
+      <header className="flex items-center space-x-2">
         <h1 className="text-lg font-medium text-slate-900">Jira Boost</h1>
+        <ProBadge isPro={license?.valid} />
       </header>
     )
   }
@@ -30,6 +38,20 @@ export function PopupHeader() {
             path="themes"
             element={
               <h1 className="text-lg font-medium text-slate-900">Themes</h1>
+            }
+          />
+          <Route
+            path="upgrade"
+            element={
+              <h1 className="text-lg font-medium text-slate-900">
+                Upgrade Pro
+              </h1>
+            }
+          />
+          <Route
+            path="manage-license"
+            element={
+              <h1 className="text-lg font-medium text-slate-900">License</h1>
             }
           />
         </Route>
