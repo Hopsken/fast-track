@@ -1,12 +1,14 @@
 import { useStorage } from "@plasmohq/storage/hook"
 
+import type { StorageKey } from "~storage"
+
 import { FieldControl, type FieldControlProps } from "./FieldControl"
 
-export type ToggleFieldProps = FieldControlProps & {
-  storageKey: string
+export type ToggleFieldProps<T extends StorageKey> = FieldControlProps & {
+  storageKey: T
 }
 
-export function ToggleField(props: ToggleFieldProps) {
+export function ToggleField<T extends StorageKey>(props: ToggleFieldProps<T>) {
   const [checked, setChecked] = useStorage(props.storageKey, false)
   return (
     <FieldControl title={props.title} description={props.description}>

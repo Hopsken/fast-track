@@ -6,7 +6,7 @@ export enum StorageKey {
   AutoFullScreen = "auto-fullscreen"
 }
 
-type StorageValueRecord = {
+export type StorageValueRecord = {
   [StorageKey.DarkMode]: "always" | "auto" | "disable"
   [StorageKey.ColorCard]: boolean
   [StorageKey.AutoFullScreen]: boolean
