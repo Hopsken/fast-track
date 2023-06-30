@@ -12,6 +12,7 @@
   "dependencies": {
     "@ctrl/tinycolor": "^3.6.0",
     "@plasmohq/storage": "^1.6.1",
+    "cash-dom": "^8.1.5",
     "plasmo": "0.76.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",

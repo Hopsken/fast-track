@@ -7,6 +7,9 @@ dependencies:
   '@plasmohq/storage':
     specifier: ^1.6.1
     version: 1.6.1(react@18.2.0)
+  cash-dom:
+    specifier: ^8.1.5
+    version: 8.1.5
   plasmo:
     specifier: 0.76.3
     version: 0.76.3(postcss@8.4.24)(react-dom@18.2.0)(react@18.2.0)
@@ -2758,6 +2761,10 @@ packages:
       no-case: 3.0.4
       tslib: 2.5.3
       upper-case-first: 2.0.2
+    dev: false
+
+  /cash-dom@8.1.5:
+    resolution: {integrity: sha512-/BS05CfzyHR5xT2ksKj1sDLPaOv5rSmIwoGxNgdKwUtnIuiJ5neMxVEmZxvfyJiSjGbOMD0Lwe+9v+fszDqHew==}
     dev: false
 
   /chalk@2.4.2:

@@ -2,12 +2,14 @@ import { Storage, type StorageWatchCallback } from "@plasmohq/storage"
 
 export enum StorageKey {
   DarkMode = "dark-mode",
-  ColorCard = "color-card"
+  ColorCard = "color-card",
+  AutoFullScreen = "auto-fullscreen"
 }
 
 type StorageValueRecord = {
   [StorageKey.DarkMode]: "always" | "auto" | "disable"
   [StorageKey.ColorCard]: boolean
+  [StorageKey.AutoFullScreen]: boolean
 }
 
 export class PersistLayer {

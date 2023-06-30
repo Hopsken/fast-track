@@ -18,6 +18,11 @@ function Popup() {
           description="Highlight background color of issues"
           storageKey={StorageKey.ColorCard}
         />
+        <ToggleField
+          title="Enable browser fullscreen"
+          description="Enter browser-level fullscreen when click on fullscreen button"
+          storageKey={StorageKey.AutoFullScreen}
+        />
       </div>
     </div>
   )
