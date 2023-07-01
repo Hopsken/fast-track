@@ -1,8 +1,8 @@
 {
   "name": "jira-boost",
-  "displayName": "Jira boost",
+  "displayName": "Jira Boost",
   "version": "0.0.1",
-  "description": "Boost Jira productivity with customizations like card highlight.",
+  "description": "All in on Jira experience boost with power-ups including standup mode, custom theme and etc.",
   "author": "hopsken",
   "scripts": {
     "dev": "plasmo dev",
