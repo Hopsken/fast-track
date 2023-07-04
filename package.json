@@ -25,7 +25,8 @@
     "react-router-dom": "^6.14.0",
     "screenfull": "^6.0.2",
     "swr": "^2.2.0",
-    "unsplash-js": "^7.0.18"
+    "unsplash-js": "^7.0.18",
+    "webextension-polyfill": "^0.10.0"
   },
   "devDependencies": {
     "@plasmohq/prettier-plugin-sort-imports": "3.6.4",
@@ -33,6 +34,7 @@
     "@types/node": "20.2.4",
     "@types/react": "18.2.7",
     "@types/react-dom": "18.2.4",
+    "@types/webextension-polyfill": "^0.10.1",
     "autoprefixer": "^10.4.14",
     "daisyui": "^3.1.6",
     "postcss": "^8.4.24",
@@ -45,6 +47,12 @@
     "host_permissions": [
       "https://*/*"
     ],
+    "permissions": [
+      "omnibox"
+    ],
+    "omnibox": {
+      "keyword": "jira"
+    },
     "browser_specific_settings": {
       "gecko": {
         "id": "{df6c8f8c-469a-4c88-8b45-23ff390f1d7d}"
