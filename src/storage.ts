@@ -6,7 +6,8 @@ export enum StorageKey {
   AutoFullScreen = "auto-fullscreen",
   CustomBackground = "custom-background",
   License = "ls-license",
-  JiraUrl = "jira-url"
+  JiraUrl = "jira-url",
+  PrimaryIssueKeyPrefix = "primary-issue-key-prefix"
 }
 
 export type StorageValueRecord = {
@@ -27,6 +28,7 @@ export type StorageValueRecord = {
     lastChecked: string
   }
   [StorageKey.JiraUrl]: string
+  [StorageKey.PrimaryIssueKeyPrefix]: string
 }
 
 export class PersistLayer {
