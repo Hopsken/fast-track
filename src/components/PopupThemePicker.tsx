@@ -54,7 +54,6 @@ export function PopupThemePicker() {
             key={photo.id}
             photo={photo}
             onClick={() => {
-              console.info(photo)
               setCustomBackground({
                 id: photo.id,
                 url: photo.urls.regular,

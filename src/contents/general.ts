@@ -95,7 +95,6 @@ async function main() {
     key: "theme",
     when: () => !!getKanbanBoard(document),
     effect: async () => {
-      console.info("injecting")
       const themeStyleElement = document.createElement("style")
       themeStyleElement.id = "jira-boost-theme"
       themeStyleElement.textContent = backgroundStyle
@@ -104,7 +103,6 @@ async function main() {
       const unsubscribe = await initCSSVariables()
 
       return () => {
-        console.info("cleanning up")
         themeStyleElement.remove()
         unsubscribe()
       }
