@@ -1,8 +1,8 @@
 import { TinyColor } from "@ctrl/tinycolor"
 import type { PlasmoCSConfig } from "plasmo"
-import { PersistLayer, StorageKey } from "~storage"
 
-import { getKanbanBoard, isJiraWebPage } from "~utils/is-jira-page"
+import { PersistLayer, StorageKey } from "~storage"
+import { getJiraApp, getKanbanBoard, isJiraWebPage } from "~utils/is-jira-page"
 
 export const config: PlasmoCSConfig = {
   matches: ["<all_urls>"],
@@ -35,7 +35,7 @@ async function main() {
     })
   }
 
-  const jiraApp = document.getElementById("jira-frontend")
+  const jiraApp = getJiraApp(document)
   if (!jiraApp) return
 
   const containerObserver = new MutationObserver(() => {

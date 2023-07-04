@@ -2,11 +2,13 @@
   "name": "jira-boost",
   "displayName": "Jira Boost",
   "version": "0.0.1",
-  "description": "All in on Jira experience boost with power-ups including standup mode, custom theme and etc.",
+  "description": "All in one Jira experience boost with power-ups including standup mode, custom theme and etc.",
   "author": "hopsken",
   "scripts": {
     "dev": "plasmo dev",
+    "dev:ff": "plasmo dev --target=firefox-mv2",
     "build": "plasmo build",
+    "build:ff": "plasmo dev --target=firefox-mv2",
     "package": "plasmo package"
   },
   "dependencies": {
@@ -16,7 +18,7 @@
     "cash-dom": "^8.1.5",
     "date-fns": "^2.30.0",
     "nanoid": "^4.0.2",
-    "plasmo": "0.76.3",
+    "plasmo": "0.77.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-icons": "^4.10.1",
@@ -42,6 +44,11 @@
   "manifest": {
     "host_permissions": [
       "https://*/*"
-    ]
+    ],
+    "browser_specific_settings": {
+      "gecko": {
+        "id": "{df6c8f8c-469a-4c88-8b45-23ff390f1d7d}"
+      }
+    }
   }
 }
