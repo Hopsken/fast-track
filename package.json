@@ -48,7 +48,8 @@
       "https://*/*"
     ],
     "permissions": [
-      "omnibox"
+      "omnibox",
+      "management"
     ],
     "omnibox": {
       "keyword": "jira"
