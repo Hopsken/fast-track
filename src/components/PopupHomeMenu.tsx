@@ -29,6 +29,7 @@ export function PopupHomeMenu() {
     <div className="flex flex-col space-y-4">
       <Link to={"/themes"}>
         <FieldControl
+          size="sm"
           title="Background"
           description="Set the background image of Kanban board">
           <div className="flex space-x-2 items-center">

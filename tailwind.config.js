@@ -5,7 +5,7 @@ module.exports = {
   mode: "jit",
   darkMode: "class",
   content: ["./**/*.tsx"],
-  plugins: [require("daisyui")],
+  plugins: [require("@tailwindcss/typography"), require("daisyui")],
   theme: {
     extend: {
       fontFamily: {

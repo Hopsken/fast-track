@@ -10,6 +10,7 @@ export function DarkModeControl() {
   )
   return (
     <FieldControl
+      size="sm"
       title={"Dark Mode"}
       description={"Enable dark mode on Jira pages"}>
       <select
