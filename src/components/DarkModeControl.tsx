@@ -17,8 +17,8 @@ export function DarkModeControl() {
         value={mode}
         onChange={(e) => setMode(e.target.value)}>
         <option value="auto">Auto</option>
-        <option value="always">Always</option>
-        <option value="disable">Disable</option>
+        <option value="always">Dark</option>
+        <option value="disable">Light</option>
       </select>
     </FieldControl>
   )
