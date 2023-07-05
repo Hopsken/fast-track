@@ -80,6 +80,11 @@ function JiraHostInput() {
           !isValid ? "input-error" : ""
         }`}
       />
+      <span className="text-sm text-gray-500">
+        You can quickly jump to a ticket by typing the keyword{" "}
+        <kbd className="kbd kbd-sm">jira</kbd> +{" "}
+        <kbd className="kbd kbd-sm">Space</kbd> + ticket ID in the address bar.
+      </span>
     </div>
   )
 }

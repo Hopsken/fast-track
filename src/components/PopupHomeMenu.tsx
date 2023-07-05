@@ -4,6 +4,7 @@ import { Link } from "react-router-dom"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { StorageKey } from "~storage"
+import { openOptionsPage } from "~utils/broswer"
 
 import { DarkModeControl } from "./DarkModeControl"
 import { FieldControl } from "./FieldControl"
@@ -27,7 +28,7 @@ function CustomBackgroundPreview() {
 export function PopupHomeMenu() {
   return (
     <div className="flex flex-col space-y-4">
-      <Link to={"/themes"}>
+      {/* <Link to={"/themes"}>
         <FieldControl
           size="sm"
           title="Background"
@@ -37,7 +38,7 @@ export function PopupHomeMenu() {
             <HiChevronRight />
           </div>
         </FieldControl>
-      </Link>
+      </Link> */}
 
       <DarkModeControl />
 
@@ -51,6 +52,13 @@ export function PopupHomeMenu() {
         description="Enter browser-level fullscreen when click on fullscreen button"
         storageKey={StorageKey.AutoFullScreen}
       />
+
+      <FieldControl
+        title="More settings"
+        description="See more settings, such as quick jump"
+        onClick={() => openOptionsPage()}>
+        <HiChevronRight />
+      </FieldControl>
     </div>
   )
 }
