@@ -48,9 +48,6 @@
     "host_permissions": [
       "https://*/*"
     ],
-    "permissions": [
-      "omnibox"
-    ],
     "omnibox": {
       "keyword": "jira"
     },
