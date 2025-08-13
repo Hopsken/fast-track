@@ -1,42 +1,8 @@
 import $ from "cash-dom"
-import type {
-  PlasmoCSConfig,
-  PlasmoCSUIJSXContainer,
-  PlasmoRender
-} from "plasmo"
 import { useCallback, useEffect, useState } from "react"
 import { createRoot } from "react-dom/client"
 import { FaChild, FaCompressAlt } from "react-icons/fa"
 import screenfull from "screenfull"
-
-import { useStorage } from "@plasmohq/storage/hook"
-
-import { PersistLayer, StorageKey } from "~storage"
-import { isJiraWebPage } from "~utils/is-jira-page"
-
-export const config: PlasmoCSConfig = {
-  matches: ["<all_urls>"],
-  all_frames: true
-}
-
-export const getRootContainer = () =>
-  new Promise((resolve, reject) => {
-    if (!isJiraWebPage(document)) return reject("")
-    if (!screenfull.isEnabled) return reject("unsupported browser")
-
-    const checkInterval = setInterval(() => {
-      const rootContainerParent = document.querySelector(`#ghx-modes-tools`)
-      if (rootContainerParent) {
-        clearInterval(checkInterval)
-        const rootContainer = document.createElement("div")
-        rootContainerParent.insertBefore(
-          rootContainer,
-          rootContainerParent.firstChild
-        )
-        resolve(rootContainer)
-      }
-    }, 137)
-  })
 
 const FullScreenStyle = `
 #ak-jira-navigation, #ak-side-navigation, #right-sidebar-panel-wrapper, [data-skip-link-wrapper='true'] {
@@ -46,7 +12,7 @@ const FullScreenStyle = `
 
 function StandupBtn() {
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const [isAutoEnterFullScreen] = useStorage(StorageKey.AutoFullScreen, false)
+  const [isAutoEnterFullScreen] = useStorage(persistLayer.autoFullScreen, false)
 
   useEffect(() => {
     const onFullScreenChange = () => {
@@ -97,10 +63,9 @@ async function registerAutoEnterFullScreen() {
   if (!isJiraWebPage(document)) return
   if (!screenfull.isEnabled) return
 
-  const persistLayer = new PersistLayer()
-  let isAutoEnterFullScreen = await persistLayer.get(StorageKey.AutoFullScreen)
+  let isAutoEnterFullScreen = await persistLayer.autoFullScreen.getValue()
 
-  persistLayer.watch(StorageKey.AutoFullScreen, ({ newValue }) => {
+  persistLayer.autoFullScreen.watch((newValue) => {
     isAutoEnterFullScreen = newValue
   })
 
@@ -124,14 +89,23 @@ async function registerAutoEnterFullScreen() {
   })
 }
 
-export const render: PlasmoRender<PlasmoCSUIJSXContainer> = async ({
-  createRootContainer
-}) => {
-  registerAutoEnterFullScreen()
+export default defineContentScript({
+  async main(ctx) {
+    registerAutoEnterFullScreen()
 
-  const rootContainer = await createRootContainer()
-  const root = createRoot(rootContainer)
-  root.render(<StandupBtn />)
-}
+    const ui = await createShadowRootUi(ctx, {
+      name: "jboost-standup-btn",
+      position: "inline",
+      onMount(uiContainer, shadow, shadowHost) {
+        const root = createRoot(uiContainer)
+        root.render(<StandupBtn />)
+        return root
+      },
+      onRemove(mounted) {
+        mounted?.unmount()
+      }
+    })
 
-export default StandupBtn
+    ui.mount()
+  }
+})

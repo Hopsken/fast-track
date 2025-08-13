@@ -1,13 +1,9 @@
-import { useStorage } from "@plasmohq/storage/hook"
-
-import { StorageKey } from "~storage"
+import { DarkModeVariant } from "@/utils/storage"
 
 import { FieldControl } from "./FieldControl"
 
 export function DarkModeControl() {
-  const [mode, setMode] = useStorage(StorageKey.DarkMode, (v) =>
-    v === undefined ? "auto" : v
-  )
+  const [mode, setMode] = useStorage(persistLayer.darkMode, "auto")
   return (
     <FieldControl
       size="sm"
@@ -16,7 +12,7 @@ export function DarkModeControl() {
       <select
         className="select select-bordered select-sm"
         value={mode}
-        onChange={(e) => setMode(e.target.value)}>
+        onChange={(e) => setMode(e.target.value as DarkModeVariant)}>
         <option value="auto">Auto</option>
         <option value="always">Dark</option>
         <option value="disable">Light</option>

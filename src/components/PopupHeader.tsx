@@ -1,3 +1,4 @@
+import { LicenseState } from "@/utils/storage"
 import iconPNG from "data-base64:~assets/logo.png"
 import { HiChevronLeft } from "react-icons/hi2"
 import {
@@ -8,23 +9,19 @@ import {
   useNavigate
 } from "react-router-dom"
 
-import { useStorage } from "@plasmohq/storage/hook"
-
-import { StorageKey } from "~storage"
-
 import { ProBadge } from "./ProBadge"
 
 export function PopupHeader() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
-  const [license] = useStorage<LicenseState>(StorageKey.License)
+  const [license] = useStorage(persistLayer.license, undefined)
 
   if (pathname === "/") {
     return (
       <header className="flex items-center space-x-2">
         <img src={iconPNG} className="w-6 h-6" alt="Jira Boost" />
         <h1 className="text-lg font-medium text-slate-900">Jira Boost</h1>
-        <ProBadge isPro={license?.valid} />
+        <ProBadge isPro={license?.valid || false} />
       </header>
     )
   }

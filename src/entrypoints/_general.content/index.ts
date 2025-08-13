@@ -80,6 +80,8 @@ export default defineContentScript({
 
   allFrames: true,
 
+  runAt: "document_idle",
+
   async main() {
     if (!isJiraWebPage(document)) return
 

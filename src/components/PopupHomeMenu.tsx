@@ -1,19 +1,11 @@
 import { HiChevronRight } from "react-icons/hi2"
-import { Link } from "react-router-dom"
-
-import { useStorage } from "@plasmohq/storage/hook"
-
-import { StorageKey } from "~storage"
-import { openOptionsPage } from "~utils/broswer"
 
 import { DarkModeControl } from "./DarkModeControl"
 import { FieldControl } from "./FieldControl"
 import { ToggleField } from "./ToggleField"
 
 function CustomBackgroundPreview() {
-  const [custom] = useStorage<{ thumb_url: string }>(
-    StorageKey.CustomBackground
-  )
+  const [custom] = useStorage(persistLayer.customBackground, undefined)
 
   if (!custom) return null
   return (
@@ -45,12 +37,12 @@ export function PopupHomeMenu() {
       <ToggleField
         title="Highlight issue color"
         description="Highlight background color of issues"
-        storageKey={StorageKey.ColorCard}
+        storageKey={persistLayer.colorfulCard}
       />
       <ToggleField
         title="Enable browser fullscreen"
         description="Enter browser-level fullscreen when click on fullscreen button"
-        storageKey={StorageKey.AutoFullScreen}
+        storageKey={persistLayer.autoFullScreen}
       />
 
       <FieldControl
