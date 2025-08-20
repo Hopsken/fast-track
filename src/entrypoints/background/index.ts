@@ -1,4 +1,6 @@
-import browser from "webextension-polyfill"
+import { browser } from '#imports'
+import { openJiraIssue } from '~/utils/open-jira-issue'
+import { openOptionsPage } from '~/utils/broswer'
 
 export default defineBackground(() => {
   browser.omnibox.onInputEntered.addListener((text: string) => {

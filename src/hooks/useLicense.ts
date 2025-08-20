@@ -1,17 +1,15 @@
 import { nanoid } from "nanoid"
 import { useCallback } from "react"
 
-import { useStorage } from "@plasmohq/storage/hook"
-
 import {
   activateLicense,
   deactivateLicense,
   validateLicense
 } from "~/lib/lemonsqueezy"
-import { StorageKey } from "~/storage"
+import { useStorage, StorageKey } from "~/storage"
 
 export function useLicense() {
-  const [license, setLicense] = useStorage<LicenseState>(StorageKey.License)
+  const [license, setLicense] = useStorage(StorageKey.License)
 
   const revalidate = useCallback(async () => {
     if (!license) return { valid: false, error: "No license" }

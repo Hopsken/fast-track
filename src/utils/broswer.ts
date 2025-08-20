@@ -1,4 +1,4 @@
-import browser from "webextension-polyfill"
+import { browser } from '#imports'
 
 export function openOptionsPage() {
   try {

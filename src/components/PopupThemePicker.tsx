@@ -3,10 +3,8 @@ import { HiNoSymbol } from "react-icons/hi2"
 import useSWRInfinite from "swr/infinite"
 import { type Full as Photo } from "unsplash-js/dist/methods/photos/types"
 
-import { useStorage } from "@plasmohq/storage/hook"
-
 import { EDITOR_COLLECTION_ID, unsplash } from "~/lib/unsplash"
-import { StorageKey } from "~/storage"
+import { useStorage, StorageKey } from "~/storage"
 
 const getKey = (pageIndex: number, previousPageData: { results: any[] }) => {
   if (previousPageData && !previousPageData.results.length) return null // 已经到最后一页
@@ -31,11 +29,7 @@ export function PopupThemePicker() {
     size,
     setSize
   } = useRecommendPhotos()
-  const [_, setCustomBackground] = useStorage<{
-    id: string
-    url: string
-    thumb_url: string
-  }>(StorageKey.CustomBackground)
+  const [_, setCustomBackground] = useStorage(StorageKey.CustomBackground)
 
   const totalCount = data[0]?.total || Infinity
   const allPhotos = useMemo(

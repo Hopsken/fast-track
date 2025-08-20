@@ -1,4 +1,7 @@
-import { useStorage } from "@plasmohq/storage/hook"
+import { useMemo } from "react"
+import { useStorage, StorageKey } from "~/storage"
+import { useVersion } from "~/hooks/useVersion"
+import { FieldControl } from "~/components/FieldControl"
 
 import logoUrl from "~/assets/logo.png"
 

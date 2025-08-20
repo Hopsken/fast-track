@@ -9,10 +9,12 @@ This is Jira Boost, a browser extension that enhances the Jira experience with f
 ## Development Commands
 
 ### Core Development
-- `pnpm dev` - Start development server for Chrome/Edge
+- `pnpm dev` - Start development server for Chrome (default)
 - `pnpm run dev:ff` - Start development server for Firefox
-- `pnpm build` - Build production bundle
+- `pnpm run dev:edge` - Start development server for Edge
+- `pnpm build` - Build production bundle for Chrome (default)
 - `pnpm run build:ff` - Build for Firefox
+- `pnpm run build:edge` - Build for Edge
 - `pnpm run clean` - Clean build directory
 
 ### Distribution
