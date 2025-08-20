@@ -1,4 +1,4 @@
-import { StorageKey, persistLayer } from "~storage"
+import { StorageKey, persistLayer } from "~/storage"
 
 import { openInNewTab, openOptionsPage } from "./broswer"
 

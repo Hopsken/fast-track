@@ -1,8 +1,8 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
-import { LEMON_CHECKOUT_LINK } from "~constants"
-import { useLicense } from "~hooks/useLicense"
+import { LEMON_CHECKOUT_LINK } from "~/constants"
+import { useLicense } from "~/hooks/useLicense"
 
 export function UpgradePro() {
   return (

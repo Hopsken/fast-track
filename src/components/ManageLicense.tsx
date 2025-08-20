@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 
-import { useLicense } from "~hooks/useLicense"
+import { useLicense } from "~/hooks/useLicense"
 
 import { ProBadge } from "./ProBadge"
 

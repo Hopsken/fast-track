@@ -2,7 +2,7 @@ import { useStorage } from "@plasmohq/storage/hook"
 
 import logoUrl from "~/assets/logo.png"
 
-import "~styles/style.css"
+import "~/styles/style.css"
 
 function OptionsPage() {
   const version = useVersion()

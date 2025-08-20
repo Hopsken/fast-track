@@ -1,5 +1,5 @@
 import { LicenseState } from "@/utils/storage"
-import iconPNG from "data-base64:~assets/logo.png"
+import iconPNG from "~/assets/logo.png"
 import { HiChevronLeft } from "react-icons/hi2"
 import {
   Outlet,

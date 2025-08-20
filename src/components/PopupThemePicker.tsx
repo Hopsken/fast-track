@@ -5,8 +5,8 @@ import { type Full as Photo } from "unsplash-js/dist/methods/photos/types"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
-import { EDITOR_COLLECTION_ID, unsplash } from "~lib/unsplash"
-import { StorageKey } from "~storage"
+import { EDITOR_COLLECTION_ID, unsplash } from "~/lib/unsplash"
+import { StorageKey } from "~/storage"
 
 const getKey = (pageIndex: number, previousPageData: { results: any[] }) => {
   if (previousPageData && !previousPageData.results.length) return null // 已经到最后一页

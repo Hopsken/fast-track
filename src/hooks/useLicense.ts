@@ -7,8 +7,8 @@ import {
   activateLicense,
   deactivateLicense,
   validateLicense
-} from "~lib/lemonsqueezy"
-import { StorageKey } from "~storage"
+} from "~/lib/lemonsqueezy"
+import { StorageKey } from "~/storage"
 
 export function useLicense() {
   const [license, setLicense] = useStorage<LicenseState>(StorageKey.License)

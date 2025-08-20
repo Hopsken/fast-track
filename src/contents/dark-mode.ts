@@ -1,4 +1,4 @@
-import darkModeStyle from "data-text:~styles/dark-mode.css"
+import darkModeStyle from "data-text:~/styles/dark-mode.css"
 
 let styleElement: HTMLStyleElement
 
