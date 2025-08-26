@@ -10,7 +10,7 @@ function CustomBackgroundPreview() {
   if (!custom) return null
   return (
     <img
-      className="w-12 aspect-[4/3] rounded shadow-sm"
+      className="w-12 aspect-4/3 rounded shadow-sm"
       src={custom.thumb_url}
       alt="custom"
     />
