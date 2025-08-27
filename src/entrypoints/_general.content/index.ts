@@ -1,15 +1,4 @@
-import type { PlasmoCSConfig } from "plasmo"
-
-import type { StorageWatchCallback } from "@plasmohq/storage"
-
-import { StorageKey, persistLayer } from "~storage"
-import { getKanbanBoard, isJiraWebPage } from "~utils/is-jira-page"
-import { PageObserver } from "~utils/page-observer"
-
-export const config: PlasmoCSConfig = {
-  matches: ["<all_urls>"],
-  all_frames: true
-}
+import { CustomBackground } from "@/utils/storage"
 
 const backgroundStyle = `
   #jira-frontend {
@@ -56,7 +45,7 @@ function createStyleElement(innerText: string) {
 }
 
 async function initCSSVariables() {
-  const customBackground = await persistLayer.get(StorageKey.CustomBackground)
+  const customBackground = await persistLayer.customBackground.getValue()
 
   if (customBackground) {
     const styleElement = createStyleElement(`
@@ -66,7 +55,7 @@ async function initCSSVariables() {
     document.head.appendChild(styleElement)
   }
 
-  const onBackgroundChange: StorageWatchCallback = async ({ newValue }) => {
+  const onBackgroundChange = (newValue?: CustomBackground) => {
     if (newValue) {
       createStyleElement(`
       :root {
@@ -78,36 +67,42 @@ async function initCSSVariables() {
     }
   }
 
-  persistLayer.watch(StorageKey.CustomBackground, onBackgroundChange)
+  const unwatch = persistLayer.customBackground.watch(onBackgroundChange)
 
   return () => {
     styleElement?.remove()
-    persistLayer.unwatch(StorageKey.CustomBackground, onBackgroundChange)
+    unwatch()
   }
 }
 
-async function main() {
-  if (!isJiraWebPage(document)) return
+export default defineContentScript({
+  matches: ["<all_urls>"],
 
-  const pageObserver = new PageObserver()
+  allFrames: true,
 
-  pageObserver.register({
-    key: "theme",
-    when: () => !!getKanbanBoard(document),
-    effect: async () => {
-      const themeStyleElement = document.createElement("style")
-      themeStyleElement.id = "jira-boost-theme"
-      themeStyleElement.textContent = backgroundStyle
-      document.head.appendChild(themeStyleElement)
+  runAt: "document_idle",
 
-      const unsubscribe = await initCSSVariables()
+  async main() {
+    if (!isJiraWebPage(document)) return
 
-      return () => {
-        themeStyleElement.remove()
-        unsubscribe()
+    const pageObserver = new PageObserver()
+
+    pageObserver.register({
+      key: "theme",
+      when: () => !!getKanbanBoard(document),
+      effect: async () => {
+        const themeStyleElement = document.createElement("style")
+        themeStyleElement.id = "jira-boost-theme"
+        themeStyleElement.textContent = backgroundStyle
+        document.head.appendChild(themeStyleElement)
+
+        const unsubscribe = await initCSSVariables()
+
+        return () => {
+          themeStyleElement.remove()
+          unsubscribe()
+        }
       }
-    }
-  })
-}
-
-main()
+    })
+  }
+})

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react"
-import Browser from "webextension-polyfill"
+import { browser } from '#imports'
 
 export function useVersion() {
   const [version, setVersion] = useState("")
 
   useEffect(() => {
-    const version = Browser.runtime.getManifest().version
+    const version = browser.runtime.getManifest().version
     setVersion(version)
   }, [])
 

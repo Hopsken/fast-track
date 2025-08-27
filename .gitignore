@@ -28,6 +28,9 @@ yarn-error.log*
 # local env files
 .env*
 
+# local settings
+.claude/settings.local.json
+
 out/
 build/
 dist/
@@ -40,3 +43,10 @@ keys.json
 
 # typescript
 .tsbuildinfo
+
+# wxt
+.output
+stats.html
+stats-*.json
+.wxt
+web-ext.config.ts

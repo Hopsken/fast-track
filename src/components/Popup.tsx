@@ -2,7 +2,7 @@ import { useMount } from "ahooks"
 import { addDays, isAfter } from "date-fns"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
 
-import { useLicense } from "~hooks/useLicense"
+import { useLicense } from "~/hooks/useLicense"
 
 import { ManageLicense } from "./ManageLicense"
 import { PopupHeader } from "./PopupHeader"

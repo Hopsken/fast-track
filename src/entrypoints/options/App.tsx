@@ -1,15 +1,11 @@
-import iconPNG from "data-base64:~assets/logo.png"
-
-import { useStorage } from "@plasmohq/storage/hook"
-
-import { StorageKey } from "~storage"
-
-import "~styles/style.css"
-
 import { useMemo } from "react"
+import { useStorage, StorageKey } from "~/storage"
+import { useVersion } from "~/hooks/useVersion"
+import { FieldControl } from "~/components/FieldControl"
 
-import { FieldControl } from "~components/FieldControl"
-import { useVersion } from "~hooks/useVersion"
+import logoUrl from "~/assets/logo.png"
+
+import "~/styles/style.css"
 
 function OptionsPage() {
   const version = useVersion()
@@ -17,7 +13,7 @@ function OptionsPage() {
     <div className="min-h-screen py-12 flex text-xl ">
       <div className="container  shadow-2xl rounded mx-auto px-6 py-4">
         <header className="flex items-center space-x-2">
-          <img src={iconPNG} className="w-12 h-12" alt="Jira Boost" />
+          <img src={logoUrl} className="w-12 h-12" alt="Jira Boost" />
           <h1 className="text-3xl font-medium ">Jira Boost</h1>
           <span>v{version}</span>
         </header>

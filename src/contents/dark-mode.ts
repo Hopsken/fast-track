@@ -1,14 +1,4 @@
-import darkModeStyle from "data-text:~styles/dark-mode.css"
-import type { PlasmoCSConfig } from "plasmo"
-
-import { PersistLayer, StorageKey } from "~storage"
-import { isJiraWebPage } from "~utils/is-jira-page"
-
-export const config: PlasmoCSConfig = {
-  matches: ["<all_urls>"],
-  all_frames: true,
-  run_at: "document_end"
-}
+import darkModeStyle from "data-text:~/styles/dark-mode.css"
 
 let styleElement: HTMLStyleElement
 
@@ -28,23 +18,26 @@ function createStyleElement(auto: boolean) {
   return element
 }
 
-async function main() {
-  if (!isJiraWebPage(document)) return
-  const persistLayer = new PersistLayer()
-  const darkMode = (await persistLayer.get(StorageKey.DarkMode)) ?? "auto"
+export default defineContentScript({
+  matches: ["<all_urls>"],
+  allFrames: true,
+  runAt: "document_end",
 
-  if (darkMode !== "disable") {
-    document.head.appendChild(createStyleElement(darkMode === "auto"))
-  }
+  async main() {
+    if (!isJiraWebPage(document)) return
+    const darkMode = (await persistLayer.darkMode.getValue()) ?? "auto"
 
-  persistLayer.watch(StorageKey.DarkMode, ({ newValue }) => {
-    const el = createStyleElement(newValue === "auto")
-    if (newValue !== "disable") {
-      document.head.appendChild(el)
-    } else {
-      el.remove()
+    if (darkMode !== "disable") {
+      document.head.appendChild(createStyleElement(darkMode === "auto"))
     }
-  })
-}
 
-main()
+    persistLayer.darkMode.watch((newValue) => {
+      const el = createStyleElement(newValue === "auto")
+      if (newValue !== "disable") {
+        document.head.appendChild(el)
+      } else {
+        el.remove()
+      }
+    })
+  }
+})
