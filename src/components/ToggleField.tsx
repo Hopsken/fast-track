@@ -1,23 +1,23 @@
+import { useStorage, StorageKey } from "~/storage"
 import { FieldControl, type FieldControlProps } from "./FieldControl"
 
-export type ToggleFieldProps<T extends WxtStorageItem<boolean, any>> =
-  FieldControlProps & {
-    storageKey: T
-  }
+export type ToggleFieldProps = FieldControlProps & {
+  storageKey: StorageKey.ColorCard | StorageKey.AutoFullScreen
+}
 
-export function ToggleField<T extends WxtStorageItem<boolean, any>>(
-  props: ToggleFieldProps<T>
-) {
-  const [checked, setChecked] = useStorage<WxtStorageItem<boolean, any>>(
-    props.storageKey,
-    false
-  )
+export function ToggleField(props: ToggleFieldProps) {
+  const [checked, setChecked] = useStorage(props.storageKey, false)
+  
   return (
-    <FieldControl title={props.title} description={props.description}>
+    <FieldControl 
+      title={props.title} 
+      description={props.description}
+      size={props.size || "lg"}
+    >
       <input
         type="checkbox"
-        className="toggle toggle-sm"
-        checked={checked}
+        className="toggle toggle-lg"
+        checked={Boolean(checked)}
         onChange={(e) => {
           setChecked(e.target.checked)
         }}

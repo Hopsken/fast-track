@@ -1,5 +1,25 @@
 import { storage } from '#imports'
 
+export interface JiraTicket {
+  id: string
+  key: string
+  summary: string
+  status: string
+  assignee?: string
+  priority?: string
+  projectKey: string
+  boardName?: string
+  url: string
+  lastViewed: string
+  viewCount: number
+}
+
+export interface TicketViewRecord {
+  ticketKey: string
+  viewCount: number
+  lastViewed: string
+}
+
 export enum StorageKey {
   DarkMode = "dark-mode",
   ColorCard = "color-card",
@@ -7,7 +27,10 @@ export enum StorageKey {
   CustomBackground = "custom-background",
   License = "ls-license",
   JiraUrl = "jira-url",
-  PrimaryIssueKeyPrefix = "primary-issue-key-prefix"
+  PrimaryIssueKeyPrefix = "primary-issue-key-prefix",
+  TicketsData = "tickets-data",
+  SearchHistory = "search-history",
+  TicketViewHistory = "ticket-view-history"
 }
 
 export type StorageValueRecord = {
@@ -34,6 +57,9 @@ export type StorageValueRecord = {
   } | null
   [StorageKey.JiraUrl]: string
   [StorageKey.PrimaryIssueKeyPrefix]: string
+  [StorageKey.TicketsData]: JiraTicket[]
+  [StorageKey.SearchHistory]: string[]
+  [StorageKey.TicketViewHistory]: TicketViewRecord[]
 }
 
 // Define storage items with WXT's type-safe storage API
@@ -58,6 +84,15 @@ export const storageItems = {
   }),
   [StorageKey.PrimaryIssueKeyPrefix]: storage.defineItem<StorageValueRecord[StorageKey.PrimaryIssueKeyPrefix]>(`local:${StorageKey.PrimaryIssueKeyPrefix}`, {
     fallback: ''
+  }),
+  [StorageKey.TicketsData]: storage.defineItem<StorageValueRecord[StorageKey.TicketsData]>(`local:${StorageKey.TicketsData}`, {
+    fallback: []
+  }),
+  [StorageKey.SearchHistory]: storage.defineItem<StorageValueRecord[StorageKey.SearchHistory]>(`local:${StorageKey.SearchHistory}`, {
+    fallback: []
+  }),
+  [StorageKey.TicketViewHistory]: storage.defineItem<StorageValueRecord[StorageKey.TicketViewHistory]>(`local:${StorageKey.TicketViewHistory}`, {
+    fallback: []
   })
 } as const
 
@@ -91,22 +126,40 @@ export function useStorage<T extends StorageKey>(
   const [value, setValue] = useState<StorageValueRecord[T]>(defaultValue)
 
   useEffect(() => {
-    // Get initial value
-    storageItems[key].getValue().then(setValue)
-    
-    // Watch for changes
-    const unwatch = storageItems[key].watch((newValue) => {
-      if (newValue !== null) {
-        setValue(newValue)
-      }
-    })
+    // Get initial value safely
+    const storageItem = storageItems[key]
+    if (storageItem) {
+      storageItem.getValue().then(setValue).catch((error) => {
+        console.warn(`Failed to get storage value for key ${key}:`, error)
+        if (defaultValue !== undefined) {
+          setValue(defaultValue)
+        }
+      })
+      
+      // Watch for changes
+      const unwatch = storageItem.watch((newValue) => {
+        if (newValue !== null) {
+          setValue(newValue)
+        }
+      })
 
-    return unwatch
-  }, [key])
+      return unwatch
+    } else {
+      console.warn(`Storage item not found for key: ${key}`)
+      if (defaultValue !== undefined) {
+        setValue(defaultValue)
+      }
+    }
+  }, [key, defaultValue])
 
   const setStorageValue = (newValue: StorageValueRecord[T]) => {
-    storageItems[key].setValue(newValue)
-    setValue(newValue)
+    const storageItem = storageItems[key]
+    if (storageItem) {
+      storageItem.setValue(newValue)
+      setValue(newValue)
+    } else {
+      console.warn(`Storage item not found for key: ${key}`)
+    }
   }
 
   return [value, setStorageValue]

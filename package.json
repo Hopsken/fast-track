@@ -1,8 +1,8 @@
 {
   "name": "jira-boost",
   "displayName": "Jira Boost",
-  "version": "0.0.7",
-  "description": "All in one Jira experience boost with power-ups including standup mode, custom theme and etc.",
+  "version": "2.0.0",
+  "description": "Quick search and access to your Jira tickets with enhanced board experience. Search by ticket key, summary, assignee, or status with lightning-fast results.",
   "author": "hopsken",
   "scripts": {
     "dev": "wxt -b chrome",
