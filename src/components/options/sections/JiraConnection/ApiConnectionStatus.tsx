@@ -1,15 +1,13 @@
 import { useState } from 'react'
-import { useStorage, StorageKey } from "~/storage"
 import { FieldControl } from "~/components/ui/forms"
+import { useJiraConfig } from "~/hooks/useStorageSettings"
 
 export function ApiConnectionStatus() {
-  const [jiraUrl] = useStorage(StorageKey.JiraUrl, '')
-  const [apiToken] = useStorage(StorageKey.JiraApiToken, '')
-  const [userEmail] = useStorage(StorageKey.JiraUserEmail, '')
+  const { jiraHost, apiToken, userEmail, isConfigComplete } = useJiraConfig()
   const [connectionStatus, setConnectionStatus] = useState<'unknown' | 'testing' | 'success' | 'error'>('unknown')
   const [statusMessage, setStatusMessage] = useState('')
 
-  const isConfigured = Boolean(jiraUrl && apiToken && userEmail)
+  const isConfigured = isConfigComplete
 
   const testConnection = async () => {
     if (!isConfigured) {
@@ -24,7 +22,7 @@ export function ApiConnectionStatus() {
     try {
       const { JiraApiService } = await import('~/lib/jira')
       const apiService = new JiraApiService({
-        baseUrl: jiraUrl,
+        baseUrl: jiraHost,
         apiToken,
         email: userEmail
       })

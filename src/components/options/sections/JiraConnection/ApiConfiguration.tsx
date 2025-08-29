@@ -1,10 +1,17 @@
 import { useMemo, useState } from "react"
-import { useStorage, StorageKey } from "~/storage"
 import { FieldControl } from "~/components/ui/forms"
+import { useJiraConfig } from "~/hooks/useStorageSettings"
 
 export function ApiConfiguration() {
-  const [apiToken, setApiToken] = useStorage(StorageKey.JiraApiToken, '')
-  const [userEmail, setUserEmail] = useStorage(StorageKey.JiraUserEmail, '')
+  const { apiToken, userEmail, updateJiraConfig, clearJiraConfig } = useJiraConfig()
+
+  const setApiToken = (value: string) => {
+    updateJiraConfig({ token: value })
+  }
+
+  const setUserEmail = (value: string) => {
+    updateJiraConfig({ email: value })
+  }
   
   const [showToken, setShowToken] = useState(false)
   
@@ -14,8 +21,7 @@ export function ApiConfiguration() {
 
   const handleClearCredentials = () => {
     if (confirm('Are you sure you want to clear your API credentials? This will disable API-based ticket collection.')) {
-      setApiToken('')
-      setUserEmail('')
+      clearJiraConfig()
     }
   }
 

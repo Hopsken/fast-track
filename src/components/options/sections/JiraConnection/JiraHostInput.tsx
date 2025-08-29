@@ -1,9 +1,13 @@
 import { useMemo } from "react"
-import { useStorage, StorageKey } from "~/storage"
 import { FieldControl } from "~/components/ui/forms"
+import { useJiraConfig } from "~/hooks/useStorageSettings"
 
 export function JiraHostInput() {
-  const [jiraHost, setJiraHost] = useStorage(StorageKey.JiraUrl, "")
+  const { jiraHost, updateJiraConfig } = useJiraConfig()
+
+  const setJiraHost = (value: string) => {
+    updateJiraConfig({ host: value })
+  }
 
   const isValid = useMemo(() => jiraHost.startsWith("http"), [jiraHost])
 

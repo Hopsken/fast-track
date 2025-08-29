@@ -4,7 +4,7 @@
  */
 
 import { defineBackground } from '#imports'
-import { MessageRouter } from './messages/message-router'
+import { registerTicketService } from '~/services/ticket-service'
 import { OmniboxHandlerService } from './services/omnibox-handler'
 import { InstallationHandlerService } from './services/installation-handler'
 
@@ -12,8 +12,10 @@ export default defineBackground(() => {
   console.log('🚀 Background script initializing...')
 
   try {
-    // Initialize core services
-    MessageRouter.initialize()
+    // Initialize proxy services
+    registerTicketService()
+    
+    // Initialize other services
     OmniboxHandlerService.initialize()
     InstallationHandlerService.initialize()
 
@@ -22,7 +24,7 @@ export default defineBackground(() => {
 
     console.log('✅ Background script initialized successfully')
     console.log('📊 Services status:')
-    console.log('  - Message Router:', MessageRouter.getStats())
+    console.log('  - Ticket Service: Registered via proxy service')
     console.log('  - Extension Version:', InstallationHandlerService.getVersion())
   } catch (error) {
     console.error('❌ Background script initialization failed:', error)

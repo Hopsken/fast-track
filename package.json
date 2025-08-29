@@ -20,6 +20,7 @@
   "dependencies": {
     "@ctrl/tinycolor": "^4.1.0",
     "@tailwindcss/typography": "^0.5.16",
+    "@webext-core/proxy-service": "^1.2.1",
     "ahooks": "^3.9.3",
     "cash-dom": "^8.1.5",
     "date-fns": "^4.1.0",

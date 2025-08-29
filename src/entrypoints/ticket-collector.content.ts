@@ -1,7 +1,7 @@
 import { defineContentScript } from '#imports'
-import { browser } from '#imports'
 import { StorageKey, JiraTicket, storageItems } from '~/storage'
 import { isJiraWebPage } from '~/utils/jira/page-detection'
+import { getTicketService } from '~/services/ticket-service'
 
 // Simplified selectors focusing only on ticket key extraction
 const SELECTORS = {
@@ -24,6 +24,11 @@ export default defineContentScript({
   matches: ['https://*.atlassian.net/jira*'],
   main() {
     if (!isJiraWebPage(document)) return
+    
+    // Debug runtime availability immediately
+    console.log('🔧 DEBUG: Using proxy service for ticket collection')
+    console.log('   Extension context:', 'content-script')
+    console.log('   Service type:', 'TicketService via proxy-service')
     
     // Debounce function to avoid excessive collection
     let collectTimeout: NodeJS.Timeout
@@ -145,7 +150,7 @@ export default defineContentScript({
      */
     const collectTicketData = async () => {
       console.log('\n🚀 =========================')
-      console.log('🚀 STARTING TICKET COLLECTION (BACKGROUND-BASED)')
+      console.log('🚀 STARTING TICKET COLLECTION (PROXY SERVICE)')
       console.log('🚀 =========================')
       
       try {
@@ -157,20 +162,12 @@ export default defineContentScript({
           return
         }
 
-        console.log(`🚀 Content: Sending ${ticketKeys.length} ticket keys to background script`)
+        console.log(`🚀 Content: Fetching ${ticketKeys.length} tickets via proxy service`)
         
-        // Step 2: Send ticket keys to background script for API processing
-        const response = await browser.runtime.sendMessage({
-          type: 'FETCH_TICKET_DETAILS',
-          ticketKeys: ticketKeys
-        })
+        // Step 2: Get ticket service instance and call directly
+        const ticketService = getTicketService()
+        const tickets = await ticketService.fetchTicketDetails(ticketKeys)
         
-        if (!response.success) {
-          console.error('❌ Background script failed to fetch tickets:', response.error)
-          return
-        }
-        
-        const tickets: JiraTicket[] = response.tickets
         console.log(`✅ Content: Received ${tickets.length}/${ticketKeys.length} tickets from background`)
 
         // Step 3: Process collected tickets
@@ -195,6 +192,15 @@ export default defineContentScript({
 
       } catch (error) {
         console.error('❌ ERROR collecting ticket data:', error)
+        
+        // Provide detailed error information
+        if (error instanceof Error) {
+          console.error('   Error name:', error.name)
+          console.error('   Error message:', error.message)
+          if (error.stack) {
+            console.error('   Stack trace:', error.stack)
+          }
+        }
       }
       
       console.log('🏁 TICKET COLLECTION COMPLETED')
