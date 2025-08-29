@@ -45,7 +45,7 @@ export function TicketSearchBox({
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="w-full pl-8 py-2 text-md border-0 focus:outline-none"
+          className="w-full pl-8 py-2 text-base border-0 focus:outline-none"
         />
         {value && (
           <button

@@ -94,10 +94,10 @@ export function TicketList({ tickets, searchQuery, isLoading, onTicketClick }: T
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-8">
         <div className="flex items-center gap-2 text-gray-500">
-          <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
-          <span className="text-sm">Searching tickets...</span>
+          <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-500 rounded-full animate-spin" />
+          <span className="text-sm">Searching...</span>
         </div>
       </div>
     )
@@ -105,16 +105,9 @@ export function TicketList({ tickets, searchQuery, isLoading, onTicketClick }: T
 
   if (tickets.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <HiInformationCircle className="w-8 h-8 text-gray-400 mb-3" />
-        <p className="text-sm text-gray-600 mb-2">
-          {searchQuery ? 'No tickets found' : 'No tickets available'}
-        </p>
-        <p className="text-xs text-gray-500 max-w-64">
-          {searchQuery 
-            ? 'Try adjusting your search terms or browse some Jira boards to collect ticket data.'
-            : 'Visit some Jira boards or issues to start collecting ticket data for quick search.'
-          }
+      <div className="flex items-center justify-center py-8 text-center">
+        <p className="text-sm text-gray-500">
+          {searchQuery ? 'No tickets found' : 'No tickets yet'}
         </p>
       </div>
     )
@@ -122,7 +115,7 @@ export function TicketList({ tickets, searchQuery, isLoading, onTicketClick }: T
 
   return (
     <div ref={listRef} className="max-h-96 overflow-y-auto">
-      <div className="space-y-2">
+      <div>
         {tickets.map((ticket, index) => (
           <div
             key={ticket.key}
@@ -135,13 +128,6 @@ export function TicketList({ tickets, searchQuery, isLoading, onTicketClick }: T
             />
           </div>
         ))}
-      </div>
-
-      {/* Keyboard hint */}
-      <div className="mt-3 pt-2 border-t border-gray-100">
-        <p className="text-xs text-gray-500 text-center">
-          Use ↑↓ arrow keys to navigate, Enter to open, Esc to reset
-        </p>
       </div>
     </div>
   )

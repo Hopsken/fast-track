@@ -30,7 +30,10 @@ export enum StorageKey {
   PrimaryIssueKeyPrefix = "primary-issue-key-prefix",
   TicketsData = "tickets-data",
   SearchHistory = "search-history",
-  TicketViewHistory = "ticket-view-history"
+  TicketViewHistory = "ticket-view-history",
+  JiraApiToken = "jira-api-token",
+  JiraUserEmail = "jira-user-email",
+  JiraHost = "jira-host"
 }
 
 export type StorageValueRecord = {
@@ -60,6 +63,9 @@ export type StorageValueRecord = {
   [StorageKey.TicketsData]: JiraTicket[]
   [StorageKey.SearchHistory]: string[]
   [StorageKey.TicketViewHistory]: TicketViewRecord[]
+  [StorageKey.JiraApiToken]: string
+  [StorageKey.JiraUserEmail]: string
+  [StorageKey.JiraHost]: string
 }
 
 // Define storage items with WXT's type-safe storage API
@@ -93,6 +99,15 @@ export const storageItems = {
   }),
   [StorageKey.TicketViewHistory]: storage.defineItem<StorageValueRecord[StorageKey.TicketViewHistory]>(`local:${StorageKey.TicketViewHistory}`, {
     fallback: []
+  }),
+  [StorageKey.JiraApiToken]: storage.defineItem<StorageValueRecord[StorageKey.JiraApiToken]>(`local:${StorageKey.JiraApiToken}`, {
+    fallback: ''
+  }),
+  [StorageKey.JiraUserEmail]: storage.defineItem<StorageValueRecord[StorageKey.JiraUserEmail]>(`local:${StorageKey.JiraUserEmail}`, {
+    fallback: ''
+  }),
+  [StorageKey.JiraHost]: storage.defineItem<StorageValueRecord[StorageKey.JiraHost]>(`local:${StorageKey.JiraHost}`, {
+    fallback: ''
   })
 } as const
 

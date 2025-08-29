@@ -1,6 +1,5 @@
 import { JiraTicket } from '~/storage'
-import { HiExternalLink, HiClock, HiUser } from 'react-icons/hi'
-import { formatDistanceToNow } from 'date-fns'
+import { HiCog6Tooth } from 'react-icons/hi2'
 
 interface TicketItemProps {
   ticket: JiraTicket
@@ -10,7 +9,6 @@ interface TicketItemProps {
 
 export function TicketItem({ ticket, isSelected = false, onClick }: TicketItemProps) {
   const statusColor = getStatusColor(ticket.status)
-  const priorityColor = getPriorityColor(ticket.priority)
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -26,10 +24,10 @@ export function TicketItem({ ticket, isSelected = false, onClick }: TicketItemPr
 
   return (
     <div
-      className={`group cursor-pointer p-3 rounded-lg border transition-all ${
+      className={`group cursor-pointer px-3 py-2 transition-colors ${
         isSelected 
-          ? 'bg-blue-50 border-blue-200 shadow-sm' 
-          : 'bg-white border-gray-100 hover:bg-gray-50 hover:border-gray-200'
+          ? 'bg-gray-100' 
+          : 'hover:bg-gray-50'
       }`}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
@@ -37,71 +35,22 @@ export function TicketItem({ ticket, isSelected = false, onClick }: TicketItemPr
       role="button"
       aria-label={`Open ticket ${ticket.key}: ${ticket.summary}`}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          {/* Ticket Key and External Link */}
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-sm font-medium text-blue-600">
-              {ticket.key}
-            </span>
-            <HiExternalLink className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
-
-          {/* Summary */}
-          <h3 className="text-sm font-medium text-gray-900 line-clamp-2 mb-2">
+      <div className="flex items-center gap-3">
+        {/* Checkbox placeholder */}
+        <div className="w-4 h-4 border border-gray-300 rounded-sm bg-white flex-shrink-0" />
+        
+        {/* Status indicator */}
+        <div className="flex items-center gap-2">
+          <div className={`w-2 h-2 rounded-full ${statusColor} flex-shrink-0`} />
+          <span className="text-sm text-gray-900 font-medium truncate">
             {ticket.summary}
-          </h3>
-
-          {/* Metadata */}
-          <div className="flex items-center gap-4 text-xs text-gray-500">
-            {/* Status */}
-            <div className="flex items-center gap-1">
-              <div 
-                className={`w-2 h-2 rounded-full ${statusColor}`} 
-                title={ticket.status}
-              />
-              <span>{ticket.status}</span>
-            </div>
-
-            {/* Priority */}
-            {ticket.priority && (
-              <div className="flex items-center gap-1">
-                <div 
-                  className={`w-2 h-2 rounded-full ${priorityColor}`}
-                  title={ticket.priority}
-                />
-                <span>{ticket.priority}</span>
-              </div>
-            )}
-
-            {/* Assignee */}
-            {ticket.assignee && (
-              <div className="flex items-center gap-1">
-                <HiUser className="w-3 h-3" />
-                <span className="truncate max-w-20" title={ticket.assignee}>
-                  {ticket.assignee}
-                </span>
-              </div>
-            )}
-
-            {/* Last viewed */}
-            <div className="flex items-center gap-1 ml-auto">
-              <HiClock className="w-3 h-3" />
-              <span title={new Date(ticket.lastViewed).toLocaleString()}>
-                {formatDistanceToNow(new Date(ticket.lastViewed), { addSuffix: true })}
-              </span>
-            </div>
-          </div>
+          </span>
         </div>
 
-        {/* View count badge */}
-        {ticket.viewCount > 1 && (
-          <div className="flex-shrink-0">
-            <span className="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-full">
-              {ticket.viewCount}
-            </span>
-          </div>
-        )}
+        {/* Settings icon */}
+        <div className="ml-auto flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+          <HiCog6Tooth className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+        </div>
       </div>
     </div>
   )
