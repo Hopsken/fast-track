@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { HiCog, HiCollection } from 'react-icons/hi'
 import { useTicketSearch } from '~/hooks/useTicketSearch'
-import { TicketSearchBox } from '~/components/TicketSearchBox'
-import { TicketList } from '~/components/TicketList'
+import { TicketSearchBox } from '~/components/search'
+import { TicketList } from '~/components/tickets'
 import { JiraTicket } from '~/storage'
-import { openOptionsPage, openInNewTab } from '~/utils/broswer'
-import '~/styles/style.css'
+import { openOptionsPage, openInNewTab } from '~/utils/extension'
+import '~/assets/styles/main.css'
 
 function App() {
   const {

@@ -3,9 +3,7 @@ import { defineConfig } from "wxt"
 export default defineConfig({
   srcDir: "src",
   modules: ["@wxt-dev/module-react", "@wxt-dev/auto-icons"],
-  imports: {
-    dirs: ["src/storage"]
-  },
+  imports: false,
   manifest: {
     name: "Jira Boost",
     description: "Quick search and access to your Jira tickets with enhanced board experience",

@@ -1,14 +1,14 @@
 import { useMemo, useState } from "react"
 import { useStorage, StorageKey } from "~/storage"
 import { useVersion } from "~/hooks/useVersion"
-import { FieldControl } from "~/components/FieldControl"
-import { DarkModeControl } from "~/components/DarkModeControl"
-import { ToggleField } from "~/components/ToggleField"
+import { FieldControl } from "~/components/ui/forms"
+import { DarkModeControl } from "~/components/ui/forms"
+import { ToggleField } from "~/components/ui/forms"
 import { HiCog, HiColorSwatch, HiSearch, HiInformationCircle } from "react-icons/hi"
 
 import logoUrl from "~/assets/logo.png"
 
-import "~/styles/style.css"
+import "~/assets/styles/main.css"
 
 function OptionsPage() {
   const version = useVersion()
@@ -386,7 +386,7 @@ function ApiConnectionStatus() {
     setStatusMessage('Testing connection...')
 
     try {
-      const { JiraApiService } = await import('~/lib/jira-api')
+      const { JiraApiService } = await import('~/lib/jira')
       const apiService = new JiraApiService({
         baseUrl: jiraUrl,
         apiToken,
