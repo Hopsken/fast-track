@@ -6,6 +6,7 @@ export { TabNavigation, tabs } from './TabNavigation'
 export { GeneralTab } from './tabs/GeneralTab'
 export { DisplayTab } from './tabs/DisplayTab'
 export { SearchTab } from './tabs/SearchTab'
+export { LicenseTab } from './tabs/LicenseTab'
 export { AboutTab } from './tabs/AboutTab'
 
 // Section components
@@ -17,3 +18,4 @@ export { TokenGenerationGuide } from './sections/JiraConnection/TokenGenerationG
 export { SearchDataOverview } from './sections/DataManagement/SearchDataOverview'
 export { SearchDataActions } from './sections/DataManagement/SearchDataActions'
 export { AboutSection } from './sections/AboutSection'
+export { LicenseStatus, UpgradeSection, ManageLicenseSection } from './sections/LicenseManagement'

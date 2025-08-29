@@ -1,4 +1,4 @@
-import { HiCog, HiColorSwatch, HiSearch, HiInformationCircle } from "react-icons/hi"
+import { HiCog, HiColorSwatch, HiSearch, HiInformationCircle, HiKey } from "react-icons/hi"
 
 export interface Tab {
   id: string
@@ -10,6 +10,7 @@ export const tabs: Tab[] = [
   { id: 'general', label: 'General', icon: HiCog },
   { id: 'display', label: 'Display', icon: HiColorSwatch },
   { id: 'search', label: 'Search & Data', icon: HiSearch },
+  { id: 'license', label: 'License', icon: HiKey },
   { id: 'about', label: 'About', icon: HiInformationCircle },
 ]
 

@@ -7,6 +7,7 @@ import {
   GeneralTab, 
   DisplayTab, 
   SearchTab, 
+  LicenseTab,
   AboutTab 
 } from "~/components/options"
 
@@ -20,7 +21,7 @@ function OptionsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto py-8 px-6">
-        <OptionsHeader version={version} />
+        <OptionsHeader version={version} onTabChange={setActiveTab} />
 
         <div className="bg-white rounded-lg shadow-sm border">
           <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
@@ -29,6 +30,7 @@ function OptionsPage() {
             {activeTab === 'general' && <GeneralTab />}
             {activeTab === 'display' && <DisplayTab />}
             {activeTab === 'search' && <SearchTab ticketCount={ticketsData.length} />}
+            {activeTab === 'license' && <LicenseTab />}
             {activeTab === 'about' && <AboutTab version={version} />}
           </div>
         </div>
