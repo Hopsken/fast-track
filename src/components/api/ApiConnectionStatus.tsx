@@ -4,7 +4,8 @@
 
 import { useState, useEffect } from 'react'
 import { HiCheckCircle, HiXCircle, HiClock } from 'react-icons/hi'
-import { useJiraConfig } from '~/hooks/storage/useSettings'
+import { browser } from 'wxt/browser'
+import { useJiraConfig } from '~/hooks/useStorageSettings'
 
 export function ApiConnectionStatus() {
   const { isConfigComplete } = useJiraConfig()
@@ -99,11 +100,11 @@ export function ApiConnectionStatus() {
         </div>
       </div>
 
-      {isConfigComplete && connectionStatus !== 'testing' && (
+      {isConfigComplete && (connectionStatus === 'success' || connectionStatus === 'error') && (
         <button
           onClick={testConnection}
           className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-          disabled={connectionStatus === 'testing'}
+          disabled={false}
         >
           Test Connection
         </button>

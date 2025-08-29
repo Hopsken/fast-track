@@ -50,8 +50,7 @@ Central storage management via `src/storage/index.ts` using Plasmo Storage:
 ### Tech Stack
 - **WXT**: Modern browser extension framework (replaces Plasmo)
 - **React 18** with TypeScript
-- **Tailwind CSS** with DaisyUI components
-- **Plasmo Storage** for cross-extension state management
+- **Tailwind CSS 4** with DaisyUI components
 - **ahooks** for React utilities
 - **cash-dom** for lightweight DOM manipulation
 
@@ -59,6 +58,112 @@ Central storage management via `src/storage/index.ts` using Plasmo Storage:
 - Host permissions: `https://*.atlassian.net/jira*`
 - Storage permission for cross-browser data persistence
 - Omnibox keyword: "jira" for quick issue access
+
+## Coding Best Practices
+
+### SOLID Principles
+- **Single Responsibility**: Each class/function should have one reason to change
+  - Keep hooks focused on a single concern (storage, API calls, UI state)
+  - Separate business logic from UI components
+- **Open-Closed**: Open for extension, closed for modification
+  - Use composition and dependency injection
+  - Create extensible hook patterns for new storage types
+- **Liskov Substitution**: Derived classes must be substitutable for base classes
+  - Ensure storage implementations can be swapped without breaking code
+- **Interface Segregation**: Clients shouldn't depend on unused interfaces
+  - Create focused TypeScript interfaces for specific use cases
+- **Dependency Inversion**: Depend on abstractions, not concretions
+  - Use generic types and interfaces rather than concrete implementations
+
+### Core Design Principles
+- **DRY (Don't Repeat Yourself)**: Eliminate code duplication
+  - Create reusable hooks for common storage patterns
+  - Extract common logic into utility functions
+  - Use TypeScript generics to avoid repetitive type definitions
+- **KISS (Keep It Simple, Stupid)**: Favor simplicity over complexity
+  - Write clear, readable code over clever solutions
+  - Break complex functions into smaller, focused ones
+  - Use descriptive names that explain intent
+- **YAGNI (You Aren't Gonna Need It)**: Don't over-engineer
+  - Implement features when needed, not in anticipation
+  - Avoid premature abstractions and generalizations
+  - Start simple and refactor when complexity is warranted
+
+### Clean Code Guidelines
+- **Naming Conventions**:
+  - Use descriptive, searchable names: `useJiraApiConfig` not `useConfig`
+  - Boolean variables: `isEnabled`, `hasPermission`, `shouldUpdate`
+  - Functions: Use verbs that describe action: `getStorageValue`, `updateTicketData`
+- **Function Design**:
+  - Keep functions small (ideally < 20 lines)
+  - Single level of abstraction per function
+  - Minimize parameters (max 3-4, use objects for more)
+  - Pure functions when possible (no side effects)
+- **Comments and Documentation**:
+  - Write self-documenting code that doesn't need comments
+  - Use comments to explain "why", not "what"
+  - Document complex business logic and API integrations
+  - Keep JSDoc comments for public APIs
+
+### TypeScript Best Practices
+- **Type Safety**:
+  - Use strict TypeScript configuration
+  - Avoid `any` type except for gradual migrations
+  - Use type assertions sparingly and document why needed
+  - Prefer union types over enums for simple constants
+- **Generic Usage**:
+  - Use generics for reusable components and hooks
+  - Add constraints to generics: `<T extends StorageKey>`
+  - Provide default types when appropriate
+- **Interface Design**:
+  - Use interfaces for object shapes
+  - Keep interfaces focused and cohesive
+  - Use composition over inheritance for complex types
+
+### React/Hook Best Practices
+- **Hook Design**:
+  - Follow hooks naming convention: `use*`
+  - Keep hooks focused on single responsibilities
+  - Return consistent data structures from custom hooks
+  - Use proper dependency arrays in `useEffect`
+- **State Management**:
+  - Prefer local state over global when possible
+  - Use proper state updates (functional updates for complex state)
+  - Minimize re-renders through proper memoization
+- **Component Structure**:
+  - Keep components small and focused
+  - Extract complex logic into custom hooks
+  - Use proper prop types and default values
+
+### WXT Extension Best Practices
+- **Storage Patterns**:
+  - Use type-safe storage keys and value mappings
+  - Implement proper error handling for storage operations
+  - Watch for storage changes when needed
+  - Use appropriate storage areas (local vs sync)
+- **Content Script Organization**:
+  - Keep content scripts lightweight
+  - Use message passing for complex operations
+  - Implement proper cleanup for event listeners
+- **Background Script Design**:
+  - Keep background scripts stateless when possible
+  - Use proper lifecycle management
+  - Implement error handling and fallbacks
+
+### Code Organization
+- **File Structure**:
+  - Group related functionality in directories
+  - Use index files for clean imports
+  - Keep flat directory structures where possible
+- **Import/Export**:
+  - Use named exports over default exports
+  - Group imports by type (external, internal, types)
+  - Use barrel exports for cleaner import paths
+- **Error Handling**:
+  - Implement proper error boundaries
+  - Log errors appropriately (not sensitive data)
+  - Provide user-friendly error messages
+  - Use Result types or error handling patterns consistently
 
 ### Development Notes
 - Uses pnpm as package manager

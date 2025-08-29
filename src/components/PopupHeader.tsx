@@ -1,4 +1,3 @@
-import { LicenseState } from "@/utils/storage"
 import iconPNG from "~/assets/logo.png"
 import { HiChevronLeft } from "react-icons/hi2"
 import {
@@ -10,11 +9,13 @@ import {
 } from "react-router-dom"
 
 import { ProBadge } from "./ProBadge"
+import { useStorage } from "~/hooks/useStorage"
+import { StorageKey } from "~/storage/keys"
 
 export function PopupHeader() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
-  const [license] = useStorage(persistLayer.license, undefined)
+  const [license] = useStorage(StorageKey.License)
 
   if (pathname === "/") {
     return (

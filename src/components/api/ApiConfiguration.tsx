@@ -4,7 +4,7 @@
 
 import { useState } from 'react'
 import { HiEye, HiEyeOff, HiMail, HiKey } from 'react-icons/hi'
-import { useJiraConfig } from '~/hooks/storage/useSettings'
+import { useJiraConfig } from '~/hooks/useStorageSettings'
 
 export function ApiConfiguration() {
   const { apiToken, userEmail, updateJiraConfig } = useJiraConfig()

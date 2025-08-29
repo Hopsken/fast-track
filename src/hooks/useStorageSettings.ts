@@ -119,7 +119,7 @@ export function useUserPreferences() {
 /**
  * Hook for license information
  */
-export function useLicense() {
+export function useLicenseSettings() {
   const [license, setLicense] = useStorage(StorageKey.License, null)
 
   const isLicenseValid = useCallback(() => {

@@ -1,6 +1,9 @@
+import { defineContentScript } from '#imports'
 import $ from "cash-dom"
 import screenfull from "screenfull"
 import { isJiraWebPage } from '~/utils/jira/page-detection'
+import { storageItems } from '~/storage/storage-items'
+import { StorageKey } from '~/storage/keys'
 
 export default defineContentScript({
   matches: ["https://*.atlassian.net/jira*"],
@@ -18,10 +21,10 @@ export default defineContentScript({
  * Registers event listeners for auto fullscreen mode
  */
 async function registerAutoEnterFullScreen(): Promise<void> {
-  let isAutoEnterFullScreen = await persistLayer.autoFullScreen.getValue()
+  let isAutoEnterFullScreen = await storageItems[StorageKey.AutoFullScreen].getValue()
 
   // Watch for setting changes
-  persistLayer.autoFullScreen.watch((newValue) => {
+  storageItems[StorageKey.AutoFullScreen].watch((newValue) => {
     isAutoEnterFullScreen = newValue
   })
 

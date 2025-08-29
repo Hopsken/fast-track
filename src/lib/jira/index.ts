@@ -52,6 +52,7 @@ export class JiraApiService {
 export type { JiraApiConfig, JiraApiIssue, JiraApiError, JiraConnectionTestResult } from './types'
 export { 
   extractJiraUrlFromCurrentPage, 
+  extractJiraInstanceName,
   isValidJiraUrl, 
   normalizeJiraUrl,
   buildIssueUrl,

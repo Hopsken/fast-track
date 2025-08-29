@@ -11,10 +11,9 @@ export type {
   LicenseInfo,
   DarkModeOption,
   JiraApiConfig,
-  StorageValueRecord,
 } from './types'
 
-export type { StorageValueRecord as StorageSchema } from './schema'
+export type { StorageValueRecord } from './schema'
 
 // Storage configuration
 export { StorageKey, STORAGE_GROUPS } from './keys'
@@ -24,7 +23,8 @@ export { STORAGE_DEFAULTS } from './schema'
 export { PersistLayer, persistLayer } from './storage-layer'
 export { storageItems } from './storage-items'
 
-// Re-export for backward compatibility
+// Re-export for backward compatibility (import for internal use)
+import { PersistLayer } from './storage-layer'
 export const PersistLayer_Legacy = PersistLayer
 
 // Hooks

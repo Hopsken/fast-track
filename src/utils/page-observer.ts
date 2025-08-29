@@ -9,7 +9,7 @@ type Effect = {
 }
 
 export class PageObserver {
-  private currentPath: string
+  private currentPath: string = ''
   private registry: Record<string, Effect & { active?: boolean }> = {}
   private cleanup: Record<string, Function | undefined> = {}
 
@@ -42,8 +42,9 @@ export class PageObserver {
     this.executeEffect(effect.key)
 
     return () => {
-      this.registry[effect.key] = undefined
+      delete this.registry[effect.key]
       this.cleanup[effect.key]?.()
+      delete this.cleanup[effect.key]
     }
   }
 

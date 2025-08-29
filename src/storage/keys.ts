@@ -34,22 +34,22 @@ export const STORAGE_GROUPS = {
     StorageKey.ColorCard,
     StorageKey.AutoFullScreen,
     StorageKey.CustomBackground,
-  ],
+  ] as const,
   JIRA_CONFIG: [
     StorageKey.JiraUrl,
     StorageKey.JiraHost,
     StorageKey.JiraApiToken,
     StorageKey.JiraUserEmail,
-  ],
+  ] as const,
   USER_DATA: [
     StorageKey.TicketsData,
     StorageKey.SearchHistory,
     StorageKey.TicketViewHistory,
-  ],
+  ] as const,
   PREFERENCES: [
     StorageKey.PrimaryIssueKeyPrefix,
-  ],
+  ] as const,
   LICENSE: [
     StorageKey.License,
-  ],
+  ] as const,
 } as const

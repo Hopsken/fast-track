@@ -1,5 +1,7 @@
+import { defineContentScript } from '#imports'
 import { browser } from '#imports'
 import { StorageKey, JiraTicket, storageItems } from '~/storage'
+import { isJiraWebPage } from '~/utils/jira/page-detection'
 
 // Simplified selectors focusing only on ticket key extraction
 const SELECTORS = {

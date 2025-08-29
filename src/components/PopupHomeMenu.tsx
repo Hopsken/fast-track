@@ -1,11 +1,12 @@
 import { HiChevronRight } from "react-icons/hi2"
 
-import { DarkModeControl } from "./DarkModeControl"
-import { FieldControl } from "./FieldControl"
-import { ToggleField } from "./ToggleField"
+import { DarkModeControl, FieldControl, ToggleField } from "~/components/ui"
+import { useStorage } from "~/hooks/useStorage"
+import { StorageKey } from "~/storage/keys"
+import { openOptionsPage } from "~/utils/extension/tabs"
 
 function CustomBackgroundPreview() {
-  const [custom] = useStorage(persistLayer.customBackground, undefined)
+  const [custom] = useStorage(StorageKey.CustomBackground)
 
   if (!custom) return null
   return (
@@ -37,12 +38,12 @@ export function PopupHomeMenu() {
       <ToggleField
         title="Highlight issue color"
         description="Highlight background color of issues"
-        storageKey={persistLayer.colorfulCard}
+        storageKey={StorageKey.ColorCard}
       />
       <ToggleField
         title="Enable browser fullscreen"
         description="Enter browser-level fullscreen when click on fullscreen button"
-        storageKey={persistLayer.autoFullScreen}
+        storageKey={StorageKey.AutoFullScreen}
       />
 
       <FieldControl

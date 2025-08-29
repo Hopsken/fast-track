@@ -15,7 +15,7 @@ export class JiraConnectionService {
     try {
       console.log('🧪 JiraAPI: Testing connection...')
       
-      const user = await this.client.makeRequest('myself')
+      const user = await this.client.makeRequest('myself') as any
       
       console.log('✅ JiraAPI: Connection test successful')
       return {
@@ -80,7 +80,7 @@ export class JiraConnectionService {
     try {
       console.log('🔐 JiraAPI: Testing permissions...')
       
-      const projects = await this.client.makeRequest('project/search?maxResults=1')
+      const projects = await this.client.makeRequest('project/search?maxResults=1') as any
       
       const hasAccess = Array.isArray(projects.values)
       const projectCount = projects.total || 0

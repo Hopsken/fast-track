@@ -1,6 +1,9 @@
+import { defineContentScript } from '#imports'
 import darkModeCSS from '~/assets/styles/dark-mode.css?inline'
 import { StyleInjector } from '~/utils/dom/style-injection'
 import { isJiraWebPage } from '~/utils/jira/page-detection'
+import { storageItems } from '~/storage/storage-items'
+import { StorageKey } from '~/storage/keys'
 
 export default defineContentScript({
   matches: ["https://*.atlassian.net/jira*"],
@@ -11,14 +14,14 @@ export default defineContentScript({
     if (!isJiraWebPage(document)) return
 
     // Initialize dark mode based on current settings
-    const darkMode = (await persistLayer.darkMode.getValue()) ?? "auto"
+    const darkMode = (await storageItems[StorageKey.DarkMode].getValue()) ?? "auto"
     
     if (darkMode !== "disable") {
       applyDarkMode(darkMode === "auto")
     }
 
     // Watch for dark mode setting changes
-    persistLayer.darkMode.watch((newValue) => {
+    storageItems[StorageKey.DarkMode].watch((newValue) => {
       if (newValue !== "disable") {
         applyDarkMode(newValue === "auto")
       } else {

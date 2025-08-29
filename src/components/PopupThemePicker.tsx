@@ -33,7 +33,7 @@ export function PopupThemePicker() {
 
   const totalCount = data[0]?.total || Infinity
   const allPhotos = useMemo(
-    () => data.reduce((acc, cur) => acc.concat(cur.results), [] as Photo[]),
+    () => data.reduce((acc, cur) => acc.concat(cur?.results || []), [] as Photo[]),
     [data]
   )
   const hasMore = totalCount > allPhotos.length
@@ -42,7 +42,7 @@ export function PopupThemePicker() {
   return (
     <div>
       <div className="columns-2 ">
-        <ResetItem onClick={() => setCustomBackground(null)} />
+        <ResetItem onClick={() => setCustomBackground(undefined)} />
         {allPhotos.map((photo) => (
           <PhotoItem
             key={photo.id}
@@ -51,7 +51,8 @@ export function PopupThemePicker() {
               setCustomBackground({
                 id: photo.id,
                 url: photo.urls.regular,
-                thumb_url: photo.urls.thumb
+                thumb_url: photo.urls.thumb,
+                instance_id: photo.id // Using photo ID as instance ID
               })
             }}
           />
@@ -84,7 +85,7 @@ function PhotoItem({ photo, onClick }: { photo: Photo; onClick: () => void }) {
       <img
         className="aspect-auto	rounded "
         src={photo.urls.thumb}
-        alt={photo.alt_description}
+        alt={photo.alt_description || 'Photo'}
       />
       <div className="absolute hidden group-hover:flex bottom-0 left-0 right-0 bg-black/40 hover:bg-black/10  items-center px-2 py-1 text-xs text-white">
         <a

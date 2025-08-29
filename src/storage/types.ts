@@ -37,6 +37,10 @@ export interface LicenseInfo {
   }
   instance: {
     id: string
+    name: string
+  }
+  meta: {
+    customer_email: string
   }
 }
 

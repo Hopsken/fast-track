@@ -119,7 +119,7 @@ export function TicketList({ tickets, searchQuery, isLoading, onTicketClick }: T
         {tickets.map((ticket, index) => (
           <div
             key={ticket.key}
-            ref={el => itemRefs.current[index] = el}
+            ref={el => { itemRefs.current[index] = el }}
           >
             <TicketItem
               ticket={ticket}

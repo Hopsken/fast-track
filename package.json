@@ -5,10 +5,10 @@
   "description": "Quick search and access to your Jira tickets with enhanced board experience. Search by ticket key, summary, assignee, or status with lightning-fast results.",
   "author": "hopsken",
   "scripts": {
-    "dev": "wxt -b chrome",
+    "dev": "wxt -b chromium",
     "dev:ff": "wxt -b firefox",
     "dev:edge": "wxt -b edge",
-    "build": "wxt build -b chrome",
+    "build": "tsc --noEmit && wxt build -b chromium",
     "build:ff": "wxt build -b firefox",
     "build:edge": "wxt build -b edge",
     "zip": "pnpm run zip:chrome && pnpm rnn zip:firefox",
@@ -30,6 +30,7 @@
     "react-router-dom": "^7.8.1",
     "screenfull": "^6.0.2",
     "swr": "^2.3.6",
+    "unimport": "^5.2.0",
     "unsplash-js": "^7.0.19",
     "wxt": "^0.20.8"
   },

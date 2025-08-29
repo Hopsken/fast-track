@@ -1,6 +1,9 @@
+import { defineContentScript } from '#imports'
 import { TinyColor } from "@ctrl/tinycolor"
 import { globalObserverManager, createDebouncedCallback } from '~/utils/dom/mutation-observer'
 import { isJiraWebPage, getJiraApp, getKanbanBoard } from '~/utils/jira/page-detection'
+import { storageItems } from '~/storage/storage-items'
+import { StorageKey } from '~/storage/keys'
 
 export default defineContentScript({
   matches: ["https://*.atlassian.net/jira*"],
@@ -10,13 +13,13 @@ export default defineContentScript({
     if (!isJiraWebPage(document)) return
 
     // Initialize card highlighting based on current settings
-    let isHighlightEnabled = await persistLayer.colorfulCard.getValue()
+    let isHighlightEnabled = await storageItems[StorageKey.ColorCard].getValue()
     
     // Set up mutation observer for dynamic content
     setupCardHighlighter(isHighlightEnabled)
     
     // Watch for setting changes
-    persistLayer.colorfulCard.watch((newValue) => {
+    storageItems[StorageKey.ColorCard].watch((newValue) => {
       isHighlightEnabled = !!newValue
       updateCardColors(isHighlightEnabled)
     })

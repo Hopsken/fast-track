@@ -119,11 +119,10 @@ export function openOptionsPage(): void {
     browser.runtime.openOptionsPage()
   } catch (_) {
     // Edge compatibility issue workaround
-    const optionsPage = browser.runtime.getManifest().options_page
-    if (optionsPage) {
-      const optionsPageUrl = browser.runtime.getURL(optionsPage)
-      browser.tabs.create({ url: optionsPageUrl })
-    }
+    const manifest = browser.runtime.getManifest()
+    const optionsPage = manifest.options_page || '/options.html'
+    const optionsPageUrl = browser.runtime.getURL(optionsPage as '/options.html')
+    browser.tabs.create({ url: optionsPageUrl })
   }
 }
 

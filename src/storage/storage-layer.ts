@@ -14,14 +14,14 @@ export class PersistLayer {
    * Gets a value from storage
    */
   async get<T extends StorageKey>(key: T): Promise<StorageValueRecord[T]> {
-    return await storageItems[key].getValue()
+    return await storageItems[key].getValue() as StorageValueRecord[T]
   }
 
   /**
    * Sets a value in storage
    */
   async set<T extends StorageKey>(key: T, value: StorageValueRecord[T]): Promise<void> {
-    return await storageItems[key].setValue(value)
+    return await storageItems[key].setValue(value as never)
   }
 
   /**
@@ -38,7 +38,7 @@ export class PersistLayer {
     key: T, 
     callback: (newValue: StorageValueRecord[T] | null, oldValue: StorageValueRecord[T] | null) => void
   ) {
-    return storageItems[key].watch(callback)
+    return storageItems[key].watch(callback as any)
   }
 
   /**

@@ -38,6 +38,7 @@ export function useLicense() {
   }, [])
 
   const deactivate = useCallback(async () => {
+    if (!license) return false
     const { deactivated } = await deactivateLicense(
       license.license_key.key,
       license.instance.id

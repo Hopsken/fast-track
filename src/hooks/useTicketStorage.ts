@@ -15,11 +15,11 @@ export function useTicketData() {
   const [viewHistory, setViewHistory] = useStorage(StorageKey.TicketViewHistory, [])
 
   const addTickets = useCallback((newTickets: JiraTicket[]) => {
-    setTickets(prevTickets => {
+    setTickets((prevTickets: JiraTicket[]) => {
       const ticketMap = new Map<string, JiraTicket>()
 
       // Add existing tickets to map
-      prevTickets.forEach(ticket => {
+      prevTickets.forEach((ticket: JiraTicket) => {
         ticketMap.set(ticket.key, ticket)
       })
 
@@ -49,10 +49,10 @@ export function useTicketData() {
 
   const updateTicketViewCount = useCallback((ticketKey: string) => {
     // Update view history
-    setViewHistory(prevHistory => {
-      const existingRecord = prevHistory.find(record => record.ticketKey === ticketKey)
+    setViewHistory((prevHistory: TicketViewRecord[]) => {
+      const existingRecord = prevHistory.find((record: TicketViewRecord) => record.ticketKey === ticketKey)
       const updatedHistory = existingRecord
-        ? prevHistory.map(record => 
+        ? prevHistory.map((record: TicketViewRecord) => 
             record.ticketKey === ticketKey
               ? { ...record, viewCount: record.viewCount + 1, lastViewed: new Date().toISOString() }
               : record
@@ -70,8 +70,8 @@ export function useTicketData() {
     })
 
     // Update ticket data
-    setTickets(prevTickets => 
-      prevTickets.map(ticket => 
+    setTickets((prevTickets: JiraTicket[]) => 
+      prevTickets.map((ticket: JiraTicket) => 
         ticket.key === ticketKey
           ? { ...ticket, viewCount: ticket.viewCount + 1, lastViewed: new Date().toISOString() }
           : ticket
@@ -100,7 +100,7 @@ export function useTicketData() {
   }, [setTickets])
 
   const removeTicket = useCallback((ticketKey: string) => {
-    setTickets(prevTickets => prevTickets.filter(ticket => ticket.key !== ticketKey))
+    setTickets((prevTickets: JiraTicket[]) => prevTickets.filter((ticket: JiraTicket) => ticket.key !== ticketKey))
   }, [setTickets])
 
   return {
@@ -125,9 +125,9 @@ export function useSearchHistory() {
   const addSearchTerm = useCallback((term: string) => {
     if (!term || term.trim().length < 2) return
 
-    setSearchHistory(prevHistory => {
+    setSearchHistory((prevHistory: string[]) => {
       const trimmedTerm = term.trim()
-      const filteredHistory = prevHistory.filter(item => item !== trimmedTerm)
+      const filteredHistory = prevHistory.filter((item: string) => item !== trimmedTerm)
       
       return [trimmedTerm, ...filteredHistory].slice(0, 50) // Keep last 50 searches
     })
@@ -138,7 +138,7 @@ export function useSearchHistory() {
   }, [setSearchHistory])
 
   const removeSearchTerm = useCallback((term: string) => {
-    setSearchHistory(prevHistory => prevHistory.filter(item => item !== term))
+    setSearchHistory((prevHistory: string[]) => prevHistory.filter((item: string) => item !== term))
   }, [setSearchHistory])
 
   return {

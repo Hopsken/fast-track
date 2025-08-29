@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from 'react'
 import { HiGlobeAlt, HiCheck, HiX } from 'react-icons/hi'
-import { useJiraConfig } from '~/hooks/storage/useSettings'
+import { useJiraConfig } from '~/hooks/useStorageSettings'
 import { isValidJiraUrl, normalizeJiraUrl, extractJiraInstanceName } from '~/lib/jira'
 
 export function JiraHostInput() {

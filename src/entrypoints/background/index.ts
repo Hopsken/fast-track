@@ -3,6 +3,7 @@
  * This serves as the entry point that initializes all background services
  */
 
+import { defineBackground } from '#imports'
 import { MessageRouter } from './messages/message-router'
 import { OmniboxHandlerService } from './services/omnibox-handler'
 import { InstallationHandlerService } from './services/installation-handler'
