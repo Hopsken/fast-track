@@ -9,10 +9,4 @@ export * from './search'
 export * from './ui'
 
 // Legacy components (to be organized or deprecated)
-export { ManageLicense } from './ManageLicense'
-export { Popup } from './Popup'
-export { PopupHeader } from './PopupHeader'
-export { PopupHomeMenu } from './PopupHomeMenu'
-export { PopupThemePicker } from './PopupThemePicker'
 export { ProBadge } from './ProBadge'
-export { UpgradePro, UpgradePro as Upgrade } from './Upgrade'
