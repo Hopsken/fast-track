@@ -1,100 +1,34 @@
-import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { JiraTicket, StorageKey, TicketViewRecord } from '~/storage'
 import { useStorage } from '~/storage'
+import { useSelectedIndex, useSearchResults, useNavigationActions, useSearchQuery } from '~/stores/useTicketStore'
 import { TicketItem } from './TicketItem'
 import { HiInformationCircle } from 'react-icons/hi'
 
 interface TicketListProps {
-  tickets: JiraTicket[]
-  searchQuery: string
+
   onTicketClick: (ticket: JiraTicket) => void
 }
 
-export interface TicketListRef {
-  navigate: (direction: 'up' | 'down' | 'enter' | 'escape') => void
-}
-
-export const TicketList = forwardRef<TicketListRef, TicketListProps>(({ tickets, searchQuery, onTicketClick }, ref) => {
-  const [selectedIndex, setSelectedIndex] = useState(0)
+export function TicketList({ onTicketClick }: TicketListProps) {
+  // Get state and actions from the unified store
+  const selectedIndex = useSelectedIndex()
+  const searchQuery = useSearchQuery()
+  const searchResults = useSearchResults() // Use search results from store instead of props
+  const { navigate } = useNavigationActions()
+  
   const [viewHistory, setViewHistory] = useStorage(StorageKey.TicketViewHistory, [])
   const listRef = useRef<HTMLDivElement>(null)
   const itemRefs = useRef<(HTMLDivElement | null)[]>([])
 
-  // Reset selection when tickets change
+  // Update itemRefs when search results change (no more setTickets sync needed!)
   useEffect(() => {
-    setSelectedIndex(0)
-    itemRefs.current = new Array(tickets.length).fill(null)
-  }, [tickets])
+    itemRefs.current = new Array(searchResults.length).fill(null)
+  }, [searchResults.length])
 
-  // Navigation methods
-  const navigate = (direction: 'up' | 'down' | 'enter' | 'escape') => {
-    switch (direction) {
-      case 'down':
-        if (tickets.length === 0) return
-        setSelectedIndex(prev => Math.min(prev + 1, tickets.length - 1))
-        break
-      case 'up':
-        if (tickets.length === 0) return
-        setSelectedIndex(prev => Math.max(prev - 1, 0))
-        break
-      case 'enter':
-        if (tickets.length === 0 || !tickets[selectedIndex]) return
-        handleTicketClick(tickets[selectedIndex])
-        break
-      case 'escape':
-        setSelectedIndex(0)
-        break
-    }
-  }
-
-  // Expose navigation methods to parent via ref
-  useImperativeHandle(ref, () => ({
-    navigate
-  }), [tickets, selectedIndex])
-
-  // Keyboard navigation using react-hotkeys-hook (fallback when search box doesn't have focus)
-  useHotkeys('ArrowDown', () => navigate('down'), [tickets, selectedIndex])
-  useHotkeys('ArrowUp', () => navigate('up'), [tickets, selectedIndex])
-  useHotkeys('Enter', () => navigate('enter'), [tickets, selectedIndex])
-  useHotkeys('Escape', () => navigate('escape'), [tickets, selectedIndex])
-
-  useHotkeys('ctrl+c,cmd+c', () => {
-    if (tickets.length === 0 || !tickets[selectedIndex]) return
-    copyTicketUrl(tickets[selectedIndex])
-  }, [tickets, selectedIndex])
-
-  // Number shortcuts (1-9) for quick selection
-  useHotkeys('1,2,3,4,5,6,7,8,9', (e) => {
-    if (tickets.length === 0) return
-    const numKey = parseInt(e.key)
-    const targetIndex = numKey - 1
-    if (targetIndex < tickets.length) {
-      handleTicketClick(tickets[targetIndex])
-    }
-  }, [tickets])
-
-  // Scroll selected item into view
-  useEffect(() => {
-    try {
-      const selectedItem = itemRefs.current[selectedIndex]
-      if (selectedItem && listRef.current) {
-        const container = listRef.current
-        const containerRect = container.getBoundingClientRect()
-        const itemRect = selectedItem.getBoundingClientRect()
-
-        if (itemRect.bottom > containerRect.bottom) {
-          selectedItem.scrollIntoView({ block: 'end', behavior: 'smooth' })
-        } else if (itemRect.top < containerRect.top) {
-          selectedItem.scrollIntoView({ block: 'start', behavior: 'smooth' })
-        }
-      }
-    } catch (error) {
-      console.warn('Error scrolling to selected item:', error)
-    }
-  }, [selectedIndex])
-
-  const handleTicketClick = async (ticket: JiraTicket) => {
+  // Handle ticket click with view history tracking
+  const handleTicketClick = useCallback(async (ticket: JiraTicket) => {
     // Update view history
     const existingRecord = viewHistory.find(record => record.ticketKey === ticket.key)
     const updatedHistory = existingRecord
@@ -114,32 +48,10 @@ export const TicketList = forwardRef<TicketListRef, TicketListProps>(({ tickets,
 
     setViewHistory(updatedHistory.slice(0, 100)) // Keep only recent 100 records
     onTicketClick(ticket)
-  }
+  }, [viewHistory, setViewHistory, onTicketClick])
 
-  const copyTicketUrl = async (ticket: JiraTicket) => {
-    try {
-      if (!ticket?.url) {
-        console.warn('No URL available for ticket:', ticket?.key)
-        return
-      }
-
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(ticket.url)
-        console.log(`Copied ${ticket.key} URL to clipboard`)
-      } else {
-        // Fallback for older browsers or when clipboard API is not available
-        fallbackCopyTextToClipboard(ticket.url)
-      }
-      
-      // TODO: Add toast notification for better UX
-    } catch (error) {
-      console.error('Failed to copy ticket URL:', error)
-      // Fallback for older browsers
-      fallbackCopyTextToClipboard(ticket.url)
-    }
-  }
-
-  const fallbackCopyTextToClipboard = (text: string) => {
+  // Fallback copy function for older browsers
+  const fallbackCopyTextToClipboard = useCallback((text: string) => {
     if (!text || typeof text !== 'string') {
       console.warn('Invalid text provided to fallback copy')
       return
@@ -173,10 +85,90 @@ export const TicketList = forwardRef<TicketListRef, TicketListProps>(({ tickets,
     } catch (error) {
       console.error('Error in fallback copy function:', error)
     }
-  }
+  }, [])
 
+  const copyTicketUrl = useCallback(async (ticket: JiraTicket) => {
+    try {
+      if (!ticket?.url) {
+        console.warn('No URL available for ticket:', ticket?.key)
+        return
+      }
 
-  if (tickets.length === 0) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(ticket.url)
+        console.log(`Copied ${ticket.key} URL to clipboard`)
+      } else {
+        // Fallback for older browsers or when clipboard API is not available
+        fallbackCopyTextToClipboard(ticket.url)
+      }
+      
+      // TODO: Add toast notification for better UX
+    } catch (error) {
+      console.error('Failed to copy ticket URL:', error)
+      // Fallback for older browsers
+      fallbackCopyTextToClipboard(ticket.url)
+    }
+  }, [fallbackCopyTextToClipboard])
+
+  // Keyboard navigation using react-hotkeys-hook (fallback when search box doesn't have focus)
+  useHotkeys('ArrowDown', () => {
+    console.log('🎹 TicketList - ArrowDown hotkey triggered')
+    navigate('down', handleTicketClick)
+  }, [navigate, handleTicketClick])
+  
+  useHotkeys('ArrowUp', () => {
+    console.log('🎹 TicketList - ArrowUp hotkey triggered')
+    navigate('up', handleTicketClick)
+  }, [navigate, handleTicketClick])
+  
+  useHotkeys('Enter', () => {
+    console.log('🎹 TicketList - Enter hotkey triggered')
+    navigate('enter', handleTicketClick)
+  }, [navigate, handleTicketClick])
+  
+  useHotkeys('Escape', () => {
+    console.log('🎹 TicketList - Escape hotkey triggered')
+    navigate('escape', handleTicketClick)
+  }, [navigate, handleTicketClick])
+
+  useHotkeys('ctrl+c,cmd+c', () => {
+    console.log('🎹 TicketList - Copy hotkey triggered', { resultsCount: searchResults.length, selectedIndex })
+    if (searchResults.length === 0 || !searchResults[selectedIndex]) return
+    copyTicketUrl(searchResults[selectedIndex])
+  }, [searchResults, selectedIndex, copyTicketUrl])
+
+  // Number shortcuts (1-9) for quick selection
+  useHotkeys('1,2,3,4,5,6,7,8,9', (e) => {
+    const numKey = parseInt(e.key)
+    const targetIndex = numKey - 1
+    console.log('🎹 TicketList - Number hotkey triggered:', { key: e.key, numKey, targetIndex, resultsCount: searchResults.length })
+    if (searchResults.length === 0) return
+    if (targetIndex < searchResults.length) {
+      handleTicketClick(searchResults[targetIndex])
+    }
+  }, [searchResults, handleTicketClick])
+
+  // Scroll selected item into view
+  useEffect(() => {
+    try {
+      const selectedItem = itemRefs.current[selectedIndex]
+      if (selectedItem && listRef.current) {
+        const container = listRef.current
+        const containerRect = container.getBoundingClientRect()
+        const itemRect = selectedItem.getBoundingClientRect()
+
+        if (itemRect.bottom > containerRect.bottom) {
+          selectedItem.scrollIntoView({ block: 'end', behavior: 'smooth' })
+        } else if (itemRect.top < containerRect.top) {
+          selectedItem.scrollIntoView({ block: 'start', behavior: 'smooth' })
+        }
+      }
+    } catch (error) {
+      console.warn('Error scrolling to selected item:', error)
+    }
+  }, [selectedIndex])
+
+  if (searchResults.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-6 text-center animate-in fade-in duration-300">
         <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3 transition-all duration-300 hover:bg-gray-200 hover:scale-105">
@@ -198,7 +190,7 @@ export const TicketList = forwardRef<TicketListRef, TicketListProps>(({ tickets,
   return (
     <div ref={listRef} className="max-h-96 overflow-y-auto">
       <div className="space-y-0">
-        {tickets.map((ticket, index) => (
+        {searchResults.map((ticket, index) => (
           <div
             key={ticket.key}
             ref={el => { itemRefs.current[index] = el }}
@@ -218,4 +210,4 @@ export const TicketList = forwardRef<TicketListRef, TicketListProps>(({ tickets,
       </div>
     </div>
   )
-})
+}

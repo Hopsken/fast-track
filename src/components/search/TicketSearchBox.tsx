@@ -1,54 +1,95 @@
-import { useRef, useEffect } from 'react'
-import { HiSearch, HiX } from 'react-icons/hi'
+import { useRef } from "react"
+import { HiSearch, HiX } from "react-icons/hi"
+import { useMount, useWhyDidYouUpdate } from "ahooks"
+import { useNavigationActions } from "~/stores/useTicketStore"
+import { type JiraTicket } from "@/storage"
 
 interface TicketSearchBoxProps {
   value: string
   onChange: (value: string) => void
   onClear: () => void
-  onNavigate?: (direction: 'up' | 'down' | 'enter' | 'escape') => void
+  onTicketClick: (ticket: JiraTicket) => void
   placeholder?: string
   autoFocus?: boolean
 }
 
-export function TicketSearchBox({ 
-  value, 
-  onChange, 
+export function TicketSearchBox({
+  value,
+  onChange,
   onClear,
-  onNavigate,
-  placeholder = "Search tickets...", 
-  autoFocus = true 
+  onTicketClick,
+  placeholder = "Search tickets...",
+  autoFocus = true
 }: TicketSearchBoxProps) {
   const inputRef = useRef<HTMLInputElement>(null)
+  const { navigate } = useNavigationActions()
 
-  useEffect(() => {
+  useWhyDidYouUpdate("TickerSearchBox", {
+    value,
+    onChange,
+    onClear,
+    onTicketClick,
+    placeholder,
+    autoFocus
+  })
+
+  useMount(() => {
     if (autoFocus && inputRef.current) {
       inputRef.current.focus()
     }
-  }, [autoFocus])
+  })
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    console.log("🔍 TicketSearchBox - Key pressed:", {
+      key: e.key,
+      code: e.code,
+      keyCode: e.keyCode,
+      ctrlKey: e.ctrlKey,
+      metaKey: e.metaKey,
+      shiftKey: e.shiftKey,
+      altKey: e.altKey,
+      target: e.target,
+      currentTarget: e.currentTarget
+    })
+
     switch (e.key) {
-      case 'ArrowDown':
+      case "ArrowDown":
+        console.log(
+          "🔍 TicketSearchBox - Arrow Down pressed, preventing default and navigating"
+        )
         e.preventDefault()
-        onNavigate?.('down')
+        navigate("down", onTicketClick)
         break
-      case 'ArrowUp':
+      case "ArrowUp":
+        console.log(
+          "🔍 TicketSearchBox - Arrow Up pressed, preventing default and navigating"
+        )
         e.preventDefault()
-        onNavigate?.('up')
+        navigate("up", onTicketClick)
         break
-      case 'Enter':
+      case "Enter":
+        console.log(
+          "🔍 TicketSearchBox - Enter pressed, preventing default and navigating"
+        )
         e.preventDefault()
-        onNavigate?.('enter')
+        navigate("enter", onTicketClick)
         break
-      case 'Escape':
+      case "Escape":
+        console.log("🔍 TicketSearchBox - Escape pressed, preventing default")
         e.preventDefault()
         if (value) {
+          console.log("🔍 TicketSearchBox - Clearing search value")
           onClear()
         } else {
-          onNavigate?.('escape')
+          console.log(
+            "🔍 TicketSearchBox - Navigating escape and blurring input"
+          )
+          navigate("escape", onTicketClick)
           inputRef.current?.blur()
         }
         break
+      default:
+        console.log("🔍 TicketSearchBox - Unhandled key:", e.key)
     }
   }
 
@@ -69,13 +110,12 @@ export function TicketSearchBox({
           <button
             onClick={onClear}
             className="absolute right-3 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-all duration-200 ease-out transform hover:scale-105 active:scale-95"
-            title="Clear search"
-          >
+            title="Clear search">
             <HiX className="w-4 h-4 transition-transform duration-150" />
           </button>
         )}
       </div>
-      
+
       {/* Animated underline for focus state */}
       <div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-blue-400 transform -translate-x-1/2 transition-all duration-300 ease-out opacity-0 focus-within:w-full focus-within:opacity-100" />
     </div>

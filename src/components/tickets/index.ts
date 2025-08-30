@@ -3,4 +3,4 @@
  */
 
 export { TicketItem } from './TicketItem'
-export { TicketList, type TicketListRef } from './TicketList'
+export { TicketList } from './TicketList'
