@@ -3,6 +3,7 @@ import { JiraHostInput } from "../sections/JiraConnection/JiraHostInput"
 import { ApiConfiguration } from "../sections/JiraConnection/ApiConfiguration"
 import { TokenGenerationGuide } from "../sections/JiraConnection/TokenGenerationGuide"
 import { PrimaryIssueKey } from "../sections/QuickAccess/PrimaryIssueKey"
+import { ShortcutManagement } from "../sections/QuickAccess/ShortcutManagement"
 
 export function GeneralTab() {
   return (
@@ -20,6 +21,7 @@ export function GeneralTab() {
       <div>
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Access</h2>
         <div className="space-y-6">
+          <ShortcutManagement />
           <PrimaryIssueKey />
         </div>
       </div>

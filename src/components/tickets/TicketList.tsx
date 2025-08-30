@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
+import { useHotkeys } from 'react-hotkeys-hook'
 import { JiraTicket, StorageKey, TicketViewRecord } from '~/storage'
 import { useStorage } from '~/storage'
 import { TicketItem } from './TicketItem'
@@ -7,11 +8,14 @@ import { HiInformationCircle } from 'react-icons/hi'
 interface TicketListProps {
   tickets: JiraTicket[]
   searchQuery: string
-  isLoading: boolean
   onTicketClick: (ticket: JiraTicket) => void
 }
 
-export function TicketList({ tickets, searchQuery, isLoading, onTicketClick }: TicketListProps) {
+export interface TicketListRef {
+  navigate: (direction: 'up' | 'down' | 'enter' | 'escape') => void
+}
+
+export const TicketList = forwardRef<TicketListRef, TicketListProps>(({ tickets, searchQuery, onTicketClick }, ref) => {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [viewHistory, setViewHistory] = useStorage(StorageKey.TicketViewHistory, [])
   const listRef = useRef<HTMLDivElement>(null)
@@ -23,50 +27,70 @@ export function TicketList({ tickets, searchQuery, isLoading, onTicketClick }: T
     itemRefs.current = new Array(tickets.length).fill(null)
   }, [tickets])
 
-  // Handle keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (tickets.length === 0) return
-
-      switch (e.key) {
-        case 'ArrowDown':
-          e.preventDefault()
-          setSelectedIndex(prev => Math.min(prev + 1, tickets.length - 1))
-          break
-        case 'ArrowUp':
-          e.preventDefault()
-          setSelectedIndex(prev => Math.max(prev - 1, 0))
-          break
-        case 'Enter':
-          e.preventDefault()
-          if (tickets[selectedIndex]) {
-            handleTicketClick(tickets[selectedIndex])
-          }
-          break
-        case 'Escape':
-          e.preventDefault()
-          setSelectedIndex(0)
-          break
-      }
+  // Navigation methods
+  const navigate = (direction: 'up' | 'down' | 'enter' | 'escape') => {
+    switch (direction) {
+      case 'down':
+        if (tickets.length === 0) return
+        setSelectedIndex(prev => Math.min(prev + 1, tickets.length - 1))
+        break
+      case 'up':
+        if (tickets.length === 0) return
+        setSelectedIndex(prev => Math.max(prev - 1, 0))
+        break
+      case 'enter':
+        if (tickets.length === 0 || !tickets[selectedIndex]) return
+        handleTicketClick(tickets[selectedIndex])
+        break
+      case 'escape':
+        setSelectedIndex(0)
+        break
     }
+  }
 
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
+  // Expose navigation methods to parent via ref
+  useImperativeHandle(ref, () => ({
+    navigate
+  }), [tickets, selectedIndex])
+
+  // Keyboard navigation using react-hotkeys-hook (fallback when search box doesn't have focus)
+  useHotkeys('ArrowDown', () => navigate('down'), [tickets, selectedIndex])
+  useHotkeys('ArrowUp', () => navigate('up'), [tickets, selectedIndex])
+  useHotkeys('Enter', () => navigate('enter'), [tickets, selectedIndex])
+  useHotkeys('Escape', () => navigate('escape'), [tickets, selectedIndex])
+
+  useHotkeys('ctrl+c,cmd+c', () => {
+    if (tickets.length === 0 || !tickets[selectedIndex]) return
+    copyTicketUrl(tickets[selectedIndex])
   }, [tickets, selectedIndex])
+
+  // Number shortcuts (1-9) for quick selection
+  useHotkeys('1,2,3,4,5,6,7,8,9', (e) => {
+    if (tickets.length === 0) return
+    const numKey = parseInt(e.key)
+    const targetIndex = numKey - 1
+    if (targetIndex < tickets.length) {
+      handleTicketClick(tickets[targetIndex])
+    }
+  }, [tickets])
 
   // Scroll selected item into view
   useEffect(() => {
-    const selectedItem = itemRefs.current[selectedIndex]
-    if (selectedItem && listRef.current) {
-      const container = listRef.current
-      const containerRect = container.getBoundingClientRect()
-      const itemRect = selectedItem.getBoundingClientRect()
+    try {
+      const selectedItem = itemRefs.current[selectedIndex]
+      if (selectedItem && listRef.current) {
+        const container = listRef.current
+        const containerRect = container.getBoundingClientRect()
+        const itemRect = selectedItem.getBoundingClientRect()
 
-      if (itemRect.bottom > containerRect.bottom) {
-        selectedItem.scrollIntoView({ block: 'end', behavior: 'smooth' })
-      } else if (itemRect.top < containerRect.top) {
-        selectedItem.scrollIntoView({ block: 'start', behavior: 'smooth' })
+        if (itemRect.bottom > containerRect.bottom) {
+          selectedItem.scrollIntoView({ block: 'end', behavior: 'smooth' })
+        } else if (itemRect.top < containerRect.top) {
+          selectedItem.scrollIntoView({ block: 'start', behavior: 'smooth' })
+        }
       }
+    } catch (error) {
+      console.warn('Error scrolling to selected item:', error)
     }
   }, [selectedIndex])
 
@@ -92,22 +116,80 @@ export function TicketList({ tickets, searchQuery, isLoading, onTicketClick }: T
     onTicketClick(ticket)
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div className="flex items-center gap-2 text-gray-500">
-          <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-500 rounded-full animate-spin" />
-          <span className="text-sm">Searching...</span>
-        </div>
-      </div>
-    )
+  const copyTicketUrl = async (ticket: JiraTicket) => {
+    try {
+      if (!ticket?.url) {
+        console.warn('No URL available for ticket:', ticket?.key)
+        return
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(ticket.url)
+        console.log(`Copied ${ticket.key} URL to clipboard`)
+      } else {
+        // Fallback for older browsers or when clipboard API is not available
+        fallbackCopyTextToClipboard(ticket.url)
+      }
+      
+      // TODO: Add toast notification for better UX
+    } catch (error) {
+      console.error('Failed to copy ticket URL:', error)
+      // Fallback for older browsers
+      fallbackCopyTextToClipboard(ticket.url)
+    }
   }
+
+  const fallbackCopyTextToClipboard = (text: string) => {
+    if (!text || typeof text !== 'string') {
+      console.warn('Invalid text provided to fallback copy')
+      return
+    }
+
+    try {
+      const textArea = document.createElement('textarea')
+      textArea.value = text
+      textArea.style.top = '0'
+      textArea.style.left = '0'
+      textArea.style.position = 'fixed'
+      textArea.style.opacity = '0'
+      textArea.style.pointerEvents = 'none'
+      
+      document.body.appendChild(textArea)
+      textArea.focus()
+      textArea.select()
+      
+      try {
+        const successful = document.execCommand('copy')
+        if (successful) {
+          console.log(`Copied ticket URL to clipboard (fallback method)`)
+        } else {
+          console.warn('Fallback copy command was unsuccessful')
+        }
+      } catch (err) {
+        console.error('Fallback copy failed:', err)
+      }
+      
+      document.body.removeChild(textArea)
+    } catch (error) {
+      console.error('Error in fallback copy function:', error)
+    }
+  }
+
 
   if (tickets.length === 0) {
     return (
-      <div className="flex items-center justify-center py-8 text-center">
-        <p className="text-sm text-gray-500">
+      <div className="flex flex-col items-center justify-center py-12 px-6 text-center animate-in fade-in duration-300">
+        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3 transition-all duration-300 hover:bg-gray-200 hover:scale-105">
+          <HiInformationCircle className="w-6 h-6 text-gray-400 transition-colors duration-200" />
+        </div>
+        <p className="text-sm font-medium text-gray-700 mb-1 animate-in slide-in-from-bottom-2 duration-500 delay-100">
           {searchQuery ? 'No tickets found' : 'No tickets yet'}
+        </p>
+        <p className="text-xs text-gray-500 animate-in slide-in-from-bottom-2 duration-500 delay-200">
+          {searchQuery 
+            ? 'Try adjusting your search query' 
+            : 'Tickets will appear here once collected from Jira'
+          }
         </p>
       </div>
     )
@@ -115,20 +197,25 @@ export function TicketList({ tickets, searchQuery, isLoading, onTicketClick }: T
 
   return (
     <div ref={listRef} className="max-h-96 overflow-y-auto">
-      <div>
+      <div className="space-y-0">
         {tickets.map((ticket, index) => (
           <div
             key={ticket.key}
             ref={el => { itemRefs.current[index] = el }}
+            className="animate-in slide-in-from-right duration-300 ease-out"
+            style={{ animationDelay: `${Math.min(index * 50, 500)}ms` }}
           >
             <TicketItem
               ticket={ticket}
               isSelected={index === selectedIndex}
+              searchQuery={searchQuery}
+              position={index + 1}
               onClick={() => handleTicketClick(ticket)}
+              onCopyUrl={copyTicketUrl}
             />
           </div>
         ))}
       </div>
     </div>
   )
-}
+})
