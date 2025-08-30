@@ -1,4 +1,4 @@
-import { AboutSection } from "../sections/AboutSection"
+import { AboutSection } from '../sections/AboutSection'
 
 interface AboutTabProps {
   version: string

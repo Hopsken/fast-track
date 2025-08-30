@@ -1,5 +1,6 @@
-import { JiraTicket } from '~/storage'
 import { HiCog6Tooth, HiClipboard } from 'react-icons/hi2'
+
+import { JiraTicket } from '~/storage'
 import { HighlightedText } from '~/utils/text-highlighting'
 
 interface TicketItemProps {
@@ -11,7 +12,14 @@ interface TicketItemProps {
   onCopyUrl?: (ticket: JiraTicket) => void
 }
 
-export function TicketItem({ ticket, isSelected = false, searchQuery = '', position, onClick, onCopyUrl }: TicketItemProps) {
+export function TicketItem({
+  ticket,
+  isSelected = false,
+  searchQuery = '',
+  position,
+  onClick,
+  onCopyUrl
+}: TicketItemProps) {
   const statusColor = getStatusColor(ticket.status)
 
   const handleClick = (e: React.MouseEvent) => {
@@ -35,38 +43,43 @@ export function TicketItem({ ticket, isSelected = false, searchQuery = '', posit
 
   return (
     <div
-      className={`group cursor-pointer px-4 py-3 transition-all duration-200 ease-out border-l-2 transform hover:translate-x-1 ${
-        isSelected 
-          ? 'bg-blue-50 border-l-blue-400 translate-x-1' 
-          : 'hover:bg-gray-50 border-l-transparent hover:border-l-gray-200 hover:shadow-sm'
+      className={`group transform cursor-pointer border-l-2 px-4 py-3 transition-all duration-200 ease-out hover:translate-x-1 ${
+        isSelected
+          ? 'translate-x-1 border-l-blue-400 bg-blue-50'
+          : 'border-l-transparent hover:border-l-gray-200 hover:bg-gray-50 hover:shadow-sm'
       }`}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       onContextMenu={handleContextMenu}
       tabIndex={0}
       role="button"
-      aria-label={`Open ticket ${ticket.key}: ${ticket.summary}`}
-    >
+      aria-label={`Open ticket ${ticket.key}: ${ticket.summary}`}>
       <div className="flex items-start gap-3">
         {/* Status indicator */}
-        <div className={`w-2 h-2 rounded-full ${statusColor} flex-shrink-0 mt-2 transition-transform duration-200 group-hover:scale-125`} />
-        
+        <div
+          className={`h-2 w-2 rounded-full ${statusColor} mt-2 flex-shrink-0 transition-transform duration-200 group-hover:scale-125`}
+        />
+
         {/* Main content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-mono text-gray-500 bg-gray-100 px-2 py-1 rounded">
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 flex items-center gap-2">
+            <span className="rounded bg-gray-100 px-2 py-1 font-mono text-xs text-gray-500">
               <HighlightedText text={ticket.key} searchQuery={searchQuery} />
             </span>
             {ticket.assignee && (
               <span className="text-xs text-gray-400">
-                @<HighlightedText text={ticket.assignee || ''} searchQuery={searchQuery} />
+                @
+                <HighlightedText
+                  text={ticket.assignee || ''}
+                  searchQuery={searchQuery}
+                />
               </span>
             )}
           </div>
-          <p className="text-sm font-medium text-gray-900 leading-snug truncate">
+          <p className="truncate text-sm leading-snug font-medium text-gray-900">
             <HighlightedText text={ticket.summary} searchQuery={searchQuery} />
           </p>
-          <div className="flex items-center gap-2 mt-1">
+          <div className="mt-1 flex items-center gap-2">
             <span className="text-xs text-gray-400 capitalize">
               {ticket.status}
             </span>
@@ -82,15 +95,20 @@ export function TicketItem({ ticket, isSelected = false, searchQuery = '', posit
         </div>
 
         {/* Action hint */}
-        <div className="flex-shrink-0 flex items-center gap-2">
+        <div className="flex flex-shrink-0 items-center gap-2">
           {position !== undefined && position <= 9 && (
-            <span className="text-xs font-mono text-gray-400 bg-gray-100 w-5 h-5 rounded flex items-center justify-center transition-all duration-200 group-hover:bg-blue-100 group-hover:text-blue-600 group-hover:scale-110">
+            <span className="flex h-5 w-5 items-center justify-center rounded bg-gray-100 font-mono text-xs text-gray-400 transition-all duration-200 group-hover:scale-110 group-hover:bg-blue-100 group-hover:text-blue-600">
               {position}
             </span>
           )}
-          <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0 flex items-center gap-2">
-            <span className="text-xs text-gray-400 transition-colors duration-200">↵</span>
-            <HiClipboard className="w-3 h-3 text-gray-400 transition-all duration-200 hover:text-blue-500 hover:scale-110" title="Right-click to copy URL" />
+          <div className="flex translate-x-2 transform items-center gap-2 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
+            <span className="text-xs text-gray-400 transition-colors duration-200">
+              ↵
+            </span>
+            <HiClipboard
+              className="h-3 w-3 text-gray-400 transition-all duration-200 hover:scale-110 hover:text-blue-500"
+              title="Right-click to copy URL"
+            />
           </div>
         </div>
       </div>
@@ -100,7 +118,11 @@ export function TicketItem({ ticket, isSelected = false, searchQuery = '', posit
 
 function getStatusColor(status: string): string {
   const statusLower = status.toLowerCase()
-  if (statusLower.includes('done') || statusLower.includes('resolved') || statusLower.includes('closed')) {
+  if (
+    statusLower.includes('done') ||
+    statusLower.includes('resolved') ||
+    statusLower.includes('closed')
+  ) {
     return 'bg-green-400'
   }
   if (statusLower.includes('progress') || statusLower.includes('development')) {
@@ -117,7 +139,7 @@ function getStatusColor(status: string): string {
 
 function getPriorityColor(priority?: string): string {
   if (!priority) return 'bg-gray-400'
-  
+
   const priorityLower = priority.toLowerCase()
   if (priorityLower.includes('highest') || priorityLower.includes('critical')) {
     return 'bg-red-500'

@@ -10,7 +10,7 @@ export class StyleInjector {
    */
   static createStyleElement(id: string, content: string): HTMLStyleElement {
     const existingElement = this.styleElements.get(id)
-    
+
     if (existingElement) {
       existingElement.textContent = content
       return existingElement
@@ -19,7 +19,7 @@ export class StyleInjector {
     const element = document.createElement('style')
     element.id = `jira-boost-${id}`
     element.textContent = content
-    
+
     this.styleElements.set(id, element)
     return element
   }
@@ -29,11 +29,11 @@ export class StyleInjector {
    */
   static injectStyle(id: string, content: string): HTMLStyleElement {
     const element = this.createStyleElement(id, content)
-    
+
     if (!element.parentElement) {
       document.head.appendChild(element)
     }
-    
+
     return element
   }
 
@@ -41,14 +41,14 @@ export class StyleInjector {
    * Creates a style element with media query support
    */
   static createMediaStyleElement(
-    id: string, 
-    content: string, 
+    id: string,
+    content: string,
     mediaQuery?: string
   ): HTMLStyleElement {
-    const wrappedContent = mediaQuery 
+    const wrappedContent = mediaQuery
       ? `@media ${mediaQuery} {\n${content}\n}`
       : content
-      
+
     return this.createStyleElement(id, wrappedContent)
   }
 
@@ -74,7 +74,7 @@ export class StyleInjector {
    * Cleans up all managed style elements
    */
   static cleanup(): void {
-    this.styleElements.forEach(element => element.remove())
+    this.styleElements.forEach((element) => element.remove())
     this.styleElements.clear()
   }
 }

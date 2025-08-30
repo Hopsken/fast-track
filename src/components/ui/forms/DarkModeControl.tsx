@@ -1,9 +1,10 @@
-import { useStorage, StorageKey, StorageValueRecord } from "~/storage"
-import { FieldControl } from "./FieldControl"
+import { FieldControl } from './FieldControl'
+
+import { useStorage, StorageKey, StorageValueRecord } from '~/storage'
 
 export function DarkModeControl() {
-  const [mode, setMode] = useStorage(StorageKey.DarkMode, "auto")
-  
+  const [mode, setMode] = useStorage(StorageKey.DarkMode, 'auto')
+
   return (
     <FieldControl
       size="lg"
@@ -12,7 +13,9 @@ export function DarkModeControl() {
       <select
         className="select select-bordered select-lg"
         value={mode}
-        onChange={(e) => setMode(e.target.value as StorageValueRecord[StorageKey.DarkMode])}>
+        onChange={(e) =>
+          setMode(e.target.value as StorageValueRecord[StorageKey.DarkMode])
+        }>
         <option value="auto">Auto</option>
         <option value="always">Always Dark</option>
         <option value="disable">Always Light</option>

@@ -1,6 +1,6 @@
-import { StorageKey, persistLayer } from "~/storage"
+import { openInNewTab, openOptionsPage } from './extension'
 
-import { openInNewTab, openOptionsPage } from "./extension"
+import { StorageKey, persistLayer } from '~/storage'
 
 function containsOnlyNumbers(str: string) {
   return /^\d+$/.test(str)
@@ -14,11 +14,11 @@ export async function openJiraIssue(ticket: string) {
     return
   }
 
-  if (jiraUrl.endsWith("/")) jiraUrl = jiraUrl.slice(0, -1)
+  if (jiraUrl.endsWith('/')) jiraUrl = jiraUrl.slice(0, -1)
   if (containsOnlyNumbers(ticket)) {
     let issuePrefix = await persistLayer.get(StorageKey.PrimaryIssueKeyPrefix)
     if (issuePrefix) {
-      ticket = `${issuePrefix.trim().replace(/-/g, "")}-${ticket}`
+      ticket = `${issuePrefix.trim().replace(/-/g, '')}-${ticket}`
     }
   }
 

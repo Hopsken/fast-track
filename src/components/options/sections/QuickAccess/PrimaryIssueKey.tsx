@@ -1,10 +1,10 @@
-import { useStorage, StorageKey } from "~/storage"
-import { FieldControl } from "~/components/ui/forms"
+import { FieldControl } from '~/components/ui/forms'
+import { useStorage, StorageKey } from '~/storage'
 
 export function PrimaryIssueKey() {
   const [issueKey, setIssueKey] = useStorage(
     StorageKey.PrimaryIssueKeyPrefix,
-    ""
+    ''
   )
 
   return (
@@ -17,7 +17,7 @@ export function PrimaryIssueKey() {
         placeholder="TICKET-"
         value={issueKey}
         onChange={(e) => setIssueKey(e.target.value)}
-        className={`input input-lg input-bordered w-full min-w-`}
+        className={`input input-lg input-bordered min-w- w-full`}
       />
     </FieldControl>
   )

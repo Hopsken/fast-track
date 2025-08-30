@@ -1,6 +1,8 @@
 import { StateCreator } from 'zustand'
-import { JiraTicket } from '~/storage'
+
 import { SearchSlice } from './createSearchSlice'
+
+import { JiraTicket } from '~/storage'
 
 export type NavigationDirection = 'up' | 'down' | 'enter' | 'escape'
 
@@ -9,7 +11,10 @@ export interface NavigationSlice {
   selectedIndex: number
 
   // Actions
-  navigate: (direction: NavigationDirection, onTicketClick?: (ticket: JiraTicket) => void) => void
+  navigate: (
+    direction: NavigationDirection,
+    onTicketClick?: (ticket: JiraTicket) => void
+  ) => void
   setSelectedIndex: (index: number) => void
   resetSelection: () => void
 }
@@ -24,9 +29,12 @@ export const createNavigationSlice: StateCreator<
   selectedIndex: 0,
 
   // Actions
-  navigate: (direction: NavigationDirection, onTicketClick?: (ticket: JiraTicket) => void) => {
+  navigate: (
+    direction: NavigationDirection,
+    onTicketClick?: (ticket: JiraTicket) => void
+  ) => {
     const { selectedIndex, searchResults } = get()
-    
+
     console.log('🎯 NavigationSlice - Navigate called:', {
       direction,
       selectedIndex,
@@ -40,30 +48,50 @@ export const createNavigationSlice: StateCreator<
           console.log('🎯 NavigationSlice - Down: No search results available')
           return
         }
-        const newDownIndex = Math.min(selectedIndex + 1, searchResults.length - 1)
-        console.log('🎯 NavigationSlice - Down: Moving from', selectedIndex, 'to', newDownIndex)
+        const newDownIndex = Math.min(
+          selectedIndex + 1,
+          searchResults.length - 1
+        )
+        console.log(
+          '🎯 NavigationSlice - Down: Moving from',
+          selectedIndex,
+          'to',
+          newDownIndex
+        )
         set({ selectedIndex: newDownIndex })
         break
-      
+
       case 'up':
         if (searchResults.length === 0) {
           console.log('🎯 NavigationSlice - Up: No search results available')
           return
         }
         const newUpIndex = Math.max(selectedIndex - 1, 0)
-        console.log('🎯 NavigationSlice - Up: Moving from', selectedIndex, 'to', newUpIndex)
+        console.log(
+          '🎯 NavigationSlice - Up: Moving from',
+          selectedIndex,
+          'to',
+          newUpIndex
+        )
         set({ selectedIndex: newUpIndex })
         break
-      
+
       case 'enter':
         if (searchResults.length === 0 || !searchResults[selectedIndex]) {
-          console.log('🎯 NavigationSlice - Enter: No ticket at index', selectedIndex)
+          console.log(
+            '🎯 NavigationSlice - Enter: No ticket at index',
+            selectedIndex
+          )
           return
         }
-        console.log('🎯 NavigationSlice - Enter: Clicking ticket at index', selectedIndex, searchResults[selectedIndex])
+        console.log(
+          '🎯 NavigationSlice - Enter: Clicking ticket at index',
+          selectedIndex,
+          searchResults[selectedIndex]
+        )
         onTicketClick?.(searchResults[selectedIndex])
         break
-      
+
       case 'escape':
         console.log('🎯 NavigationSlice - Escape: Resetting selection to 0')
         set({ selectedIndex: 0 })
@@ -77,7 +105,12 @@ export const createNavigationSlice: StateCreator<
       console.log('🎯 NavigationSlice - Setting selected index:', index)
       set({ selectedIndex: index })
     } else {
-      console.warn('🎯 NavigationSlice - Invalid index:', index, 'for results count:', searchResults.length)
+      console.warn(
+        '🎯 NavigationSlice - Invalid index:',
+        index,
+        'for results count:',
+        searchResults.length
+      )
     }
   },
 

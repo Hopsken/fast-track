@@ -7,10 +7,11 @@ import { browser } from '#imports'
 /**
  * Opens a URL in a new tab
  */
-export async function openInNewTab(url: string): Promise<chrome.tabs.Tab | null> {
+export async function openInNewTab(
+  url: string
+): Promise<chrome.tabs.Tab | null> {
   try {
-    const tab = await browser.tabs.create({ url })
-    return tab
+    return await browser.tabs.create({ url })
   } catch (error) {
     console.error('Failed to open new tab:', error)
     return null
@@ -24,7 +25,7 @@ export async function openInCurrentTab(url: string): Promise<boolean> {
   try {
     const tabs = await browser.tabs.query({ active: true, currentWindow: true })
     const currentTab = tabs[0]
-    
+
     if (currentTab?.id) {
       await browser.tabs.update(currentTab.id, { url })
       return true
@@ -48,10 +49,11 @@ export function closeCurrentWindow(): void {
 /**
  * Gets all tabs matching a pattern
  */
-export async function getMatchingTabs(pattern: string): Promise<chrome.tabs.Tab[]> {
+export async function getMatchingTabs(
+  pattern: string
+): Promise<chrome.tabs.Tab[]> {
   try {
-    const tabs = await browser.tabs.query({ url: pattern })
-    return tabs
+    return await browser.tabs.query({ url: pattern })
   } catch (error) {
     console.error('Failed to get matching tabs:', error)
     return []
@@ -71,13 +73,13 @@ export async function getJiraTabs(): Promise<chrome.tabs.Tab[]> {
 export async function focusTab(tabId: number): Promise<boolean> {
   try {
     await browser.tabs.update(tabId, { active: true })
-    
+
     // Also focus the window containing the tab
     const tab = await browser.tabs.get(tabId)
     if (tab.windowId) {
       await browser.windows.update(tab.windowId, { focused: true })
     }
-    
+
     return true
   } catch (error) {
     console.error('Failed to focus tab:', error)
@@ -101,10 +103,11 @@ export async function reloadTab(tabId: number): Promise<boolean> {
 /**
  * Gets tab information
  */
-export async function getTabInfo(tabId: number): Promise<chrome.tabs.Tab | null> {
+export async function getTabInfo(
+  tabId: number
+): Promise<chrome.tabs.Tab | null> {
   try {
-    const tab = await browser.tabs.get(tabId)
-    return tab
+    return await browser.tabs.get(tabId)
   } catch (error) {
     console.error('Failed to get tab info:', error)
     return null
@@ -117,11 +120,13 @@ export async function getTabInfo(tabId: number): Promise<chrome.tabs.Tab | null>
 export function openOptionsPage(): void {
   try {
     browser.runtime.openOptionsPage()
-  } catch (_) {
+  } catch {
     // Edge compatibility issue workaround
     const manifest = browser.runtime.getManifest()
     const optionsPage = manifest.options_page || '/options.html'
-    const optionsPageUrl = browser.runtime.getURL(optionsPage as '/options.html')
+    const optionsPageUrl = browser.runtime.getURL(
+      optionsPage as '/options.html'
+    )
     browser.tabs.create({ url: optionsPageUrl })
   }
 }
@@ -129,7 +134,10 @@ export function openOptionsPage(): void {
 /**
  * Utility for opening Jira issues
  */
-export async function openJiraIssue(issueKey: string, baseUrl?: string): Promise<boolean> {
+export async function openJiraIssue(
+  issueKey: string,
+  baseUrl?: string
+): Promise<boolean> {
   if (!baseUrl) {
     // Try to get base URL from current Jira tab
     const jiraTabs = await getJiraTabs()
@@ -138,12 +146,12 @@ export async function openJiraIssue(issueKey: string, baseUrl?: string): Promise
       baseUrl = url.origin
     }
   }
-  
+
   if (!baseUrl) {
     console.error('No Jira base URL available')
     return false
   }
-  
+
   const issueUrl = `${baseUrl}/browse/${issueKey}`
   const tab = await openInNewTab(issueUrl)
   return tab !== null

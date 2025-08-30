@@ -1,10 +1,13 @@
 import { useState } from 'react'
-import { FieldControl } from "~/components/ui/forms"
-import { useJiraConfig } from "~/hooks/useStorageSettings"
+
+import { FieldControl } from '~/components/ui/forms'
+import { useJiraConfig } from '~/hooks/useStorageSettings'
 
 export function ApiConnectionStatus() {
   const { jiraHost, apiToken, userEmail, isConfigComplete } = useJiraConfig()
-  const [connectionStatus, setConnectionStatus] = useState<'unknown' | 'testing' | 'success' | 'error'>('unknown')
+  const [connectionStatus, setConnectionStatus] = useState<
+    'unknown' | 'testing' | 'success' | 'error'
+  >('unknown')
   const [statusMessage, setStatusMessage] = useState('')
 
   const isConfigured = isConfigComplete
@@ -28,7 +31,7 @@ export function ApiConnectionStatus() {
       })
 
       const success = await apiService.testConnection()
-      
+
       if (success) {
         setConnectionStatus('success')
         setStatusMessage('Connection successful! API integration is working.')
@@ -38,25 +41,35 @@ export function ApiConnectionStatus() {
       }
     } catch (error) {
       setConnectionStatus('error')
-      setStatusMessage(`Connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      setStatusMessage(
+        `Connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
   const getStatusColor = () => {
     switch (connectionStatus) {
-      case 'success': return 'text-green-600 bg-green-50 border-green-200'
-      case 'error': return 'text-red-600 bg-red-50 border-red-200'
-      case 'testing': return 'text-blue-600 bg-blue-50 border-blue-200'
-      default: return 'text-gray-600 bg-gray-50 border-gray-200'
+      case 'success':
+        return 'text-green-600 bg-green-50 border-green-200'
+      case 'error':
+        return 'text-red-600 bg-red-50 border-red-200'
+      case 'testing':
+        return 'text-blue-600 bg-blue-50 border-blue-200'
+      default:
+        return 'text-gray-600 bg-gray-50 border-gray-200'
     }
   }
 
   const getStatusIcon = () => {
     switch (connectionStatus) {
-      case 'success': return '✅'
-      case 'error': return '❌'
-      case 'testing': return '🔄'
-      default: return isConfigured ? '⚠️' : '❓'
+      case 'success':
+        return '✅'
+      case 'error':
+        return '❌'
+      case 'testing':
+        return '🔄'
+      default:
+        return isConfigured ? '⚠️' : '❓'
     }
   }
 
@@ -64,11 +77,10 @@ export function ApiConnectionStatus() {
     <FieldControl
       size="lg"
       title="Connection Status"
-      description="Current status of your Jira API integration"
-    >
+      description="Current status of your Jira API integration">
       <div className="w-full space-y-3">
-        <div className={`p-3 rounded-lg border text-sm ${getStatusColor()}`}>
-          <div className="flex items-center gap-2 mb-2">
+        <div className={`rounded-lg border p-3 text-sm ${getStatusColor()}`}>
+          <div className="mb-2 flex items-center gap-2">
             <span className="text-lg">{getStatusIcon()}</span>
             <span className="font-medium">
               {isConfigured ? 'API Configured' : 'Not Configured'}
@@ -78,17 +90,18 @@ export function ApiConnectionStatus() {
             <div className="text-xs opacity-80">{statusMessage}</div>
           )}
         </div>
-        
+
         <button
           onClick={testConnection}
           disabled={!isConfigured || connectionStatus === 'testing'}
-          className={`w-full px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+          className={`w-full rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
             isConfigured && connectionStatus !== 'testing'
               ? 'bg-blue-600 text-white hover:bg-blue-700'
-              : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-          }`}
-        >
-          {connectionStatus === 'testing' ? 'Testing Connection...' : 'Test Connection'}
+              : 'cursor-not-allowed bg-gray-200 text-gray-500'
+          }`}>
+          {connectionStatus === 'testing'
+            ? 'Testing Connection...'
+            : 'Test Connection'}
         </button>
       </div>
     </FieldControl>

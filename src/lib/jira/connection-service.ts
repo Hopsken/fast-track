@@ -2,8 +2,8 @@
  * Service for Jira connection testing and validation
  */
 
-import type { JiraConnectionTestResult } from './types'
 import { JiraApiClient } from './api-client'
+import type { JiraConnectionTestResult } from './types'
 
 export class JiraConnectionService {
   constructor(private client: JiraApiClient) {}
@@ -14,9 +14,9 @@ export class JiraConnectionService {
   async testConnection(): Promise<JiraConnectionTestResult> {
     try {
       console.log('🧪 JiraAPI: Testing connection...')
-      
-      const user = await this.client.makeRequest('myself') as any
-      
+
+      const user = (await this.client.makeRequest('myself')) as any
+
       console.log('✅ JiraAPI: Connection test successful')
       return {
         success: true,
@@ -62,9 +62,9 @@ export class JiraConnectionService {
   async getServerInfo(): Promise<any> {
     try {
       console.log('ℹ️ JiraAPI: Fetching server info...')
-      
+
       const serverInfo = await this.client.makeRequest('serverInfo')
-      
+
       console.log('✅ JiraAPI: Server info retrieved')
       return serverInfo
     } catch (error) {
@@ -76,17 +76,24 @@ export class JiraConnectionService {
   /**
    * Tests permissions by trying to access user's projects
    */
-  async testPermissions(): Promise<{ hasAccess: boolean; projectCount: number }> {
+  async testPermissions(): Promise<{
+    hasAccess: boolean
+    projectCount: number
+  }> {
     try {
       console.log('🔐 JiraAPI: Testing permissions...')
-      
-      const projects = await this.client.makeRequest('project/search?maxResults=1') as any
-      
+
+      const projects = (await this.client.makeRequest(
+        'project/search?maxResults=1'
+      )) as any
+
       const hasAccess = Array.isArray(projects.values)
       const projectCount = projects.total || 0
 
-      console.log(`✅ JiraAPI: Permission test completed. Access: ${hasAccess}, Projects: ${projectCount}`)
-      
+      console.log(
+        `✅ JiraAPI: Permission test completed. Access: ${hasAccess}, Projects: ${projectCount}`
+      )
+
       return {
         hasAccess,
         projectCount

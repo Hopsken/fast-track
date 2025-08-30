@@ -6,9 +6,9 @@
  * Checks if the current document is a Jira web page
  */
 export function isJiraWebPage(document: Document): boolean {
-  const hostname = document.location.hostname
-  const pathname = document.location.pathname
-  
+  const { hostname } = document.location
+  const { pathname } = document.location
+
   return hostname.includes('atlassian.net') && pathname.includes('/jira')
 }
 
@@ -16,52 +16,59 @@ export function isJiraWebPage(document: Document): boolean {
  * Gets the Jira application container element
  */
 export function getJiraApp(document: Document): Element | null {
-  return document.getElementById('jira') || 
-         document.querySelector('[data-testid="jira-app"]') ||
-         document.querySelector('#app')
+  return (
+    document.getElementById('jira') ||
+    document.querySelector('[data-testid="jira-app"]') ||
+    document.querySelector('#app')
+  )
 }
 
 /**
  * Gets the Kanban board container element
  */
 export function getKanbanBoard(document: Document): Element | null {
-  return document.getElementById('gh') ||
-         document.querySelector('[data-testid="board.layout"]') ||
-         document.querySelector('.ghx-board-wrap')
+  return (
+    document.getElementById('gh') ||
+    document.querySelector('[data-testid="board.layout"]') ||
+    document.querySelector('.ghx-board-wrap')
+  )
 }
 
 /**
  * Detects the current Jira page type
  */
 export function getJiraPageType(document: Document): JiraPageType {
-  const pathname = document.location.pathname
-  const search = document.location.search
-  
+  const { pathname } = document.location
+  const { search } = document.location
+
   if (pathname.includes('/browse/')) {
     return 'issue-detail'
   }
-  
-  if (pathname.includes('/boards/') || pathname.includes('/secure/RapidBoard.jspa')) {
+
+  if (
+    pathname.includes('/boards/') ||
+    pathname.includes('/secure/RapidBoard.jspa')
+  ) {
     return 'board'
   }
-  
+
   if (pathname.includes('/issues/') || search.includes('filter=')) {
     return 'search-results'
   }
-  
+
   if (pathname.includes('/projects/')) {
     return 'project'
   }
-  
+
   return 'unknown'
 }
 
 /**
  * Jira page types
  */
-export type JiraPageType = 
+export type JiraPageType =
   | 'issue-detail'
-  | 'board' 
+  | 'board'
   | 'search-results'
   | 'project'
   | 'unknown'
@@ -70,7 +77,7 @@ export type JiraPageType =
  * Waits for a specific Jira element to appear
  */
 export function waitForJiraElement(
-  selector: string, 
+  selector: string,
   timeout: number = 5000
 ): Promise<Element> {
   return new Promise((resolve, reject) => {

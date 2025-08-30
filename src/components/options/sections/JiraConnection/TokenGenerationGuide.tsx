@@ -1,5 +1,6 @@
-import { useState } from "react"
-import { FieldControl } from "~/components/ui/forms"
+import { useState } from 'react'
+
+import { FieldControl } from '~/components/ui/forms'
 
 export function TokenGenerationGuide() {
   const [isExpanded, setIsExpanded] = useState(false)
@@ -8,33 +9,33 @@ export function TokenGenerationGuide() {
     <FieldControl
       size="lg"
       title="How to Generate API Token"
-      description="Step-by-step guide to create your Atlassian API token"
-    >
+      description="Step-by-step guide to create your Atlassian API token">
       <div className="w-full">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full px-4 py-2 text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors flex items-center justify-between"
-        >
+          className="flex w-full items-center justify-between rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-700 transition-colors hover:bg-blue-100">
           <span>Show Setup Instructions</span>
-          <span className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+          <span
+            className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
             ↓
           </span>
         </button>
 
         {isExpanded && (
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg text-sm space-y-4">
+          <div className="mt-4 space-y-4 rounded-lg bg-gray-50 p-4 text-sm">
             <div className="space-y-3">
-              <div className="font-medium text-gray-800">📝 Generate Your API Token:</div>
-              
-              <ol className="list-decimal list-inside space-y-2 text-gray-700 ml-4">
+              <div className="font-medium text-gray-800">
+                📝 Generate Your API Token:
+              </div>
+
+              <ol className="ml-4 list-inside list-decimal space-y-2 text-gray-700">
                 <li>
                   Go to{' '}
-                  <a 
-                    href="https://id.atlassian.com/manage-profile/security/api-tokens" 
-                    target="_blank" 
+                  <a
+                    href="https://id.atlassian.com/manage-profile/security/api-tokens"
+                    target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 underline"
-                  >
+                    className="text-blue-600 underline hover:text-blue-800">
                     Atlassian Account Settings
                   </a>
                 </li>
@@ -46,9 +47,11 @@ export function TokenGenerationGuide() {
               </ol>
             </div>
 
-            <div className="border-t pt-3 space-y-2">
-              <div className="font-medium text-gray-800">🔐 Security Best Practices:</div>
-              <ul className="list-disc list-inside space-y-1 text-gray-600 ml-4 text-xs">
+            <div className="space-y-2 border-t pt-3">
+              <div className="font-medium text-gray-800">
+                🔐 Security Best Practices:
+              </div>
+              <ul className="ml-4 list-inside list-disc space-y-1 text-xs text-gray-600">
                 <li>Store your token securely (like a password)</li>
                 <li>Never share your token with others</li>
                 <li>Revoke unused tokens in your Atlassian account</li>
@@ -56,9 +59,11 @@ export function TokenGenerationGuide() {
               </ul>
             </div>
 
-            <div className="border-t pt-3 space-y-2">
-              <div className="font-medium text-gray-800">✨ Benefits of API Integration:</div>
-              <ul className="list-disc list-inside space-y-1 text-gray-600 ml-4 text-xs">
+            <div className="space-y-2 border-t pt-3">
+              <div className="font-medium text-gray-800">
+                ✨ Benefits of API Integration:
+              </div>
+              <ul className="ml-4 list-inside list-disc space-y-1 text-xs text-gray-600">
                 <li>More reliable than web scraping</li>
                 <li>Access to all issue fields and metadata</li>
                 <li>Faster data collection</li>

@@ -2,9 +2,9 @@
  * Core storage layer implementation
  */
 
-import { storageItems } from './storage-items'
 import { StorageKey } from './keys'
 import type { StorageValueRecord } from './schema'
+import { storageItems } from './storage-items'
 
 /**
  * Storage layer class for type-safe storage operations
@@ -14,13 +14,16 @@ export class PersistLayer {
    * Gets a value from storage
    */
   async get<T extends StorageKey>(key: T): Promise<StorageValueRecord[T]> {
-    return await storageItems[key].getValue() as StorageValueRecord[T]
+    return (await storageItems[key].getValue()) as StorageValueRecord[T]
   }
 
   /**
    * Sets a value in storage
    */
-  async set<T extends StorageKey>(key: T, value: StorageValueRecord[T]): Promise<void> {
+  async set<T extends StorageKey>(
+    key: T,
+    value: StorageValueRecord[T]
+  ): Promise<void> {
     return await storageItems[key].setValue(value as never)
   }
 
@@ -35,8 +38,11 @@ export class PersistLayer {
    * Watches for changes to a storage value
    */
   watch<T extends StorageKey>(
-    key: T, 
-    callback: (newValue: StorageValueRecord[T] | null, oldValue: StorageValueRecord[T] | null) => void
+    key: T,
+    callback: (
+      newValue: StorageValueRecord[T] | null,
+      oldValue: StorageValueRecord[T] | null
+    ) => void
   ) {
     return storageItems[key].watch(callback as any)
   }
@@ -44,7 +50,9 @@ export class PersistLayer {
   /**
    * Gets multiple values from storage
    */
-  async getMultiple<T extends StorageKey>(keys: T[]): Promise<{ [K in T]: StorageValueRecord[K] }> {
+  async getMultiple<T extends StorageKey>(
+    keys: T[]
+  ): Promise<{ [K in T]: StorageValueRecord[K] }> {
     const values = await Promise.all(
       keys.map(async (key) => ({
         key,
@@ -52,16 +60,21 @@ export class PersistLayer {
       }))
     )
 
-    return values.reduce((acc, { key, value }) => {
-      acc[key] = value
-      return acc
-    }, {} as { [K in T]: StorageValueRecord[K] })
+    return values.reduce(
+      (acc, { key, value }) => {
+        acc[key] = value
+        return acc
+      },
+      {} as { [K in T]: StorageValueRecord[K] }
+    )
   }
 
   /**
    * Sets multiple values in storage
    */
-  async setMultiple(values: { [K in StorageKey]?: StorageValueRecord[K] }): Promise<void> {
+  async setMultiple(values: {
+    [K in StorageKey]?: StorageValueRecord[K]
+  }): Promise<void> {
     const setPromises = Object.entries(values).map(([key, value]) =>
       this.set(key as StorageKey, value as any)
     )
@@ -73,14 +86,16 @@ export class PersistLayer {
    * Clears specific storage keys
    */
   async clear(keys: StorageKey[]): Promise<void> {
-    const clearPromises = keys.map(key => this.remove(key))
+    const clearPromises = keys.map((key) => this.remove(key))
     await Promise.all(clearPromises)
   }
 
   /**
    * Gets all values from a specific group
    */
-  async getGroup<T extends StorageKey>(keys: readonly T[]): Promise<{ [K in T]: StorageValueRecord[K] }> {
+  async getGroup<T extends StorageKey>(
+    keys: readonly T[]
+  ): Promise<{ [K in T]: StorageValueRecord[K] }> {
     return this.getMultiple([...keys])
   }
 }

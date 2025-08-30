@@ -1,18 +1,18 @@
-import { nanoid } from "nanoid"
-import { useCallback } from "react"
+import { nanoid } from 'nanoid'
+import { useCallback } from 'react'
 
 import {
   activateLicense,
   deactivateLicense,
   validateLicense
-} from "~/lib/lemonsqueezy"
-import { useStorage, StorageKey } from "~/storage"
+} from '~/lib/lemonsqueezy'
+import { useStorage, StorageKey } from '~/storage'
 
 export function useLicense() {
   const [license, setLicense] = useStorage(StorageKey.License)
 
   const revalidate = useCallback(async () => {
-    if (!license) return { valid: false, error: "No license" }
+    if (!license) return { valid: false, error: 'No license' }
     const { valid, error, ...info } = await validateLicense(
       license.license_key.key,
       license.instance.id

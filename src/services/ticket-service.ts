@@ -1,11 +1,12 @@
 /**
  * Ticket Service using @webext-core/proxy-service
- * 
+ *
  * This service provides type-safe, cross-context access to ticket operations.
  * Functions are called from content scripts but executed in the background.
  */
 
 import { defineProxyService } from '@webext-core/proxy-service'
+
 import { JiraApiService } from '~/lib/jira'
 import { persistLayer } from '~/storage'
 import { StorageKey } from '~/storage/keys'
@@ -20,7 +21,7 @@ class TicketService {
    */
   async fetchTicketDetails(ticketKeys: string[]): Promise<JiraTicket[]> {
     console.log('🔄 TicketService: Fetching details for tickets:', ticketKeys)
-    
+
     try {
       // Get API configuration from storage (with backward compatibility)
       const [jiraHost, jiraUrl, apiToken, userEmail] = await Promise.all([
@@ -34,20 +35,24 @@ class TicketService {
       const baseUrl = jiraHost || jiraUrl
 
       if (!baseUrl || !apiToken || !userEmail) {
-        throw new Error('Jira API configuration is incomplete. Please configure API settings.')
+        throw new Error(
+          'Jira API configuration is incomplete. Please configure API settings.'
+        )
       }
 
       // Create API service instance
       const apiService = new JiraApiService({
-        baseUrl: baseUrl,
+        baseUrl,
         email: userEmail,
-        apiToken: apiToken
+        apiToken
       })
 
       // Fetch tickets in batches with rate limiting
       const tickets = await this.processBatchedRequests(apiService, ticketKeys)
-      
-      console.log(`🎉 TicketService: Successfully fetched ${tickets.length}/${ticketKeys.length} tickets`)
+
+      console.log(
+        `🎉 TicketService: Successfully fetched ${tickets.length}/${ticketKeys.length} tickets`
+      )
       return tickets
     } catch (error) {
       console.error('❌ TicketService: Failed to fetch ticket details:', error)
@@ -58,7 +63,11 @@ class TicketService {
   /**
    * Tests the API connection
    */
-  async testConnection(): Promise<{ success: boolean; error?: string; user?: any }> {
+  async testConnection(): Promise<{
+    success: boolean
+    error?: string
+    user?: any
+  }> {
     try {
       const [jiraHost, jiraUrl, apiToken, userEmail] = await Promise.all([
         persistLayer.get(StorageKey.JiraHost),
@@ -75,13 +84,12 @@ class TicketService {
       }
 
       const apiService = new JiraApiService({
-        baseUrl: baseUrl,
+        baseUrl,
         email: userEmail,
-        apiToken: apiToken
+        apiToken
       })
 
-      const result = await apiService.testConnection()
-      return result
+      return await apiService.testConnection()
     } catch (error) {
       return {
         success: false,
@@ -101,13 +109,13 @@ class TicketService {
     invalidCount: number
   }> {
     const ticketKeyPattern = /^[A-Z]+-\d+$/
-    const validation = ticketKeys.map(key => ({
+    const validation = ticketKeys.map((key) => ({
       key,
       isValid: typeof key === 'string' && ticketKeyPattern.test(key.trim())
     }))
 
-    const validKeys = validation.filter(v => v.isValid).map(v => v.key)
-    const invalidKeys = validation.filter(v => !v.isValid).map(v => v.key)
+    const validKeys = validation.filter((v) => v.isValid).map((v) => v.key)
+    const invalidKeys = validation.filter((v) => !v.isValid).map((v) => v.key)
 
     return {
       validKeys,
@@ -122,21 +130,21 @@ class TicketService {
    * Processes ticket requests in batches with rate limiting
    */
   private async processBatchedRequests(
-    apiService: JiraApiService, 
+    apiService: JiraApiService,
     ticketKeys: string[]
   ): Promise<JiraTicket[]> {
     const tickets: JiraTicket[] = []
     const batchSize = 5
-    
+
     for (let i = 0; i < ticketKeys.length; i += batchSize) {
       const batch = ticketKeys.slice(i, i + batchSize)
       const batchTickets = await this.processSingleBatch(apiService, batch)
-      
+
       tickets.push(...batchTickets)
-      
+
       // Rate limiting between batches
       if (i + batchSize < ticketKeys.length) {
-        await new Promise(resolve => setTimeout(resolve, 100))
+        await new Promise((resolve) => setTimeout(resolve, 100))
       }
     }
 
@@ -166,13 +174,15 @@ class TicketService {
     })
 
     const batchResults = await Promise.all(batchPromises)
-    return batchResults.filter((ticket: JiraTicket | null): ticket is JiraTicket => ticket !== null)
+    return batchResults.filter(
+      (ticket: JiraTicket | null): ticket is JiraTicket => ticket !== null
+    )
   }
 }
 
 /**
  * Define the proxy service
- * 
+ *
  * Returns:
  * - registerTicketService: Function to register the service in background script
  * - getTicketService: Function to get service instance from any context

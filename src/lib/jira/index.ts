@@ -3,10 +3,10 @@
  * This provides a unified service that combines all Jira API functionality
  */
 
-import type { JiraApiConfig } from './types'
 import { JiraApiClient } from './api-client'
-import { JiraIssueService } from './issue-service'
 import { JiraConnectionService } from './connection-service'
+import { JiraIssueService } from './issue-service'
+import type { JiraApiConfig } from './types'
 
 export class JiraApiService {
   private client: JiraApiClient
@@ -22,7 +22,7 @@ export class JiraApiService {
   // Issue operations
   getIssue = (issueKey: string) => this.issueService.getIssue(issueKey)
   getIssues = (issueKeys: string[]) => this.issueService.getIssues(issueKeys)
-  
+
   // Connection operations
   testConnection = () => this.connectionService.testConnection()
   validateConfig = () => this.connectionService.validateConfig()
@@ -49,11 +49,16 @@ export class JiraApiService {
 }
 
 // Export types and utilities
-export type { JiraApiConfig, JiraApiIssue, JiraApiError, JiraConnectionTestResult } from './types'
-export { 
-  extractJiraUrlFromCurrentPage, 
+export type {
+  JiraApiConfig,
+  JiraApiIssue,
+  JiraApiError,
+  JiraConnectionTestResult
+} from './types'
+export {
+  extractJiraUrlFromCurrentPage,
   extractJiraInstanceName,
-  isValidJiraUrl, 
+  isValidJiraUrl,
   normalizeJiraUrl,
   buildIssueUrl,
   extractIssueKeyFromUrl,

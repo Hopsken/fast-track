@@ -1,4 +1,10 @@
-import { HiCog, HiColorSwatch, HiSearch, HiInformationCircle, HiKey } from "react-icons/hi"
+import {
+  HiCog,
+  HiColorSwatch,
+  HiSearch,
+  HiInformationCircle,
+  HiKey
+} from 'react-icons/hi'
 
 export interface Tab {
   id: string
@@ -11,7 +17,7 @@ export const tabs: Tab[] = [
   { id: 'display', label: 'Display', icon: HiColorSwatch },
   { id: 'search', label: 'Search & Data', icon: HiSearch },
   { id: 'license', label: 'License', icon: HiKey },
-  { id: 'about', label: 'About', icon: HiInformationCircle },
+  { id: 'about', label: 'About', icon: HiInformationCircle }
 ]
 
 interface TabNavigationProps {
@@ -29,13 +35,12 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`flex items-center gap-2 py-4 px-2 border-b-2 font-medium text-sm transition-colors ${
+              className={`flex items-center gap-2 border-b-2 px-2 py-4 text-sm font-medium transition-colors ${
                 activeTab === tab.id
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              <Icon className="w-4 h-4" />
+              }`}>
+              <Icon className="h-4 w-4" />
               {tab.label}
             </button>
           )

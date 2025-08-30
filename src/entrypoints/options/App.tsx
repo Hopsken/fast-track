@@ -1,17 +1,18 @@
-import { useState } from "react"
-import { useStorage, StorageKey } from "~/storage"
-import { useVersion } from "~/hooks/useVersion"
-import { 
-  OptionsHeader, 
-  TabNavigation, 
-  GeneralTab, 
-  DisplayTab, 
-  SearchTab, 
-  LicenseTab,
-  AboutTab 
-} from "~/components/options"
+import { useState } from 'react'
 
-import "~/assets/styles/main.css"
+import {
+  OptionsHeader,
+  TabNavigation,
+  GeneralTab,
+  DisplayTab,
+  SearchTab,
+  LicenseTab,
+  AboutTab
+} from '~/components/options'
+import { useVersion } from '~/hooks/useVersion'
+import { useStorage, StorageKey } from '~/storage'
+
+import '~/assets/styles/main.css'
 
 function OptionsPage() {
   const version = useVersion()
@@ -20,16 +21,18 @@ function OptionsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto py-8 px-6">
+      <div className="mx-auto max-w-4xl px-6 py-8">
         <OptionsHeader version={version} onTabChange={setActiveTab} />
 
-        <div className="bg-white rounded-lg shadow-sm border">
+        <div className="rounded-lg border bg-white shadow-sm">
           <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
           <div className="p-6">
             {activeTab === 'general' && <GeneralTab />}
             {activeTab === 'display' && <DisplayTab />}
-            {activeTab === 'search' && <SearchTab ticketCount={ticketsData.length} />}
+            {activeTab === 'search' && (
+              <SearchTab ticketCount={ticketsData.length} />
+            )}
             {activeTab === 'license' && <LicenseTab />}
             {activeTab === 'about' && <AboutTab version={version} />}
           </div>
@@ -38,6 +41,5 @@ function OptionsPage() {
     </div>
   )
 }
-
 
 export default OptionsPage

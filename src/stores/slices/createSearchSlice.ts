@@ -1,7 +1,9 @@
-import { StateCreator } from "zustand"
-import Fuse from "fuse.js"
-import { JiraTicket, TicketViewRecord } from "~/storage"
-import { NavigationSlice } from "./createNavigationSlice"
+import Fuse from 'fuse.js'
+import { StateCreator } from 'zustand'
+
+import { NavigationSlice } from './createNavigationSlice'
+
+import { JiraTicket, TicketViewRecord } from '~/storage'
 
 export interface SearchSlice {
   // State
@@ -34,7 +36,7 @@ export const createSearchSlice: StateCreator<
   SearchSlice
 > = (set, get) => ({
   // Initial state
-  searchQuery: "",
+  searchQuery: '',
   searchResults: [],
   searchHistory: [],
   error: undefined,
@@ -42,7 +44,7 @@ export const createSearchSlice: StateCreator<
 
   // Actions
   setSearchQuery: (query: string) => {
-    console.log("🔍 SearchSlice - Setting search query:", query)
+    console.log('🔍 SearchSlice - Setting search query:', query)
     set({ searchQuery: query, error: undefined })
   },
 
@@ -55,7 +57,7 @@ export const createSearchSlice: StateCreator<
     primaryPrefix: string
   ) => {
     try {
-      console.log("🔍 SearchSlice - Performing search:", {
+      console.log('🔍 SearchSlice - Performing search:', {
         query,
         ticketsCount: tickets.length
       })
@@ -64,12 +66,12 @@ export const createSearchSlice: StateCreator<
 
       // Validate input data
       if (!Array.isArray(tickets)) {
-        throw new Error("Invalid tickets data")
+        throw new Error('Invalid tickets data')
       }
 
       if (!query.trim()) {
         // Smart recent tickets algorithm with enhanced context awareness
-        const now = new Date().getTime()
+        const now = Date.now()
         const scoredTickets = tickets.map((ticket) => {
           try {
             return {
@@ -86,7 +88,7 @@ export const createSearchSlice: StateCreator<
               )
             }
           } catch (error) {
-            console.warn("Error scoring ticket:", ticket.key, error)
+            console.warn('Error scoring ticket:', ticket.key, error)
             return {
               ticket,
               score: 0
@@ -103,7 +105,7 @@ export const createSearchSlice: StateCreator<
 
         // Auto-reset navigation selection when search results change
         console.log(
-          "🔍 SearchSlice - Auto-resetting selection after recent search"
+          '🔍 SearchSlice - Auto-resetting selection after recent search'
         )
         const { resetSelection } = get()
         if (resetSelection) resetSelection()
@@ -112,17 +114,17 @@ export const createSearchSlice: StateCreator<
 
       // Validate search query
       if (query.length > 200) {
-        throw new Error("Search query too long")
+        throw new Error('Search query too long')
       }
 
       // Create Fuse.js instance for fuzzy search
       const fuseOptions = {
         keys: [
-          { name: "key", weight: 0.4 },
-          { name: "summary", weight: 0.3 },
-          { name: "assignee", weight: 0.15 },
-          { name: "status", weight: 0.1 },
-          { name: "projectKey", weight: 0.05 }
+          { name: 'key', weight: 0.4 },
+          { name: 'summary', weight: 0.3 },
+          { name: 'assignee', weight: 0.15 },
+          { name: 'status', weight: 0.1 },
+          { name: 'projectKey', weight: 0.05 }
         ],
         threshold: 0.4, // Lower = more strict matching
         distance: 100,
@@ -163,7 +165,7 @@ export const createSearchSlice: StateCreator<
             )
           } catch (error) {
             console.warn(
-              "Error calculating context score for ticket:",
+              'Error calculating context score for ticket:',
               ticket.key,
               error
             )
@@ -198,7 +200,7 @@ export const createSearchSlice: StateCreator<
               summaryMatchBonus
           }
         } catch (error) {
-          console.warn("Error processing search result:", error)
+          console.warn('Error processing search result:', error)
           return {
             ticket: fuseResult.item,
             score: 0
@@ -212,20 +214,20 @@ export const createSearchSlice: StateCreator<
         .slice(0, 25) // Show more search results
         .map((r) => r.ticket)
 
-      console.log("🔍 SearchSlice - Search completed:", {
+      console.log('🔍 SearchSlice - Search completed:', {
         query,
         resultsCount: results.length
       })
       set({ searchResults: results, isSearching: false })
 
       // Auto-reset navigation selection when search results change
-      console.log("🔍 SearchSlice - Auto-resetting selection after search")
+      console.log('🔍 SearchSlice - Auto-resetting selection after search')
       const { resetSelection } = get()
       if (resetSelection) resetSelection()
     } catch (error) {
-      console.error("Search error:", error)
+      console.error('Search error:', error)
       const errorMessage =
-        error instanceof Error ? error.message : "Search failed"
+        error instanceof Error ? error.message : 'Search failed'
       set({ error: errorMessage, isSearching: false })
 
       // Fallback: return basic filtered results
@@ -246,7 +248,7 @@ export const createSearchSlice: StateCreator<
 
       // Auto-reset navigation selection when search results change
       console.log(
-        "🔍 SearchSlice - Auto-resetting selection after fallback search"
+        '🔍 SearchSlice - Auto-resetting selection after fallback search'
       )
       const { resetSelection } = get()
       if (resetSelection) resetSelection()
@@ -259,8 +261,8 @@ export const createSearchSlice: StateCreator<
   },
 
   clearSearch: () => {
-    console.log("🔍 SearchSlice - Clearing search")
-    set({ searchQuery: "", searchResults: [], error: undefined })
+    console.log('🔍 SearchSlice - Clearing search')
+    set({ searchQuery: '', searchResults: [], error: undefined })
   },
 
   setError: (error?: string) => {
@@ -332,7 +334,7 @@ function calculateContextScore(
 
     if (
       assigneeEmail === currentUserEmail ||
-      assigneeEmail.includes(currentUserEmail.split("@")[0])
+      assigneeEmail.includes(currentUserEmail.split('@')[0])
     ) {
       score += 25 // Own tickets get high priority
 
@@ -346,9 +348,9 @@ function calculateContextScore(
   // 4. STATUS-BASED CONTEXTUAL PRIORITY
   const statusLower = ticket.status.toLowerCase()
   if (
-    statusLower.includes("progress") ||
-    statusLower.includes("development") ||
-    statusLower.includes("doing")
+    statusLower.includes('progress') ||
+    statusLower.includes('development') ||
+    statusLower.includes('doing')
   ) {
     score += 20 // Active work gets highest priority
 
@@ -357,9 +359,9 @@ function calculateContextScore(
       score += 8
     }
   } else if (
-    statusLower.includes("review") ||
-    statusLower.includes("testing") ||
-    statusLower.includes("qa")
+    statusLower.includes('review') ||
+    statusLower.includes('testing') ||
+    statusLower.includes('qa')
   ) {
     score += 15 // Review items are important
 
@@ -368,20 +370,20 @@ function calculateContextScore(
       score += 5
     }
   } else if (
-    statusLower.includes("todo") ||
-    statusLower.includes("backlog") ||
-    statusLower.includes("ready")
+    statusLower.includes('todo') ||
+    statusLower.includes('backlog') ||
+    statusLower.includes('ready')
   ) {
     score += 8 // Ready to start tickets
   } else if (
-    statusLower.includes("blocked") ||
-    statusLower.includes("impediment")
+    statusLower.includes('blocked') ||
+    statusLower.includes('impediment')
   ) {
     score += 12 // Blocked tickets need attention
   } else if (
-    statusLower.includes("done") ||
-    statusLower.includes("resolved") ||
-    statusLower.includes("closed")
+    statusLower.includes('done') ||
+    statusLower.includes('resolved') ||
+    statusLower.includes('closed')
   ) {
     score -= 10 // Reduce closed tickets priority
   }
@@ -390,17 +392,17 @@ function calculateContextScore(
   if (ticket.priority) {
     const priorityLower = ticket.priority.toLowerCase()
     if (
-      priorityLower.includes("highest") ||
-      priorityLower.includes("critical")
+      priorityLower.includes('highest') ||
+      priorityLower.includes('critical')
     ) {
       score += 25
-    } else if (priorityLower.includes("high")) {
+    } else if (priorityLower.includes('high')) {
       score += 15
-    } else if (priorityLower.includes("medium")) {
+    } else if (priorityLower.includes('medium')) {
       score += 5
     } else if (
-      priorityLower.includes("low") ||
-      priorityLower.includes("lowest")
+      priorityLower.includes('low') ||
+      priorityLower.includes('lowest')
     ) {
       score -= 5
     }
@@ -453,7 +455,7 @@ function calculateContextScore(
   // 8. TIME-SENSITIVE PATTERNS
   // End of week cleanup - boost review/testing tickets on Friday
   if (timeContext.isFriday) {
-    if (statusLower.includes("review") || statusLower.includes("testing")) {
+    if (statusLower.includes('review') || statusLower.includes('testing')) {
       score += 8
     }
   }
@@ -461,9 +463,9 @@ function calculateContextScore(
   // Start of week planning - boost backlog/ready tickets on Monday
   if (timeContext.isMonday) {
     if (
-      statusLower.includes("backlog") ||
-      statusLower.includes("ready") ||
-      statusLower.includes("todo")
+      statusLower.includes('backlog') ||
+      statusLower.includes('ready') ||
+      statusLower.includes('todo')
     ) {
       score += 6
     }

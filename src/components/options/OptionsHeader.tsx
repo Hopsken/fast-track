@@ -1,6 +1,6 @@
-import logoUrl from "~/assets/logo.png"
-import { ProBadge } from "~/components/ProBadge"
-import { useStorage, StorageKey } from "~/storage"
+import logoUrl from '~/assets/logo.png'
+import { ProBadge } from '~/components/ProBadge'
+import { useStorage, StorageKey } from '~/storage'
 
 interface OptionsHeaderProps {
   version: string
@@ -17,14 +17,14 @@ export function OptionsHeader({ version, onTabChange }: OptionsHeaderProps) {
   }
 
   return (
-    <header className="flex items-center justify-between mb-8">
+    <header className="mb-8 flex items-center justify-between">
       <div className="flex items-center space-x-3">
-        <img src={logoUrl} className="w-12 h-12" alt="Jira Boost" />
+        <img src={logoUrl} className="h-12 w-12" alt="Jira Boost" />
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold text-gray-900">Jira Boost</h1>
-            <ProBadge 
-              isPro={license?.valid || false} 
+            <ProBadge
+              isPro={license?.valid || false}
               onClick={handleProBadgeClick}
               interactive={!!onTabChange}
             />

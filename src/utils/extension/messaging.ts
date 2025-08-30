@@ -18,14 +18,16 @@ export interface ExtensionResponse {
 /**
  * Sends a message to the background script
  */
-export async function sendToBackground<T = any>(message: ExtensionMessage): Promise<T> {
+export async function sendToBackground<T = any>(
+  message: ExtensionMessage
+): Promise<T> {
   try {
     const response = await browser.runtime.sendMessage(message)
-    
+
     if (!response.success) {
       throw new Error(response.error || 'Background request failed')
     }
-    
+
     return response.data
   } catch (error) {
     console.error('Failed to send message to background:', error)
@@ -36,10 +38,12 @@ export async function sendToBackground<T = any>(message: ExtensionMessage): Prom
 /**
  * Sends a message to a specific tab
  */
-export async function sendToTab<T = any>(tabId: number, message: ExtensionMessage): Promise<T> {
+export async function sendToTab<T = any>(
+  tabId: number,
+  message: ExtensionMessage
+): Promise<T> {
   try {
-    const response = await browser.tabs.sendMessage(tabId, message)
-    return response
+    return await browser.tabs.sendMessage(tabId, message)
   } catch (error) {
     console.error(`Failed to send message to tab ${tabId}:`, error)
     throw error
@@ -62,10 +66,12 @@ export async function getCurrentTab(): Promise<chrome.tabs.Tab | null> {
 /**
  * Sends a message to the current active tab
  */
-export async function sendToCurrentTab<T = any>(message: ExtensionMessage): Promise<T | null> {
+export async function sendToCurrentTab<T = any>(
+  message: ExtensionMessage
+): Promise<T | null> {
   const tab = await getCurrentTab()
   if (!tab?.id) return null
-  
+
   return sendToTab(tab.id, message)
 }
 
@@ -74,7 +80,10 @@ export async function sendToCurrentTab<T = any>(message: ExtensionMessage): Prom
  */
 export function createMessageListener(
   messageType: string,
-  handler: (message: ExtensionMessage, sender: chrome.runtime.MessageSender) => Promise<any> | any
+  handler: (
+    message: ExtensionMessage,
+    sender: chrome.runtime.MessageSender
+  ) => Promise<any> | any
 ) {
   const listener = async (
     message: ExtensionMessage,
@@ -124,5 +133,5 @@ export const Messages = {
     }>({
       type: 'VALIDATE_TICKET_KEYS',
       ticketKeys
-    }),
+    })
 } as const

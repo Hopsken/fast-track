@@ -11,7 +11,7 @@ export class InstallationHandlerService {
    */
   static initialize(): void {
     browser.runtime.onInstalled.addListener(this.handleInstallation.bind(this))
-    
+
     if (browser.runtime.onStartup) {
       browser.runtime.onStartup.addListener(this.handleStartup.bind(this))
     }
@@ -20,7 +20,9 @@ export class InstallationHandlerService {
   /**
    * Handles extension installation events
    */
-  private static handleInstallation(details: chrome.runtime.InstalledDetails): void {
+  private static handleInstallation(
+    details: chrome.runtime.InstalledDetails
+  ): void {
     console.log('🎉 Extension installation event:', details.reason)
 
     switch (details.reason) {
@@ -44,7 +46,7 @@ export class InstallationHandlerService {
    */
   private static handleFirstInstall(): void {
     console.log('👋 Welcome! Opening options page for first-time setup')
-    
+
     try {
       openOptionsPage()
     } catch (error) {
@@ -57,7 +59,7 @@ export class InstallationHandlerService {
    */
   private static handleUpdate(previousVersion?: string): void {
     console.log(`🔄 Extension updated from version ${previousVersion}`)
-    
+
     // Handle migration logic if needed
     this.handleMigration(previousVersion)
   }
@@ -83,7 +85,7 @@ export class InstallationHandlerService {
    */
   private static handleStartup(): void {
     console.log('🚀 Extension started with browser')
-    
+
     // Perform any startup tasks
     this.performStartupTasks()
   }
@@ -91,18 +93,20 @@ export class InstallationHandlerService {
   /**
    * Handles data migration between versions
    */
-  private static async handleMigration(previousVersion?: string): Promise<void> {
+  private static async handleMigration(
+    previousVersion?: string
+  ): Promise<void> {
     if (!previousVersion) return
 
     try {
       console.log(`🔄 Performing migration from version ${previousVersion}`)
-      
+
       // Add migration logic here based on version comparisons
       // Example:
       // if (this.compareVersions(previousVersion, '2.0.0') < 0) {
       //   await this.migrateToV2()
       // }
-      
+
       console.log('✅ Migration completed successfully')
     } catch (error) {
       console.error('❌ Migration failed:', error)
@@ -116,12 +120,11 @@ export class InstallationHandlerService {
     try {
       // Clean up old data, check for updates, etc.
       console.log('🧹 Performing startup cleanup tasks')
-      
+
       // Example tasks:
       // - Clear old cache data
       // - Update configuration if needed
       // - Sync with remote services
-      
     } catch (error) {
       console.error('❌ Startup tasks failed:', error)
     }
@@ -133,17 +136,17 @@ export class InstallationHandlerService {
   private static compareVersions(version1: string, version2: string): number {
     const v1Parts = version1.split('.').map(Number)
     const v2Parts = version2.split('.').map(Number)
-    
+
     const maxLength = Math.max(v1Parts.length, v2Parts.length)
-    
+
     for (let i = 0; i < maxLength; i++) {
       const v1Part = v1Parts[i] || 0
       const v2Part = v2Parts[i] || 0
-      
+
       if (v1Part > v2Part) return 1
       if (v1Part < v2Part) return -1
     }
-    
+
     return 0
   }
 

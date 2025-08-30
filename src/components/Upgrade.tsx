@@ -1,8 +1,8 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
-import { LEMON_CHECKOUT_LINK } from "~/constants"
-import { useLicense } from "~/hooks/useLicense"
+import { LEMON_CHECKOUT_LINK } from '~/constants'
+import { useLicense } from '~/hooks/useLicense'
 
 export function UpgradePro() {
   return (
@@ -12,7 +12,7 @@ export function UpgradePro() {
       </p>
       <p className="font-medium italic">Lock your Early Bird discount now!</p>
 
-      <ul className="list-disc ring-2 ring-gray-200 rounded py-2 pl-4">
+      <ul className="list-disc rounded py-2 pl-4 ring-2 ring-gray-200">
         <li>Unlock all existing Pro features.</li>
         <li>All upcoming Pro features will be free.</li>
         <li>Activated on up to 3 different browsers.</li>
@@ -27,7 +27,8 @@ export function UpgradePro() {
         <a
           className="btn btn-neutral btn-sm w-full"
           href={LEMON_CHECKOUT_LINK}
-          target="_blank">
+          target="_blank"
+          rel="noreferrer">
           Early Bird Price $9.99
         </a>
         <ActivateKey />
@@ -38,8 +39,8 @@ export function UpgradePro() {
 
 function ActivateKey() {
   const [isActive, setIsActive] = useState(false)
-  const [input, setInput] = useState("")
-  const [error, setError] = useState("")
+  const [input, setInput] = useState('')
+  const [error, setError] = useState('')
   const [isLoading, setLoading] = useState(false)
   const { activate } = useLicense()
   const navigate = useNavigate()
@@ -47,7 +48,7 @@ function ActivateKey() {
   if (!isActive) {
     return (
       <span
-        className="font-medium text-sm underline cursor-pointer"
+        className="cursor-pointer text-sm font-medium underline"
         onClick={() => setIsActive(true)}>
         Enter license key
       </span>
@@ -55,13 +56,13 @@ function ActivateKey() {
   }
 
   return (
-    <div className="flex flex-col gap-2 w-full">
+    <div className="flex w-full flex-col gap-2">
       <div className="form-control">
         <input
           type="text"
           placeholder="Paste your license key here"
           className={`input input-sm input-bordered w-full max-w-xs ${
-            error ? "input-error" : ""
+            error ? 'input-error' : ''
           }`}
           value={input}
           onChange={(event) => {
@@ -79,11 +80,11 @@ function ActivateKey() {
             activate(input)
               .then(({ error }) => {
                 if (error) setError(error)
-                else navigate("/")
+                else navigate('/')
               })
               .catch(() => {
                 setError(
-                  "Something went wrong, please try again later or contact hi@hopsken.com for help"
+                  'Something went wrong, please try again later or contact hi@hopsken.com for help'
                 )
               })
               .finally(() => setLoading(false))
@@ -95,7 +96,7 @@ function ActivateKey() {
           className="btn btn-ghost btn-sm"
           onClick={() => {
             setIsActive(false)
-            setInput("")
+            setInput('')
           }}>
           Cancel
         </button>

@@ -1,11 +1,12 @@
-import { create } from "zustand"
-import { devtools } from "zustand/middleware"
-import { useShallow } from "zustand/react/shallow"
-import { createSearchSlice, SearchSlice } from "./slices/createSearchSlice"
+import { create } from 'zustand'
+import { devtools } from 'zustand/middleware'
+import { useShallow } from 'zustand/react/shallow'
+
 import {
   createNavigationSlice,
   NavigationSlice
-} from "./slices/createNavigationSlice"
+} from './slices/createNavigationSlice'
+import { createSearchSlice, SearchSlice } from './slices/createSearchSlice'
 
 // Combined store type
 export type TicketStore = SearchSlice & NavigationSlice
@@ -18,7 +19,7 @@ export const useTicketStore = create<TicketStore>()(
       ...createNavigationSlice(...a)
     }),
     {
-      name: "ticket-store"
+      name: 'ticket-store'
     }
   )
 )
@@ -61,4 +62,4 @@ export const useNavigationActions = () =>
   )
 
 // Export types
-export type { NavigationDirection } from "./slices/createNavigationSlice"
+export type { NavigationDirection } from './slices/createNavigationSlice'

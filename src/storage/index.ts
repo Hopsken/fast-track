@@ -10,7 +10,7 @@ export type {
   CustomBackground,
   LicenseInfo,
   DarkModeOption,
-  JiraApiConfig,
+  JiraApiConfig
 } from './types'
 
 export type { StorageValueRecord } from './schema'

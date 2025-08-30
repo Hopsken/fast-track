@@ -3,9 +3,9 @@
  */
 
 import { JiraApiService } from '~/lib/jira'
-import type { JiraTicket } from '~/storage/types'
-import { persistLayer } from '~/storage/storage-layer'
 import { StorageKey } from '~/storage/keys'
+import { persistLayer } from '~/storage/storage-layer'
+import type { JiraTicket } from '~/storage/types'
 
 export class TicketFetcherService {
   /**
@@ -13,7 +13,7 @@ export class TicketFetcherService {
    */
   static async fetchTicketDetails(ticketKeys: string[]): Promise<JiraTicket[]> {
     console.log('🔄 Background: Fetching details for tickets:', ticketKeys)
-    
+
     try {
       // Get API configuration from storage
       const [jiraHost, apiToken, userEmail] = await Promise.all([
@@ -23,20 +23,24 @@ export class TicketFetcherService {
       ])
 
       if (!jiraHost || !apiToken || !userEmail) {
-        throw new Error('Jira API configuration is incomplete. Please configure API settings.')
+        throw new Error(
+          'Jira API configuration is incomplete. Please configure API settings.'
+        )
       }
 
       // Create API service instance
       const apiService = new JiraApiService({
         baseUrl: jiraHost,
         email: userEmail,
-        apiToken: apiToken
+        apiToken
       })
 
       // Fetch tickets in batches with rate limiting
       const tickets = await this.processBatchedRequests(apiService, ticketKeys)
-      
-      console.log(`🎉 Background: Successfully fetched ${tickets.length}/${ticketKeys.length} tickets`)
+
+      console.log(
+        `🎉 Background: Successfully fetched ${tickets.length}/${ticketKeys.length} tickets`
+      )
       return tickets
     } catch (error) {
       console.error('❌ Background: Failed to fetch ticket details:', error)
@@ -48,21 +52,21 @@ export class TicketFetcherService {
    * Processes ticket requests in batches with rate limiting
    */
   private static async processBatchedRequests(
-    apiService: JiraApiService, 
+    apiService: JiraApiService,
     ticketKeys: string[]
   ): Promise<JiraTicket[]> {
     const tickets: JiraTicket[] = []
     const batchSize = 5
-    
+
     for (let i = 0; i < ticketKeys.length; i += batchSize) {
       const batch = ticketKeys.slice(i, i + batchSize)
       const batchTickets = await this.processSingleBatch(apiService, batch)
-      
+
       tickets.push(...batchTickets)
-      
+
       // Rate limiting between batches
       if (i + batchSize < ticketKeys.length) {
-        await new Promise(resolve => setTimeout(resolve, 100))
+        await new Promise((resolve) => setTimeout(resolve, 100))
       }
     }
 
@@ -92,13 +96,19 @@ export class TicketFetcherService {
     })
 
     const batchResults = await Promise.all(batchPromises)
-    return batchResults.filter((ticket): ticket is JiraTicket => ticket !== null)
+    return batchResults.filter(
+      (ticket): ticket is JiraTicket => ticket !== null
+    )
   }
 
   /**
    * Tests the API connection
    */
-  static async testConnection(): Promise<{ success: boolean; error?: string; user?: any }> {
+  static async testConnection(): Promise<{
+    success: boolean
+    error?: string
+    user?: any
+  }> {
     try {
       const [jiraHost, apiToken, userEmail] = await Promise.all([
         persistLayer.get(StorageKey.JiraHost),
@@ -113,11 +123,10 @@ export class TicketFetcherService {
       const apiService = new JiraApiService({
         baseUrl: jiraHost,
         email: userEmail,
-        apiToken: apiToken
+        apiToken
       })
 
-      const result = await apiService.testConnection()
-      return result
+      return await apiService.testConnection()
     } catch (error) {
       return {
         success: false,

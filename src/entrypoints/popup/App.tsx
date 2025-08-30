@@ -1,20 +1,21 @@
-import { useState, useEffect, useCallback } from "react"
-import { HiCog, HiCollection } from "react-icons/hi"
-import { useTicketSearch } from "~/hooks/useTicketSearch"
-import { TicketSearchBox } from "~/components/search"
-import { TicketList } from "~/components/tickets"
-import { ErrorBoundary } from "~/components/ErrorBoundary"
-import { JiraTicket } from "~/storage"
-import { openOptionsPage, openInNewTab } from "~/utils/extension"
-import { getCurrentShortcut, formatShortcut } from "~/utils/shortcuts"
-import "~/assets/styles/main.css"
+import { useState, useEffect, useCallback } from 'react'
+import { HiCog, HiCollection } from 'react-icons/hi'
+
+import { ErrorBoundary } from '~/components/ErrorBoundary'
+import { TicketSearchBox } from '~/components/search'
+import { TicketList } from '~/components/tickets'
+import { useTicketSearch } from '~/hooks/useTicketSearch'
+import { JiraTicket } from '~/storage'
+import { openOptionsPage, openInNewTab } from '~/utils/extension'
+import { getCurrentShortcut, formatShortcut } from '~/utils/shortcuts'
+import '~/assets/styles/main.css'
 
 function App() {
   const { searchQuery, searchHistory, handleSearch, setSearchQuery } =
     useTicketSearch()
 
   const [showHistory, setShowHistory] = useState(false)
-  const [shortcutText, setShortcutText] = useState("Alt+J to search")
+  const [shortcutText, setShortcutText] = useState('Alt+J to search')
 
   useEffect(() => {
     const loadShortcut = async () => {
@@ -22,14 +23,12 @@ function App() {
         const shortcut = await getCurrentShortcut()
         setShortcutText(`${formatShortcut(shortcut)} to search`)
       } catch (error) {
-        console.warn("Failed to load shortcut for popup:", error)
+        console.warn('Failed to load shortcut for popup:', error)
       }
     }
 
     loadShortcut()
   }, [])
-
-
 
   const handleTicketClick = useCallback((ticket: JiraTicket) => {
     // Open the ticket in a new tab
@@ -45,7 +44,7 @@ function App() {
   }
 
   const handleClearSearch = useCallback(() => {
-    setSearchQuery("")
+    setSearchQuery('')
     setShowHistory(false)
   }, [])
 
@@ -60,13 +59,13 @@ function App() {
   }, [])
 
   return (
-    <div className="w-96 max-h-[600px] bg-white shadow-lg animate-in fade-in zoom-in-95 duration-200 ease-out">
+    <div className="animate-in fade-in zoom-in-95 max-h-[600px] w-96 bg-white shadow-lg duration-200 ease-out">
       {/* Search Section */}
-      <div className="p-3 border-b border-gray-100 animate-in slide-in-from-top duration-300 delay-75">
+      <div className="animate-in slide-in-from-top border-b border-gray-100 p-3 delay-75 duration-300">
         <ErrorBoundary
           onError={(error, errorInfo) => {
-            console.error("🚨 TicketSearchBox Error:", error)
-            console.error("🚨 Error Info:", errorInfo)
+            console.error('🚨 TicketSearchBox Error:', error)
+            console.error('🚨 Error Info:', errorInfo)
           }}>
           <TicketSearchBox
             value={searchQuery}
@@ -80,23 +79,23 @@ function App() {
       </div>
 
       {/* Results Section */}
-      <div className="overflow-hidden animate-in fade-in duration-400 delay-150">
+      <div className="animate-in fade-in overflow-hidden delay-150 duration-400">
         <ErrorBoundary>
           <TicketList onTicketClick={handleTicketClick} />
         </ErrorBoundary>
       </div>
 
       {/* Quick Actions Footer */}
-      <div className="border-t border-gray-100 px-4 py-3 bg-gray-50 animate-in slide-in-from-bottom duration-300 delay-200">
+      <div className="animate-in slide-in-from-bottom border-t border-gray-100 bg-gray-50 px-4 py-3 delay-200 duration-300">
         <div className="flex items-center justify-between text-xs text-gray-500">
           <span className="font-medium transition-colors duration-200">
             {shortcutText}
           </span>
           <button
             onClick={handleOpenOptionsPage}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-md transition-all duration-200 ease-out hover:scale-105 active:scale-95"
+            className="rounded-md p-2 text-gray-400 transition-all duration-200 ease-out hover:scale-105 hover:bg-gray-200 hover:text-gray-600 active:scale-95"
             title="Settings">
-            <HiCog className="w-4 h-4 transition-transform duration-200" />
+            <HiCog className="h-4 w-4 transition-transform duration-200" />
           </button>
         </div>
       </div>

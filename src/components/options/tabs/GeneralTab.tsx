@@ -1,15 +1,17 @@
-import { ApiConnectionStatus } from "../sections/JiraConnection/ApiConnectionStatus"
-import { JiraHostInput } from "../sections/JiraConnection/JiraHostInput"
-import { ApiConfiguration } from "../sections/JiraConnection/ApiConfiguration"
-import { TokenGenerationGuide } from "../sections/JiraConnection/TokenGenerationGuide"
-import { PrimaryIssueKey } from "../sections/QuickAccess/PrimaryIssueKey"
-import { ShortcutManagement } from "../sections/QuickAccess/ShortcutManagement"
+import { ApiConfiguration } from '../sections/JiraConnection/ApiConfiguration'
+import { ApiConnectionStatus } from '../sections/JiraConnection/ApiConnectionStatus'
+import { JiraHostInput } from '../sections/JiraConnection/JiraHostInput'
+import { TokenGenerationGuide } from '../sections/JiraConnection/TokenGenerationGuide'
+import { PrimaryIssueKey } from '../sections/QuickAccess/PrimaryIssueKey'
+import { ShortcutManagement } from '../sections/QuickAccess/ShortcutManagement'
 
 export function GeneralTab() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Jira Connection</h2>
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">
+          Jira Connection
+        </h2>
         <div className="space-y-6">
           <ApiConnectionStatus />
           <JiraHostInput />
@@ -17,9 +19,11 @@ export function GeneralTab() {
           <TokenGenerationGuide />
         </div>
       </div>
-      
+
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Access</h2>
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">
+          Quick Access
+        </h2>
         <div className="space-y-6">
           <ShortcutManagement />
           <PrimaryIssueKey />

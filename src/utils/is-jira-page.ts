@@ -1,15 +1,15 @@
 export const isJiraWebPage = (document: Document) => {
-  return !!document.getElementById("jira")
+  return !!document.getElementById('jira')
 }
 
 export const getKanbanBoard = (document: Document) => {
-  return document.getElementById("gh")
+  return document.getElementById('gh')
 }
 
 export const getJiraApp = (document: Document) => {
   if (!isJiraWebPage(document)) return null
   return (
-    document.getElementById("jira-frontend") || document.getElementById("page")
+    document.getElementById('jira-frontend') || document.getElementById('page')
   )
 }
 

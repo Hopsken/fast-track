@@ -1,12 +1,13 @@
-import { useCallback, useEffect } from "react"
-import { useStorage, StorageKey } from "~/storage"
+import { useCallback, useEffect } from 'react'
+
+import { useStorage, StorageKey } from '~/storage'
 import {
   useSearchQuery,
   useSearchResults,
   useSearchError,
   useIsSearching,
   useSearchActions
-} from "~/stores/useTicketStore"
+} from '~/stores/useTicketStore'
 
 export function useTicketSearch() {
   // Get data from storage (source of truth for tickets data)
@@ -17,8 +18,8 @@ export function useTicketSearch() {
     []
   )
   const [viewHistory] = useStorage(StorageKey.TicketViewHistory, [])
-  const [userEmail] = useStorage(StorageKey.JiraUserEmail, "")
-  const [primaryPrefix] = useStorage(StorageKey.PrimaryIssueKeyPrefix, "")
+  const [userEmail] = useStorage(StorageKey.JiraUserEmail, '')
+  const [primaryPrefix] = useStorage(StorageKey.PrimaryIssueKeyPrefix, '')
 
   // Get state and actions from the store
   const searchQuery = useSearchQuery()
@@ -33,14 +34,14 @@ export function useTicketSearch() {
       try {
         if (!query.trim()) return
 
-        console.log("🔍 useTicketSearch - Adding to search history:", query)
+        console.log('🔍 useTicketSearch - Adding to search history:', query)
         const newHistory = [
           query,
           ...searchHistory.filter((h) => h !== query)
         ].slice(0, 10)
         setSearchHistory(newHistory)
       } catch (error) {
-        console.error("Error adding to search history:", error)
+        console.error('Error adding to search history:', error)
       }
     },
     [searchHistory, setSearchHistory]
@@ -48,17 +49,17 @@ export function useTicketSearch() {
 
   const clearSearchHistory = useCallback(async () => {
     try {
-      console.log("🔍 useTicketSearch - Clearing search history")
+      console.log('🔍 useTicketSearch - Clearing search history')
       setSearchHistory([])
     } catch (error) {
-      console.error("Error clearing search history:", error)
+      console.error('Error clearing search history:', error)
     }
   }, [setSearchHistory])
 
   const handleSearch = useCallback(
     (query: string) => {
       try {
-        console.log("🔍 useTicketSearch - Handling search:", query)
+        console.log('🔍 useTicketSearch - Handling search:', query)
 
         // Update search query in store
         actions.setSearchQuery(query)
@@ -79,8 +80,8 @@ export function useTicketSearch() {
           addToSearchHistory(query.trim())
         }
       } catch (error) {
-        console.error("Error handling search:", error)
-        actions.setError("Search failed")
+        console.error('Error handling search:', error)
+        actions.setError('Search failed')
       }
     },
     [
@@ -95,7 +96,7 @@ export function useTicketSearch() {
   )
 
   useEffect(() => {
-    console.log("🔍 useTicketSearch - Tickets data changed:", tickets)
+    console.log('🔍 useTicketSearch - Tickets data changed:', tickets)
     handleSearch(searchQuery)
   }, [tickets])
 

@@ -4,8 +4,13 @@
 
 import { useState, useEffect } from 'react'
 import { HiGlobeAlt, HiCheck, HiX } from 'react-icons/hi'
+
 import { useJiraConfig } from '~/hooks/useStorageSettings'
-import { isValidJiraUrl, normalizeJiraUrl, extractJiraInstanceName } from '~/lib/jira'
+import {
+  isValidJiraUrl,
+  normalizeJiraUrl,
+  extractJiraInstanceName
+} from '~/lib/jira'
 
 export function JiraHostInput() {
   const { jiraHost, updateJiraConfig } = useJiraConfig()
@@ -38,9 +43,11 @@ export function JiraHostInput() {
 
   const getValidationIcon = () => {
     if (!showValidation) return null
-    return isValid 
-      ? <HiCheck className="w-5 h-5 text-green-500" />
-      : <HiX className="w-5 h-5 text-red-500" />
+    return isValid ? (
+      <HiCheck className="h-5 w-5 text-green-500" />
+    ) : (
+      <HiX className="h-5 w-5 text-red-500" />
+    )
   }
 
   const getInstanceName = () => {
@@ -51,11 +58,13 @@ export function JiraHostInput() {
   return (
     <div className="space-y-3">
       <div>
-        <label htmlFor="jira-host" className="block text-sm font-medium text-gray-700 mb-2">
+        <label
+          htmlFor="jira-host"
+          className="mb-2 block text-sm font-medium text-gray-700">
           Jira URL
         </label>
         <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
             <HiGlobeAlt className="h-5 w-5 text-gray-400" />
           </div>
           <input
@@ -65,7 +74,7 @@ export function JiraHostInput() {
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="https://your-domain.atlassian.net"
-            className={`block w-full pl-10 pr-12 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
+            className={`block w-full rounded-md border py-2 pr-12 pl-10 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm ${
               showValidation
                 ? isValid
                   ? 'border-green-300 bg-green-50'
@@ -73,7 +82,7 @@ export function JiraHostInput() {
                 : 'border-gray-300'
             }`}
           />
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+          <div className="absolute inset-y-0 right-0 flex items-center pr-3">
             {getValidationIcon()}
           </div>
         </div>
@@ -84,22 +93,23 @@ export function JiraHostInput() {
           {isValid ? (
             <div className="text-sm text-green-600">
               <div className="flex items-center gap-2">
-                <HiCheck className="w-4 h-4" />
+                <HiCheck className="h-4 w-4" />
                 <span>Valid Jira URL</span>
               </div>
               {getInstanceName() && (
-                <p className="text-xs text-gray-600 mt-1">
-                  Instance: <span className="font-mono">{getInstanceName()}</span>
+                <p className="mt-1 text-xs text-gray-600">
+                  Instance:{' '}
+                  <span className="font-mono">{getInstanceName()}</span>
                 </p>
               )}
             </div>
           ) : (
             <div className="text-sm text-red-600">
               <div className="flex items-center gap-2">
-                <HiX className="w-4 h-4" />
+                <HiX className="h-4 w-4" />
                 <span>Please enter a valid Jira URL</span>
               </div>
-              <p className="text-xs mt-1">
+              <p className="mt-1 text-xs">
                 Example: https://your-company.atlassian.net
               </p>
             </div>
@@ -108,8 +118,7 @@ export function JiraHostInput() {
           {isValid && inputValue !== jiraHost && (
             <button
               onClick={handleSave}
-              className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors"
-            >
+              className="rounded bg-blue-600 px-3 py-1 text-sm text-white transition-colors hover:bg-blue-700">
               Save URL
             </button>
           )}

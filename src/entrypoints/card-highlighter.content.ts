@@ -1,23 +1,31 @@
+import { TinyColor } from '@ctrl/tinycolor'
+
 import { defineContentScript } from '#imports'
-import { TinyColor } from "@ctrl/tinycolor"
-import { globalObserverManager, createDebouncedCallback } from '~/utils/dom/mutation-observer'
-import { isJiraWebPage, getJiraApp, getKanbanBoard } from '~/utils/jira/page-detection'
-import { storageItems } from '~/storage/storage-items'
 import { StorageKey } from '~/storage/keys'
+import { storageItems } from '~/storage/storage-items'
+import {
+  globalObserverManager,
+  createDebouncedCallback
+} from '~/utils/dom/mutation-observer'
+import {
+  isJiraWebPage,
+  getJiraApp,
+  getKanbanBoard
+} from '~/utils/jira/page-detection'
 
 export default defineContentScript({
-  matches: ["https://*.atlassian.net/jira*"],
+  matches: ['https://*.atlassian.net/jira*'],
   allFrames: true,
-  
+
   async main() {
     if (!isJiraWebPage(document)) return
 
     // Initialize card highlighting based on current settings
     let isHighlightEnabled = await storageItems[StorageKey.ColorCard].getValue()
-    
+
     // Set up mutation observer for dynamic content
     setupCardHighlighter(isHighlightEnabled)
-    
+
     // Watch for setting changes
     storageItems[StorageKey.ColorCard].watch((newValue) => {
       isHighlightEnabled = !!newValue
@@ -63,10 +71,10 @@ function updateCardColors(highlight: boolean): void {
   if (!kanban) return
 
   const cards = kanban.querySelectorAll(`[class*="ghx-type-"]`)
-  
+
   cards.forEach((card) => {
     if (!(card instanceof HTMLElement)) return
-    
+
     if (highlight) {
       highlightCard(card)
     } else {
@@ -80,12 +88,12 @@ function updateCardColors(highlight: boolean): void {
  */
 function highlightCard(card: HTMLElement): void {
   if (!card) return
-  
-  const grabber = card.querySelector(".ghx-grabber") as HTMLElement
+
+  const grabber = card.querySelector('.ghx-grabber') as HTMLElement
   const backgroundColor = grabber?.style.backgroundColor
-  
+
   if (!backgroundColor) return
-  
+
   try {
     const color = new TinyColor(backgroundColor)
     card.style.background = color.setAlpha(0.3).toRgbString()
@@ -98,5 +106,5 @@ function highlightCard(card: HTMLElement): void {
  * Removes highlight from a card
  */
 function removeCardHighlight(card: HTMLElement): void {
-  card.style.background = "unset"
+  card.style.background = 'unset'
 }

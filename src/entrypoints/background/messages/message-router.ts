@@ -2,8 +2,9 @@
  * Message routing system for background script
  */
 
-import { browser } from '#imports'
 import { TicketMessageHandler } from './ticket-messages'
+
+import { browser } from '#imports'
 
 export interface MessageRequest {
   type: string
@@ -32,13 +33,23 @@ export class MessageRouter {
    */
   static initialize(): void {
     // Register message handlers
-    this.registerHandler('FETCH_TICKET_DETAILS', TicketMessageHandler.handleFetchTicketDetails)
-    this.registerHandler('TEST_API_CONNECTION', TicketMessageHandler.handleTestConnection)
-    
+    this.registerHandler(
+      'FETCH_TICKET_DETAILS',
+      TicketMessageHandler.handleFetchTicketDetails
+    )
+    this.registerHandler(
+      'TEST_API_CONNECTION',
+      TicketMessageHandler.handleTestConnection
+    )
+
     // Set up main message listener
     browser.runtime.onMessage.addListener(this.handleMessage.bind(this))
-    
-    console.log('📮 Message router initialized with', this.handlers.size, 'handlers')
+
+    console.log(
+      '📮 Message router initialized with',
+      this.handlers.size,
+      'handlers'
+    )
   }
 
   /**
@@ -65,11 +76,16 @@ export class MessageRouter {
     sender: chrome.runtime.MessageSender,
     sendResponse: (response: MessageResponse) => void
   ): Promise<boolean> {
-    console.log('📨 Background: Received message:', message.type, 'from', sender.tab?.url)
+    console.log(
+      '📨 Background: Received message:',
+      message.type,
+      'from',
+      sender.tab?.url
+    )
 
     try {
       const handler = this.handlers.get(message.type)
-      
+
       if (!handler) {
         console.warn(`⚠️ No handler found for message type: ${message.type}`)
         sendResponse({
@@ -82,12 +98,12 @@ export class MessageRouter {
       // Execute handler
       const response = await handler(message, sender)
       sendResponse(response)
-      
+
       console.log('✅ Background: Message handled successfully:', message.type)
       return true
     } catch (error) {
       console.error('❌ Background: Message handling failed:', error)
-      
+
       sendResponse({
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error occurred'
@@ -100,12 +116,11 @@ export class MessageRouter {
    * Sends a message to a specific tab
    */
   static async sendMessageToTab<T = any>(
-    tabId: number, 
+    tabId: number,
     message: MessageRequest
   ): Promise<T | null> {
     try {
-      const response = await browser.tabs.sendMessage(tabId, message)
-      return response
+      return await browser.tabs.sendMessage(tabId, message)
     } catch (error) {
       console.error(`Failed to send message to tab ${tabId}:`, error)
       return null
@@ -118,8 +133,8 @@ export class MessageRouter {
   static async broadcastMessage(message: MessageRequest): Promise<void> {
     try {
       const tabs = await browser.tabs.query({})
-      
-      const promises = tabs.map(tab => {
+
+      const promises = tabs.map((tab) => {
         if (tab.id) {
           return this.sendMessageToTab(tab.id, message).catch(() => {
             // Ignore errors for tabs that can't receive messages
@@ -128,7 +143,9 @@ export class MessageRouter {
       })
 
       await Promise.all(promises)
-      console.log(`📡 Broadcasted message ${message.type} to ${tabs.length} tabs`)
+      console.log(
+        `📡 Broadcasted message ${message.type} to ${tabs.length} tabs`
+      )
     } catch (error) {
       console.error('❌ Failed to broadcast message:', error)
     }

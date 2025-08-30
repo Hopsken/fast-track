@@ -1,7 +1,7 @@
 import { defineContentScript } from '#imports'
+import { getTicketService } from '~/services/ticket-service'
 import { StorageKey, JiraTicket, storageItems } from '~/storage'
 import { isJiraWebPage } from '~/utils/jira/page-detection'
-import { getTicketService } from '~/services/ticket-service'
 
 // Simplified selectors focusing only on ticket key extraction
 const SELECTORS = {
@@ -11,25 +11,26 @@ const SELECTORS = {
     '[id^="card-"]',
     '[data-issue-key]'
   ].join(', '),
-  
+
   // Ticket key selectors - specific elements that contain ticket keys
   ticketKey: '[data-testid="platform-card.common.ui.key.key"]',
   issueLink: 'a[href*="/browse/"]',
-  
+
   // Search results for other page types
-  searchResults: '.issue-list tr[data-issue-key], .split-view-issue-list .issue-container'
+  searchResults:
+    '.issue-list tr[data-issue-key], .split-view-issue-list .issue-container'
 }
 
 export default defineContentScript({
   matches: ['https://*.atlassian.net/jira*'],
   main() {
     if (!isJiraWebPage(document)) return
-    
+
     // Debug runtime availability immediately
     console.log('🔧 DEBUG: Using proxy service for ticket collection')
     console.log('   Extension context:', 'content-script')
     console.log('   Service type:', 'TicketService via proxy-service')
-    
+
     // Debounce function to avoid excessive collection
     let collectTimeout: NodeJS.Timeout
 
@@ -48,7 +49,7 @@ export default defineContentScript({
         console.log('✅ Found ticket key from data-issue-key:', key)
         return key
       }
-      
+
       // Try card ID (format: card-KEY-123)
       const cardId = element.getAttribute('id')
       if (cardId?.startsWith('card-')) {
@@ -58,7 +59,7 @@ export default defineContentScript({
           return extractedKey
         }
       }
-      
+
       // Try ticket key element (new Jira interface)
       const keyElement = element.querySelector(SELECTORS.ticketKey)
       if (keyElement) {
@@ -68,7 +69,7 @@ export default defineContentScript({
           return keyText
         }
       }
-      
+
       // Try finding key from internal link
       const linkElement = element.querySelector(SELECTORS.issueLink)
       if (linkElement) {
@@ -79,23 +80,26 @@ export default defineContentScript({
           return keyMatch[1]
         }
       }
-      
+
       return null
     }
-    
+
     /**
      * Extract unique ticket keys from different page types
      */
     const extractTicketKeysFromPage = (): string[] => {
       const ticketKeys = new Set<string>()
       const currentUrl = window.location.href
-      
-      console.log('🔍 ExtractTicketKeysFromPage: Starting key extraction for:', currentUrl)
+
+      console.log(
+        '🔍 ExtractTicketKeysFromPage: Starting key extraction for:',
+        currentUrl
+      )
 
       // Method 1: Extract from board/card views
       const cards = document.querySelectorAll(SELECTORS.cards)
       console.log(`🎫 Found ${cards.length} card elements`)
-      
+
       cards.forEach((card, index) => {
         const key = extractTicketKey(card)
         if (key) {
@@ -116,7 +120,7 @@ export default defineContentScript({
       // Method 3: Extract from search results
       const searchRows = document.querySelectorAll(SELECTORS.searchResults)
       console.log(`📋 Found ${searchRows.length} search result elements`)
-      
+
       searchRows.forEach((row, index) => {
         const key = extractTicketKey(row)
         if (key) {
@@ -128,7 +132,7 @@ export default defineContentScript({
       // Method 4: Extract from all links containing /browse/
       const browseLinks = document.querySelectorAll(SELECTORS.issueLink)
       console.log(`🔗 Found ${browseLinks.length} browse links`)
-      
+
       browseLinks.forEach((link, index) => {
         const href = link.getAttribute('href')
         if (href) {
@@ -141,7 +145,10 @@ export default defineContentScript({
       })
 
       const uniqueKeys = Array.from(ticketKeys)
-      console.log(`🎯 ExtractTicketKeysFromPage: Extracted ${uniqueKeys.length} unique ticket keys:`, uniqueKeys)
+      console.log(
+        `🎯 ExtractTicketKeysFromPage: Extracted ${uniqueKeys.length} unique ticket keys:`,
+        uniqueKeys
+      )
       return uniqueKeys
     }
 
@@ -152,47 +159,54 @@ export default defineContentScript({
       console.log('\n🚀 =========================')
       console.log('🚀 STARTING TICKET COLLECTION (PROXY SERVICE)')
       console.log('🚀 =========================')
-      
+
       try {
         // Step 1: Extract ticket keys from DOM
         const ticketKeys = extractTicketKeysFromPage()
-        
+
         if (ticketKeys.length === 0) {
           console.log('❌ No ticket keys found on page')
           return
         }
 
-        console.log(`🚀 Content: Fetching ${ticketKeys.length} tickets via proxy service`)
-        
+        console.log(
+          `🚀 Content: Fetching ${ticketKeys.length} tickets via proxy service`
+        )
+
         // Step 2: Get ticket service instance and call directly
         const ticketService = getTicketService()
         const tickets = await ticketService.fetchTicketDetails(ticketKeys)
-        
-        console.log(`✅ Content: Received ${tickets.length}/${ticketKeys.length} tickets from background`)
+
+        console.log(
+          `✅ Content: Received ${tickets.length}/${ticketKeys.length} tickets from background`
+        )
 
         // Step 3: Process collected tickets
         if (tickets.length > 0) {
           console.log(`\n✅ SUCCESS: Collected ${tickets.length} tickets`)
           console.log('📊 Ticket Summary:')
-          console.table(tickets.map(ticket => ({
-            Key: ticket.key,
-            Summary: ticket.summary.substring(0, 50) + (ticket.summary.length > 50 ? '...' : ''),
-            Status: ticket.status || 'Unknown',
-            Assignee: ticket.assignee || 'Unassigned',
-            Priority: ticket.priority || 'None',
-            Project: ticket.projectKey
-          })))
-          
+          console.table(
+            tickets.map((ticket) => ({
+              Key: ticket.key,
+              Summary:
+                ticket.summary.substring(0, 50) +
+                (ticket.summary.length > 50 ? '...' : ''),
+              Status: ticket.status || 'Unknown',
+              Assignee: ticket.assignee || 'Unassigned',
+              Priority: ticket.priority || 'None',
+              Project: ticket.projectKey
+            }))
+          )
+
           console.log('💾 Merging tickets with existing data...')
           await mergeTicketsData(tickets)
           console.log('✅ Tickets successfully saved to storage')
         } else {
           console.log('⚠️ No tickets were successfully fetched')
         }
-
       } catch (error) {
         console.error('❌ ERROR collecting ticket data:', error)
-        
+
         // Provide detailed error information
         if (error instanceof Error) {
           console.error('   Error name:', error.name)
@@ -202,7 +216,7 @@ export default defineContentScript({
           }
         }
       }
-      
+
       console.log('🏁 TICKET COLLECTION COMPLETED')
       console.log('🏁 =========================\n')
     }
@@ -211,23 +225,30 @@ export default defineContentScript({
      * Merge new tickets with existing data
      */
     const mergeTicketsData = async (newTickets: JiraTicket[]) => {
-      console.log(`💾 MergeTicketsData: Starting merge process with ${newTickets.length} new tickets`)
-      
-      const existingTickets = (await storageItems[StorageKey.TicketsData].getValue()) || []
-      console.log(`💾 MergeTicketsData: Found ${existingTickets.length} existing tickets in storage`)
-      
+      console.log(
+        `💾 MergeTicketsData: Starting merge process with ${newTickets.length} new tickets`
+      )
+
+      const existingTickets =
+        (await storageItems[StorageKey.TicketsData].getValue()) || []
+      console.log(
+        `💾 MergeTicketsData: Found ${existingTickets.length} existing tickets in storage`
+      )
+
       const ticketMap = new Map<string, JiraTicket>()
 
       // Add existing tickets to map
       existingTickets.forEach((ticket: JiraTicket) => {
         ticketMap.set(ticket.key, ticket)
       })
-      console.log(`💾 MergeTicketsData: Added ${existingTickets.length} existing tickets to map`)
+      console.log(
+        `💾 MergeTicketsData: Added ${existingTickets.length} existing tickets to map`
+      )
 
       // Merge new tickets
       let updatedCount = 0
       let addedCount = 0
-      
+
       newTickets.forEach((newTicket) => {
         const existing = ticketMap.get(newTicket.key)
         if (existing) {
@@ -240,7 +261,9 @@ export default defineContentScript({
           }
           ticketMap.set(newTicket.key, merged)
           updatedCount++
-          console.log(`💾 Updated ticket ${newTicket.key} (view count: ${merged.viewCount})`)
+          console.log(
+            `💾 Updated ticket ${newTicket.key} (view count: ${merged.viewCount})`
+          )
         } else {
           // Add new ticket
           ticketMap.set(newTicket.key, newTicket)
@@ -249,15 +272,22 @@ export default defineContentScript({
         }
       })
 
-      console.log(`💾 MergeTicketsData: Updated ${updatedCount} tickets, added ${addedCount} new tickets`)
+      console.log(
+        `💾 MergeTicketsData: Updated ${updatedCount} tickets, added ${addedCount} new tickets`
+      )
 
       // Convert back to array and limit size (keep most recent 1000 tickets)
       const mergedTickets = Array.from(ticketMap.values())
-        .sort((a, b) => new Date(b.lastViewed).getTime() - new Date(a.lastViewed).getTime())
+        .sort(
+          (a, b) =>
+            new Date(b.lastViewed).getTime() - new Date(a.lastViewed).getTime()
+        )
         .slice(0, 1000)
 
-      console.log(`💾 MergeTicketsData: Final merged collection has ${mergedTickets.length} tickets (limited to 1000)`)
-      
+      console.log(
+        `💾 MergeTicketsData: Final merged collection has ${mergedTickets.length} tickets (limited to 1000)`
+      )
+
       await storageItems[StorageKey.TicketsData].setValue(mergedTickets)
       console.log('💾 MergeTicketsData: Successfully saved to storage')
     }

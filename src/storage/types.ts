@@ -44,7 +44,7 @@ export interface LicenseInfo {
   }
 }
 
-export type DarkModeOption = "always" | "auto" | "disable"
+export type DarkModeOption = 'always' | 'auto' | 'disable'
 
 export interface JiraApiConfig {
   host: string

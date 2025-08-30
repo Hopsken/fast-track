@@ -1,6 +1,6 @@
-import $ from "cash-dom"
+import $ from 'cash-dom'
 
-import { isJiraWebPage } from "./is-jira-page"
+import { isJiraWebPage } from './is-jira-page'
 
 type Effect = {
   key: string
@@ -23,7 +23,7 @@ export class PageObserver {
   }
 
   private initListener() {
-    $("#jira").on("click", () => {
+    $('#jira').on('click', () => {
       // wait for history change
       setTimeout(() => {
         const newPath = location.pathname
@@ -65,7 +65,7 @@ export class PageObserver {
       try {
         this.cleanup[effect.key] = await effect.effect()
         effect.active = active
-      } catch (_) {
+      } catch {
         //
       }
     } else {

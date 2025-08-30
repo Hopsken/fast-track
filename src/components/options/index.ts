@@ -18,4 +18,8 @@ export { TokenGenerationGuide } from './sections/JiraConnection/TokenGenerationG
 export { SearchDataOverview } from './sections/DataManagement/SearchDataOverview'
 export { SearchDataActions } from './sections/DataManagement/SearchDataActions'
 export { AboutSection } from './sections/AboutSection'
-export { LicenseStatus, UpgradeSection, ManageLicenseSection } from './sections/LicenseManagement'
+export {
+  LicenseStatus,
+  UpgradeSection,
+  ManageLicenseSection
+} from './sections/LicenseManagement'

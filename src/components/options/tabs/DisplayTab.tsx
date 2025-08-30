@@ -1,12 +1,14 @@
-import { DarkModeControl } from "~/components/ui/forms"
-import { ToggleField } from "~/components/ui/forms"
-import { StorageKey } from "~/storage"
+import { DarkModeControl } from '~/components/ui/forms'
+import { ToggleField } from '~/components/ui/forms'
+import { StorageKey } from '~/storage'
 
 export function DisplayTab() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Theme & Display</h2>
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">
+          Theme & Display
+        </h2>
         <div className="space-y-6">
           <DarkModeControl />
           <ToggleField

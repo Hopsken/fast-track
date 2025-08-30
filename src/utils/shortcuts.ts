@@ -15,7 +15,9 @@ export async function getCurrentShortcut(): Promise<string> {
   try {
     if (typeof chrome !== 'undefined' && chrome.commands) {
       const commands = await chrome.commands.getAll()
-      const executeAction = commands.find(cmd => cmd.name === '_execute_action')
+      const executeAction = commands.find(
+        (cmd) => cmd.name === '_execute_action'
+      )
       return executeAction?.shortcut || 'Alt+J'
     }
     return 'Alt+J'
@@ -48,17 +50,23 @@ export function openShortcutsPage(): void {
  */
 export function formatShortcut(shortcut: string): string {
   if (!shortcut) return 'Not set'
-  
+
   return shortcut
     .split('+')
-    .map(key => {
+    .map((key) => {
       switch (key.toLowerCase()) {
-        case 'ctrl': return 'Ctrl'
-        case 'alt': return 'Alt' 
-        case 'shift': return 'Shift'
-        case 'cmd': return 'Cmd'
-        case 'meta': return navigator.userAgent.includes('Mac') ? 'Cmd' : 'Meta'
-        default: return key.charAt(0).toUpperCase() + key.slice(1).toLowerCase()
+        case 'ctrl':
+          return 'Ctrl'
+        case 'alt':
+          return 'Alt'
+        case 'shift':
+          return 'Shift'
+        case 'cmd':
+          return 'Cmd'
+        case 'meta':
+          return navigator.userAgent.includes('Mac') ? 'Cmd' : 'Meta'
+        default:
+          return key.charAt(0).toUpperCase() + key.slice(1).toLowerCase()
       }
     })
     .join(' + ')

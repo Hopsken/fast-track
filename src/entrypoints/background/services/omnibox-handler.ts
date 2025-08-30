@@ -10,11 +10,15 @@ export class OmniboxHandlerService {
    * Initializes omnibox event listeners
    */
   static initialize(): void {
-    browser.omnibox.onInputEntered.addListener(this.handleOmniboxInput.bind(this))
-    
+    browser.omnibox.onInputEntered.addListener(
+      this.handleOmniboxInput.bind(this)
+    )
+
     // Optional: Add input changed listener for suggestions
     if (browser.omnibox.onInputChanged) {
-      browser.omnibox.onInputChanged.addListener(this.handleOmniboxInputChanged.bind(this))
+      browser.omnibox.onInputChanged.addListener(
+        this.handleOmniboxInputChanged.bind(this)
+      )
     }
   }
 
@@ -23,7 +27,7 @@ export class OmniboxHandlerService {
    */
   private static handleOmniboxInput(text: string): void {
     console.log('🔍 Omnibox: User entered:', text)
-    
+
     try {
       openJiraIssue(text)
     } catch (error) {
@@ -35,7 +39,7 @@ export class OmniboxHandlerService {
    * Handles omnibox input changes for providing suggestions
    */
   private static handleOmniboxInputChanged(
-    text: string, 
+    text: string,
     suggest: (suggestions: chrome.omnibox.SuggestResult[]) => void
   ): void {
     if (text.length < 2) {
@@ -50,7 +54,9 @@ export class OmniboxHandlerService {
   /**
    * Generates suggestions based on user input
    */
-  private static generateSuggestions(text: string): chrome.omnibox.SuggestResult[] {
+  private static generateSuggestions(
+    text: string
+  ): chrome.omnibox.SuggestResult[] {
     const suggestions: chrome.omnibox.SuggestResult[] = []
 
     // Check if text looks like a ticket key (e.g., "PROJ-123")

@@ -1,9 +1,9 @@
-import { useLicense } from "~/hooks/useLicense"
-import { 
-  LicenseStatus, 
-  UpgradeSection, 
-  ManageLicenseSection 
-} from "~/components/options/sections/LicenseManagement"
+import {
+  LicenseStatus,
+  UpgradeSection,
+  ManageLicenseSection
+} from '~/components/options/sections/LicenseManagement'
+import { useLicense } from '~/hooks/useLicense'
 
 export function LicenseTab() {
   const { license } = useLicense()
@@ -13,18 +13,24 @@ export function LicenseTab() {
       {license ? (
         <>
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Current License</h2>
+            <h2 className="mb-4 text-lg font-semibold text-gray-900">
+              Current License
+            </h2>
             <LicenseStatus />
           </div>
-          
+
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">License Management</h2>
+            <h2 className="mb-4 text-lg font-semibold text-gray-900">
+              License Management
+            </h2>
             <ManageLicenseSection />
           </div>
         </>
       ) : (
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Upgrade to Pro</h2>
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">
+            Upgrade to Pro
+          </h2>
           <UpgradeSection />
         </div>
       )}

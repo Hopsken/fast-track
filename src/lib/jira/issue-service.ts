@@ -2,9 +2,10 @@
  * Service for Jira issue-specific API operations
  */
 
-import type { JiraApiIssue } from './types'
-import type { JiraTicket } from '~/storage'
 import { JiraApiClient } from './api-client'
+import type { JiraApiIssue } from './types'
+
+import type { JiraTicket } from '~/storage'
 
 export class JiraIssueService {
   private rateLimitDelay = 100 // ms between requests
@@ -17,11 +18,16 @@ export class JiraIssueService {
   async getIssue(issueKey: string): Promise<JiraTicket | null> {
     try {
       console.log(`🎫 JiraAPI: Fetching issue ${issueKey}`)
-      
-      const issue = await this.client.makeRequest<JiraApiIssue>(`issue/${issueKey}`)
+
+      const issue = await this.client.makeRequest<JiraApiIssue>(
+        `issue/${issueKey}`
+      )
       const ticket = this.convertToTicket(issue)
 
-      console.log(`✅ JiraAPI: Successfully converted issue ${issueKey} to ticket:`, ticket)
+      console.log(
+        `✅ JiraAPI: Successfully converted issue ${issueKey} to ticket:`,
+        ticket
+      )
       return ticket
     } catch (error) {
       console.error(`❌ JiraAPI: Failed to fetch issue ${issueKey}:`, error)
@@ -33,20 +39,27 @@ export class JiraIssueService {
    * Fetches multiple issues in batches
    */
   async getIssues(issueKeys: string[]): Promise<JiraTicket[]> {
-    console.log(`🎫 JiraAPI: Batch fetching ${issueKeys.length} issues:`, issueKeys)
-    
+    console.log(
+      `🎫 JiraAPI: Batch fetching ${issueKeys.length} issues:`,
+      issueKeys
+    )
+
     const tickets: JiraTicket[] = []
     const batchSize = 10 // Process in smaller batches to avoid overwhelming the API
-    
+
     for (let i = 0; i < issueKeys.length; i += batchSize) {
       const batch = issueKeys.slice(i, i + batchSize)
-      console.log(`📦 JiraAPI: Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(issueKeys.length / batchSize)}`)
-      
+      console.log(
+        `📦 JiraAPI: Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(issueKeys.length / batchSize)}`
+      )
+
       const batchResults = await this.processBatch(batch)
       tickets.push(...batchResults)
     }
-    
-    console.log(`✅ JiraAPI: Batch fetch completed. Successfully fetched ${tickets.length}/${issueKeys.length} issues`)
+
+    console.log(
+      `✅ JiraAPI: Batch fetch completed. Successfully fetched ${tickets.length}/${issueKeys.length} issues`
+    )
     return tickets
   }
 
@@ -57,20 +70,22 @@ export class JiraIssueService {
     const batchPromises = batch.map(async (key, index) => {
       // Add small delay between requests to respect rate limits
       if (index > 0) {
-        await new Promise(resolve => setTimeout(resolve, this.rateLimitDelay))
+        await new Promise((resolve) => setTimeout(resolve, this.rateLimitDelay))
       }
       return this.getIssue(key)
     })
-    
+
     const batchResults = await Promise.allSettled(batchPromises)
-    
+
     const tickets: JiraTicket[] = []
     batchResults.forEach((result, index) => {
       if (result.status === 'fulfilled' && result.value) {
         tickets.push(result.value)
       } else {
-        console.warn(`⚠️ JiraAPI: Failed to fetch issue ${batch[index]}:`, 
-                    result.status === 'rejected' ? result.reason : 'Unknown error')
+        console.warn(
+          `⚠️ JiraAPI: Failed to fetch issue ${batch[index]}:`,
+          result.status === 'rejected' ? result.reason : 'Unknown error'
+        )
       }
     })
 

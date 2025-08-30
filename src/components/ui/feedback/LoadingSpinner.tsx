@@ -8,10 +8,10 @@ interface LoadingSpinnerProps {
   className?: string
 }
 
-export function LoadingSpinner({ 
-  size = 'md', 
-  color = 'gray', 
-  className = '' 
+export function LoadingSpinner({
+  size = 'md',
+  color = 'gray',
+  className = ''
 }: LoadingSpinnerProps) {
   const sizeClasses = {
     sm: 'w-4 h-4',
@@ -27,12 +27,7 @@ export function LoadingSpinner({
 
   return (
     <div
-      className={`
-        ${sizeClasses[size]} 
-        ${colorClasses[color]} 
-        border-2 rounded-full animate-spin
-        ${className}
-      `}
+      className={` ${sizeClasses[size]} ${colorClasses[color]} animate-spin rounded-full border-2 ${className} `}
     />
   )
 }
@@ -44,19 +39,20 @@ interface LoadingStateProps {
   className?: string
 }
 
-export function LoadingState({ 
-  message = 'Loading...', 
+export function LoadingState({
+  message = 'Loading...',
   size = 'md',
   color = 'gray',
-  className = '' 
+  className = ''
 }: LoadingStateProps) {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <LoadingSpinner size={size} color={color} />
       {message && (
-        <span className={`text-sm ${
-          color === 'white' ? 'text-white' : 'text-gray-600'
-        }`}>
+        <span
+          className={`text-sm ${
+            color === 'white' ? 'text-white' : 'text-gray-600'
+          }`}>
           {message}
         </span>
       )}

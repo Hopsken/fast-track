@@ -2,14 +2,14 @@
  * Storage value type mapping and schema definitions
  */
 
-import type { 
-  JiraTicket, 
-  TicketViewRecord, 
-  CustomBackground, 
-  LicenseInfo, 
-  DarkModeOption 
-} from './types'
 import { StorageKey } from './keys'
+import type {
+  JiraTicket,
+  TicketViewRecord,
+  CustomBackground,
+  LicenseInfo,
+  DarkModeOption
+} from './types'
 
 /**
  * Maps storage keys to their value types
@@ -46,5 +46,5 @@ export const STORAGE_DEFAULTS: { [K in StorageKey]: StorageValueRecord[K] } = {
   [StorageKey.PrimaryIssueKeyPrefix]: '',
   [StorageKey.TicketsData]: [],
   [StorageKey.SearchHistory]: [],
-  [StorageKey.TicketViewHistory]: [],
+  [StorageKey.TicketViewHistory]: []
 }

@@ -2,11 +2,12 @@
  * Main storage hook for React components
  */
 
-import { useState, useEffect } from "react"
-import { storageItems } from "~/storage/storage-items"
-import { StorageKey, STORAGE_GROUPS } from "~/storage/keys"
-import type { StorageValueRecord } from "~/storage/schema"
-import { STORAGE_DEFAULTS } from "~/storage/schema"
+import { useState, useEffect } from 'react'
+
+import { StorageKey, STORAGE_GROUPS } from '~/storage/keys'
+import type { StorageValueRecord } from '~/storage/schema'
+import { STORAGE_DEFAULTS } from '~/storage/schema'
+import { storageItems } from '~/storage/storage-items'
 
 /**
  * React hook for accessing WXT storage with automatic updates
@@ -43,11 +44,9 @@ export function useStorage<T extends StorageKey>(
         })
 
       // Watch for changes
-      const unwatch = storageItem.watch((newValue) => {
+      return storageItem.watch((newValue) => {
         setValue((newValue ?? fallbackValue) as StorageValueRecord[T])
       })
-
-      return unwatch
     } else {
       console.warn(`Storage item not found for key: ${key}`)
       setValue(fallbackValue)
@@ -63,7 +62,7 @@ export function useStorage<T extends StorageKey>(
 
     if (storageItem) {
       const finalValue =
-        typeof newValue === "function"
+        typeof newValue === 'function'
           ? (
               newValue as (prev: StorageValueRecord[T]) => StorageValueRecord[T]
             )(value)
@@ -155,7 +154,7 @@ export function useMultipleStorage<T extends StorageKey>(
       await Promise.all(updatePromises)
       setValues((prev) => ({ ...prev, ...updates }))
     } catch (error) {
-      console.error("Failed to update storage values:", error)
+      console.error('Failed to update storage values:', error)
     }
   }
 

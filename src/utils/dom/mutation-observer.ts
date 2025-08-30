@@ -28,7 +28,7 @@ export class MutationObserverManager {
 
     const observer = new MutationObserver(callback)
     observer.observe(target, config)
-    
+
     this.observers.set(id, observer)
     return observer
   }
@@ -48,7 +48,7 @@ export class MutationObserverManager {
    * Disconnects all managed observers
    */
   disconnectAll(): void {
-    this.observers.forEach(observer => observer.disconnect())
+    this.observers.forEach((observer) => observer.disconnect())
     this.observers.clear()
   }
 

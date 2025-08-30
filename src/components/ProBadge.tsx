@@ -1,4 +1,4 @@
-import { HiLockClosed } from "react-icons/hi2"
+import { HiLockClosed } from 'react-icons/hi2'
 
 interface ProBadgeProps {
   isPro: boolean
@@ -6,19 +6,23 @@ interface ProBadgeProps {
   interactive?: boolean
 }
 
-export function ProBadge({ isPro, onClick, interactive = false }: ProBadgeProps) {
+export function ProBadge({
+  isPro,
+  onClick,
+  interactive = false
+}: ProBadgeProps) {
   const baseClasses = `rounded px-2 py-1 text-xs font-bold flex items-center gap-1 ${
-    isPro ? "text-amber-400 bg-gray-700" : "text-gray-500 bg-gray-200"
+    isPro ? 'text-amber-400 bg-gray-700' : 'text-gray-500 bg-gray-200'
   }`
-  
-  const classes = interactive 
+
+  const classes = interactive
     ? `${baseClasses} cursor-pointer hover:opacity-80 transition-opacity`
     : baseClasses
 
   const content = (
     <>
       <span>Pro</span>
-      {!isPro && <HiLockClosed className="w-3 h-3" />}
+      {!isPro && <HiLockClosed className="h-3 w-3" />}
     </>
   )
 
@@ -30,9 +34,5 @@ export function ProBadge({ isPro, onClick, interactive = false }: ProBadgeProps)
     )
   }
 
-  return (
-    <div className={classes}>
-      {content}
-    </div>
-  )
+  return <div className={classes}>{content}</div>
 }

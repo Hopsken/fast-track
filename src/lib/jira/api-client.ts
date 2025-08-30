@@ -10,18 +10,21 @@ export class JiraApiClient {
   /**
    * Makes an authenticated HTTP request to the Jira API
    */
-  async makeRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  async makeRequest<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T> {
     const url = `${this.config.baseUrl}/rest/api/3/${endpoint}`
-    
+
     console.log(`🌐 JiraAPI: Fetching ${url}`)
-    
+
     try {
       const response = await fetch(url, {
         ...options,
         headers: {
           ...this.getAuthHeaders(),
-          ...options.headers,
-        },
+          ...options.headers
+        }
       })
 
       if (!response.ok) {
@@ -42,8 +45,8 @@ export class JiraApiClient {
    */
   private getAuthHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
     }
 
     if (this.config.email && this.config.apiToken) {
@@ -57,15 +60,19 @@ export class JiraApiClient {
   /**
    * Handles error responses from the API
    */
-  private async handleErrorResponse(response: Response, endpoint: string): Promise<never> {
+  private async handleErrorResponse(
+    response: Response,
+    endpoint: string
+  ): Promise<never> {
     const errorText = await response.text()
     console.error(`❌ JiraAPI: HTTP ${response.status} - ${errorText}`)
-    
+
     let errorMessage: string
 
     switch (response.status) {
       case 401:
-        errorMessage = 'Authentication failed. Please check your API token and email.'
+        errorMessage =
+          'Authentication failed. Please check your API token and email.'
         break
       case 403:
         errorMessage = 'Access forbidden. Please check your permissions.'
@@ -76,7 +83,7 @@ export class JiraApiClient {
       default:
         errorMessage = `HTTP ${response.status}: ${errorText}`
     }
-    
+
     throw new Error(errorMessage)
   }
 

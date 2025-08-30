@@ -9,29 +9,32 @@ export interface HighlightedTextProps {
 /**
  * Highlights matching text within a string
  */
-export function highlightText(text: string, searchQuery: string): React.ReactNode[] {
+export function highlightText(
+  text: string,
+  searchQuery: string
+): React.ReactNode[] {
   // Handle edge cases
   if (!text || typeof text !== 'string') {
     return [text || '']
   }
-  
+
   if (!searchQuery || typeof searchQuery !== 'string' || !searchQuery.trim()) {
     return [text]
   }
 
   const query = searchQuery.trim().toLowerCase()
   const lowerText = text.toLowerCase()
-  
+
   // Avoid infinite loops with empty query after trimming
   if (!query) {
     return [text]
   }
-  
+
   const parts: React.ReactNode[] = []
   let lastIndex = 0
   let index = lowerText.indexOf(query)
   let keyCounter = 0
-  
+
   // Safety limit to prevent infinite loops
   const maxMatches = 100
   let matchCount = 0
@@ -44,10 +47,15 @@ export function highlightText(text: string, searchQuery: string): React.ReactNod
 
     // Add highlighted match
     parts.push(
-      React.createElement('mark', {
-        key: keyCounter++,
-        className: 'bg-yellow-200 text-yellow-900 px-0.5 rounded-sm font-medium'
-      }, text.slice(index, index + query.length))
+      React.createElement(
+        'mark',
+        {
+          key: keyCounter++,
+          className:
+            'bg-yellow-200 text-yellow-900 px-0.5 rounded-sm font-medium'
+        },
+        text.slice(index, index + query.length)
+      )
     )
 
     lastIndex = index + query.length
@@ -66,7 +74,11 @@ export function highlightText(text: string, searchQuery: string): React.ReactNod
 /**
  * React component for highlighted text
  */
-export function HighlightedText({ text, searchQuery, className = '' }: HighlightedTextProps): React.ReactElement {
+export function HighlightedText({
+  text,
+  searchQuery,
+  className = ''
+}: HighlightedTextProps): React.ReactElement {
   try {
     const highlightedParts = highlightText(text || '', searchQuery || '')
     return React.createElement('span', { className }, ...highlightedParts)
