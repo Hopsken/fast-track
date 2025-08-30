@@ -1,3 +1,4 @@
+import { MouseEvent, KeyboardEvent } from 'react'
 import { HiCog6Tooth, HiClipboard } from 'react-icons/hi2'
 
 import { JiraTicket } from '~/storage'
@@ -22,19 +23,19 @@ export function TicketItem({
 }: TicketItemProps) {
   const statusColor = getStatusColor(ticket.status)
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = (e: MouseEvent) => {
     e.preventDefault()
     onClick()
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
       onClick()
     }
   }
 
-  const handleContextMenu = (e: React.MouseEvent) => {
+  const handleContextMenu = (e: MouseEvent) => {
     e.preventDefault()
     if (onCopyUrl) {
       onCopyUrl(ticket)

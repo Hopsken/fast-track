@@ -2,16 +2,15 @@ import { useEffect, useRef, useCallback } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { HiInformationCircle } from 'react-icons/hi'
 
-import { TicketItem } from './TicketItem'
-
-import { JiraTicket, StorageKey, TicketViewRecord } from '~/storage'
-import { useStorage } from '~/storage'
+import { JiraTicket, StorageKey, TicketViewRecord, useStorage } from '~/storage'
 import {
   useSelectedIndex,
   useSearchResults,
   useNavigationActions,
   useSearchQuery
 } from '~/stores/useTicketStore'
+
+import { TicketItem } from './TicketItem'
 
 interface TicketListProps {
   onTicketClick: (ticket: JiraTicket) => void

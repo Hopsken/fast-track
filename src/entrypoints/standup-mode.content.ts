@@ -1,7 +1,8 @@
+import { defineContentScript } from '#imports'
+
 import $ from 'cash-dom'
 import screenfull from 'screenfull'
 
-import { defineContentScript } from '#imports'
 import { StorageKey } from '~/storage/keys'
 import { storageItems } from '~/storage/storage-items'
 import { isJiraWebPage } from '~/utils/jira/page-detection'

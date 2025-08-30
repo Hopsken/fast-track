@@ -1,8 +1,8 @@
 import { StateCreator } from 'zustand'
 
-import { SearchSlice } from './createSearchSlice'
-
 import { JiraTicket } from '~/storage'
+
+import { SearchSlice } from './createSearchSlice'
 
 export type NavigationDirection = 'up' | 'down' | 'enter' | 'escape'
 

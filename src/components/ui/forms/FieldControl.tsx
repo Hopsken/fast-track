@@ -1,9 +1,9 @@
-import type { PropsWithChildren } from 'react'
+import type { PropsWithChildren, ReactNode } from 'react'
 
 export type FieldControlProps = {
   size?: 'sm' | 'lg'
   title: string
-  description: string | React.ReactNode
+  description: string | ReactNode
   onClick?: () => void
 }
 

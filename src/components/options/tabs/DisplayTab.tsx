@@ -1,5 +1,4 @@
-import { DarkModeControl } from '~/components/ui/forms'
-import { ToggleField } from '~/components/ui/forms'
+import { DarkModeControl, ToggleField } from '~/components/ui/forms'
 import { StorageKey } from '~/storage'
 
 export function DisplayTab() {

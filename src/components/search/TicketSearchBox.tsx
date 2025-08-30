@@ -1,5 +1,5 @@
 import { useMount, useWhyDidYouUpdate } from 'ahooks'
-import { useRef } from 'react'
+import { useRef, KeyboardEvent } from 'react'
 import { HiSearch, HiX } from 'react-icons/hi'
 
 import { type JiraTicket } from '@/storage'
@@ -40,7 +40,7 @@ export function TicketSearchBox({
     }
   })
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     console.log('🔍 TicketSearchBox - Key pressed:', {
       key: e.key,
       code: e.code,

@@ -1,3 +1,4 @@
+import { ComponentType } from 'react'
 import {
   HiCog,
   HiColorSwatch,
@@ -9,7 +10,7 @@ import {
 export interface Tab {
   id: string
   label: string
-  icon: React.ComponentType<{ className?: string }>
+  icon: ComponentType<{ className?: string }>
 }
 
 export const tabs: Tab[] = [

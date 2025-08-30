@@ -1,4 +1,5 @@
 import { defineContentScript } from '#imports'
+
 import { getTicketService } from '~/services/ticket-service'
 import { StorageKey, JiraTicket, storageItems } from '~/storage'
 import { isJiraWebPage } from '~/utils/jira/page-detection'

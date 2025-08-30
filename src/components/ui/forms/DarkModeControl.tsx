@@ -1,6 +1,6 @@
-import { FieldControl } from './FieldControl'
-
 import { useStorage, StorageKey, StorageValueRecord } from '~/storage'
+
+import { FieldControl } from './FieldControl'
 
 export function DarkModeControl() {
   const [mode, setMode] = useStorage(StorageKey.DarkMode, 'auto')

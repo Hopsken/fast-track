@@ -2,7 +2,7 @@
  * Component for Jira host URL input with validation
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, KeyboardEvent } from 'react'
 import { HiGlobeAlt, HiCheck, HiX } from 'react-icons/hi'
 
 import { useJiraConfig } from '~/hooks/useStorageSettings'
@@ -35,7 +35,7 @@ export function JiraHostInput() {
     }
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: KeyboardEvent) => {
     if (e.key === 'Enter' && isValid) {
       handleSave()
     }

@@ -1,4 +1,5 @@
 import { defineContentScript } from '#imports'
+
 import customThemeCSS from '~/assets/styles/custom-theme.css?inline'
 import { CustomBackground } from '~/storage'
 import { StorageKey } from '~/storage/keys'

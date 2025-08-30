@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
-import { ProBadge } from './ProBadge'
-
 import { useLicense } from '~/hooks/useLicense'
+
+import { ProBadge } from './ProBadge'
 
 export function ManageLicense() {
   const { deactivate, valid, license } = useLicense()

@@ -1,9 +1,9 @@
 import Fuse from 'fuse.js'
 import { StateCreator } from 'zustand'
 
-import { NavigationSlice } from './createNavigationSlice'
-
 import { JiraTicket, TicketViewRecord } from '~/storage'
+
+import { NavigationSlice } from './createNavigationSlice'
 
 export interface SearchSlice {
   // State

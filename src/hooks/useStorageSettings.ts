@@ -4,14 +4,14 @@
 
 import { useCallback } from 'react'
 
-import { useStorage, useMultipleStorage } from './useStorage'
-
 import { StorageKey, STORAGE_GROUPS } from '~/storage/keys'
 import type {
   DarkModeOption,
   CustomBackground,
   JiraApiConfig
 } from '~/storage/types'
+
+import { useStorage, useMultipleStorage } from './useStorage'
 
 /**
  * Hook for UI settings management

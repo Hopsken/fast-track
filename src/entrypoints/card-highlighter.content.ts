@@ -1,6 +1,7 @@
+import { defineContentScript } from '#imports'
+
 import { TinyColor } from '@ctrl/tinycolor'
 
-import { defineContentScript } from '#imports'
 import { StorageKey } from '~/storage/keys'
 import { storageItems } from '~/storage/storage-items'
 import {

@@ -4,10 +4,10 @@
 
 import { useCallback } from 'react'
 
-import { useStorage } from './useStorage'
-
 import { StorageKey } from '~/storage/keys'
 import type { JiraTicket, TicketViewRecord } from '~/storage/types'
+
+import { useStorage } from './useStorage'
 
 /**
  * Hook for managing ticket data

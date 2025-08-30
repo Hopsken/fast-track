@@ -3,11 +3,12 @@
  * This serves as the entry point that initializes all background services
  */
 
+import { defineBackground } from '#imports'
+
+import { registerTicketService } from '~/services/ticket-service'
+
 import { InstallationHandlerService } from './services/installation-handler'
 import { OmniboxHandlerService } from './services/omnibox-handler'
-
-import { defineBackground } from '#imports'
-import { registerTicketService } from '~/services/ticket-service'
 
 export default defineBackground(() => {
   console.log('🚀 Background script initializing...')

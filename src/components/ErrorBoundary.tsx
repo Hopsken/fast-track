@@ -1,4 +1,4 @@
-import { ErrorInfo } from 'react'
+import { ErrorInfo, ReactNode, ComponentType } from 'react'
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { HiExclamationCircle, HiRefresh } from 'react-icons/hi'
 
@@ -43,8 +43,8 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
 }
 
 interface ErrorBoundaryProps {
-  children: React.ReactNode
-  fallback?: React.ComponentType<ErrorFallbackProps>
+  children: ReactNode
+  fallback?: ComponentType<ErrorFallbackProps>
   onError?: (error: Error, errorInfo: ErrorInfo) => void
 }
 

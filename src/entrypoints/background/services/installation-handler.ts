@@ -3,6 +3,7 @@
  */
 
 import { browser } from '#imports'
+
 import { openOptionsPage } from '~/utils/extension'
 
 export class InstallationHandlerService {

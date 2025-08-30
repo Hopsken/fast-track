@@ -2,9 +2,9 @@
  * Message routing system for background script
  */
 
-import { TicketMessageHandler } from './ticket-messages'
-
 import { browser } from '#imports'
+
+import { TicketMessageHandler } from './ticket-messages'
 
 export interface MessageRequest {
   type: string

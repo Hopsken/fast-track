@@ -1,4 +1,5 @@
 import { defineContentScript } from '#imports'
+
 import darkModeCSS from '~/assets/styles/dark-mode.css?inline'
 import { StorageKey } from '~/storage/keys'
 import { storageItems } from '~/storage/storage-items'

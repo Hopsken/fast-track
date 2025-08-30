@@ -1,4 +1,4 @@
-import React from 'react'
+import { ReactNode, ReactElement, createElement } from 'react'
 
 export interface HighlightedTextProps {
   text: string
@@ -9,10 +9,7 @@ export interface HighlightedTextProps {
 /**
  * Highlights matching text within a string
  */
-export function highlightText(
-  text: string,
-  searchQuery: string
-): React.ReactNode[] {
+export function highlightText(text: string, searchQuery: string): ReactNode[] {
   // Handle edge cases
   if (!text || typeof text !== 'string') {
     return [text || '']
@@ -30,7 +27,7 @@ export function highlightText(
     return [text]
   }
 
-  const parts: React.ReactNode[] = []
+  const parts: ReactNode[] = []
   let lastIndex = 0
   let index = lowerText.indexOf(query)
   let keyCounter = 0
@@ -47,7 +44,7 @@ export function highlightText(
 
     // Add highlighted match
     parts.push(
-      React.createElement(
+      createElement(
         'mark',
         {
           key: keyCounter++,
@@ -78,13 +75,13 @@ export function HighlightedText({
   text,
   searchQuery,
   className = ''
-}: HighlightedTextProps): React.ReactElement {
+}: HighlightedTextProps): ReactElement {
   try {
     const highlightedParts = highlightText(text || '', searchQuery || '')
-    return React.createElement('span', { className }, ...highlightedParts)
+    return createElement('span', { className }, ...highlightedParts)
   } catch (error) {
     console.warn('Error highlighting text:', error)
     // Fallback to plain text if highlighting fails
-    return React.createElement('span', { className }, text || '')
+    return createElement('span', { className }, text || '')
   }
 }

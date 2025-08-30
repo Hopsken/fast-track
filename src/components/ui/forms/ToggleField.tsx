@@ -1,6 +1,6 @@
-import { FieldControl, type FieldControlProps } from './FieldControl'
-
 import { useStorage, StorageKey } from '~/storage'
+
+import { FieldControl, type FieldControlProps } from './FieldControl'
 
 export type ToggleFieldProps = FieldControlProps & {
   storageKey: StorageKey.ColorCard | StorageKey.AutoFullScreen

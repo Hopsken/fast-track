@@ -1,6 +1,6 @@
-import { openInNewTab, openOptionsPage } from './extension'
-
 import { StorageKey, persistLayer } from '~/storage'
+
+import { openInNewTab, openOptionsPage } from './extension'
 
 function containsOnlyNumbers(str: string) {
   return /^\d+$/.test(str)

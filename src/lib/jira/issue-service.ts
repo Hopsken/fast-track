@@ -2,10 +2,10 @@
  * Service for Jira issue-specific API operations
  */
 
+import type { JiraTicket } from '~/storage'
+
 import { JiraApiClient } from './api-client'
 import type { JiraApiIssue } from './types'
-
-import type { JiraTicket } from '~/storage'
 
 export class JiraIssueService {
   private rateLimitDelay = 100 // ms between requests

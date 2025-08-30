@@ -3,6 +3,7 @@
  */
 
 import { browser } from '#imports'
+
 import { openJiraIssue } from '~/utils/open-jira-issue'
 
 export class OmniboxHandlerService {

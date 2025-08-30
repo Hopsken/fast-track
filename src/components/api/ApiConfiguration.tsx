@@ -2,7 +2,7 @@
  * Component for API token and email configuration
  */
 
-import { useState } from 'react'
+import { useState, KeyboardEvent } from 'react'
 import { HiEye, HiEyeOff, HiMail, HiKey } from 'react-icons/hi'
 
 import { useJiraConfig } from '~/hooks/useStorageSettings'
@@ -25,13 +25,13 @@ export function ApiConfiguration() {
     }
   }
 
-  const handleEmailKeyPress = (e: React.KeyboardEvent) => {
+  const handleEmailKeyPress = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleEmailSave()
     }
   }
 
-  const handleTokenKeyPress = (e: React.KeyboardEvent) => {
+  const handleTokenKeyPress = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleTokenSave()
     }

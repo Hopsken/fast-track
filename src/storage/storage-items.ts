@@ -2,11 +2,11 @@
  * WXT storage item definitions
  */
 
+import { storage } from '#imports'
+
 import { StorageKey } from './keys'
 import { STORAGE_DEFAULTS } from './schema'
 import type { StorageValueRecord } from './schema'
-
-import { storage } from '#imports'
 
 /**
  * WXT storage items with type safety and default values
