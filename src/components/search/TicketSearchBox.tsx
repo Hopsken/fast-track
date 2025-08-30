@@ -53,6 +53,25 @@ export function TicketSearchBox({
       currentTarget: e.currentTarget
     })
 
+    // Handle Emacs-style navigation
+    if (e.ctrlKey && e.key === 'n') {
+      console.log(
+        '🔍 TicketSearchBox - Ctrl+n pressed, preventing default and navigating down'
+      )
+      e.preventDefault()
+      navigate('down', onTicketClick)
+      return
+    }
+    
+    if (e.ctrlKey && e.key === 'p') {
+      console.log(
+        '🔍 TicketSearchBox - Ctrl+p pressed, preventing default and navigating up'
+      )
+      e.preventDefault()
+      navigate('up', onTicketClick)
+      return
+    }
+
     switch (e.key) {
       case 'ArrowDown':
         console.log(
