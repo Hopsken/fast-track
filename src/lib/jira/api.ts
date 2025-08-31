@@ -28,16 +28,10 @@ export class JiraApiService {
   // Issue Operations (Delegated to JiraIssueService)
   // ============================================================================
 
-  /**
-   * Fetches a single issue by key
-   */
   async getIssue(issueKey: string): Promise<JiraTicket | null> {
     return this.issueService.getIssue(issueKey)
   }
 
-  /**
-   * Fetches multiple issues using bulk API
-   */
   async getIssues(issueKeys: string[]): Promise<JiraTicket[]> {
     return this.issueService.getIssues(issueKeys)
   }
@@ -46,30 +40,18 @@ export class JiraApiService {
   // Connection Operations (Delegated to JiraConnectionService)
   // ============================================================================
 
-  /**
-   * Tests the connection to Jira API
-   */
   async testConnection(): Promise<JiraConnectionTestResult> {
     return this.connectionService.testConnection()
   }
 
-  /**
-   * Validates API configuration without making a request
-   */
   validateConfig(): { isValid: boolean; missingFields: string[] } {
     return this.connectionService.validateConfig()
   }
 
-  /**
-   * Gets server information
-   */
   async getServerInfo(): Promise<unknown> {
     return this.connectionService.getServerInfo()
   }
 
-  /**
-   * Tests permissions by trying to access user's projects
-   */
   async testPermissions(): Promise<{
     hasAccess: boolean
     projectCount: number
@@ -92,9 +74,6 @@ export class JiraApiService {
     this.connectionService = new JiraConnectionService(this.client)
   }
 
-  /**
-   * Gets the current configuration
-   */
   getConfig(): JiraApiConfig {
     return this.client.getConfig()
   }

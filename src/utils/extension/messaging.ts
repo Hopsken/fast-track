@@ -121,17 +121,5 @@ export const Messages = {
   testApiConnection: () =>
     sendToBackground<{ success: boolean; error?: string; user?: unknown }>({
       type: 'TEST_API_CONNECTION'
-    }),
-
-  validateTicketKeys: (ticketKeys: string[]) =>
-    sendToBackground<{
-      validKeys: string[]
-      invalidKeys: string[]
-      totalCount: number
-      validCount: number
-      invalidCount: number
-    }>({
-      type: 'VALIDATE_TICKET_KEYS',
-      ticketKeys
     })
 } as const

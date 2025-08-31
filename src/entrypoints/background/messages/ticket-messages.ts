@@ -111,49 +111,4 @@ export class TicketMessageHandler {
       }
     }
   }
-
-  /**
-   * Handles VALIDATE_TICKET_KEYS messages
-   */
-  static handleValidateTicketKeys: MessageHandler = async (
-    message: MessageRequest
-  ) => {
-    try {
-      const { ticketKeys } = message
-
-      if (!Array.isArray(ticketKeys)) {
-        return {
-          success: false,
-          error: 'Invalid ticket keys provided'
-        }
-      }
-
-      const ticketKeyPattern = /^[A-Z]+-\d+$/
-      const validation = ticketKeys.map((key) => ({
-        key,
-        isValid: typeof key === 'string' && ticketKeyPattern.test(key.trim())
-      }))
-
-      const validKeys = validation.filter((v) => v.isValid).map((v) => v.key)
-      const invalidKeys = validation.filter((v) => !v.isValid).map((v) => v.key)
-
-      return {
-        success: true,
-        data: {
-          validKeys,
-          invalidKeys,
-          totalCount: ticketKeys.length,
-          validCount: validKeys.length,
-          invalidCount: invalidKeys.length
-        }
-      }
-    } catch (error) {
-      console.error('❌ Failed to validate ticket keys:', error)
-
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Validation failed'
-      }
-    }
-  }
 }
