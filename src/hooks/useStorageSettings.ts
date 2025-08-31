@@ -4,6 +4,7 @@
 
 import { useCallback } from 'react'
 
+import { StorageValueRecord } from '@/storage'
 import { StorageKey, STORAGE_GROUPS } from '~/storage/keys'
 import type {
   DarkModeOption,
@@ -63,7 +64,8 @@ export function useJiraConfig() {
 
   const updateJiraConfig = useCallback(
     (config: Partial<JiraApiConfig>) => {
-      const updates: Partial<{ [key in StorageKey]: any }> = {}
+      const updates: Partial<{ [key in StorageKey]: StorageValueRecord[key] }> =
+        {}
 
       if (config.host !== undefined) {
         updates[StorageKey.JiraHost] = config.host

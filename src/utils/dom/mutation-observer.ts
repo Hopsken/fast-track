@@ -77,10 +77,10 @@ export function createDebouncedCallback(
   callback: () => void,
   delay: number = 300
 ): MutationCallback {
-  let timeoutId: NodeJS.Timeout
+  let timeoutId: number
 
   return () => {
     clearTimeout(timeoutId)
-    timeoutId = setTimeout(callback, delay)
+    timeoutId = window.setTimeout(callback, delay)
   }
 }

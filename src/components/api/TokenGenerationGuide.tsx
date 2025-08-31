@@ -93,7 +93,7 @@ export function TokenGenerationGuide() {
                   Important Security Note
                 </h3>
                 <p className="mt-1 text-sm text-yellow-700">
-                  API tokens are like passwords. Keep them secure and don't
+                  API tokens are like passwords. Keep them secure and don&apos;t
                   share them. This extension stores tokens locally in your
                   browser only.
                 </p>

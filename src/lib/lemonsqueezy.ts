@@ -1,3 +1,5 @@
+import { LicenseInfo } from '@/storage/types'
+
 const LemonSqueezyAPIHost = 'https://api.lemonsqueezy.com'
 const LemonSqueezyStoreId = 20105
 const LemonSqueezyProductId = 89178

@@ -45,7 +45,7 @@ export class ScoringError extends SearchError {
 // Error factory functions for consistent error creation
 export function createValidationError(
   field: string,
-  value: any
+  value: unknown
 ): ValidationError {
   return new ValidationError(`Invalid ${field}: ${value}`)
 }

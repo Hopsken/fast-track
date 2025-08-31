@@ -15,7 +15,11 @@ export class JiraConnectionService {
     try {
       console.log('🧪 JiraAPI: Testing connection...')
 
-      const user = (await this.client.makeRequest('myself')) as any
+      const user = (await this.client.makeRequest('myself')) as unknown as {
+        accountId: string
+        displayName: string
+        emailAddress: string
+      }
 
       console.log('✅ JiraAPI: Connection test successful')
       return {
@@ -59,7 +63,7 @@ export class JiraConnectionService {
   /**
    * Gets server information
    */
-  async getServerInfo(): Promise<any> {
+  async getServerInfo(): Promise<unknown> {
     try {
       console.log('ℹ️ JiraAPI: Fetching server info...')
 
@@ -85,7 +89,10 @@ export class JiraConnectionService {
 
       const projects = (await this.client.makeRequest(
         'project/search?maxResults=1'
-      )) as any
+      )) as unknown as {
+        values: unknown[]
+        total: number
+      }
 
       const hasAccess = Array.isArray(projects.values)
       const projectCount = projects.total || 0

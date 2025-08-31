@@ -4,11 +4,7 @@
 
 import { TicketFetcherService } from '../services/ticket-fetcher'
 
-import type {
-  MessageRequest,
-  MessageResponse,
-  MessageHandler
-} from './message-router'
+import type { MessageRequest, MessageHandler } from './message-router'
 
 /**
  * Handlers for ticket-related messages

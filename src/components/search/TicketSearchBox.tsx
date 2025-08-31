@@ -1,4 +1,3 @@
-import { useMount, useWhyDidYouUpdate } from 'ahooks'
 import { useRef, KeyboardEvent } from 'react'
 import { HiSearch, HiX } from 'react-icons/hi'
 
@@ -11,7 +10,6 @@ interface TicketSearchBoxProps {
   onClear: () => void
   onTicketClick: (ticket: JiraTicket) => void
   placeholder?: string
-  autoFocus?: boolean
 }
 
 export function TicketSearchBox({
@@ -19,18 +17,11 @@ export function TicketSearchBox({
   onChange,
   onClear,
   onTicketClick,
-  placeholder = 'Search tickets...',
-  autoFocus = true
+  placeholder = 'Search tickets...'
 }: TicketSearchBoxProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const { navigate } = useNavigationActions()
   const isSearching = useIsSearching()
-
-  useMount(() => {
-    if (autoFocus && inputRef.current) {
-      inputRef.current.focus()
-    }
-  })
 
   const handleKeyDown = (e: KeyboardEvent) => {
     // Handle Emacs-style navigation
@@ -97,6 +88,8 @@ export function TicketSearchBox({
         <input
           ref={inputRef}
           type="text"
+          // eslint-disable-next-line jsx-a11y/no-autofocus
+          autoFocus
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}

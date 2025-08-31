@@ -4,9 +4,8 @@
 
 import { useState, useEffect } from 'react'
 
-import { StorageKey, STORAGE_GROUPS } from '~/storage/keys'
-import type { StorageValueRecord } from '~/storage/schema'
-import { STORAGE_DEFAULTS } from '~/storage/schema'
+import { StorageKey } from '~/storage/keys'
+import { type StorageValueRecord, STORAGE_DEFAULTS } from '~/storage/schema'
 import { storageItems } from '~/storage/storage-items'
 
 /**

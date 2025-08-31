@@ -7,7 +7,8 @@ export function SearchDataActions() {
 
   const clearAllData = async () => {
     if (
-      confirm(
+      // eslint-disable-next-line no-alert
+      window.confirm(
         'Are you sure you want to clear all collected ticket data? This cannot be undone.'
       )
     ) {

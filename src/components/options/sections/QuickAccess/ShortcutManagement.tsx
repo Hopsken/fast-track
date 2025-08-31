@@ -70,9 +70,9 @@ export function ShortcutManagement() {
 
       <div className="mt-4 border-t border-gray-200 pt-4">
         <p className="text-xs text-gray-500">
-          Click "Customize" to change the keyboard shortcut in Chrome's
-          extension settings. You can also access this via Chrome menu → More
-          tools → Extensions → Keyboard shortcuts.
+          {
+            'Click "Customize" to change the keyboard shortcut in Chrome\'s extension settings. You can also access this via Chrome menu → More tools → Extensions → Keyboard shortcuts.'
+          }
         </p>
       </div>
     </div>

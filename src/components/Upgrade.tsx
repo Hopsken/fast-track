@@ -47,11 +47,11 @@ function ActivateKey() {
 
   if (!isActive) {
     return (
-      <span
-        className="cursor-pointer text-sm font-medium underline"
+      <button
+        className="left text-sm font-medium underline"
         onClick={() => setIsActive(true)}>
         Enter license key
-      </span>
+      </button>
     )
   }
 

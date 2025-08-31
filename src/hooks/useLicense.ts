@@ -1,5 +1,5 @@
+import { useMemoizedFn } from 'ahooks'
 import { nanoid } from 'nanoid'
-import { useCallback } from 'react'
 
 import {
   activateLicense,
@@ -11,7 +11,7 @@ import { useStorage, StorageKey } from '~/storage'
 export function useLicense() {
   const [license, setLicense] = useStorage(StorageKey.License)
 
-  const revalidate = useCallback(async () => {
+  const revalidate = useMemoizedFn(async () => {
     if (!license) return { valid: false, error: 'No license' }
     const { valid, error, ...info } = await validateLicense(
       license.license_key.key,
@@ -23,9 +23,9 @@ export function useLicense() {
       ...info
     })
     return { valid, error }
-  }, [license])
+  })
 
-  const activate = useCallback(async (key: string) => {
+  const activate = useMemoizedFn(async (key: string) => {
     const { activated, error, ...info } = await activateLicense(key, nanoid())
     if (activated) {
       setLicense({
@@ -35,9 +35,9 @@ export function useLicense() {
       })
     }
     return { activated, error }
-  }, [])
+  })
 
-  const deactivate = useCallback(async () => {
+  const deactivate = useMemoizedFn(async () => {
     if (!license) return false
     const { deactivated } = await deactivateLicense(
       license.license_key.key,
@@ -47,7 +47,7 @@ export function useLicense() {
       setLicense(null)
     }
     return true
-  }, [license])
+  })
 
   return {
     license,

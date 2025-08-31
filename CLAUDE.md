@@ -62,21 +62,43 @@ Central storage management via `src/storage/index.ts` using Plasmo Storage:
 
 ## Ticket Search Architecture
 
-The ticket search system is optimized for performance and user experience with a clean modular architecture:
+The ticket search system uses a modern RxJS-based reactive architecture that eliminates race conditions and provides optimal performance:
 
 ### Search Components
 - **TicketSearchBox**: Input component with loading states and keyboard navigation
 - **TicketList**: Results display with visual feedback and interaction handlers
 - **TicketItem**: Individual ticket rendering with search term highlighting
 
-### Data Flow
+### Reactive Architecture (RxJS-based)
 1. **Collection**: `ticket-collector.content.ts` extracts ticket keys from Jira DOM
 2. **Fetching**: Background service fetches detailed ticket data from Jira API
-3. **Storage**: Tickets stored in browser storage with merge and deduplication
-4. **Search**: Real-time search with debouncing, caching, and intelligent scoring
+3. **Storage**: Tickets stored in browser storage with reactive observables
+4. **Stream Processing**: RxJS orchestrates search with automatic debouncing and cancellation
+
+### Core RxJS Components
+- **`storageToStream`**: Utility converting WXT storage items to RxJS observables
+- **`SearchStreamService`**: Pure stream processing with debouncing (150ms) and error handling
+- **Search Orchestrator**: External coordination between RxJS streams and Zustand store
+- **Simplified Zustand Slice**: Pure state management without complex search logic
+
+### Data Flow
+```typescript
+User Input → setSearchQuery() → Zustand State → toStream() → RxJS Observable
+    ↓
+Storage Changes → storageToStream() → Observable → combineLatest()
+    ↓
+Debounced Search (150ms) → switchMap() → Search Results → Store Update
+```
+
+### Race Condition Elimination
+- **switchMap operator**: Automatically cancels outdated searches
+- **Reactive streams**: All data sources (storage, user input) are observables
+- **External orchestration**: No circular dependencies between streams and state
+- **Proper subscription management**: Clean setup and teardown
 
 ### Performance Optimizations
-- **Debounced Search**: 300ms delay to reduce computational overhead
+- **RxJS Debouncing**: 150ms delay with automatic cancellation
+- **Stream Sharing**: `shareReplay(1)` prevents duplicate operations
 - **Memoized Scoring**: Context scoring cached with 5-minute TTL
 - **Result Caching**: Search results cached with 2-minute TTL for repeated queries
 - **Smart DOM Observation**: Adaptive throttling in ticket collector
@@ -84,13 +106,13 @@ The ticket search system is optimized for performance and user experience with a
 ### Search Utilities (`src/utils/search/`)
 - **scoring.ts**: Context-aware ticket scoring algorithm with memoization
 - **cache.ts**: TTL-based caching system for search results and scores
-- **debounce.ts**: Search-specific debouncing utilities using lodash-es
 - **highlight.tsx**: Multi-term text highlighting for search results
 
 ### State Management
-- **createSearchSlice.ts**: Zustand slice managing search state and operations
+- **createSearchSlice.ts**: Simplified Zustand slice with pure state management
 - **createNavigationSlice.ts**: Keyboard navigation using object map pattern
-- **useTicketSearch.ts**: Main hook integrating search functionality
+- **useTicketSearch.ts**: Simplified hook using direct Zustand actions
+- **Search Orchestrator**: External RxJS stream coordination
 
 ### Navigation Pattern
 Uses object map pattern instead of switch statements for cleaner, more maintainable navigation logic.

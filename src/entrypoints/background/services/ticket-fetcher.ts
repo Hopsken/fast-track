@@ -107,7 +107,7 @@ export class TicketFetcherService {
   static async testConnection(): Promise<{
     success: boolean
     error?: string
-    user?: any
+    user?: unknown
   }> {
     try {
       const [jiraHost, apiToken, userEmail] = await Promise.all([

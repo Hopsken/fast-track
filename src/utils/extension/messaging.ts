@@ -6,19 +6,19 @@ import { browser } from '#imports'
 
 export interface ExtensionMessage {
   type: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export interface ExtensionResponse {
   success: boolean
-  data?: any
+  data?: unknown
   error?: string
 }
 
 /**
  * Sends a message to the background script
  */
-export async function sendToBackground<T = any>(
+export async function sendToBackground<T = unknown>(
   message: ExtensionMessage
 ): Promise<T> {
   try {
@@ -38,7 +38,7 @@ export async function sendToBackground<T = any>(
 /**
  * Sends a message to a specific tab
  */
-export async function sendToTab<T = any>(
+export async function sendToTab<T = unknown>(
   tabId: number,
   message: ExtensionMessage
 ): Promise<T> {
@@ -66,7 +66,7 @@ export async function getCurrentTab(): Promise<chrome.tabs.Tab | null> {
 /**
  * Sends a message to the current active tab
  */
-export async function sendToCurrentTab<T = any>(
+export async function sendToCurrentTab<T = unknown>(
   message: ExtensionMessage
 ): Promise<T | null> {
   const tab = await getCurrentTab()
@@ -83,7 +83,7 @@ export function createMessageListener(
   handler: (
     message: ExtensionMessage,
     sender: chrome.runtime.MessageSender
-  ) => Promise<any> | any
+  ) => Promise<unknown> | unknown
 ) {
   const listener = async (
     message: ExtensionMessage,
@@ -113,13 +113,13 @@ export function createMessageListener(
  */
 export const Messages = {
   fetchTicketDetails: (ticketKeys: string[]) =>
-    sendToBackground<{ tickets: any[] }>({
+    sendToBackground<{ tickets: unknown[] }>({
       type: 'FETCH_TICKET_DETAILS',
       ticketKeys
     }),
 
   testApiConnection: () =>
-    sendToBackground<{ success: boolean; error?: string; user?: any }>({
+    sendToBackground<{ success: boolean; error?: string; user?: unknown }>({
       type: 'TEST_API_CONNECTION'
     }),
 

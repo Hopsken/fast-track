@@ -68,7 +68,8 @@ export function ManageLicenseSection() {
               </h4>
               <p className="text-sm text-red-700">
                 Are you sure you want to deactivate your Pro license on this
-                device? You'll lose access to Pro features until you reactivate.
+                device? You&apos;ll lose access to Pro features until you
+                reactivate.
               </p>
             </div>
 

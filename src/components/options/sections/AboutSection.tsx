@@ -15,7 +15,7 @@ export function AboutSection({ version }: AboutSectionProps) {
           <p className="leading-relaxed">
             Version 2 introduces a completely redesigned popup focused on quick
             ticket search. Now you can instantly find and access any Jira ticket
-            you've recently viewed.
+            you&apos;ve recently viewed.
           </p>
           <div>
             <h4 className="mb-3 font-medium text-gray-800">New Features:</h4>

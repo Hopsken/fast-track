@@ -44,7 +44,7 @@ export class PersistLayer {
       oldValue: StorageValueRecord[T] | null
     ) => void
   ) {
-    return storageItems[key].watch(callback as any)
+    return storageItems[key].watch(callback as never)
   }
 
   /**
@@ -76,7 +76,7 @@ export class PersistLayer {
     [K in StorageKey]?: StorageValueRecord[K]
   }): Promise<void> {
     const setPromises = Object.entries(values).map(([key, value]) =>
-      this.set(key as StorageKey, value as any)
+      this.set(key as StorageKey, value as StorageValueRecord[StorageKey])
     )
 
     await Promise.all(setPromises)

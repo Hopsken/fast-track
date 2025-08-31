@@ -8,12 +8,12 @@ import { TicketMessageHandler } from './ticket-messages'
 
 export interface MessageRequest {
   type: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export interface MessageResponse {
   success: boolean
-  data?: any
+  data?: unknown
   error?: string
 }
 
@@ -115,7 +115,7 @@ export class MessageRouter {
   /**
    * Sends a message to a specific tab
    */
-  static async sendMessageToTab<T = any>(
+  static async sendMessageToTab<T = unknown>(
     tabId: number,
     message: MessageRequest
   ): Promise<T | null> {

@@ -5,8 +5,7 @@
 import { storage } from '#imports'
 
 import { StorageKey } from './keys'
-import { STORAGE_DEFAULTS } from './schema'
-import type { StorageValueRecord } from './schema'
+import { STORAGE_DEFAULTS, type StorageValueRecord } from './schema'
 
 /**
  * WXT storage items with type safety and default values

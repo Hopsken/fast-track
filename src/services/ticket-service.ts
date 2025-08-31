@@ -66,7 +66,7 @@ class TicketService {
   async testConnection(): Promise<{
     success: boolean
     error?: string
-    user?: any
+    user?: unknown
   }> {
     try {
       const [jiraHost, jiraUrl, apiToken, userEmail] = await Promise.all([

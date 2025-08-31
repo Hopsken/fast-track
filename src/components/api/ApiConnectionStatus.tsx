@@ -2,6 +2,7 @@
  * Component for displaying Jira API connection status
  */
 
+import { useMemoizedFn } from 'ahooks'
 import { useState, useEffect } from 'react'
 import { HiCheckCircle, HiXCircle, HiClock } from 'react-icons/hi'
 import { browser } from 'wxt/browser'
@@ -15,7 +16,7 @@ export function ApiConnectionStatus() {
   >('idle')
   const [errorMessage, setErrorMessage] = useState<string>('')
 
-  const testConnection = async () => {
+  const testConnection = useMemoizedFn(async () => {
     if (!isConfigComplete) {
       setConnectionStatus('error')
       setErrorMessage('API configuration is incomplete')
@@ -42,13 +43,13 @@ export function ApiConnectionStatus() {
       setConnectionStatus('error')
       setErrorMessage('Failed to test connection')
     }
-  }
+  })
 
   useEffect(() => {
     if (isConfigComplete) {
       testConnection()
     }
-  }, [isConfigComplete])
+  }, [isConfigComplete, testConnection])
 
   const getStatusIcon = () => {
     switch (connectionStatus) {

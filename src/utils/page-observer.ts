@@ -11,7 +11,7 @@ type Effect = {
 export class PageObserver {
   private currentPath: string = ''
   private registry: Record<string, Effect & { active?: boolean }> = {}
-  private cleanup: Record<string, Function | undefined> = {}
+  private cleanup: Record<string, (() => void) | undefined> = {}
 
   constructor() {
     if (!isJiraWebPage(document)) {

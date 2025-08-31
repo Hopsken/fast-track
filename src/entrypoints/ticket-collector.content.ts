@@ -32,7 +32,7 @@ export default defineContentScript({
     console.log('   Service type:', 'TicketService via proxy-service')
 
     // Smart debouncing with different delays for different triggers
-    let collectTimeout: NodeJS.Timeout
+    let collectTimeout: number
     let lastCollectionTime = 0
     let lastUrl = window.location.href
     let lastTicketCount = 0
@@ -50,7 +50,7 @@ export default defineContentScript({
       }
 
       clearTimeout(collectTimeout)
-      collectTimeout = setTimeout(async () => {
+      collectTimeout = window.setTimeout(async () => {
         try {
           await collectTicketData(trigger)
           lastCollectionTime = Date.now()

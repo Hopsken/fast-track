@@ -2,7 +2,7 @@
  * HTTP client abstraction for Jira API calls
  */
 
-import type { JiraApiConfig, JiraApiError } from './types'
+import type { JiraApiConfig } from './types'
 
 export class JiraApiClient {
   constructor(private config: JiraApiConfig) {}
@@ -62,7 +62,7 @@ export class JiraApiClient {
    */
   private async handleErrorResponse(
     response: Response,
-    endpoint: string
+    _endpoint: string
   ): Promise<never> {
     const errorText = await response.text()
     console.error(`❌ JiraAPI: HTTP ${response.status} - ${errorText}`)
@@ -98,6 +98,7 @@ export class JiraApiClient {
    * Gets the current configuration (without sensitive data)
    */
   getConfig(): Omit<JiraApiConfig, 'apiToken'> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { apiToken, ...safeConfig } = this.config
     return safeConfig
   }

@@ -79,7 +79,6 @@ function App() {
             onClear={handleClearSearch}
             onTicketClick={handleTicketClick}
             placeholder="Search tickets..."
-            autoFocus={true}
           />
         </ErrorBoundary>
       </div>

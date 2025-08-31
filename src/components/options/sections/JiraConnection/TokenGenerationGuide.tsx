@@ -39,11 +39,13 @@ export function TokenGenerationGuide() {
                     Atlassian Account Settings
                   </a>
                 </li>
-                <li>Click "Create API token"</li>
-                <li>Enter a label (e.g., "Jira Boost Extension")</li>
-                <li>Click "Create"</li>
-                <li>Copy the token immediately (you won't see it again!)</li>
-                <li>Paste it in the "API Token" field above</li>
+                <li>{'Click "Create API token"'}</li>
+                <li>{'Enter a label (e.g., "Jira Boost Extension")'}</li>
+                <li>{'Click "Create"'}</li>
+                <li>
+                  {'Copy the token immediately (you won&apos;t see it again!)'}
+                </li>
+                <li>{'Paste it in the "API Token" field above'}</li>
               </ol>
             </div>
 

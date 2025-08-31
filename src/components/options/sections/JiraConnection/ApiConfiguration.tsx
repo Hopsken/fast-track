@@ -23,6 +23,7 @@ export function ApiConfiguration() {
 
   const handleClearCredentials = () => {
     if (
+      // eslint-disable-next-line no-alert
       confirm(
         'Are you sure you want to clear your API credentials? This will disable API-based ticket collection.'
       )

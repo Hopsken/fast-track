@@ -10,7 +10,7 @@ import {
 
 import { getRecentTickets, searchTickets } from '@/stores/slices/search/engine'
 import type { SearchContext } from '@/stores/slices/search/types'
-import { JiraTicket } from '~/storage'
+import { JiraTicket, TicketViewRecord } from '~/storage'
 
 export interface SearchResult {
   query: string
@@ -151,7 +151,7 @@ export class SearchStreamService {
    */
   createContextObservable(
     userEmail$: Observable<string>,
-    viewHistory$: Observable<any[]>,
+    viewHistory$: Observable<TicketViewRecord[]>,
     primaryPrefix$: Observable<string>
   ): Observable<SearchContext> {
     return combineLatest([

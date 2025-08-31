@@ -49,7 +49,7 @@ export interface JiraApiError {
   errors: Record<string, string>
 }
 
-export interface JiraApiResponse<T = any> {
+export interface JiraApiResponse<T = unknown> {
   success: boolean
   data?: T
   error?: string
