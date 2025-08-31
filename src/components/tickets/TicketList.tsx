@@ -1,7 +1,8 @@
-import { useEffect, useRef, useCallback } from 'react'
-import { useHotkeys } from 'react-hotkeys-hook'
+import { useMemoizedFn } from 'ahooks'
+import { useEffect, useRef } from 'react'
 import { HiInformationCircle } from 'react-icons/hi'
 
+import { useTicketListHotkeys } from '~/hooks/useTicketListHotkeys'
 import { JiraTicket, StorageKey, TicketViewRecord, useStorage } from '~/storage'
 import {
   useSelectedIndex,
@@ -30,153 +31,50 @@ export function TicketList({ onTicketClick }: TicketListProps) {
     []
   )
   const listRef = useRef<HTMLDivElement>(null)
-  const itemRefs = useRef<(HTMLDivElement | null)[]>([])
-
-  // Update itemRefs when search results change (no more setTickets sync needed!)
-  useEffect(() => {
-    itemRefs.current = new Array(searchResults.length).fill(null)
-  }, [searchResults.length])
 
   // Handle ticket click with view history tracking
-  const handleTicketClick = useCallback(
-    async (ticket: JiraTicket) => {
-      // Update view history
-      const existingRecord = viewHistory.find(
-        (record) => record.ticketKey === ticket.key
-      )
-      const updatedHistory = existingRecord
-        ? viewHistory.map((record) =>
-            record.ticketKey === ticket.key
-              ? {
-                  ...record,
-                  viewCount: record.viewCount + 1,
-                  lastViewed: new Date().toISOString()
-                }
-              : record
-          )
-        : [
-            ...viewHistory,
-            {
-              ticketKey: ticket.key,
-              viewCount: 1,
-              lastViewed: new Date().toISOString()
-            } as TicketViewRecord
-          ]
+  const handleTicketClick = useMemoizedFn(async (ticket: JiraTicket) => {
+    // Update view history
+    const existingRecord = viewHistory.find(
+      (record) => record.ticketKey === ticket.key
+    )
+    const updatedHistory = existingRecord
+      ? viewHistory.map((record) =>
+          record.ticketKey === ticket.key
+            ? {
+                ...record,
+                viewCount: record.viewCount + 1,
+                lastViewed: new Date().toISOString()
+              }
+            : record
+        )
+      : [
+          ...viewHistory,
+          {
+            ticketKey: ticket.key,
+            viewCount: 1,
+            lastViewed: new Date().toISOString()
+          } as TicketViewRecord
+        ]
 
-      setViewHistory(updatedHistory.slice(0, 100)) // Keep only recent 100 records
-      onTicketClick(ticket)
-    },
-    [viewHistory, setViewHistory, onTicketClick]
-  )
+    setViewHistory(updatedHistory.slice(0, 100)) // Keep only recent 100 records
+    onTicketClick(ticket)
+  })
 
-  // Fallback copy function for older browsers
-  const fallbackCopyTextToClipboard = useCallback((text: string) => {
-    if (!text || typeof text !== 'string') {
-      return
-    }
+  // Handle all keyboard shortcuts for the ticket list
+  useTicketListHotkeys({
+    searchResults,
+    selectedIndex,
+    navigate,
+    handleTicketClick
+  })
 
-    try {
-      const textArea = document.createElement('textarea')
-      textArea.value = text
-      textArea.style.top = '0'
-      textArea.style.left = '0'
-      textArea.style.position = 'fixed'
-      textArea.style.opacity = '0'
-      textArea.style.pointerEvents = 'none'
-
-      document.body.appendChild(textArea)
-      textArea.focus()
-      textArea.select()
-
-      document.execCommand('copy')
-      document.body.removeChild(textArea)
-    } catch (error) {
-      console.error('Error in fallback copy function:', error)
-    }
-  }, [])
-
-  const copyTicketUrl = useCallback(
-    async (ticket: JiraTicket) => {
-      try {
-        if (!ticket?.url) {
-          return
-        }
-
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(ticket.url)
-        } else {
-          // Fallback for older browsers or when clipboard API is not available
-          fallbackCopyTextToClipboard(ticket.url)
-        }
-      } catch (error) {
-        console.error('Failed to copy ticket URL:', error)
-        // Fallback for older browsers
-        fallbackCopyTextToClipboard(ticket.url)
-      }
-    },
-    [fallbackCopyTextToClipboard]
-  )
-
-  // Keyboard navigation using react-hotkeys-hook (fallback when search box doesn't have focus)
-  useHotkeys(
-    'ArrowDown',
-    () => {
-      navigate('down', handleTicketClick)
-    },
-    [navigate, handleTicketClick]
-  )
-
-  useHotkeys(
-    'ArrowUp',
-    () => {
-      navigate('up', handleTicketClick)
-    },
-    [navigate, handleTicketClick]
-  )
-
-  useHotkeys(
-    'Enter',
-    () => {
-      navigate('enter', handleTicketClick)
-    },
-    [navigate, handleTicketClick]
-  )
-
-  useHotkeys(
-    'Escape',
-    () => {
-      navigate('escape', handleTicketClick)
-    },
-    [navigate, handleTicketClick]
-  )
-
-  useHotkeys(
-    'ctrl+c,cmd+c',
-    () => {
-      if (searchResults.length === 0 || !searchResults[selectedIndex]) return
-      copyTicketUrl(searchResults[selectedIndex])
-    },
-    [searchResults, selectedIndex, copyTicketUrl]
-  )
-
-  // Number shortcuts (1-9) for quick selection
-  useHotkeys(
-    '1,2,3,4,5,6,7,8,9',
-    (e) => {
-      const numKey = Number.parseInt(e.key)
-      const targetIndex = numKey - 1
-      if (searchResults.length === 0) return
-      if (targetIndex < searchResults.length) {
-        handleTicketClick(searchResults[targetIndex])
-      }
-    },
-    [searchResults, handleTicketClick]
-  )
-
-  // Scroll selected item into view
+  // Scroll selected item into view using data attributes
   useEffect(() => {
     try {
-      const selectedItem = itemRefs.current[selectedIndex]
+      const selectedItem = listRef.current?.querySelector(
+        `[data-ticket-index="${selectedIndex}"]`
+      ) as HTMLElement
       if (selectedItem && listRef.current) {
         const container = listRef.current
         const containerRect = container.getBoundingClientRect()
@@ -248,18 +146,14 @@ export function TicketList({ onTicketClick }: TicketListProps) {
         {searchResults.map((ticket, index) => (
           <div
             key={ticket.key}
-            ref={(el) => {
-              itemRefs.current[index] = el
-            }}
+            data-ticket-index={index}
             className="animate-in slide-in-from-right duration-300 ease-out"
             style={{ animationDelay: `${Math.min(index * 50, 500)}ms` }}>
             <TicketItem
               ticket={ticket}
               isSelected={index === selectedIndex}
               searchQuery={searchQuery}
-              position={index + 1}
               onClick={() => handleTicketClick(ticket)}
-              onCopyUrl={copyTicketUrl}
             />
           </div>
         ))}
