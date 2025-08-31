@@ -17,18 +17,13 @@ export interface SearchSlice {
   searchResults: JiraTicket[]
   error?: string
   searchState: SearchState
-  searchRequestId: number
 
-  // Actions
-  search: (
-    query: string,
-    tickets: JiraTicket[],
-    viewHistory: TicketViewRecord[],
-    userEmail: string,
-    primaryPrefix: string
-  ) => void
+  // Simple state management actions - no complex search logic
+  setSearchQuery: (query: string) => void
+  setSearchResults: (results: JiraTicket[]) => void
+  setSearchError: (error?: string) => void
+  setSearching: () => void
   clearSearch: () => void
-  setError: (error?: string) => void
 }
 
 // Internal scoring result

@@ -67,7 +67,10 @@ export function searchTickets(
   const fuseResults = fuse.search(query.trim())
 
   // Performance optimization: Limit results early
-  const maxResults = Math.min(fuseResults.length, SEARCH_LIMITS.maxResultsBeforeScoring)
+  const maxResults = Math.min(
+    fuseResults.length,
+    SEARCH_LIMITS.maxResultsBeforeScoring
+  )
   const limitedResults = fuseResults.slice(0, maxResults)
 
   // Enhanced scoring context
@@ -101,7 +104,10 @@ export function searchTickets(
 
       // Calculate match bonuses
       const exactMatchBonus = calculateExactMatchBonus(ticket.key, queryLower)
-      const summaryMatchBonus = calculateSummaryMatchBonus(ticket.summary, queryLower)
+      const summaryMatchBonus = calculateSummaryMatchBonus(
+        ticket.summary,
+        queryLower
+      )
 
       return {
         ticket,
@@ -135,7 +141,10 @@ export function searchTickets(
 /**
  * Calculate bonus score for exact key matches
  */
-function calculateExactMatchBonus(ticketKey: string, queryLower: string): number {
+function calculateExactMatchBonus(
+  ticketKey: string,
+  queryLower: string
+): number {
   const ticketKeyLower = ticketKey.toLowerCase()
 
   if (ticketKeyLower === queryLower) {
@@ -150,13 +159,17 @@ function calculateExactMatchBonus(ticketKey: string, queryLower: string): number
 /**
  * Calculate bonus score for summary matches
  */
-function calculateSummaryMatchBonus(summary: string, queryLower: string): number {
+function calculateSummaryMatchBonus(
+  summary: string,
+  queryLower: string
+): number {
   const summaryLower = summary.toLowerCase()
 
   if (summaryLower.includes(queryLower)) {
     const matchPosition = summaryLower.indexOf(queryLower)
     return Math.max(
-      SCORING_WEIGHTS.maxSummaryMatchBonus - matchPosition / SCORING_WEIGHTS.summaryPositionDivisor,
+      SCORING_WEIGHTS.maxSummaryMatchBonus -
+        matchPosition / SCORING_WEIGHTS.summaryPositionDivisor,
       SCORING_WEIGHTS.minSummaryMatchBonus
     )
   }
@@ -172,7 +185,7 @@ export function createFallbackResults(
   tickets: JiraTicket[]
 ): JiraTicket[] {
   const queryLower = query.toLowerCase().trim()
-  
+
   return tickets
     .filter(
       (ticket) =>

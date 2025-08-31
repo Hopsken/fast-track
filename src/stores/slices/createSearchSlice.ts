@@ -1,22 +1,9 @@
 import { StateCreator } from 'zustand'
 
-import {
-  createValidationError,
-  createDataError,
-  getErrorMessage,
-  isRecoverableError
-} from '@/utils/search/errors'
-import { JiraTicket, TicketViewRecord } from '~/storage'
+import { JiraTicket } from '~/storage'
 
 import { NavigationSlice } from './createNavigationSlice'
-import {
-  SearchSlice,
-  SearchContext,
-  SEARCH_LIMITS,
-  getRecentTickets,
-  searchTickets,
-  createFallbackResults
-} from './search'
+import { SearchSlice } from './search'
 
 export type { SearchState, SearchSlice } from './search'
 
@@ -31,86 +18,38 @@ export const createSearchSlice: StateCreator<
   searchResults: [],
   error: undefined,
   searchState: 'idle',
-  searchRequestId: 0,
 
-  // Actions
-  search: (
-    query: string,
-    tickets: JiraTicket[],
-    viewHistory: TicketViewRecord[],
-    userEmail: string,
-    primaryPrefix: string
-  ) => {
-    const currentRequestId = get().searchRequestId + 1
-
-    // Set initial state atomically
+  // Simple state management actions - no complex search logic
+  setSearchQuery: (query: string) => {
     set({
       searchQuery: query,
-      error: undefined,
-      searchState: 'searching',
-      searchRequestId: currentRequestId
+      searchState: query.trim() ? 'searching' : 'idle'
+    })
+  },
+
+  setSearchResults: (results: JiraTicket[]) => {
+    set({
+      searchResults: results,
+      searchState: 'success'
     })
 
-    try {
-      // Validate input data
-      if (!Array.isArray(tickets)) {
-        throw createDataError('tickets must be an array')
-      }
-
-      const searchContext: SearchContext = {
-        viewHistory,
-        userEmail,
-        primaryPrefix
-      }
-
-      let results: JiraTicket[]
-
-      if (!query.trim()) {
-        // Handle empty query - show recent tickets
-        results = getRecentTickets(tickets, searchContext)
-      } else {
-        // Validate search query
-        if (query.length > SEARCH_LIMITS.maxQueryLength) {
-          throw createValidationError('query', 'too long (max 200 characters)')
-        }
-        // Perform actual search
-        results = searchTickets(query, tickets, searchContext)
-      }
-
-      // Only update if this is still the current request
-      const state = get()
-      if (state.searchRequestId === currentRequestId) {
-        set({ searchResults: results, searchState: 'success' })
-
-        // Auto-reset navigation selection
-        const { resetSelection } = state
-        if (resetSelection) resetSelection()
-      }
-    } catch (error) {
-      console.error('Search error:', error)
-      const errorMessage = getErrorMessage(error as Error)
-      const recoverable = isRecoverableError(error as Error)
-
-      // Only update if this is still the current request
-      const state = get()
-      if (state.searchRequestId === currentRequestId) {
-        set({ error: errorMessage, searchState: 'error' })
-
-        // Fallback: return basic filtered results for non-empty queries (only for recoverable errors)
-        if (recoverable && Array.isArray(tickets) && query.trim()) {
-          const fallbackResults = createFallbackResults(query, tickets)
-          set({ searchResults: fallbackResults })
-        } else {
-          set({ searchResults: [] })
-        }
-
-        // Auto-reset navigation selection
-        const { resetSelection } = state
-        if (resetSelection) resetSelection()
-      }
+    // Auto-reset navigation selection when results change
+    const { resetSelection } = get()
+    if (resetSelection) {
+      resetSelection()
     }
   },
 
+  setSearchError: (error?: string) => {
+    set({
+      error,
+      searchState: error ? 'error' : 'idle'
+    })
+  },
+
+  setSearching: () => {
+    set({ searchState: 'searching' })
+  },
 
   clearSearch: () => {
     set({
@@ -119,9 +58,5 @@ export const createSearchSlice: StateCreator<
       error: undefined,
       searchState: 'idle'
     })
-  },
-
-  setError: (error?: string) => {
-    set({ error })
   }
 })

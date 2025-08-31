@@ -40,10 +40,7 @@ export const STORAGE_GROUPS = {
     StorageKey.JiraApiToken,
     StorageKey.JiraUserEmail
   ] as const,
-  USER_DATA: [
-    StorageKey.TicketsData,
-    StorageKey.TicketViewHistory
-  ] as const,
+  USER_DATA: [StorageKey.TicketsData, StorageKey.TicketViewHistory] as const,
   PREFERENCES: [StorageKey.PrimaryIssueKeyPrefix] as const,
   LICENSE: [StorageKey.License] as const
 } as const

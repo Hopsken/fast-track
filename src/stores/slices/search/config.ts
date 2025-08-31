@@ -34,4 +34,3 @@ export const SCORING_WEIGHTS = {
   summaryPositionDivisor: 5,
   minSummaryMatchBonus: 5
 } as const
-

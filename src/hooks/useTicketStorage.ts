@@ -154,4 +154,3 @@ export function useTicketData() {
     totalTickets: tickets.length
   }
 }
-

@@ -38,15 +38,18 @@ export const useSelectedTicket = () =>
     return searchResults[selectedIndex] || null
   })
 export const useSearchError = () => useTicketStore((state) => state.error)
-export const useIsSearching = () => useTicketStore((state) => state.searchState === 'searching')
+export const useIsSearching = () =>
+  useTicketStore((state) => state.searchState === 'searching')
 
 // Action selectors
 export const useSearchActions = () =>
   useTicketStore(
     useShallow((state) => ({
-      search: state.search,
-      clearSearch: state.clearSearch,
-      setError: state.setError
+      setSearchQuery: state.setSearchQuery,
+      setSearchResults: state.setSearchResults,
+      setSearchError: state.setSearchError,
+      setSearching: state.setSearching,
+      clearSearch: state.clearSearch
     }))
   )
 

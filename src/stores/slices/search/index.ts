@@ -1,14 +1,15 @@
 // Barrel exports for search modules
 
 // Types
-export type { SearchState, SearchContext, SearchSlice, ScoredTicket } from './types'
+export type {
+  SearchState,
+  SearchContext,
+  SearchSlice,
+  ScoredTicket
+} from './types'
 
 // Configuration
-export {
-  FUSE_OPTIONS,
-  SEARCH_LIMITS,
-  SCORING_WEIGHTS
-} from './config'
+export { FUSE_OPTIONS, SEARCH_LIMITS, SCORING_WEIGHTS } from './config'
 
 // Search engine functions
 export {

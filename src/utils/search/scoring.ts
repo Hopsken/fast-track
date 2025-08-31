@@ -60,7 +60,6 @@ function _calculateContextScore(
     context.now
   )
 
-
   // 7. TIME-SENSITIVE PATTERNS
   score += calculateTimePatternScore(ticket.status, timeContext)
 
@@ -251,7 +250,6 @@ function calculateProjectScore(
 
   return score
 }
-
 
 function calculateTimePatternScore(
   status: string,

@@ -1,20 +1,31 @@
 import { useState, useEffect, useCallback } from 'react'
-import { HiCog, HiCollection } from 'react-icons/hi'
+import { HiCog } from 'react-icons/hi'
 
+import { initializeSearchOrchestration } from '@/services/search/searchOrchestrator'
 import { ErrorBoundary } from '~/components/ErrorBoundary'
 import { TicketSearchBox } from '~/components/search'
 import { TicketList } from '~/components/tickets'
 import { useTicketSearch } from '~/hooks/useTicketSearch'
 import { JiraTicket } from '~/storage'
+import { useTicketStore } from '~/stores/useTicketStore'
 import { openOptionsPage, openInNewTab } from '~/utils/extension'
 import { getCurrentShortcut, formatShortcut } from '~/utils/shortcuts'
 import '~/assets/styles/main.css'
 
 function App() {
-  const { searchQuery, handleSearch } =
-    useTicketSearch()
+  const { searchQuery, handleSearch } = useTicketSearch()
 
   const [shortcutText, setShortcutText] = useState('Alt+J to search')
+
+  // Initialize search orchestration
+  useEffect(() => {
+    const subscription = initializeSearchOrchestration(useTicketStore)
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
 
   useEffect(() => {
     const loadShortcut = async () => {
@@ -37,7 +48,6 @@ function App() {
     window.close()
   }, [])
 
-
   const handleClearSearch = useCallback(() => {
     handleSearch('')
   }, [handleSearch])
@@ -47,9 +57,12 @@ function App() {
     window.close()
   }
 
-  const handleInputChange = useCallback((value: string) => {
-    handleSearch(value)
-  }, [handleSearch])
+  const handleInputChange = useCallback(
+    (value: string) => {
+      handleSearch(value)
+    },
+    [handleSearch]
+  )
 
   return (
     <div className="animate-in fade-in zoom-in-95 max-h-[600px] w-96 bg-white shadow-lg duration-200 ease-out">
