@@ -26,15 +26,6 @@ export function TicketSearchBox({
   const { navigate } = useNavigationActions()
   const isSearching = useIsSearching()
 
-  useWhyDidYouUpdate('TickerSearchBox', {
-    value,
-    onChange,
-    onClear,
-    onTicketClick,
-    placeholder,
-    autoFocus
-  })
-
   useMount(() => {
     if (autoFocus && inputRef.current) {
       inputRef.current.focus()

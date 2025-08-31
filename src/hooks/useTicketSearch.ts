@@ -1,3 +1,4 @@
+import { useMemoizedFn } from 'ahooks'
 import { useCallback, useEffect } from 'react'
 
 import { debounceSearch } from '@/utils/search/debounce'
@@ -56,7 +57,7 @@ export function useTicketSearch() {
   }, [setSearchHistory])
 
   // Debounced search function to reduce unnecessary computations
-  const debouncedPerformSearch = useCallback(
+  const debouncedPerformSearch = useMemoizedFn(
     debounceSearch((query: string) => {
       actions.performSearch(
         query,
@@ -66,44 +67,36 @@ export function useTicketSearch() {
         userEmail,
         primaryPrefix
       )
-    }, 300),
-    [actions, tickets, searchHistory, viewHistory, userEmail, primaryPrefix]
+    }, 300)
   )
 
-  const handleSearch = useCallback(
-    (query: string) => {
-      try {
-        // Update search query in store immediately for responsive UI
-        actions.setSearchQuery(query)
-        actions.setError(undefined)
+  const handleSearch = useMemoizedFn((query: string) => {
+    try {
+      // Update search query in store immediately for responsive UI
+      actions.setSearchQuery(query)
+      actions.setError(undefined)
 
-        // Set searching state
-        actions.setIsSearching(true)
+      // Set searching state
+      actions.setIsSearching(true)
 
-        // Perform debounced search
-        debouncedPerformSearch(query)
+      // Perform debounced search
+      debouncedPerformSearch(query)
 
-        // Add to search history if query is not empty
-        if (query.trim()) {
-          addToSearchHistory(query.trim())
-        }
-      } catch (error) {
-        console.error('Error handling search:', error)
-        actions.setError('Search failed')
-        actions.setIsSearching(false)
+      // Add to search history if query is not empty
+      if (query.trim()) {
+        addToSearchHistory(query.trim())
       }
-    },
-    [actions, debouncedPerformSearch, addToSearchHistory]
-  )
+    } catch (error) {
+      console.error('Error handling search:', error)
+      actions.setError('Search failed')
+      actions.setIsSearching(false)
+    }
+  })
 
   // Re-search when tickets data changes
   useEffect(() => {
-    if (searchQuery) {
-      handleSearch(searchQuery)
-    } else {
-      // Show recent tickets when no search query
-      debouncedPerformSearch('')
-    }
+    debouncedPerformSearch(searchQuery)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tickets])
 
   return {
