@@ -7,7 +7,8 @@ import {
   useSelectedIndex,
   useSearchResults,
   useNavigationActions,
-  useSearchQuery
+  useSearchQuery,
+  useIsSearching
 } from '~/stores/useTicketStore'
 
 import { TicketItem } from './TicketItem'
@@ -21,6 +22,7 @@ export function TicketList({ onTicketClick }: TicketListProps) {
   const selectedIndex = useSelectedIndex()
   const searchQuery = useSearchQuery()
   const searchResults = useSearchResults() // Use search results from store instead of props
+  const isSearching = useIsSearching()
   const { navigate } = useNavigationActions()
 
   const [viewHistory, setViewHistory] = useStorage(
@@ -70,7 +72,6 @@ export function TicketList({ onTicketClick }: TicketListProps) {
   // Fallback copy function for older browsers
   const fallbackCopyTextToClipboard = useCallback((text: string) => {
     if (!text || typeof text !== 'string') {
-      console.warn('Invalid text provided to fallback copy')
       return
     }
 
@@ -87,17 +88,7 @@ export function TicketList({ onTicketClick }: TicketListProps) {
       textArea.focus()
       textArea.select()
 
-      try {
-        const successful = document.execCommand('copy')
-        if (successful) {
-          console.log(`Copied ticket URL to clipboard (fallback method)`)
-        } else {
-          console.warn('Fallback copy command was unsuccessful')
-        }
-      } catch (err) {
-        console.error('Fallback copy failed:', err)
-      }
-
+      document.execCommand('copy')
       document.body.removeChild(textArea)
     } catch (error) {
       console.error('Error in fallback copy function:', error)
@@ -108,19 +99,15 @@ export function TicketList({ onTicketClick }: TicketListProps) {
     async (ticket: JiraTicket) => {
       try {
         if (!ticket?.url) {
-          console.warn('No URL available for ticket:', ticket?.key)
           return
         }
 
         if (navigator.clipboard && navigator.clipboard.writeText) {
           await navigator.clipboard.writeText(ticket.url)
-          console.log(`Copied ${ticket.key} URL to clipboard`)
         } else {
           // Fallback for older browsers or when clipboard API is not available
           fallbackCopyTextToClipboard(ticket.url)
         }
-
-        // TODO: Add toast notification for better UX
       } catch (error) {
         console.error('Failed to copy ticket URL:', error)
         // Fallback for older browsers
@@ -134,7 +121,6 @@ export function TicketList({ onTicketClick }: TicketListProps) {
   useHotkeys(
     'ArrowDown',
     () => {
-      console.log('🎹 TicketList - ArrowDown hotkey triggered')
       navigate('down', handleTicketClick)
     },
     [navigate, handleTicketClick]
@@ -143,7 +129,6 @@ export function TicketList({ onTicketClick }: TicketListProps) {
   useHotkeys(
     'ArrowUp',
     () => {
-      console.log('🎹 TicketList - ArrowUp hotkey triggered')
       navigate('up', handleTicketClick)
     },
     [navigate, handleTicketClick]
@@ -152,7 +137,6 @@ export function TicketList({ onTicketClick }: TicketListProps) {
   useHotkeys(
     'Enter',
     () => {
-      console.log('🎹 TicketList - Enter hotkey triggered')
       navigate('enter', handleTicketClick)
     },
     [navigate, handleTicketClick]
@@ -161,7 +145,6 @@ export function TicketList({ onTicketClick }: TicketListProps) {
   useHotkeys(
     'Escape',
     () => {
-      console.log('🎹 TicketList - Escape hotkey triggered')
       navigate('escape', handleTicketClick)
     },
     [navigate, handleTicketClick]
@@ -170,10 +153,6 @@ export function TicketList({ onTicketClick }: TicketListProps) {
   useHotkeys(
     'ctrl+c,cmd+c',
     () => {
-      console.log('🎹 TicketList - Copy hotkey triggered', {
-        resultsCount: searchResults.length,
-        selectedIndex
-      })
       if (searchResults.length === 0 || !searchResults[selectedIndex]) return
       copyTicketUrl(searchResults[selectedIndex])
     },
@@ -186,12 +165,6 @@ export function TicketList({ onTicketClick }: TicketListProps) {
     (e) => {
       const numKey = Number.parseInt(e.key)
       const targetIndex = numKey - 1
-      console.log('🎹 TicketList - Number hotkey triggered:', {
-        key: e.key,
-        numKey,
-        targetIndex,
-        resultsCount: searchResults.length
-      })
       if (searchResults.length === 0) return
       if (targetIndex < searchResults.length) {
         handleTicketClick(searchResults[targetIndex])
@@ -221,6 +194,37 @@ export function TicketList({ onTicketClick }: TicketListProps) {
   }, [selectedIndex])
 
   if (searchResults.length === 0) {
+    if (isSearching) {
+      return (
+        <div className="animate-in fade-in flex flex-col items-center justify-center px-6 py-12 text-center duration-300">
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-blue-50">
+            <svg
+              className="h-6 w-6 animate-spin text-blue-500"
+              fill="none"
+              viewBox="0 0 24 24">
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+          <p className="animate-in slide-in-from-bottom-2 mb-1 text-sm font-medium text-gray-700 delay-100 duration-500">
+            Searching tickets...
+          </p>
+          <p className="animate-in slide-in-from-bottom-2 text-xs text-gray-500 delay-200 duration-500">
+            Please wait while we find your tickets
+          </p>
+        </div>
+      )
+    }
+
     return (
       <div className="animate-in fade-in flex flex-col items-center justify-center px-6 py-12 text-center duration-300">
         <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 transition-all duration-300 hover:scale-105 hover:bg-gray-200">

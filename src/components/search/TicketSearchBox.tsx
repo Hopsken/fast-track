@@ -3,7 +3,7 @@ import { useRef, KeyboardEvent } from 'react'
 import { HiSearch, HiX } from 'react-icons/hi'
 
 import { type JiraTicket } from '@/storage'
-import { useNavigationActions } from '~/stores/useTicketStore'
+import { useNavigationActions, useIsSearching } from '~/stores/useTicketStore'
 
 interface TicketSearchBoxProps {
   value: string
@@ -24,6 +24,7 @@ export function TicketSearchBox({
 }: TicketSearchBoxProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const { navigate } = useNavigationActions()
+  const isSearching = useIsSearching()
 
   useWhyDidYouUpdate('TickerSearchBox', {
     value,
@@ -41,32 +42,14 @@ export function TicketSearchBox({
   })
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    console.log('🔍 TicketSearchBox - Key pressed:', {
-      key: e.key,
-      code: e.code,
-      keyCode: e.keyCode,
-      ctrlKey: e.ctrlKey,
-      metaKey: e.metaKey,
-      shiftKey: e.shiftKey,
-      altKey: e.altKey,
-      target: e.target,
-      currentTarget: e.currentTarget
-    })
-
     // Handle Emacs-style navigation
     if (e.ctrlKey && e.key === 'n') {
-      console.log(
-        '🔍 TicketSearchBox - Ctrl+n pressed, preventing default and navigating down'
-      )
       e.preventDefault()
       navigate('down', onTicketClick)
       return
     }
-    
+
     if (e.ctrlKey && e.key === 'p') {
-      console.log(
-        '🔍 TicketSearchBox - Ctrl+p pressed, preventing default and navigating up'
-      )
       e.preventDefault()
       navigate('up', onTicketClick)
       return
@@ -74,56 +57,59 @@ export function TicketSearchBox({
 
     switch (e.key) {
       case 'ArrowDown':
-        console.log(
-          '🔍 TicketSearchBox - Arrow Down pressed, preventing default and navigating'
-        )
         e.preventDefault()
         navigate('down', onTicketClick)
         break
       case 'ArrowUp':
-        console.log(
-          '🔍 TicketSearchBox - Arrow Up pressed, preventing default and navigating'
-        )
         e.preventDefault()
         navigate('up', onTicketClick)
         break
       case 'Enter':
-        console.log(
-          '🔍 TicketSearchBox - Enter pressed, preventing default and navigating'
-        )
         e.preventDefault()
         navigate('enter', onTicketClick)
         break
       case 'Escape':
-        console.log('🔍 TicketSearchBox - Escape pressed, preventing default')
         e.preventDefault()
         if (value) {
-          console.log('🔍 TicketSearchBox - Clearing search value')
           onClear()
         } else {
-          console.log(
-            '🔍 TicketSearchBox - Navigating escape and blurring input'
-          )
           navigate('escape', onTicketClick)
           inputRef.current?.blur()
         }
         break
-      default:
-        console.log('🔍 TicketSearchBox - Unhandled key:', e.key)
     }
   }
 
   return (
     <div className="relative">
       <div className="relative flex items-center rounded-lg border border-gray-200 bg-gray-50 transition-all duration-200 ease-out focus-within:border-blue-300 focus-within:bg-white focus-within:shadow-sm">
-        <HiSearch className="absolute left-3 h-4 w-4 text-gray-400 transition-colors duration-200" />
+        {isSearching ? (
+          <svg
+            className="absolute left-3 h-4 w-4 animate-spin text-blue-500 transition-colors duration-200"
+            fill="none"
+            viewBox="0 0 24 24">
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        ) : (
+          <HiSearch className="absolute left-3 h-4 w-4 text-gray-400 transition-colors duration-200" />
+        )}
         <input
           ref={inputRef}
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
+          placeholder={isSearching ? 'Searching...' : placeholder}
           className="w-full border-0 bg-transparent py-3 pr-10 pl-10 text-sm font-medium placeholder-gray-400 transition-all duration-200 focus:outline-none"
         />
         {value && (

@@ -7,7 +7,14 @@ export interface HighlightedTextProps {
 }
 
 /**
- * Highlights matching text within a string
+ * Escape special regex characters in search query
+ */
+function escapeRegExp(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+/**
+ * Enhanced highlighting with better performance and multi-term support
  */
 export function highlightText(text: string, searchQuery: string): ReactNode[] {
   // Handle edge cases
@@ -19,53 +26,63 @@ export function highlightText(text: string, searchQuery: string): ReactNode[] {
     return [text]
   }
 
-  const query = searchQuery.trim().toLowerCase()
-  const lowerText = text.toLowerCase()
+  const trimmedQuery = searchQuery.trim()
 
   // Avoid infinite loops with empty query after trimming
-  if (!query) {
+  if (!trimmedQuery) {
     return [text]
   }
 
-  const parts: ReactNode[] = []
-  let lastIndex = 0
-  let index = lowerText.indexOf(query)
-  let keyCounter = 0
+  try {
+    // Split query into individual terms for better matching
+    const terms = trimmedQuery
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((term) => term.length > 0)
 
-  // Safety limit to prevent infinite loops
-  const maxMatches = 100
-  let matchCount = 0
-
-  while (index !== -1 && matchCount < maxMatches) {
-    // Add text before the match
-    if (index > lastIndex) {
-      parts.push(text.slice(lastIndex, index))
+    if (terms.length === 0) {
+      return [text]
     }
 
-    // Add highlighted match
-    parts.push(
-      createElement(
-        'mark',
-        {
-          key: keyCounter++,
-          className:
-            'bg-yellow-200 text-yellow-900 px-0.5 rounded-sm font-medium'
-        },
-        text.slice(index, index + query.length)
+    // Create regex pattern for all terms
+    const escapedTerms = terms.map(escapeRegExp)
+    const regex = new RegExp(`(${escapedTerms.join('|')})`, 'gi')
+
+    const parts: ReactNode[] = []
+    const matches = text.split(regex)
+    let keyCounter = 0
+
+    matches.forEach((part) => {
+      if (!part) return
+
+      const isMatch = terms.some(
+        (term) =>
+          part.toLowerCase() === term ||
+          new RegExp(`^${escapeRegExp(term)}$`, 'i').test(part)
       )
-    )
 
-    lastIndex = index + query.length
-    index = lowerText.indexOf(query, lastIndex)
-    matchCount++
+      if (isMatch) {
+        parts.push(
+          createElement(
+            'mark',
+            {
+              key: keyCounter++,
+              className:
+                'bg-yellow-200 text-yellow-900 px-0.5 rounded font-medium'
+            },
+            part
+          )
+        )
+      } else {
+        parts.push(part)
+      }
+    })
+
+    return parts.length > 0 ? parts : [text]
+  } catch (error) {
+    console.warn('Error in highlightText:', error)
+    return [text]
   }
-
-  // Add remaining text
-  if (lastIndex < text.length) {
-    parts.push(text.slice(lastIndex))
-  }
-
-  return parts
 }
 
 /**

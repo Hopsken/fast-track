@@ -46,6 +46,7 @@ Central storage management via `src/storage/index.ts` using Plasmo Storage:
 - **Card Highlighting**: Visual enhancements for Jira cards
 - **Standup Mode**: Enhanced view for daily standups
 - **License Management**: LemonSqueezy integration for pro features
+- **Ticket Search**: High-performance search with debouncing, caching, and context-aware scoring
 
 ### Tech Stack
 - **WXT**: Modern browser extension framework (replaces Plasmo)
@@ -58,6 +59,41 @@ Central storage management via `src/storage/index.ts` using Plasmo Storage:
 - Host permissions: `https://*.atlassian.net/jira*`
 - Storage permission for cross-browser data persistence
 - Omnibox keyword: "jira" for quick issue access
+
+## Ticket Search Architecture
+
+The ticket search system is optimized for performance and user experience with a clean modular architecture:
+
+### Search Components
+- **TicketSearchBox**: Input component with loading states and keyboard navigation
+- **TicketList**: Results display with visual feedback and interaction handlers
+- **TicketItem**: Individual ticket rendering with search term highlighting
+
+### Data Flow
+1. **Collection**: `ticket-collector.content.ts` extracts ticket keys from Jira DOM
+2. **Fetching**: Background service fetches detailed ticket data from Jira API
+3. **Storage**: Tickets stored in browser storage with merge and deduplication
+4. **Search**: Real-time search with debouncing, caching, and intelligent scoring
+
+### Performance Optimizations
+- **Debounced Search**: 300ms delay to reduce computational overhead
+- **Memoized Scoring**: Context scoring cached with 5-minute TTL
+- **Result Caching**: Search results cached with 2-minute TTL for repeated queries
+- **Smart DOM Observation**: Adaptive throttling in ticket collector
+
+### Search Utilities (`src/utils/search/`)
+- **scoring.ts**: Context-aware ticket scoring algorithm with memoization
+- **cache.ts**: TTL-based caching system for search results and scores
+- **debounce.ts**: Search-specific debouncing utilities using lodash-es
+- **highlight.tsx**: Multi-term text highlighting for search results
+
+### State Management
+- **createSearchSlice.ts**: Zustand slice managing search state and operations
+- **createNavigationSlice.ts**: Keyboard navigation using object map pattern
+- **useTicketSearch.ts**: Main hook integrating search functionality
+
+### Navigation Pattern
+Uses object map pattern instead of switch statements for cleaner, more maintainable navigation logic.
 
 ## Coding Best Practices
 

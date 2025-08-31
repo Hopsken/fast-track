@@ -27,17 +27,37 @@ export default defineContentScript({
   main() {
     if (!isJiraWebPage(document)) return
 
-    // Debug runtime availability immediately
     console.log('🔧 DEBUG: Using proxy service for ticket collection')
     console.log('   Extension context:', 'content-script')
     console.log('   Service type:', 'TicketService via proxy-service')
 
-    // Debounce function to avoid excessive collection
+    // Smart debouncing with different delays for different triggers
     let collectTimeout: NodeJS.Timeout
+    let lastCollectionTime = 0
+    let lastUrl = window.location.href
+    let lastTicketCount = 0
 
-    const debounceCollect = (fn: () => void, delay: number) => {
+    // Enhanced debounce with adaptive delays and duplicate prevention
+    const smartDebounceCollect = (
+      trigger: 'dom' | 'url' | 'initial',
+      delay: number
+    ) => {
+      const now = Date.now()
+
+      // Prevent too frequent collections (minimum 5 seconds between collections)
+      if (now - lastCollectionTime < 5000) {
+        return
+      }
+
       clearTimeout(collectTimeout)
-      collectTimeout = setTimeout(fn, delay)
+      collectTimeout = setTimeout(async () => {
+        try {
+          await collectTicketData(trigger)
+          lastCollectionTime = Date.now()
+        } catch (error) {
+          console.error('Collection failed:', error)
+        }
+      }, delay)
     }
 
     /**
@@ -47,7 +67,6 @@ export default defineContentScript({
       // Try data-issue-key attribute first (most reliable)
       let key = element.getAttribute('data-issue-key')
       if (key) {
-        console.log('✅ Found ticket key from data-issue-key:', key)
         return key
       }
 
@@ -56,7 +75,6 @@ export default defineContentScript({
       if (cardId?.startsWith('card-')) {
         const extractedKey = cardId.replace('card-', '')
         if (/^[A-Z]+-\d+$/.test(extractedKey)) {
-          console.log('✅ Found ticket key from card ID:', extractedKey)
           return extractedKey
         }
       }
@@ -66,7 +84,6 @@ export default defineContentScript({
       if (keyElement) {
         const keyText = keyElement.textContent?.trim()
         if (keyText && /^[A-Z]+-\d+$/.test(keyText)) {
-          console.log('✅ Found ticket key from key element:', keyText)
           return keyText
         }
       }
@@ -77,7 +94,6 @@ export default defineContentScript({
         const href = linkElement.getAttribute('href')
         const keyMatch = href?.match(/\/browse\/([A-Z]+-\d+)/)
         if (keyMatch) {
-          console.log('✅ Found ticket key from link:', keyMatch[1])
           return keyMatch[1]
         }
       }
@@ -86,7 +102,7 @@ export default defineContentScript({
     }
 
     /**
-     * Extract unique ticket keys from different page types
+     * Extract unique ticket keys from different page types with smart caching
      */
     const extractTicketKeysFromPage = (): string[] => {
       const ticketKeys = new Set<string>()
@@ -105,7 +121,10 @@ export default defineContentScript({
         const key = extractTicketKey(card)
         if (key) {
           ticketKeys.add(key)
-          console.log(`✅ Card ${index + 1}: Found key ${key}`)
+          if (index < 5) {
+            // Only log first few for brevity
+            console.log(`✅ Card ${index + 1}: Found key ${key}`)
+          }
         }
       })
 
@@ -118,48 +137,66 @@ export default defineContentScript({
         }
       }
 
-      // Method 3: Extract from search results
-      const searchRows = document.querySelectorAll(SELECTORS.searchResults)
-      console.log(`📋 Found ${searchRows.length} search result elements`)
+      // Method 3: Extract from search results (only if we have few cards)
+      if (ticketKeys.size < 10) {
+        const searchRows = document.querySelectorAll(SELECTORS.searchResults)
+        console.log(`📋 Found ${searchRows.length} search result elements`)
 
-      searchRows.forEach((row, index) => {
-        const key = extractTicketKey(row)
-        if (key) {
-          ticketKeys.add(key)
-          console.log(`✅ Search result ${index + 1}: Found key ${key}`)
-        }
-      })
-
-      // Method 4: Extract from all links containing /browse/
-      const browseLinks = document.querySelectorAll(SELECTORS.issueLink)
-      console.log(`🔗 Found ${browseLinks.length} browse links`)
-
-      browseLinks.forEach((link, index) => {
-        const href = link.getAttribute('href')
-        if (href) {
-          const keyMatch = href.match(/\/browse\/([A-Z]+-\d+)/)
-          if (keyMatch) {
-            ticketKeys.add(keyMatch[1])
-            console.log(`✅ Link ${index + 1}: Found key ${keyMatch[1]}`)
+        searchRows.forEach((row, index) => {
+          const key = extractTicketKey(row)
+          if (key) {
+            ticketKeys.add(key)
+            if (index < 3) {
+              // Only log first few for brevity
+              console.log(`✅ Search result ${index + 1}: Found key ${key}`)
+            }
           }
-        }
-      })
+        })
+      }
+
+      // Method 4: Extract from browse links (limited to prevent overwhelming)
+      if (ticketKeys.size < 20) {
+        const browseLinks = Array.from(
+          document.querySelectorAll(SELECTORS.issueLink)
+        ).slice(0, 50) // Limit to first 50 links to prevent performance issues
+        console.log(
+          `🔗 Processing ${browseLinks.length} browse links (limited)`
+        )
+
+        browseLinks.forEach((link) => {
+          const href = link.getAttribute('href')
+          if (href) {
+            const keyMatch = href.match(/\/browse\/([A-Z]+-\d+)/)
+            if (keyMatch) {
+              ticketKeys.add(keyMatch[1])
+            }
+          }
+        })
+      }
 
       const uniqueKeys = Array.from(ticketKeys)
       console.log(
-        `🎯 ExtractTicketKeysFromPage: Extracted ${uniqueKeys.length} unique ticket keys:`,
-        uniqueKeys
+        `🎯 ExtractTicketKeysFromPage: Extracted ${uniqueKeys.length} unique ticket keys`
       )
+
+      // Only log keys if count changed significantly
+      if (Math.abs(uniqueKeys.length - lastTicketCount) > 2) {
+        console.log(
+          'Keys:',
+          uniqueKeys.slice(0, 10),
+          uniqueKeys.length > 10 ? `...and ${uniqueKeys.length - 10} more` : ''
+        )
+        lastTicketCount = uniqueKeys.length
+      }
+
       return uniqueKeys
     }
 
     /**
      * Collect tickets using background script API approach
      */
-    const collectTicketData = async () => {
-      console.log('\n🚀 =========================')
-      console.log('🚀 STARTING TICKET COLLECTION (PROXY SERVICE)')
-      console.log('🚀 =========================')
+    const collectTicketData = async (trigger: 'dom' | 'url' | 'initial') => {
+      console.log(`\n🚀 STARTING TICKET COLLECTION (${trigger.toUpperCase()})`)
 
       try {
         // Step 1: Extract ticket keys from DOM
@@ -184,20 +221,27 @@ export default defineContentScript({
 
         // Step 3: Process collected tickets
         if (tickets.length > 0) {
-          console.log(`\n✅ SUCCESS: Collected ${tickets.length} tickets`)
-          console.log('📊 Ticket Summary:')
-          console.table(
-            tickets.map((ticket) => ({
-              Key: ticket.key,
-              Summary:
-                ticket.summary.substring(0, 50) +
-                (ticket.summary.length > 50 ? '...' : ''),
-              Status: ticket.status || 'Unknown',
-              Assignee: ticket.assignee || 'Unassigned',
-              Priority: ticket.priority || 'None',
-              Project: ticket.projectKey
-            }))
-          )
+          console.log(`✅ SUCCESS: Collected ${tickets.length} tickets`)
+
+          // Only show detailed table for significant collections
+          if (tickets.length > 5 || trigger === 'initial') {
+            console.log('📊 Ticket Summary:')
+            console.table(
+              tickets.slice(0, 10).map((ticket) => ({
+                Key: ticket.key,
+                Summary:
+                  ticket.summary.substring(0, 50) +
+                  (ticket.summary.length > 50 ? '...' : ''),
+                Status: ticket.status || 'Unknown',
+                Assignee: ticket.assignee || 'Unassigned',
+                Priority: ticket.priority || 'None',
+                Project: ticket.projectKey
+              }))
+            )
+            if (tickets.length > 10) {
+              console.log(`... and ${tickets.length - 10} more tickets`)
+            }
+          }
 
           console.log('💾 Merging tickets with existing data...')
           await mergeTicketsData(tickets)
@@ -212,14 +256,10 @@ export default defineContentScript({
         if (error instanceof Error) {
           console.error('   Error name:', error.name)
           console.error('   Error message:', error.message)
-          if (error.stack) {
-            console.error('   Stack trace:', error.stack)
-          }
         }
       }
 
-      console.log('🏁 TICKET COLLECTION COMPLETED')
-      console.log('🏁 =========================\n')
+      console.log('🏁 TICKET COLLECTION COMPLETED\n')
     }
 
     /**
@@ -242,9 +282,6 @@ export default defineContentScript({
       existingTickets.forEach((ticket: JiraTicket) => {
         ticketMap.set(ticket.key, ticket)
       })
-      console.log(
-        `💾 MergeTicketsData: Added ${existingTickets.length} existing tickets to map`
-      )
 
       // Merge new tickets
       let updatedCount = 0
@@ -262,14 +299,10 @@ export default defineContentScript({
           }
           ticketMap.set(newTicket.key, merged)
           updatedCount++
-          console.log(
-            `💾 Updated ticket ${newTicket.key} (view count: ${merged.viewCount})`
-          )
         } else {
           // Add new ticket
           ticketMap.set(newTicket.key, newTicket)
           addedCount++
-          console.log(`💾 Added new ticket ${newTicket.key}`)
         }
       })
 
@@ -293,18 +326,58 @@ export default defineContentScript({
       console.log('💾 MergeTicketsData: Successfully saved to storage')
     }
 
-    // Initial collection on load
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        debounceCollect(collectTicketData, 2000)
-      })
-    } else {
-      debounceCollect(collectTicketData, 2000)
+    // Enhanced URL change detection
+    const checkUrlChange = () => {
+      if (window.location.href !== lastUrl) {
+        console.log('🔄 URL changed from', lastUrl, 'to', window.location.href)
+        lastUrl = window.location.href
+        smartDebounceCollect('url', 1500) // Faster response for URL changes
+      }
     }
 
-    // Observe for dynamic content changes (SPA navigation)
-    const observer = new MutationObserver(() => {
-      debounceCollect(collectTicketData, 3000)
+    // Initial collection with longer delay to let page load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        smartDebounceCollect('initial', 3000)
+      })
+    } else {
+      smartDebounceCollect('initial', 2000)
+    }
+
+    // Smart DOM observation with throttling
+    let observationCount = 0
+    const MAX_OBSERVATIONS = 50 // Limit observations per session
+
+    const observer = new MutationObserver((mutations) => {
+      observationCount++
+
+      // Only process mutations that might contain ticket data
+      const relevantMutation = mutations.some((mutation) => {
+        const target = mutation.target as Element
+        return (
+          target.nodeType === Node.ELEMENT_NODE &&
+          (target.matches?.(SELECTORS.cards) ||
+            target.querySelector?.(SELECTORS.cards) ||
+            target.matches?.(SELECTORS.searchResults) ||
+            target.querySelector?.(SELECTORS.searchResults))
+        )
+      })
+
+      if (relevantMutation && observationCount < MAX_OBSERVATIONS) {
+        smartDebounceCollect('dom', 4000) // Longer delay for DOM changes
+      } else if (observationCount >= MAX_OBSERVATIONS) {
+        console.log('⚠️ DOM observation limit reached, reducing frequency')
+        observer.disconnect()
+        // Reconnect with reduced sensitivity after a delay
+        setTimeout(() => {
+          observationCount = 0
+          observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: false
+          })
+        }, 30000) // 30 second break
+      }
     })
 
     observer.observe(document.body, {
@@ -313,20 +386,15 @@ export default defineContentScript({
       attributes: false
     })
 
-    // Handle navigation changes
-    let lastUrl = window.location.href
-    const checkUrlChange = () => {
-      if (window.location.href !== lastUrl) {
-        lastUrl = window.location.href
-        debounceCollect(collectTicketData, 2000)
-      }
-    }
+    // URL change detection with reduced frequency
+    const urlCheckInterval = setInterval(checkUrlChange, 2000) // Check every 2 seconds instead of 1
 
-    setInterval(checkUrlChange, 1000)
-
+    // Cleanup function
     return () => {
       observer.disconnect()
       clearTimeout(collectTimeout)
+      clearInterval(urlCheckInterval)
+      console.log('🧹 Ticket collector cleanup completed')
     }
   }
 })

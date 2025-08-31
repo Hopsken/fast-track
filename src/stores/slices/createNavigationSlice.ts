@@ -35,87 +35,40 @@ export const createNavigationSlice: StateCreator<
   ) => {
     const { selectedIndex, searchResults } = get()
 
-    console.log('🎯 NavigationSlice - Navigate called:', {
-      direction,
-      selectedIndex,
-      resultsCount: searchResults.length,
-      hasOnTicketClick: !!onTicketClick
-    })
-
-    switch (direction) {
-      case 'down':
-        if (searchResults.length === 0) {
-          console.log('🎯 NavigationSlice - Down: No search results available')
-          return
-        }
-        const newDownIndex = Math.min(
-          selectedIndex + 1,
-          searchResults.length - 1
-        )
-        console.log(
-          '🎯 NavigationSlice - Down: Moving from',
-          selectedIndex,
-          'to',
-          newDownIndex
-        )
-        set({ selectedIndex: newDownIndex })
-        break
-
-      case 'up':
-        if (searchResults.length === 0) {
-          console.log('🎯 NavigationSlice - Up: No search results available')
-          return
-        }
-        const newUpIndex = Math.max(selectedIndex - 1, 0)
-        console.log(
-          '🎯 NavigationSlice - Up: Moving from',
-          selectedIndex,
-          'to',
-          newUpIndex
-        )
-        set({ selectedIndex: newUpIndex })
-        break
-
-      case 'enter':
-        if (searchResults.length === 0 || !searchResults[selectedIndex]) {
-          console.log(
-            '🎯 NavigationSlice - Enter: No ticket at index',
-            selectedIndex
-          )
-          return
-        }
-        console.log(
-          '🎯 NavigationSlice - Enter: Clicking ticket at index',
-          selectedIndex,
-          searchResults[selectedIndex]
-        )
+    const navigationActions = {
+      down: () => {
+        if (searchResults.length === 0) return
+        const newIndex = Math.min(selectedIndex + 1, searchResults.length - 1)
+        set({ selectedIndex: newIndex })
+      },
+      up: () => {
+        if (searchResults.length === 0) return
+        const newIndex = Math.max(selectedIndex - 1, 0)
+        set({ selectedIndex: newIndex })
+      },
+      enter: () => {
+        if (searchResults.length === 0 || !searchResults[selectedIndex]) return
         onTicketClick?.(searchResults[selectedIndex])
-        break
-
-      case 'escape':
-        console.log('🎯 NavigationSlice - Escape: Resetting selection to 0')
+      },
+      escape: () => {
         set({ selectedIndex: 0 })
-        break
+      }
+    }
+
+    const action = navigationActions[direction]
+    if (action) {
+      action()
     }
   },
 
   setSelectedIndex: (index: number) => {
     const { searchResults } = get()
     if (index >= 0 && index < searchResults.length) {
-      console.log('🎯 NavigationSlice - Setting selected index:', index)
       set({ selectedIndex: index })
-    } else {
-      console.warn(
-        '🎯 NavigationSlice - Invalid index:',
-        index,
-        'for results count:',
-        searchResults.length
-      )
     }
   },
 
   resetSelection: () => {
-    console.log('🎯 NavigationSlice - Resetting selection to 0')
     set({ selectedIndex: 0 })
   }
 })

@@ -1,5 +1,5 @@
 import { MouseEvent, KeyboardEvent } from 'react'
-import { HiCog6Tooth, HiClipboard } from 'react-icons/hi2'
+import { HiClipboard } from 'react-icons/hi2'
 
 import { JiraTicket } from '~/storage'
 import { HighlightedText } from '~/utils/text-highlighting'
@@ -134,25 +134,6 @@ function getStatusColor(status: string): string {
   }
   if (statusLower.includes('blocked') || statusLower.includes('impediment')) {
     return 'bg-red-400'
-  }
-  return 'bg-gray-400'
-}
-
-function getPriorityColor(priority?: string): string {
-  if (!priority) return 'bg-gray-400'
-
-  const priorityLower = priority.toLowerCase()
-  if (priorityLower.includes('highest') || priorityLower.includes('critical')) {
-    return 'bg-red-500'
-  }
-  if (priorityLower.includes('high')) {
-    return 'bg-orange-500'
-  }
-  if (priorityLower.includes('medium')) {
-    return 'bg-yellow-500'
-  }
-  if (priorityLower.includes('low')) {
-    return 'bg-green-500'
   }
   return 'bg-gray-400'
 }

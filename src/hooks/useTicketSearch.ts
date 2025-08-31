@@ -1,5 +1,6 @@
 import { useCallback, useEffect } from 'react'
 
+import { debounceSearch } from '@/utils/search/debounce'
 import { useStorage, StorageKey } from '~/storage'
 import {
   useSearchQuery,
@@ -34,7 +35,6 @@ export function useTicketSearch() {
       try {
         if (!query.trim()) return
 
-        console.log('🔍 useTicketSearch - Adding to search history:', query)
         const newHistory = [
           query,
           ...searchHistory.filter((h) => h !== query)
@@ -49,31 +49,39 @@ export function useTicketSearch() {
 
   const clearSearchHistory = useCallback(async () => {
     try {
-      console.log('🔍 useTicketSearch - Clearing search history')
       setSearchHistory([])
     } catch (error) {
       console.error('Error clearing search history:', error)
     }
   }, [setSearchHistory])
 
+  // Debounced search function to reduce unnecessary computations
+  const debouncedPerformSearch = useCallback(
+    debounceSearch((query: string) => {
+      actions.performSearch(
+        query,
+        tickets,
+        searchHistory,
+        viewHistory,
+        userEmail,
+        primaryPrefix
+      )
+    }, 300),
+    [actions, tickets, searchHistory, viewHistory, userEmail, primaryPrefix]
+  )
+
   const handleSearch = useCallback(
     (query: string) => {
       try {
-        console.log('🔍 useTicketSearch - Handling search:', query)
-
-        // Update search query in store
+        // Update search query in store immediately for responsive UI
         actions.setSearchQuery(query)
         actions.setError(undefined)
 
-        // Perform search with current data
-        actions.performSearch(
-          query,
-          tickets,
-          searchHistory,
-          viewHistory,
-          userEmail,
-          primaryPrefix
-        )
+        // Set searching state
+        actions.setIsSearching(true)
+
+        // Perform debounced search
+        debouncedPerformSearch(query)
 
         // Add to search history if query is not empty
         if (query.trim()) {
@@ -82,22 +90,20 @@ export function useTicketSearch() {
       } catch (error) {
         console.error('Error handling search:', error)
         actions.setError('Search failed')
+        actions.setIsSearching(false)
       }
     },
-    [
-      actions,
-      tickets,
-      searchHistory,
-      viewHistory,
-      userEmail,
-      primaryPrefix,
-      addToSearchHistory
-    ]
+    [actions, debouncedPerformSearch, addToSearchHistory]
   )
 
+  // Re-search when tickets data changes
   useEffect(() => {
-    console.log('🔍 useTicketSearch - Tickets data changed:', tickets)
-    handleSearch(searchQuery)
+    if (searchQuery) {
+      handleSearch(searchQuery)
+    } else {
+      // Show recent tickets when no search query
+      debouncedPerformSearch('')
+    }
   }, [tickets])
 
   return {
