@@ -11,10 +11,9 @@ import { getCurrentShortcut, formatShortcut } from '~/utils/shortcuts'
 import '~/assets/styles/main.css'
 
 function App() {
-  const { searchQuery, searchHistory, handleSearch } =
+  const { searchQuery, handleSearch } =
     useTicketSearch()
 
-  const [showHistory, setShowHistory] = useState(false)
   const [shortcutText, setShortcutText] = useState('Alt+J to search')
 
   useEffect(() => {
@@ -38,14 +37,9 @@ function App() {
     window.close()
   }, [])
 
-  const handleHistoryItemClick = (query: string) => {
-    handleSearch(query)
-    setShowHistory(false)
-  }
 
   const handleClearSearch = useCallback(() => {
     handleSearch('')
-    setShowHistory(false)
   }, [handleSearch])
 
   const handleOpenOptionsPage = () => {
@@ -55,8 +49,7 @@ function App() {
 
   const handleInputChange = useCallback((value: string) => {
     handleSearch(value)
-    setShowHistory(false)
-  }, [])
+  }, [handleSearch])
 
   return (
     <div className="animate-in fade-in zoom-in-95 max-h-[600px] w-96 bg-white shadow-lg duration-200 ease-out">

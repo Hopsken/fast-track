@@ -23,7 +23,6 @@ export enum StorageKey {
 
   // Data
   TicketsData = 'tickets-data',
-  SearchHistory = 'search-history',
   TicketViewHistory = 'ticket-view-history'
 }
 
@@ -43,7 +42,6 @@ export const STORAGE_GROUPS = {
   ] as const,
   USER_DATA: [
     StorageKey.TicketsData,
-    StorageKey.SearchHistory,
     StorageKey.TicketViewHistory
   ] as const,
   PREFERENCES: [StorageKey.PrimaryIssueKeyPrefix] as const,

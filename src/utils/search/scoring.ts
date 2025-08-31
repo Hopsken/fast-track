@@ -8,7 +8,6 @@ export interface ScoringContext {
   viewHistory: TicketViewRecord[]
   userEmail: string
   primaryPrefix: string
-  searchHistory: string[]
   tickets: JiraTicket[]
 }
 
@@ -61,12 +60,8 @@ function _calculateContextScore(
     context.now
   )
 
-  // 7. SEARCH CONTEXT ADJUSTMENTS (only in search mode)
-  if (context.isSearchMode) {
-    score += calculateSearchContextScore(ticket, context.searchHistory)
-  }
 
-  // 8. TIME-SENSITIVE PATTERNS
+  // 7. TIME-SENSITIVE PATTERNS
   score += calculateTimePatternScore(ticket.status, timeContext)
 
   return Math.max(score, 0) // Ensure non-negative scores
@@ -257,23 +252,6 @@ function calculateProjectScore(
   return score
 }
 
-function calculateSearchContextScore(
-  ticket: JiraTicket,
-  searchHistory: string[]
-): number {
-  // Boost recently searched for similar terms
-  const recentSearches = searchHistory.slice(0, 5)
-  const hasRelatedSearch = recentSearches.some((search) => {
-    const searchLower = search.toLowerCase()
-    return (
-      ticket.key.toLowerCase().includes(searchLower) ||
-      ticket.summary.toLowerCase().includes(searchLower) ||
-      (ticket.assignee && ticket.assignee.toLowerCase().includes(searchLower))
-    )
-  })
-
-  return hasRelatedSearch ? 8 : 0
-}
 
 function calculateTimePatternScore(
   status: string,
@@ -312,6 +290,6 @@ export const calculateContextScore = memoizeWithTTL(
   (ticket: JiraTicket, context: ScoringContext) => {
     // Create cache key based on ticket and context that affects scoring
     // 30-minute time buckets
-    return `${ticket.key}-${context.isSearchMode}-${context.userEmail}-${context.primaryPrefix}-${context.viewHistory.length}-${context.searchHistory.length}-${Math.floor(context.now / (30 * 60 * 1000))}`
+    return `${ticket.key}-${context.isSearchMode}-${context.userEmail}-${context.primaryPrefix}-${context.viewHistory.length}-${Math.floor(context.now / (30 * 60 * 1000))}`
   }
 )

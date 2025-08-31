@@ -35,5 +35,3 @@ export const SCORING_WEIGHTS = {
   minSummaryMatchBonus: 5
 } as const
 
-// Search history configuration
-export const SEARCH_HISTORY_LIMIT = 10

@@ -7,8 +7,7 @@ export type { SearchState, SearchContext, SearchSlice, ScoredTicket } from './ty
 export {
   FUSE_OPTIONS,
   SEARCH_LIMITS,
-  SCORING_WEIGHTS,
-  SEARCH_HISTORY_LIMIT
+  SCORING_WEIGHTS
 } from './config'
 
 // Search engine functions

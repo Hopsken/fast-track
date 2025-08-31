@@ -3,7 +3,6 @@ import { useStorage, StorageKey } from '~/storage'
 
 export function SearchDataActions() {
   const [, setTicketsData] = useStorage(StorageKey.TicketsData, [])
-  const [, setSearchHistory] = useStorage(StorageKey.SearchHistory, [])
   const [, setViewHistory] = useStorage(StorageKey.TicketViewHistory, [])
 
   const clearAllData = async () => {
@@ -13,14 +12,7 @@ export function SearchDataActions() {
       )
     ) {
       await setTicketsData([])
-      await setSearchHistory([])
       await setViewHistory([])
-    }
-  }
-
-  const clearSearchHistory = async () => {
-    if (confirm('Clear search history?')) {
-      await setSearchHistory([])
     }
   }
 
@@ -29,13 +21,8 @@ export function SearchDataActions() {
       <FieldControl
         size="lg"
         title="Data Management"
-        description="Manage your collected ticket data and search history">
+        description="Manage your collected ticket data and view history">
         <div className="space-y-2">
-          <button
-            onClick={clearSearchHistory}
-            className="w-full rounded-lg border border-orange-200 bg-orange-50 px-4 py-2 text-sm text-orange-700 transition-colors hover:bg-orange-100">
-            Clear Search History
-          </button>
           <button
             onClick={clearAllData}
             className="w-full rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700 transition-colors hover:bg-red-100">

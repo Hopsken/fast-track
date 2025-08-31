@@ -8,7 +8,6 @@ export interface SearchContext {
   viewHistory: TicketViewRecord[]
   userEmail: string
   primaryPrefix: string
-  searchHistory: string[]
 }
 
 // Search slice interface
@@ -16,7 +15,6 @@ export interface SearchSlice {
   // State
   searchQuery: string
   searchResults: JiraTicket[]
-  searchHistory: string[]
   error?: string
   searchState: SearchState
   searchRequestId: number
@@ -25,12 +23,10 @@ export interface SearchSlice {
   search: (
     query: string,
     tickets: JiraTicket[],
-    searchHistory: string[],
     viewHistory: TicketViewRecord[],
     userEmail: string,
     primaryPrefix: string
   ) => void
-  addToSearchHistory: (query: string, currentHistory: string[]) => string[]
   clearSearch: () => void
   setError: (error?: string) => void
 }

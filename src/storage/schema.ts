@@ -26,7 +26,6 @@ export type StorageValueRecord = {
   [StorageKey.JiraUserEmail]: string
   [StorageKey.PrimaryIssueKeyPrefix]: string
   [StorageKey.TicketsData]: JiraTicket[]
-  [StorageKey.SearchHistory]: string[]
   [StorageKey.TicketViewHistory]: TicketViewRecord[]
 }
 
@@ -45,6 +44,5 @@ export const STORAGE_DEFAULTS: { [K in StorageKey]: StorageValueRecord[K] } = {
   [StorageKey.JiraUserEmail]: '',
   [StorageKey.PrimaryIssueKeyPrefix]: '',
   [StorageKey.TicketsData]: [],
-  [StorageKey.SearchHistory]: [],
   [StorageKey.TicketViewHistory]: []
 }

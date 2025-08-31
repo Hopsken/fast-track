@@ -1,5 +1,4 @@
 import { useMemoizedFn } from 'ahooks'
-import { useCallback } from 'react'
 
 import { debounceSearch } from '@/utils/search/debounce'
 import { useStorage, StorageKey } from '~/storage'
@@ -15,10 +14,6 @@ export function useTicketSearch() {
   // Get data from storage (source of truth for tickets data)
   const [tickets] = useStorage(StorageKey.TicketsData, [])
 
-  const [searchHistory, setSearchHistory] = useStorage(
-    StorageKey.SearchHistory,
-    []
-  )
   const [viewHistory] = useStorage(StorageKey.TicketViewHistory, [])
   const [userEmail] = useStorage(StorageKey.JiraUserEmail, '')
   const [primaryPrefix] = useStorage(StorageKey.PrimaryIssueKeyPrefix, '')
@@ -30,31 +25,6 @@ export function useTicketSearch() {
   const isSearching = useIsSearching()
   const actions = useSearchActions()
 
-  // Enhanced addToSearchHistory that updates both store and storage
-  const addToSearchHistory = useCallback(
-    async (query: string) => {
-      try {
-        if (!query.trim()) return
-
-        const newHistory = [
-          query,
-          ...searchHistory.filter((h) => h !== query)
-        ].slice(0, 10)
-        setSearchHistory(newHistory)
-      } catch (error) {
-        console.error('Error adding to search history:', error)
-      }
-    },
-    [searchHistory, setSearchHistory]
-  )
-
-  const clearSearchHistory = useCallback(async () => {
-    try {
-      setSearchHistory([])
-    } catch (error) {
-      console.error('Error clearing search history:', error)
-    }
-  }, [setSearchHistory])
 
   // Debounced search function to reduce unnecessary computations
   const debouncedSearch = useMemoizedFn(
@@ -62,7 +32,6 @@ export function useTicketSearch() {
       actions.search(
         query,
         tickets,
-        searchHistory,
         viewHistory,
         userEmail,
         primaryPrefix
@@ -75,11 +44,6 @@ export function useTicketSearch() {
       // Perform debounced search with unified action
       // This handles all state updates atomically
       debouncedSearch(query)
-
-      // Add to search history if query is not empty
-      if (query.trim()) {
-        addToSearchHistory(query.trim())
-      }
     } catch (error) {
       console.error('Error handling search:', error)
       actions.setError('Search failed')
@@ -93,9 +57,7 @@ export function useTicketSearch() {
   return {
     searchQuery,
     searchResults,
-    searchHistory,
     handleSearch,
-    clearSearchHistory,
     error,
     isSearching
   }

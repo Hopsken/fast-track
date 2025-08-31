@@ -78,11 +78,6 @@ export const storageItems = {
     fallback: STORAGE_DEFAULTS[StorageKey.TicketsData]
   }),
 
-  [StorageKey.SearchHistory]: storage.defineItem<
-    StorageValueRecord[StorageKey.SearchHistory]
-  >(`local:${StorageKey.SearchHistory}`, {
-    fallback: STORAGE_DEFAULTS[StorageKey.SearchHistory]
-  }),
 
   [StorageKey.TicketViewHistory]: storage.defineItem<
     StorageValueRecord[StorageKey.TicketViewHistory]

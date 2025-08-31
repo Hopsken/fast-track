@@ -13,7 +13,6 @@ import {
   SearchSlice,
   SearchContext,
   SEARCH_LIMITS,
-  SEARCH_HISTORY_LIMIT,
   getRecentTickets,
   searchTickets,
   createFallbackResults
@@ -30,7 +29,6 @@ export const createSearchSlice: StateCreator<
   // Initial state
   searchQuery: '',
   searchResults: [],
-  searchHistory: [],
   error: undefined,
   searchState: 'idle',
   searchRequestId: 0,
@@ -39,7 +37,6 @@ export const createSearchSlice: StateCreator<
   search: (
     query: string,
     tickets: JiraTicket[],
-    searchHistory: string[],
     viewHistory: TicketViewRecord[],
     userEmail: string,
     primaryPrefix: string
@@ -63,8 +60,7 @@ export const createSearchSlice: StateCreator<
       const searchContext: SearchContext = {
         viewHistory,
         userEmail,
-        primaryPrefix,
-        searchHistory
+        primaryPrefix
       }
 
       let results: JiraTicket[]
@@ -115,10 +111,6 @@ export const createSearchSlice: StateCreator<
     }
   },
 
-  addToSearchHistory: (query: string, currentHistory: string[]): string[] => {
-    if (!query.trim()) return currentHistory
-    return [query, ...currentHistory.filter((h) => h !== query)].slice(0, SEARCH_HISTORY_LIMIT)
-  },
 
   clearSearch: () => {
     set({
