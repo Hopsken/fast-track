@@ -31,6 +31,7 @@ export class JiraIssueService {
           'id',
           'key',
           'summary',
+          'issuetype',
           'status',
           'assignee',
           'priority',
@@ -102,6 +103,7 @@ export class JiraIssueService {
           'id',
           'key',
           'summary',
+          'issuetype',
           'status',
           'assignee',
           'priority',
@@ -180,9 +182,33 @@ export class JiraIssueService {
       id: issue.id,
       key: issue.key,
       summary: issue.fields?.summary || '',
-      status: issue.fields?.status?.name || '',
-      assignee: issue.fields?.assignee?.displayName,
-      priority: issue.fields?.priority?.name,
+      issueType: {
+        name: issue.fields?.issuetype?.name || '',
+        iconUrl: issue.fields?.issuetype?.iconUrl || '',
+        description: issue.fields?.issuetype?.description || ''
+      },
+      status: {
+        name: issue.fields?.status?.name || '',
+        description: issue.fields?.status?.description || '',
+        statusCategory: {
+          key: issue.fields?.status?.statusCategory?.key || '',
+          colorName: issue.fields?.status?.statusCategory?.colorName || '',
+          name: issue.fields?.status?.statusCategory?.name || ''
+        }
+      },
+      assignee: issue.fields?.assignee
+        ? {
+            displayName: issue.fields.assignee.displayName || '',
+            emailAddress: issue.fields.assignee.emailAddress || '',
+            avatarUrls: issue.fields.assignee.avatarUrls?.['48x48'] || ''
+          }
+        : undefined,
+      priority: issue.fields?.priority
+        ? {
+            name: issue.fields.priority.name || '',
+            iconUrl: issue.fields.priority.iconUrl || ''
+          }
+        : undefined,
       projectKey: issue.fields?.project?.key || '',
       boardName: issue.fields?.project?.name || '',
       url: `${config.baseUrl}/browse/${issue.key}`,

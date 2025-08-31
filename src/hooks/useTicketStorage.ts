@@ -121,7 +121,10 @@ export function useTicketData() {
           (ticket) =>
             ticket.key.toLowerCase().includes(lowerQuery) ||
             ticket.summary.toLowerCase().includes(lowerQuery) ||
-            ticket.assignee?.toLowerCase().includes(lowerQuery) ||
+            ticket.assignee?.displayName?.toLowerCase().includes(lowerQuery) ||
+            ticket.assignee?.emailAddress?.toLowerCase().includes(lowerQuery) ||
+            ticket.status?.name?.toLowerCase().includes(lowerQuery) ||
+            ticket.priority?.name?.toLowerCase().includes(lowerQuery) ||
             ticket.projectKey.toLowerCase().includes(lowerQuery)
         )
         .slice(0, 50) // Limit search results

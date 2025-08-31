@@ -1,14 +1,43 @@
 /**
  * Storage-related type definitions
  */
+export interface JiraIssueType {
+  name: string
+  iconUrl: string
+  description: string
+}
+
+export interface JiraStatusCategory {
+  key: string
+  colorName: string
+  name: string
+}
+
+export interface JiraStatus {
+  name: string
+  description: string
+  statusCategory: JiraStatusCategory
+}
+
+export interface JiraAssignee {
+  displayName: string
+  emailAddress: string
+  avatarUrls: string
+}
+
+export interface JiraPriority {
+  name: string
+  iconUrl: string
+}
 
 export interface JiraTicket {
   id: string
   key: string
   summary: string
-  status: string
-  assignee?: string
-  priority?: string
+  issueType: JiraIssueType
+  status: JiraStatus
+  assignee?: JiraAssignee
+  priority?: JiraPriority
   projectKey: string
   boardName?: string
   url: string

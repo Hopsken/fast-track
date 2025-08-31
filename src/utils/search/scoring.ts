@@ -1,4 +1,10 @@
-import type { JiraTicket, TicketViewRecord } from '~/storage'
+import type {
+  JiraTicket,
+  TicketViewRecord,
+  JiraStatus,
+  JiraPriority,
+  JiraAssignee
+} from '~/storage'
 
 import { memoizeWithTTL } from './cache'
 
@@ -115,18 +121,26 @@ function calculateFrequencyScore(
 }
 
 function calculateAssigneeScore(
-  assignee: string | undefined,
+  assignee: JiraAssignee | undefined,
   userEmail: string,
   timeContext: TimeContext
 ): number {
   if (!assignee || !userEmail) return 0
 
-  const assigneeEmail = assignee.toLowerCase()
+  const assigneeEmail = (
+    assignee.emailAddress ||
+    assignee.displayName ||
+    ''
+  ).toLowerCase()
   const currentUserEmail = userEmail.toLowerCase()
 
   if (
     assigneeEmail === currentUserEmail ||
-    assigneeEmail.includes(currentUserEmail.split('@')[0])
+    assigneeEmail.includes(currentUserEmail.split('@')[0]) ||
+    (assignee.displayName &&
+      assignee.displayName
+        .toLowerCase()
+        .includes(currentUserEmail.split('@')[0]))
   ) {
     let score = 25 // Own tickets get high priority
 
@@ -142,11 +156,29 @@ function calculateAssigneeScore(
 }
 
 function calculateStatusScore(
-  status: string,
+  status: JiraStatus,
   timeContext: TimeContext
 ): number {
-  const statusLower = status.toLowerCase()
+  const statusLower = (status?.name || '').toLowerCase()
+  const statusCategory = status?.statusCategory?.name?.toLowerCase() || ''
 
+  // Use Jira's native status categories first
+  if (statusCategory === 'in_progress') {
+    let score = 20 // Active work gets highest priority
+
+    // Extra boost on weekdays for active tickets
+    if (timeContext.isWeekday) {
+      score += 8
+    }
+
+    return score
+  } else if (statusCategory === 'done') {
+    return -10 // Reduce closed tickets priority
+  } else if (statusCategory === 'todo') {
+    return 8 // Ready to start tickets
+  }
+
+  // Fallback to name-based detection for more granular scoring
   if (
     statusLower.includes('progress') ||
     statusLower.includes('development') ||
@@ -174,12 +206,6 @@ function calculateStatusScore(
 
     return score
   } else if (
-    statusLower.includes('todo') ||
-    statusLower.includes('backlog') ||
-    statusLower.includes('ready')
-  ) {
-    return 8 // Ready to start tickets
-  } else if (
     statusLower.includes('blocked') ||
     statusLower.includes('impediment')
   ) {
@@ -195,10 +221,10 @@ function calculateStatusScore(
   return 0
 }
 
-function calculatePriorityScore(priority: string | undefined): number {
-  if (!priority) return 0
+function calculatePriorityScore(priority: JiraPriority | undefined): number {
+  if (!priority?.name) return 0
 
-  const priorityLower = priority.toLowerCase()
+  const priorityLower = priority.name.toLowerCase()
 
   if (priorityLower.includes('highest') || priorityLower.includes('critical')) {
     return 25
@@ -257,10 +283,11 @@ function calculateProjectScore({
 }
 
 function calculateTimePatternScore(
-  status: string,
+  status: JiraStatus,
   timeContext: TimeContext
 ): number {
-  const statusLower = status.toLowerCase()
+  const statusLower = (status?.name || '').toLowerCase()
+  const statusCategory = status?.statusCategory?.name?.toLowerCase() || ''
 
   // End of week cleanup - boost review/testing tickets on Friday
   if (timeContext.isFriday) {
@@ -272,6 +299,7 @@ function calculateTimePatternScore(
   // Start of week planning - boost backlog/ready tickets on Monday
   if (timeContext.isMonday) {
     if (
+      statusCategory === 'todo' ||
       statusLower.includes('backlog') ||
       statusLower.includes('ready') ||
       statusLower.includes('todo')
