@@ -24,7 +24,7 @@ export function OptionsHeader({ version, onTabChange }: OptionsHeaderProps) {
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold text-gray-900">Jira Boost</h1>
             <ProBadge
-              isPro={license?.valid || false}
+              isPro={!!license?.instance || false}
               onClick={handleProBadgeClick}
               interactive={!!onTabChange}
             />

@@ -18,9 +18,9 @@ export function useLicense() {
       license.instance.id
     )
     setLicense({
+      ...info,
       valid,
-      lastChecked: new Date().toISOString(),
-      ...info
+      lastChecked: new Date().toISOString()
     })
     return { valid, error }
   })
@@ -29,9 +29,9 @@ export function useLicense() {
     const { activated, error, ...info } = await activateLicense(key, nanoid())
     if (activated) {
       setLicense({
+        ...info,
         valid: true,
-        lastChecked: new Date().toISOString(),
-        ...info
+        lastChecked: new Date().toISOString()
       })
     }
     return { activated, error }

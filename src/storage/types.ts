@@ -30,6 +30,8 @@ export interface CustomBackground {
 }
 
 export interface LicenseInfo {
+  valid: boolean
+  lastChecked: string
   instance: {
     id: string
     name: string

@@ -1,12 +1,16 @@
 /**
- * Service for Jira connection testing and validation
+ * Jira Connection Service
+ * Handles connection testing, validation, and health checks
  */
 
-import { JiraApiClient } from './api-client'
+import type { JiraClient } from './client'
 import type { JiraConnectionTestResult } from './types'
 
+/**
+ * Service for connection-related operations and validation
+ */
 export class JiraConnectionService {
-  constructor(private client: JiraApiClient) {}
+  constructor(private client: JiraClient) {}
 
   /**
    * Tests the connection to Jira API
@@ -15,19 +19,15 @@ export class JiraConnectionService {
     try {
       console.log('🧪 JiraAPI: Testing connection...')
 
-      const user = (await this.client.makeRequest('myself')) as unknown as {
-        accountId: string
-        displayName: string
-        emailAddress: string
-      }
+      const user = await this.client.myself.getCurrentUser()
 
       console.log('✅ JiraAPI: Connection test successful')
       return {
         success: true,
         user: {
           accountId: user.accountId,
-          displayName: user.displayName,
-          emailAddress: user.emailAddress
+          displayName: user.displayName || '',
+          emailAddress: user.emailAddress || ''
         }
       }
     } catch (error) {
@@ -52,7 +52,9 @@ export class JiraConnectionService {
     if (!config.email) {
       missingFields.push('email')
     }
-    // Note: We can't check apiToken here since it's not exposed by getConfig()
+    if (!config.apiToken) {
+      missingFields.push('apiToken')
+    }
 
     return {
       isValid: missingFields.length === 0,
@@ -67,7 +69,7 @@ export class JiraConnectionService {
     try {
       console.log('ℹ️ JiraAPI: Fetching server info...')
 
-      const serverInfo = await this.client.makeRequest('serverInfo')
+      const serverInfo = await this.client.serverInfo.getServerInfo()
 
       console.log('✅ JiraAPI: Server info retrieved')
       return serverInfo
@@ -87,12 +89,9 @@ export class JiraConnectionService {
     try {
       console.log('🔐 JiraAPI: Testing permissions...')
 
-      const projects = (await this.client.makeRequest(
-        'project/search?maxResults=1'
-      )) as unknown as {
-        values: unknown[]
-        total: number
-      }
+      const projects = await this.client.projects.searchProjects({
+        maxResults: 1
+      })
 
       const hasAccess = Array.isArray(projects.values)
       const projectCount = projects.total || 0

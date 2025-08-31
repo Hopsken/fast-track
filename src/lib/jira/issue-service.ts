@@ -1,16 +1,22 @@
 /**
- * Service for Jira issue-specific API operations
+ * Jira Issue Service
+ * Handles issue fetching, bulk operations, and ticket conversion
  */
+
+import type { Issue } from 'jira.js/version3/models/issue'
+import { chunk, compact, flatMap, map } from 'lodash-es'
 
 import type { JiraTicket } from '~/storage'
 
-import { JiraApiClient } from './api-client'
-import type { JiraApiIssue } from './types'
+import type { JiraClient } from './client'
 
+/**
+ * Service for issue-related operations with functional programming patterns
+ */
 export class JiraIssueService {
   private rateLimitDelay = 100 // ms between requests
 
-  constructor(private client: JiraApiClient) {}
+  constructor(private client: JiraClient) {}
 
   /**
    * Fetches a single issue by key
@@ -19,9 +25,19 @@ export class JiraIssueService {
     try {
       console.log(`🎫 JiraAPI: Fetching issue ${issueKey}`)
 
-      const issue = await this.client.makeRequest<JiraApiIssue>(
-        `issue/${issueKey}`
-      )
+      const issue = await this.client.issues.getIssue({
+        issueIdOrKey: issueKey,
+        fields: [
+          'id',
+          'key',
+          'summary',
+          'status',
+          'assignee',
+          'priority',
+          'project'
+        ]
+      })
+
       const ticket = this.convertToTicket(issue)
 
       console.log(
@@ -36,35 +52,98 @@ export class JiraIssueService {
   }
 
   /**
-   * Fetches multiple issues in batches
+   * Fetches multiple issues using bulk API with functional patterns
    */
   async getIssues(issueKeys: string[]): Promise<JiraTicket[]> {
     console.log(
-      `🎫 JiraAPI: Batch fetching ${issueKeys.length} issues:`,
+      `🎫 JiraAPI: Bulk fetching ${issueKeys.length} issues:`,
       issueKeys
     )
 
-    const tickets: JiraTicket[] = []
-    const batchSize = 10 // Process in smaller batches to avoid overwhelming the API
+    const batchSize = 100 // jira.js bulkFetchIssues limit
+    const batches = chunk(issueKeys, batchSize)
 
-    for (let i = 0; i < issueKeys.length; i += batchSize) {
-      const batch = issueKeys.slice(i, i + batchSize)
-      console.log(
-        `📦 JiraAPI: Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(issueKeys.length / batchSize)}`
-      )
+    const batchResults = await Promise.all(
+      map(batches, async (batch, index) => {
+        console.log(
+          `📦 JiraAPI: Processing bulk batch ${index + 1}/${batches.length} (${batch.length} issues)`
+        )
 
-      const batchResults = await this.processBatch(batch)
-      tickets.push(...batchResults)
-    }
+        const result = await this.processBulkBatch(batch)
+
+        // Add small delay between bulk requests to respect rate limits
+        if (index < batches.length - 1) {
+          await new Promise((resolve) =>
+            setTimeout(resolve, this.rateLimitDelay)
+          )
+        }
+
+        return result
+      })
+    )
+
+    const tickets = flatMap(batchResults)
 
     console.log(
-      `✅ JiraAPI: Batch fetch completed. Successfully fetched ${tickets.length}/${issueKeys.length} issues`
+      `✅ JiraAPI: Bulk fetch completed. Successfully fetched ${tickets.length}/${issueKeys.length} issues`
     )
     return tickets
   }
 
   /**
-   * Processes a batch of issue keys
+   * Processes a bulk batch of issue keys using jira.js bulkFetchIssues
+   */
+  private async processBulkBatch(batch: string[]): Promise<JiraTicket[]> {
+    try {
+      // Use bulk fetch API to get multiple issues at once
+      const searchResult = await this.client.issues.bulkFetchIssues({
+        issueIdsOrKeys: batch,
+        fields: [
+          'id',
+          'key',
+          'summary',
+          'status',
+          'assignee',
+          'priority',
+          'project'
+        ]
+      })
+
+      const tickets = compact(
+        map(searchResult.issues || [], (issue) => {
+          try {
+            return this.convertToTicket(issue)
+          } catch (error) {
+            console.warn(
+              `⚠️ JiraAPI: Failed to convert issue ${issue.key}:`,
+              error
+            )
+            return null // Will be removed by compact()
+          }
+        })
+      )
+
+      // Log any issues that weren't found
+      const foundKeys = new Set(tickets.map((t) => t.key))
+      const missingKeys = batch.filter((key) => !foundKeys.has(key))
+      if (missingKeys.length > 0) {
+        console.warn(`⚠️ JiraAPI: Issues not found: ${missingKeys.join(', ')}`)
+      }
+
+      return tickets
+    } catch (error) {
+      console.error(`❌ JiraAPI: Bulk fetch failed for batch:`, error)
+
+      // Fallback to individual requests for this batch
+      console.log(
+        `🔄 JiraAPI: Falling back to individual requests for ${batch.length} issues`
+      )
+      return this.processBatch(batch)
+    }
+  }
+
+  /**
+   * Processes a batch of issue keys (fallback method)
    */
   private async processBatch(batch: string[]): Promise<JiraTicket[]> {
     const batchPromises = batch.map(async (key, index) => {
@@ -77,36 +156,35 @@ export class JiraIssueService {
 
     const batchResults = await Promise.allSettled(batchPromises)
 
-    const tickets: JiraTicket[] = []
-    batchResults.forEach((result, index) => {
-      if (result.status === 'fulfilled' && result.value) {
-        tickets.push(result.value)
-      } else {
+    return compact(
+      map(batchResults, (result, index) => {
+        if (result.status === 'fulfilled' && result.value) {
+          return result.value
+        }
         console.warn(
           `⚠️ JiraAPI: Failed to fetch issue ${batch[index]}:`,
           result.status === 'rejected' ? result.reason : 'Unknown error'
         )
-      }
-    })
-
-    return tickets
+        return null // Will be removed by compact()
+      })
+    )
   }
 
   /**
-   * Converts a Jira API issue to internal ticket format
+   * Converts a jira.js Issue to internal ticket format
    */
-  private convertToTicket(issue: JiraApiIssue): JiraTicket {
+  private convertToTicket(issue: Issue): JiraTicket {
     const config = this.client.getConfig()
 
     return {
       id: issue.id,
       key: issue.key,
-      summary: issue.fields.summary,
-      status: issue.fields.status.name,
-      assignee: issue.fields.assignee?.displayName,
-      priority: issue.fields.priority?.name,
-      projectKey: issue.fields.project.key,
-      boardName: issue.fields.project.name,
+      summary: issue.fields?.summary || '',
+      status: issue.fields?.status?.name || '',
+      assignee: issue.fields?.assignee?.displayName,
+      priority: issue.fields?.priority?.name,
+      projectKey: issue.fields?.project?.key || '',
+      boardName: issue.fields?.project?.name || '',
       url: `${config.baseUrl}/browse/${issue.key}`,
       lastViewed: new Date().toISOString(),
       viewCount: 1
