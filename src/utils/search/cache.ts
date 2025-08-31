@@ -230,11 +230,12 @@ export function memoizeWithTTL<Args extends unknown[], Return>(
 export const searchCache = new SearchCache()
 export const scoreCache = new ScoreCache()
 
-// Cleanup interval for all caches
-setInterval(
-  () => {
-    searchCache.clear()
-    scoreCache.clear()
-  },
-  10 * 60 * 1000
-) // Cleanup every 10 minutes
+// Cleanup function for manual cache management
+export function cleanupCaches() {
+  searchCache.clear()
+  scoreCache.clear()
+}
+
+// For browser extension popup - cleanup happens automatically when popup closes
+// No need for intervals since popup DOM is destroyed on close
+// TTL-based cleanup in individual cache methods handles expired entries

@@ -11,7 +11,7 @@ import { getCurrentShortcut, formatShortcut } from '~/utils/shortcuts'
 import '~/assets/styles/main.css'
 
 function App() {
-  const { searchQuery, searchHistory, handleSearch, setSearchQuery } =
+  const { searchQuery, searchHistory, handleSearch } =
     useTicketSearch()
 
   const [showHistory, setShowHistory] = useState(false)
@@ -44,9 +44,9 @@ function App() {
   }
 
   const handleClearSearch = useCallback(() => {
-    setSearchQuery('')
+    handleSearch('')
     setShowHistory(false)
-  }, [])
+  }, [handleSearch])
 
   const handleOpenOptionsPage = () => {
     openOptionsPage()

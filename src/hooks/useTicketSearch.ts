@@ -1,5 +1,5 @@
 import { useMemoizedFn } from 'ahooks'
-import { useCallback, useEffect } from 'react'
+import { useCallback } from 'react'
 
 import { debounceSearch } from '@/utils/search/debounce'
 import { useStorage, StorageKey } from '~/storage'
@@ -57,9 +57,9 @@ export function useTicketSearch() {
   }, [setSearchHistory])
 
   // Debounced search function to reduce unnecessary computations
-  const debouncedPerformSearch = useMemoizedFn(
+  const debouncedSearch = useMemoizedFn(
     debounceSearch((query: string) => {
-      actions.performSearch(
+      actions.search(
         query,
         tickets,
         searchHistory,
@@ -72,15 +72,9 @@ export function useTicketSearch() {
 
   const handleSearch = useMemoizedFn((query: string) => {
     try {
-      // Update search query in store immediately for responsive UI
-      actions.setSearchQuery(query)
-      actions.setError(undefined)
-
-      // Set searching state
-      actions.setIsSearching(true)
-
-      // Perform debounced search
-      debouncedPerformSearch(query)
+      // Perform debounced search with unified action
+      // This handles all state updates atomically
+      debouncedSearch(query)
 
       // Add to search history if query is not empty
       if (query.trim()) {
@@ -89,15 +83,12 @@ export function useTicketSearch() {
     } catch (error) {
       console.error('Error handling search:', error)
       actions.setError('Search failed')
-      actions.setIsSearching(false)
     }
   })
 
-  // Re-search when tickets data changes
-  useEffect(() => {
-    debouncedPerformSearch(searchQuery)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tickets])
+  // Re-search when tickets data changes (removed - causes unnecessary searches)
+  // Previous implementation would trigger searches on every ticket update
+  // Now search only happens when user explicitly searches
 
   return {
     searchQuery,
@@ -105,7 +96,6 @@ export function useTicketSearch() {
     searchHistory,
     handleSearch,
     clearSearchHistory,
-    setSearchQuery: actions.setSearchQuery,
     error,
     isSearching
   }
