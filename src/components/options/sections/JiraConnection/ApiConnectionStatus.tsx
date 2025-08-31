@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { FieldControl } from '~/components/ui/forms'
+import { FormField } from '~/components/ui/forms'
 import { useJiraConfig } from '~/hooks/useStorageSettings'
 
 export function ApiConnectionStatus() {
@@ -74,14 +74,20 @@ export function ApiConnectionStatus() {
   }
 
   return (
-    <FieldControl
+    <FormField
       size="lg"
       title="Connection Status"
       description="Current status of your Jira API integration">
       <div className="w-full space-y-3">
-        <div className={`rounded-lg border p-3 text-sm ${getStatusColor()}`}>
+        <div
+          className={`rounded-lg border p-3 text-sm ${getStatusColor()}`}
+          role="status"
+          aria-live="polite"
+          aria-label={`API connection status: ${isConfigured ? 'API Configured' : 'Not Configured'}`}>
           <div className="mb-2 flex items-center gap-2">
-            <span className="text-lg">{getStatusIcon()}</span>
+            <span className="text-lg" aria-hidden="true">
+              {getStatusIcon()}
+            </span>
             <span className="font-medium">
               {isConfigured ? 'API Configured' : 'Not Configured'}
             </span>
@@ -98,12 +104,13 @@ export function ApiConnectionStatus() {
             isConfigured && connectionStatus !== 'testing'
               ? 'bg-blue-600 text-white hover:bg-blue-700'
               : 'cursor-not-allowed bg-gray-200 text-gray-500'
-          }`}>
+          }`}
+          aria-label={`Test API connection ${connectionStatus === 'testing' ? '- testing in progress' : ''}`}>
           {connectionStatus === 'testing'
             ? 'Testing Connection...'
             : 'Test Connection'}
         </button>
       </div>
-    </FieldControl>
+    </FormField>
   )
 }

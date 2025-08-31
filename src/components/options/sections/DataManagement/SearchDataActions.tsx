@@ -1,4 +1,4 @@
-import { FieldControl } from '~/components/ui/forms'
+import { FormField } from '~/components/ui/forms'
 import { useStorage, StorageKey } from '~/storage'
 
 export function SearchDataActions() {
@@ -19,33 +19,44 @@ export function SearchDataActions() {
 
   return (
     <div className="space-y-4">
-      <FieldControl
+      <FormField
         size="lg"
         title="Data Management"
         description="Manage your collected ticket data and view history">
         <div className="space-y-2">
           <button
             onClick={clearAllData}
-            className="w-full rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700 transition-colors hover:bg-red-100">
+            className="w-full rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700 transition-colors hover:bg-red-100"
+            aria-label="Clear all collected ticket data and view history"
+            aria-describedby="clear-data-warning">
             Clear All Data
           </button>
+          <div id="clear-data-warning" className="sr-only">
+            Warning: This action cannot be undone and will remove all your
+            collected ticket data
+          </div>
         </div>
-      </FieldControl>
+      </FormField>
 
-      <FieldControl
+      <FormField
         size="lg"
         title="Data Collection"
         description="Ticket data is automatically collected when you visit Jira boards and issues">
-        <div className="space-y-2 text-sm text-gray-600">
-          <p>
+        <div
+          className="space-y-2 text-sm text-gray-600"
+          role="list"
+          aria-label="Data collection information">
+          <p role="listitem">
             • Data is collected from board views, issue details, and search
             results
           </p>
-          <p>• Up to 1,000 most recent tickets are stored</p>
-          <p>• View counts and timestamps are tracked for relevance scoring</p>
-          <p>• All data is stored locally in your browser</p>
+          <p role="listitem">• Up to 1,000 most recent tickets are stored</p>
+          <p role="listitem">
+            • View counts and timestamps are tracked for relevance scoring
+          </p>
+          <p role="listitem">• All data is stored locally in your browser</p>
         </div>
-      </FieldControl>
+      </FormField>
     </div>
   )
 }

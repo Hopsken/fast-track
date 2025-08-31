@@ -1,4 +1,4 @@
-import type { PropsWithChildren, ReactNode } from 'react'
+import React, { type PropsWithChildren, type ReactNode } from 'react'
 
 export type FieldControlProps = {
   size?: 'sm' | 'lg'
@@ -9,12 +9,26 @@ export type FieldControlProps = {
 
 export function FieldControl(props: PropsWithChildren<FieldControlProps>) {
   const { size = 'sm' } = props
+
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (props.onClick && (event.key === 'Enter' || event.key === ' ')) {
+      event.preventDefault()
+      props.onClick()
+    }
+  }
+
   return (
     <div
       className={`field flex items-center ${
         props.onClick ? 'cursor-pointer' : ''
       }`}
-      onClick={props.onClick}>
+      onClick={props.onClick}
+      onKeyDown={handleKeyPress}
+      tabIndex={props.onClick ? 0 : undefined}
+      role={props.onClick ? 'button' : undefined}
+      aria-label={
+        props.onClick ? `${props.title}. ${props.description}` : undefined
+      }>
       <div className="flex flex-1 flex-col space-y-1">
         <div className={size === 'sm' ? 'text-sm' : 'text-lg'}>
           {props.title}

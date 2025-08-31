@@ -1,6 +1,12 @@
 import { useMemo, useState } from 'react'
 
-import { FieldControl } from '~/components/ui/forms'
+import {
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription
+} from '~/components/ui/form'
+import { FormField } from '~/components/ui/forms'
 import { useJiraConfig } from '~/hooks/useStorageSettings'
 
 export function ApiConfiguration() {
@@ -33,72 +39,84 @@ export function ApiConfiguration() {
   }
 
   return (
-    <FieldControl
+    <FormField
       size="lg"
       title="API Authentication"
       description="Configure your Atlassian credentials for reliable ticket data collection">
       <div className="w-full space-y-4">
         {/* User Email */}
-        <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">
-            Atlassian Account Email
-          </label>
-          <input
-            type="email"
-            placeholder="your-email@example.com"
-            value={userEmail}
-            onChange={(e) => setUserEmail(e.target.value)}
-            className={`input input-bordered w-full ${
-              !isValidEmail ? 'input-error' : ''
-            }`}
-          />
+        <FormItem>
+          <FormLabel htmlFor="user-email">Atlassian Account Email</FormLabel>
+          <FormControl>
+            <input
+              id="user-email"
+              type="email"
+              placeholder="your-email@example.com"
+              value={userEmail}
+              onChange={(e) => setUserEmail(e.target.value)}
+              className={`input input-bordered w-full ${
+                !isValidEmail ? 'input-error' : ''
+              }`}
+              aria-invalid={!isValidEmail}
+              aria-describedby={!isValidEmail ? 'email-error' : undefined}
+            />
+          </FormControl>
           {userEmail && !isValidEmail && (
-            <p className="mt-1 text-xs text-red-500">
+            <p
+              id="email-error"
+              className="mt-1 text-xs text-red-500"
+              role="alert">
               Please enter a valid email address
             </p>
           )}
-        </div>
+        </FormItem>
 
         {/* API Token */}
-        <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">
+        <FormItem>
+          <FormLabel htmlFor="api-token">
             API Token
             {apiToken && (
               <span className="ml-2 text-xs text-green-600">
                 (***{apiToken.slice(-4)})
               </span>
             )}
-          </label>
-          <div className="relative">
-            <input
-              type={showToken ? 'text' : 'password'}
-              placeholder="Enter your API token"
-              value={apiToken}
-              onChange={(e) => setApiToken(e.target.value)}
-              className="input input-bordered w-full pr-20"
-            />
-            <button
-              type="button"
-              onClick={() => setShowToken(!showToken)}
-              className="absolute inset-y-0 right-0 flex items-center pr-3 text-sm text-gray-500 hover:text-gray-700">
-              {showToken ? 'Hide' : 'Show'}
-            </button>
-          </div>
-          <p className="mt-1 text-xs text-gray-500">
+          </FormLabel>
+          <FormControl>
+            <div className="relative">
+              <input
+                id="api-token"
+                type={showToken ? 'text' : 'password'}
+                placeholder="Enter your API token"
+                value={apiToken}
+                onChange={(e) => setApiToken(e.target.value)}
+                className="input input-bordered w-full pr-20"
+                aria-describedby="token-help"
+              />
+              <button
+                type="button"
+                onClick={() => setShowToken(!showToken)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-sm text-gray-500 hover:text-gray-700"
+                aria-label={showToken ? 'Hide API token' : 'Show API token'}>
+                {showToken ? 'Hide' : 'Show'}
+              </button>
+            </div>
+          </FormControl>
+          <FormDescription id="token-help">
             Your API token is stored locally and never transmitted to external
             servers
-          </p>
-        </div>
+          </FormDescription>
+        </FormItem>
 
         {/* Clear Credentials Button */}
         {(apiToken || userEmail) && (
           <button
             onClick={handleClearCredentials}
-            className="w-full rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700 transition-colors hover:bg-red-100">
+            className="w-full rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700 transition-colors hover:bg-red-100"
+            aria-label="Clear all API credentials">
             Clear API Credentials
           </button>
         )}
       </div>
-    </FieldControl>
+    </FormField>
   )
 }

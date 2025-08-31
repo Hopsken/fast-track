@@ -1,30 +1,40 @@
 import { useState } from 'react'
 
-import { FieldControl } from '~/components/ui/forms'
+import { FormField } from '~/components/ui/forms'
 
 export function TokenGenerationGuide() {
   const [isExpanded, setIsExpanded] = useState(false)
 
   return (
-    <FieldControl
+    <FormField
       size="lg"
       title="How to Generate API Token"
       description="Step-by-step guide to create your Atlassian API token">
       <div className="w-full">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex w-full items-center justify-between rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-700 transition-colors hover:bg-blue-100">
+          className="flex w-full items-center justify-between rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-700 transition-colors hover:bg-blue-100"
+          aria-expanded={isExpanded}
+          aria-controls="token-generation-instructions"
+          aria-label={`${isExpanded ? 'Hide' : 'Show'} API token setup instructions`}>
           <span>Show Setup Instructions</span>
           <span
-            className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+            className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+            aria-hidden="true">
             ↓
           </span>
         </button>
 
         {isExpanded && (
-          <div className="mt-4 space-y-4 rounded-lg bg-gray-50 p-4 text-sm">
+          <div
+            className="mt-4 space-y-4 rounded-lg bg-gray-50 p-4 text-sm"
+            id="token-generation-instructions"
+            role="region"
+            aria-labelledby="token-generation-guide-title">
             <div className="space-y-3">
-              <div className="font-medium text-gray-800">
+              <div
+                className="font-medium text-gray-800"
+                id="token-generation-guide-title">
                 📝 Generate Your API Token:
               </div>
 
@@ -75,6 +85,6 @@ export function TokenGenerationGuide() {
           </div>
         )}
       </div>
-    </FieldControl>
+    </FormField>
   )
 }

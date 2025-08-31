@@ -2,11 +2,11 @@ import { useStorage, StorageKey } from '~/storage'
 
 import { FormField, type FormFieldProps } from './FormField'
 
-export type ToggleFieldProps = Omit<FormFieldProps, 'children'> & {
+export type ToggleFormFieldProps = Omit<FormFieldProps, 'children'> & {
   storageKey: StorageKey.ColorCard | StorageKey.AutoFullScreen
 }
 
-export function ToggleField(props: ToggleFieldProps) {
+export function ToggleFormField(props: ToggleFormFieldProps) {
   const { storageKey, ...formFieldProps } = props
   const [checked, setChecked] = useStorage(storageKey, false)
 
