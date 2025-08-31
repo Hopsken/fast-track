@@ -56,12 +56,12 @@ function setupCardHighlighter(enabled: boolean): void {
     updateCardColors(enabled)
   }, 500)
 
-  globalObserverManager.observe(
-    'card-highlighter',
-    jiraApp,
-    debouncedCallback,
-    { childList: true, subtree: true }
-  )
+  globalObserverManager.observe({
+    id: 'card-highlighter',
+    target: jiraApp,
+    callback: debouncedCallback,
+    config: { childList: true, subtree: true }
+  })
 }
 
 /**

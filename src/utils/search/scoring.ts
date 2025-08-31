@@ -53,12 +53,12 @@ function _calculateContextScore(
   score += calculatePriorityScore(ticket.priority)
 
   // 6. PROJECT CONTEXT AND MOMENTUM
-  score += calculateProjectScore(
+  score += calculateProjectScore({
     ticket,
-    context.primaryPrefix,
-    context.tickets,
-    context.now
-  )
+    primaryPrefix: context.primaryPrefix,
+    tickets: context.tickets,
+    now: context.now
+  })
 
   // 7. TIME-SENSITIVE PATTERNS
   score += calculateTimePatternScore(ticket.status, timeContext)
@@ -216,12 +216,17 @@ function calculatePriorityScore(priority: string | undefined): number {
   return 0
 }
 
-function calculateProjectScore(
-  ticket: JiraTicket,
-  primaryPrefix: string,
-  tickets: JiraTicket[],
+function calculateProjectScore({
+  ticket,
+  primaryPrefix,
+  tickets,
+  now
+}: {
+  ticket: JiraTicket
+  primaryPrefix: string
+  tickets: JiraTicket[]
   now: number
-): number {
+}): number {
   let score = 0
   const projectTickets = tickets.filter(
     (t) => t.projectKey === ticket.projectKey

@@ -17,12 +17,17 @@ export class MutationObserverManager {
   /**
    * Creates and starts a mutation observer
    */
-  observe(
-    id: string,
-    target: Element,
-    callback: MutationCallback,
-    config: ObserverConfig = { childList: true, subtree: true }
-  ): MutationObserver {
+  observe({
+    id,
+    target,
+    callback,
+    config = { childList: true, subtree: true }
+  }: {
+    id: string
+    target: Element
+    callback: MutationCallback
+    config: ObserverConfig
+  }): MutationObserver {
     // Disconnect existing observer with same id
     this.disconnect(id)
 
