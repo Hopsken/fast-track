@@ -26,15 +26,10 @@ export default defineContentScript({
   main() {
     if (!isJiraWebPage(document)) return
 
-    console.log('🔧 CONTENT: Using centralized messaging for ticket collection')
-    console.log('   Extension context:', 'content-script')
-    console.log('   Communication method:', 'Centralized messaging service')
-
     // Smart debouncing with different delays for different triggers
     let collectTimeout: number
     let lastCollectionTime = 0
     let lastUrl = window.location.href
-    let lastTicketCount = 0
 
     // Enhanced debounce with adaptive delays and duplicate prevention
     const smartDebounceCollect = (
@@ -50,12 +45,8 @@ export default defineContentScript({
 
       clearTimeout(collectTimeout)
       collectTimeout = window.setTimeout(async () => {
-        try {
-          await collectTicketData(trigger)
-          lastCollectionTime = Date.now()
-        } catch (error) {
-          console.error('Collection failed:', error)
-        }
+        await collectTicketData(trigger)
+        lastCollectionTime = Date.now()
       }, delay)
     }
 
@@ -64,7 +55,7 @@ export default defineContentScript({
      */
     const extractTicketKey = (element: Element): string | null => {
       // Try data-issue-key attribute first (most reliable)
-      let key = element.getAttribute('data-issue-key')
+      const key = element.getAttribute('data-issue-key')
       if (key) {
         return key
       }
@@ -106,24 +97,13 @@ export default defineContentScript({
     const extractTicketKeysFromPage = (): string[] => {
       const ticketKeys = new Set<string>()
       const currentUrl = window.location.href
-
-      console.log(
-        '🔍 ExtractTicketKeysFromPage: Starting key extraction for:',
-        currentUrl
-      )
-
       // Method 1: Extract from board/card views
       const cards = document.querySelectorAll(SELECTORS.cards)
-      console.log(`🎫 Found ${cards.length} card elements`)
 
-      cards.forEach((card, index) => {
+      cards.forEach((card) => {
         const key = extractTicketKey(card)
         if (key) {
           ticketKeys.add(key)
-          if (index < 5) {
-            // Only log first few for brevity
-            console.log(`✅ Card ${index + 1}: Found key ${key}`)
-          }
         }
       })
 
@@ -132,23 +112,17 @@ export default defineContentScript({
         const urlKeyMatch = currentUrl.match(/\/browse\/([A-Z]+-\d+)/)
         if (urlKeyMatch) {
           ticketKeys.add(urlKeyMatch[1])
-          console.log(`✅ URL: Found key ${urlKeyMatch[1]}`)
         }
       }
 
       // Method 3: Extract from search results (only if we have few cards)
       if (ticketKeys.size < 10) {
         const searchRows = document.querySelectorAll(SELECTORS.searchResults)
-        console.log(`📋 Found ${searchRows.length} search result elements`)
 
-        searchRows.forEach((row, index) => {
+        searchRows.forEach((row) => {
           const key = extractTicketKey(row)
           if (key) {
             ticketKeys.add(key)
-            if (index < 3) {
-              // Only log first few for brevity
-              console.log(`✅ Search result ${index + 1}: Found key ${key}`)
-            }
           }
         })
       }
@@ -158,9 +132,6 @@ export default defineContentScript({
         const browseLinks = Array.from(
           document.querySelectorAll(SELECTORS.issueLink)
         ).slice(0, 50) // Limit to first 50 links to prevent performance issues
-        console.log(
-          `🔗 Processing ${browseLinks.length} browse links (limited)`
-        )
 
         browseLinks.forEach((link) => {
           const href = link.getAttribute('href')
@@ -173,79 +144,35 @@ export default defineContentScript({
         })
       }
 
-      const uniqueKeys = Array.from(ticketKeys)
-      console.log(
-        `🎯 ExtractTicketKeysFromPage: Extracted ${uniqueKeys.length} unique ticket keys`
-      )
-
-      // Only log keys if count changed significantly
-      if (Math.abs(uniqueKeys.length - lastTicketCount) > 2) {
-        console.log(
-          'Keys:',
-          uniqueKeys.slice(0, 10),
-          uniqueKeys.length > 10 ? `...and ${uniqueKeys.length - 10} more` : ''
-        )
-        lastTicketCount = uniqueKeys.length
-      }
-
-      return uniqueKeys
+      return Array.from(ticketKeys)
     }
 
     /**
      * Collect tickets by sending keys to background service
      */
     const collectTicketData = async (trigger: 'dom' | 'url' | 'initial') => {
-      console.log(
-        `\n🚀 CONTENT: Starting ticket key collection (${trigger.toUpperCase()})`
-      )
+      // Step 1: Extract ticket keys from DOM
+      const ticketKeys = extractTicketKeysFromPage()
 
-      try {
-        // Step 1: Extract ticket keys from DOM
-        const ticketKeys = extractTicketKeysFromPage()
-
-        if (ticketKeys.length === 0) {
-          console.log('❌ No ticket keys found on page')
-          return
-        }
-
-        console.log(
-          `📤 CONTENT: Sending ${ticketKeys.length} keys to background service`
-        )
-
-        // Step 2: Send keys to background service for processing
-        const result = await sendMessage('collectTickets', {
-          keys: ticketKeys,
-          trigger,
-          url: window.location.href
-        })
-
-        if (result.success) {
-          console.log(
-            `✅ CONTENT: Background successfully processed ${result.count}/${ticketKeys.length} tickets`
-          )
-        } else {
-          console.error(
-            `❌ CONTENT: Background processing failed:`,
-            result.error
-          )
-        }
-      } catch (error) {
-        console.error('❌ CONTENT: Error during ticket collection:', error)
-
-        // Provide detailed error information
-        if (error instanceof Error) {
-          console.error('   Error name:', error.name)
-          console.error('   Error message:', error.message)
-        }
+      if (ticketKeys.length === 0) {
+        return
       }
 
-      console.log('🏁 CONTENT: Ticket key collection completed\n')
+      // Step 2: Send keys to background service for processing
+      const result = await sendMessage('collectTickets', {
+        keys: ticketKeys,
+        trigger,
+        url: window.location.href
+      })
+
+      if (!result.success) {
+        throw new Error(`Background processing failed: ${result.error}`)
+      }
     }
 
     // Enhanced URL change detection
     const checkUrlChange = () => {
       if (window.location.href !== lastUrl) {
-        console.log('🔄 URL changed from', lastUrl, 'to', window.location.href)
         lastUrl = window.location.href
         smartDebounceCollect('url', 1500) // Faster response for URL changes
       }
@@ -282,7 +209,6 @@ export default defineContentScript({
       if (relevantMutation && observationCount < MAX_OBSERVATIONS) {
         smartDebounceCollect('dom', 4000) // Longer delay for DOM changes
       } else if (observationCount >= MAX_OBSERVATIONS) {
-        console.log('⚠️ DOM observation limit reached, reducing frequency')
         observer.disconnect()
         // Reconnect with reduced sensitivity after a delay
         setTimeout(() => {
@@ -310,7 +236,6 @@ export default defineContentScript({
       observer.disconnect()
       clearTimeout(collectTimeout)
       clearInterval(urlCheckInterval)
-      console.log('🧹 Ticket collector cleanup completed')
     }
   }
 })

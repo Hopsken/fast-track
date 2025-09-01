@@ -157,11 +157,21 @@ Uses object map pattern instead of switch statements for cleaner, more maintaina
   - Single level of abstraction per function
   - Minimize parameters (max 3-4, use objects for more)
   - Pure functions when possible (no side effects)
+  - Prefer early returns to reduce nesting and improve readability
 - **Comments and Documentation**:
   - Write self-documenting code that doesn't need comments
   - Use comments to explain "why", not "what"
   - Document complex business logic and API integrations
   - Keep JSDoc comments for public APIs
+- **Logging Practices**:
+  - Avoid `console.log` statements unless explicitly requested by the user
+  - Use proper logging libraries or debugging tools when debugging is needed
+  - Remove debugging statements before committing code
+- **Error Handling Practices**:
+  - Avoid extensive try-catch blocks that might swallow errors
+  - Let meaningful errors bubble up to be handled at appropriate levels
+  - Use specific error handling only where recovery or user feedback is needed
+  - Prefer explicit error return values or Result types over silent error swallowing
 
 ### TypeScript Best Practices
 - **Type Safety**:
