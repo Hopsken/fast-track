@@ -2,7 +2,11 @@ import { useRef, KeyboardEvent } from 'react'
 import { HiSearch, HiX } from 'react-icons/hi'
 
 import { type JiraTicket } from '@/storage'
-import { useNavigationActions, useIsSearching } from '~/stores/useTicketStore'
+import {
+  useNavigationActions,
+  useIsSearching,
+  useSelectedTicket
+} from '~/stores/useTicketStore'
 
 interface TicketSearchBoxProps {
   value: string
@@ -22,8 +26,18 @@ export function TicketSearchBox({
   const inputRef = useRef<HTMLInputElement>(null)
   const { navigate } = useNavigationActions()
   const isSearching = useIsSearching()
+  const selectedTicket = useSelectedTicket()
 
   const handleKeyDown = (e: KeyboardEvent) => {
+    // Handle copy selected ticket key
+    if ((e.metaKey || e.ctrlKey) && e.key === 'c') {
+      if (selectedTicket) {
+        e.preventDefault()
+        navigator.clipboard.writeText(selectedTicket.key)
+      }
+      return
+    }
+
     // Handle Emacs-style navigation
     if (e.ctrlKey && e.key === 'n') {
       e.preventDefault()

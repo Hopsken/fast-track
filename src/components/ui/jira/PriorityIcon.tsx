@@ -38,7 +38,10 @@ export function PriorityIcon({
     } else if (priorityName.includes('medium')) {
       fallbackColor = 'bg-yellow-500'
       fallbackText = '='
-    } else if (priorityName.includes('low') || priorityName.includes('lowest')) {
+    } else if (
+      priorityName.includes('low') ||
+      priorityName.includes('lowest')
+    ) {
       fallbackColor = 'bg-green-500'
       fallbackText = '↓'
     }

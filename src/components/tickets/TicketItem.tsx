@@ -3,7 +3,7 @@ import { MouseEvent, KeyboardEvent } from 'react'
 import {
   IssueTypeIcon,
   StatusBadge,
-  PriorityIcon,
+  // PriorityIcon,
   AssigneeAvatar
 } from '~/components/ui/jira'
 import { JiraTicket } from '~/storage'
@@ -38,7 +38,7 @@ export function TicketItem({
     <div
       className={`group flex cursor-pointer items-center gap-3 border-l-2 px-4 py-3 transition-all duration-200 ease-out hover:translate-x-1 ${
         isSelected
-          ? 'translate-x-1 border-l-blue-400 bg-blue-50'
+          ? 'border-l-blue-400 bg-blue-50'
           : 'border-l-transparent hover:border-l-gray-200 hover:bg-gray-50 hover:shadow-sm'
       }`}
       onClick={handleClick}

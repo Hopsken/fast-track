@@ -37,7 +37,9 @@ export function AssigneeAvatar({
     if (names.length === 1) {
       return names[0].substring(0, 2).toUpperCase()
     }
-    return (names[0].charAt(0) + (names[names.length - 1]?.charAt(0) || '')).toUpperCase()
+    return (
+      names[0].charAt(0) + (names[names.length - 1]?.charAt(0) || '')
+    ).toUpperCase()
   }
 
   const displayName = assignee.displayName || assignee.emailAddress || 'Unknown'
@@ -47,7 +49,7 @@ export function AssigneeAvatar({
     const colorIndex = displayName.charCodeAt(0) % 6
     const colors = [
       'bg-blue-400',
-      'bg-green-400', 
+      'bg-green-400',
       'bg-purple-400',
       'bg-orange-400',
       'bg-pink-400',
