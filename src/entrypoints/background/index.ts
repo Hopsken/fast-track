@@ -9,6 +9,7 @@ import { registerTicketService } from '~/services/ticket-service'
 
 import { InstallationHandlerService } from './services/installation-handler'
 import { OmniboxHandlerService } from './services/omnibox-handler'
+import { initializeTicketCollectionService } from './services/ticket-collection-service'
 
 export default defineBackground(() => {
   console.log('🚀 Background script initializing...')
@@ -16,6 +17,9 @@ export default defineBackground(() => {
   try {
     // Initialize proxy services
     registerTicketService()
+
+    // Initialize messaging services
+    initializeTicketCollectionService()
 
     // Initialize other services
     OmniboxHandlerService.initialize()
@@ -29,6 +33,7 @@ export default defineBackground(() => {
     console.log('✅ Background script initialized successfully')
     console.log('📊 Services status:')
     console.log('  - Ticket Service: Registered via proxy service')
+    console.log('  - Ticket Collection: Messaging service active')
     console.log(
       '  - Extension Version:',
       InstallationHandlerService.getVersion()

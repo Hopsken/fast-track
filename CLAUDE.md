@@ -223,8 +223,58 @@ Uses object map pattern instead of switch statements for cleaner, more maintaina
   - Provide user-friendly error messages
   - Use Result types or error handling patterns consistently
 
+### Service Architecture (Updated September 2025)
+
+#### Proxy Service Pattern
+The extension uses `@webext-core/proxy-service` for all cross-context communication:
+
+**Background Script** (`src/entrypoints/background/index.ts`):
+```javascript
+import { registerTicketService } from '~/services/ticket-service'
+
+// Single line - proxy service handles all inter-context communication
+registerTicketService()
+```
+
+**Content Scripts/Options** (any context):
+```javascript
+import { getTicketService } from '~/services/ticket-service'
+
+const ticketService = getTicketService()  // Cross-context proxy
+await ticketService.fetchTicketDetails(keys)  // Direct method calls
+await ticketService.testConnection()
+```
+
+#### Consolidated Services
+- **TicketService** (`src/services/ticket-service.ts`) - Single service using proxy pattern
+  - API service caching with config change detection
+  - Backward compatibility (`JiraHost` || `JiraUrl` fallback)
+  - Bulk operations with `getIssues()` method
+  - Cross-context communication via proxy service
+
+#### Architecture Cleanup
+Removed unused manual message routing infrastructure (~290 lines of dead code):
+- Manual MessageRouter class and handlers were never initialized
+- Proxy service automatically handles all inter-context communication
+- Single, clean service architecture throughout codebase
+
+#### Centralized Messaging Service
+All `@webext-core/messaging` communication goes through a single messaging service:
+
+**Centralized Service** (`src/lib/messaging.ts`):
+```javascript
+export const { sendMessage, onMessage } = defineExtensionMessaging<TicketCollectionProtocol>()
+```
+
+**Usage Pattern**:
+- Background services: `import { onMessage } from '~/lib/messaging'`
+- Content scripts: `import { sendMessage } from '~/lib/messaging'`
+- Single `defineExtensionMessaging` call prevents duplicated messaging setup
+
 ### Development Notes
 - Uses pnpm as package manager
 - Content scripts use `PageObserver` utility for dynamic page changes
 - Extension auto-opens options page on first install
+- **Service Communication**: Always use `getTicketService()` proxy pattern, never manual messaging
+- **Messaging**: Always use centralized messaging service from `~/lib/messaging`
 - Supports both Chrome and Firefox builds with different configurations

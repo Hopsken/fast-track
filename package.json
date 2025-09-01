@@ -28,6 +28,7 @@
     "@ctrl/tinycolor": "^4.1.0",
     "@radix-ui/react-label": "^2.1.7",
     "@tailwindcss/typography": "^0.5.16",
+    "@webext-core/messaging": "^2.3.0",
     "@webext-core/proxy-service": "^1.2.1",
     "ahooks": "^3.9.3",
     "cash-dom": "^8.1.5",

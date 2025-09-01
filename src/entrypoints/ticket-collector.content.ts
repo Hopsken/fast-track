@@ -1,7 +1,6 @@
 import { defineContentScript } from '#imports'
 
-import { getTicketService } from '~/services/ticket-service'
-import { StorageKey, JiraTicket, storageItems } from '~/storage'
+import { sendMessage } from '~/lib/messaging'
 import { isJiraWebPage } from '~/utils/jira/page-detection'
 
 // Simplified selectors focusing only on ticket key extraction
@@ -27,9 +26,9 @@ export default defineContentScript({
   main() {
     if (!isJiraWebPage(document)) return
 
-    console.log('🔧 DEBUG: Using proxy service for ticket collection')
+    console.log('🔧 CONTENT: Using centralized messaging for ticket collection')
     console.log('   Extension context:', 'content-script')
-    console.log('   Service type:', 'TicketService via proxy-service')
+    console.log('   Communication method:', 'Centralized messaging service')
 
     // Smart debouncing with different delays for different triggers
     let collectTimeout: number
@@ -193,10 +192,12 @@ export default defineContentScript({
     }
 
     /**
-     * Collect tickets using background script API approach
+     * Collect tickets by sending keys to background service
      */
     const collectTicketData = async (trigger: 'dom' | 'url' | 'initial') => {
-      console.log(`\n🚀 STARTING TICKET COLLECTION (${trigger.toUpperCase()})`)
+      console.log(
+        `\n🚀 CONTENT: Starting ticket key collection (${trigger.toUpperCase()})`
+      )
 
       try {
         // Step 1: Extract ticket keys from DOM
@@ -208,49 +209,28 @@ export default defineContentScript({
         }
 
         console.log(
-          `🚀 Content: Fetching ${ticketKeys.length} tickets via proxy service`
+          `📤 CONTENT: Sending ${ticketKeys.length} keys to background service`
         )
 
-        // Step 2: Get ticket service instance and call directly
-        const ticketService = getTicketService()
-        const tickets = await ticketService.fetchTicketDetails(ticketKeys)
+        // Step 2: Send keys to background service for processing
+        const result = await sendMessage('collectTickets', {
+          keys: ticketKeys,
+          trigger,
+          url: window.location.href
+        })
 
-        console.log(
-          `✅ Content: Received ${tickets.length}/${ticketKeys.length} tickets from background`
-        )
-
-        // Step 3: Process collected tickets
-        if (tickets.length > 0) {
-          console.log(`✅ SUCCESS: Collected ${tickets.length} tickets`)
-
-          // Only show detailed table for significant collections
-          if (tickets.length > 5 || trigger === 'initial') {
-            console.log('📊 Ticket Summary:')
-            console.table(
-              tickets.slice(0, 10).map((ticket) => ({
-                Key: ticket.key,
-                Summary:
-                  ticket.summary.substring(0, 50) +
-                  (ticket.summary.length > 50 ? '...' : ''),
-                Status: ticket.status || 'Unknown',
-                Assignee: ticket.assignee || 'Unassigned',
-                Priority: ticket.priority || 'None',
-                Project: ticket.projectKey
-              }))
-            )
-            if (tickets.length > 10) {
-              console.log(`... and ${tickets.length - 10} more tickets`)
-            }
-          }
-
-          console.log('💾 Merging tickets with existing data...')
-          await mergeTicketsData(tickets)
-          console.log('✅ Tickets successfully saved to storage')
+        if (result.success) {
+          console.log(
+            `✅ CONTENT: Background successfully processed ${result.count}/${ticketKeys.length} tickets`
+          )
         } else {
-          console.log('⚠️ No tickets were successfully fetched')
+          console.error(
+            `❌ CONTENT: Background processing failed:`,
+            result.error
+          )
         }
       } catch (error) {
-        console.error('❌ ERROR collecting ticket data:', error)
+        console.error('❌ CONTENT: Error during ticket collection:', error)
 
         // Provide detailed error information
         if (error instanceof Error) {
@@ -259,71 +239,7 @@ export default defineContentScript({
         }
       }
 
-      console.log('🏁 TICKET COLLECTION COMPLETED\n')
-    }
-
-    /**
-     * Merge new tickets with existing data
-     */
-    const mergeTicketsData = async (newTickets: JiraTicket[]) => {
-      console.log(
-        `💾 MergeTicketsData: Starting merge process with ${newTickets.length} new tickets`
-      )
-
-      const existingTickets =
-        (await storageItems[StorageKey.TicketsData].getValue()) || []
-      console.log(
-        `💾 MergeTicketsData: Found ${existingTickets.length} existing tickets in storage`
-      )
-
-      const ticketMap = new Map<string, JiraTicket>()
-
-      // Add existing tickets to map
-      existingTickets.forEach((ticket: JiraTicket) => {
-        ticketMap.set(ticket.key, ticket)
-      })
-
-      // Merge new tickets
-      let updatedCount = 0
-      let addedCount = 0
-
-      newTickets.forEach((newTicket) => {
-        const existing = ticketMap.get(newTicket.key)
-        if (existing) {
-          // Update existing ticket with new data and increment view count
-          const merged = {
-            ...existing,
-            ...newTicket,
-            viewCount: existing.viewCount + 1,
-            lastViewed: newTicket.lastViewed
-          }
-          ticketMap.set(newTicket.key, merged)
-          updatedCount++
-        } else {
-          // Add new ticket
-          ticketMap.set(newTicket.key, newTicket)
-          addedCount++
-        }
-      })
-
-      console.log(
-        `💾 MergeTicketsData: Updated ${updatedCount} tickets, added ${addedCount} new tickets`
-      )
-
-      // Convert back to array and limit size (keep most recent 1000 tickets)
-      const mergedTickets = Array.from(ticketMap.values())
-        .sort(
-          (a, b) =>
-            new Date(b.lastViewed).getTime() - new Date(a.lastViewed).getTime()
-        )
-        .slice(0, 1000)
-
-      console.log(
-        `💾 MergeTicketsData: Final merged collection has ${mergedTickets.length} tickets (limited to 1000)`
-      )
-
-      await storageItems[StorageKey.TicketsData].setValue(mergedTickets)
-      console.log('💾 MergeTicketsData: Successfully saved to storage')
+      console.log('🏁 CONTENT: Ticket key collection completed\n')
     }
 
     // Enhanced URL change detection
