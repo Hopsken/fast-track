@@ -50,3 +50,6 @@ stats.html
 stats-*.json
 .wxt
 web-ext.config.ts
+
+# serena
+.serena

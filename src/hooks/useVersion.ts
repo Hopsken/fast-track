@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react"
 import { browser } from '#imports'
 
+import { useEffect, useState } from 'react'
+
 export function useVersion() {
-  const [version, setVersion] = useState("")
+  const [version, setVersion] = useState('')
 
   useEffect(() => {
-    const version = browser.runtime.getManifest().version
+    const { version } = browser.runtime.getManifest()
     setVersion(version)
   }, [])
 

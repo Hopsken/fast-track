@@ -1,6 +1,6 @@
-import $ from "cash-dom"
+import $ from 'cash-dom'
 
-import { isJiraWebPage } from "./is-jira-page"
+import { isJiraWebPage } from './is-jira-page'
 
 type Effect = {
   key: string
@@ -9,9 +9,9 @@ type Effect = {
 }
 
 export class PageObserver {
-  private currentPath: string
+  private currentPath: string = ''
   private registry: Record<string, Effect & { active?: boolean }> = {}
-  private cleanup: Record<string, Function | undefined> = {}
+  private cleanup: Record<string, (() => void) | undefined> = {}
 
   constructor() {
     if (!isJiraWebPage(document)) {
@@ -23,7 +23,7 @@ export class PageObserver {
   }
 
   private initListener() {
-    $("#jira").on("click", () => {
+    $('#jira').on('click', () => {
       // wait for history change
       setTimeout(() => {
         const newPath = location.pathname
@@ -42,8 +42,9 @@ export class PageObserver {
     this.executeEffect(effect.key)
 
     return () => {
-      this.registry[effect.key] = undefined
+      delete this.registry[effect.key]
       this.cleanup[effect.key]?.()
+      delete this.cleanup[effect.key]
     }
   }
 
@@ -64,7 +65,7 @@ export class PageObserver {
       try {
         this.cleanup[effect.key] = await effect.effect()
         effect.active = active
-      } catch (_) {
+      } catch {
         //
       }
     } else {

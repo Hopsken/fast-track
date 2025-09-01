@@ -1,16 +1,44 @@
-import { browser } from '#imports'
-import { openJiraIssue } from '~/utils/open-jira-issue'
-import { openOptionsPage } from '~/utils/broswer'
+/**
+ * Background script - Main coordinator
+ * This serves as the entry point that initializes all background services
+ */
+
+import { defineBackground } from '#imports'
+
+import { registerTicketService } from '~/services/ticket-service'
+
+import { InstallationHandlerService } from './services/installation-handler'
+import { OmniboxHandlerService } from './services/omnibox-handler'
+import { initializeTicketCollectionService } from './services/ticket-collection-service'
 
 export default defineBackground(() => {
-  browser.omnibox.onInputEntered.addListener((text: string) => {
-    // Event handler for user entering keyword and pressing space/enter
-    openJiraIssue(text)
-  })
+  console.log('🚀 Background script initializing...')
 
-  browser.runtime.onInstalled.addListener((details) => {
-    if (details.reason === "install") {
-      openOptionsPage()
-    }
-  })
+  try {
+    // Initialize proxy services
+    registerTicketService()
+
+    // Initialize messaging services
+    initializeTicketCollectionService()
+
+    // Initialize other services
+    OmniboxHandlerService.initialize()
+    InstallationHandlerService.initialize()
+
+    // Set up omnibox default suggestion
+    OmniboxHandlerService.setDefaultSuggestion(
+      'Search Jira tickets or enter ticket key (e.g., PROJ-123)'
+    )
+
+    console.log('✅ Background script initialized successfully')
+    console.log('📊 Services status:')
+    console.log('  - Ticket Service: Registered via proxy service')
+    console.log('  - Ticket Collection: Messaging service active')
+    console.log(
+      '  - Extension Version:',
+      InstallationHandlerService.getVersion()
+    )
+  } catch (error) {
+    console.error('❌ Background script initialization failed:', error)
+  }
 })

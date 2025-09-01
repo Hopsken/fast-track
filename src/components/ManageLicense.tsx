@@ -1,9 +1,9 @@
-import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 
-import { useLicense } from "~/hooks/useLicense"
+import { useLicense } from '~/hooks/useLicense'
 
-import { ProBadge } from "./ProBadge"
+import { ProBadge } from './ProBadge'
 
 export function ManageLicense() {
   const { deactivate, valid, license } = useLicense()
@@ -18,7 +18,7 @@ export function ManageLicense() {
       <div>
         <ProBadge isPro={valid} />
       </div>
-      <ul className="font-medium list-none">
+      <ul className="list-none font-medium">
         <li>Device ID: {license.instance.name}</li>
         <li>License Email: {license.meta.customer_email}</li>
       </ul>
@@ -26,7 +26,7 @@ export function ManageLicense() {
       <DeactivateLicense
         onDeactivate={async () => {
           await deactivate()
-          navigate("/upgrade", { replace: true })
+          navigate('/upgrade', { replace: true })
         }}
       />
     </div>

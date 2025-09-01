@@ -1,43 +1,44 @@
-import { nanoid } from "nanoid"
-import { useCallback } from "react"
+import { useMemoizedFn } from 'ahooks'
+import { nanoid } from 'nanoid'
 
 import {
   activateLicense,
   deactivateLicense,
   validateLicense
-} from "~/lib/lemonsqueezy"
-import { useStorage, StorageKey } from "~/storage"
+} from '~/lib/lemonsqueezy'
+import { useStorage, StorageKey } from '~/storage'
 
 export function useLicense() {
   const [license, setLicense] = useStorage(StorageKey.License)
 
-  const revalidate = useCallback(async () => {
-    if (!license) return { valid: false, error: "No license" }
+  const revalidate = useMemoizedFn(async () => {
+    if (!license) return { valid: false, error: 'No license' }
     const { valid, error, ...info } = await validateLicense(
       license.license_key.key,
       license.instance.id
     )
     setLicense({
+      ...info,
       valid,
-      lastChecked: new Date().toISOString(),
-      ...info
+      lastChecked: new Date().toISOString()
     })
     return { valid, error }
-  }, [license])
+  })
 
-  const activate = useCallback(async (key: string) => {
+  const activate = useMemoizedFn(async (key: string) => {
     const { activated, error, ...info } = await activateLicense(key, nanoid())
     if (activated) {
       setLicense({
+        ...info,
         valid: true,
-        lastChecked: new Date().toISOString(),
-        ...info
+        lastChecked: new Date().toISOString()
       })
     }
     return { activated, error }
-  }, [])
+  })
 
-  const deactivate = useCallback(async () => {
+  const deactivate = useMemoizedFn(async () => {
+    if (!license) return false
     const { deactivated } = await deactivateLicense(
       license.license_key.key,
       license.instance.id
@@ -46,7 +47,7 @@ export function useLicense() {
       setLicense(null)
     }
     return true
-  }, [license])
+  })
 
   return {
     license,

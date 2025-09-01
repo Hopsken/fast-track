@@ -6,15 +6,9 @@ module.exports = {
   tabWidth: 2,
   useTabs: false,
   semi: false,
-  singleQuote: false,
+  singleQuote: true,
   trailingComma: "none",
   bracketSpacing: true,
   bracketSameLine: true,
-  plugins: [
-    require.resolve("@plasmohq/prettier-plugin-sort-imports"),
-    // require.resolve("prettier-plugin-tailwindcss")
-  ],
-  importOrder: ["^@plasmohq/(.*)$", "^~(.*)$", "^[./]"],
-  importOrderSeparation: true,
-  importOrderSortSpecifiers: true
+  plugins: [require.resolve("prettier-plugin-tailwindcss")]
 }
