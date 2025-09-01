@@ -151,12 +151,20 @@ export default defineContentScript({
      * Collect tickets by sending keys to background service
      */
     const collectTicketData = async (trigger: 'dom' | 'url' | 'initial') => {
+      console.log(
+        `\n🚀 CONTENT: Starting ticket key collection (${trigger.toUpperCase()})`
+      )
+
       // Step 1: Extract ticket keys from DOM
       const ticketKeys = extractTicketKeysFromPage()
 
       if (ticketKeys.length === 0) {
         return
       }
+
+      console.log(
+        `🚀 CONTENT: Extracted ${ticketKeys.length} ticket keys (${trigger.toUpperCase()})`
+      )
 
       // Step 2: Send keys to background service for processing
       const result = await sendMessage('collectTickets', {
@@ -168,6 +176,10 @@ export default defineContentScript({
       if (!result.success) {
         throw new Error(`Background processing failed: ${result.error}`)
       }
+
+      console.log(
+        `🚀 CONTENT: Ticket key collection completed (${trigger.toUpperCase()})`
+      )
     }
 
     // Enhanced URL change detection
