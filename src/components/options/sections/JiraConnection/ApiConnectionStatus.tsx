@@ -30,14 +30,16 @@ export function ApiConnectionStatus() {
         email: userEmail
       })
 
-      const success = await apiService.testConnection()
+      const result = await apiService.testConnection()
 
-      if (success) {
+      if (result.success) {
         setConnectionStatus('success')
         setStatusMessage('Connection successful! API integration is working.')
       } else {
         setConnectionStatus('error')
-        setStatusMessage('Connection failed. Please check your credentials.')
+        setStatusMessage(
+          result.error || 'Connection failed. Please check your credentials.'
+        )
       }
     } catch (error) {
       setConnectionStatus('error')

@@ -16,7 +16,7 @@ import type { JiraTicket } from '~/storage/types'
 /**
  * Ticket service implementation
  */
-class TicketService {
+export class TicketService {
   private cachedApiService: JiraApiService | null = null
   private cachedConfig: JiraApiConfig | null = null
   /**
