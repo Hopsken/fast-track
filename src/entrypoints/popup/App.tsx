@@ -65,7 +65,7 @@ function App() {
   )
 
   return (
-    <div className="animate-in fade-in zoom-in-95 max-h-[600px] w-96 bg-white shadow-lg duration-200 ease-out">
+    <div className="animate-in fade-in zoom-in-95 max-h-[600px] w-[36rem] bg-white shadow-lg duration-200 ease-out">
       {/* Search Section */}
       <div className="animate-in slide-in-from-top border-b border-gray-100 p-3 delay-75 duration-300">
         <ErrorBoundary

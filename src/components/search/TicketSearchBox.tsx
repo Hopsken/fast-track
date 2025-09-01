@@ -71,6 +71,8 @@ export function TicketSearchBox({
         } else {
           navigate('escape', onTicketClick)
           inputRef.current?.blur()
+          // Close popup window
+          window.close()
         }
         break
     }
