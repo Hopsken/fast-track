@@ -5,8 +5,10 @@ export const FUSE_OPTIONS = {
   keys: [
     { name: 'key', weight: 0.4 },
     { name: 'summary', weight: 0.3 },
-    { name: 'assignee', weight: 0.15 },
-    { name: 'status', weight: 0.1 },
+    { name: 'assignee.displayName', weight: 0.15 },
+    { name: 'status.name', weight: 0.1 },
+    { name: 'issueType.name', weight: 0.08 },
+    { name: 'priority.name', weight: 0.07 },
     { name: 'projectKey', weight: 0.05 }
   ],
   threshold: 0.4,
