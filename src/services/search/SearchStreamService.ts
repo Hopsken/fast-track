@@ -2,6 +2,7 @@ import { combineLatest, Observable, of } from 'rxjs'
 import {
   debounceTime,
   distinctUntilChanged,
+  map,
   switchMap,
   shareReplay,
   startWith,
@@ -163,13 +164,11 @@ export class SearchStreamService {
         (prev, curr) =>
           prev[0] === curr[0] && prev[1] === curr[1] && prev[2] === curr[2]
       ),
-      switchMap(([userEmail, viewHistory, primaryPrefix]) =>
-        of({
-          userEmail,
-          viewHistory,
-          primaryPrefix
-        })
-      )
+      map(([userEmail, viewHistory, primaryPrefix]) => ({
+        userEmail,
+        viewHistory,
+        primaryPrefix
+      }))
     )
   }
 }

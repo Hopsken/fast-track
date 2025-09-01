@@ -19,12 +19,23 @@ export class JiraClient extends BaseClient {
   serverInfo = new ServerInfo(this)
 
   constructor(private jiraConfig: JiraApiConfig) {
+    // Validate required authentication fields
+    if (!jiraConfig.email || !jiraConfig.apiToken) {
+      throw new Error(
+        'Email and API token are required for Jira authentication'
+      )
+    }
+
+    if (!jiraConfig.baseUrl) {
+      throw new Error('Base URL is required for Jira client')
+    }
+
     super({
       host: jiraConfig.baseUrl,
       authentication: {
         basic: {
-          email: jiraConfig.email || '',
-          apiToken: jiraConfig.apiToken || ''
+          email: jiraConfig.email,
+          apiToken: jiraConfig.apiToken
         }
       }
     })
@@ -36,13 +47,24 @@ export class JiraClient extends BaseClient {
   updateConfig(newConfig: Partial<JiraApiConfig>): void {
     this.jiraConfig = { ...this.jiraConfig, ...newConfig }
 
+    // Validate updated configuration
+    if (!this.jiraConfig.email || !this.jiraConfig.apiToken) {
+      throw new Error(
+        'Email and API token are required for Jira authentication'
+      )
+    }
+
+    if (!this.jiraConfig.baseUrl) {
+      throw new Error('Base URL is required for Jira client')
+    }
+
     // Reinitialize the client with new configuration
     const updatedConfig = {
       host: this.jiraConfig.baseUrl,
       authentication: {
         basic: {
-          email: this.jiraConfig.email || '',
-          apiToken: this.jiraConfig.apiToken || ''
+          email: this.jiraConfig.email,
+          apiToken: this.jiraConfig.apiToken
         }
       }
     }

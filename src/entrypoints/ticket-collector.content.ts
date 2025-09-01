@@ -2,6 +2,10 @@ import { defineContentScript } from '#imports'
 
 import { sendMessage } from '~/lib/messaging'
 import { isJiraWebPage } from '~/utils/jira/page-detection'
+import { logger } from '~/utils/logger'
+
+// Create a namespaced logger for ticket collection
+const log = logger.namespace('TicketCollector')
 
 // Simplified selectors focusing only on ticket key extraction
 const SELECTORS = {
@@ -151,9 +155,7 @@ export default defineContentScript({
      * Collect tickets by sending keys to background service
      */
     const collectTicketData = async (trigger: 'dom' | 'url' | 'initial') => {
-      console.log(
-        `\n🚀 CONTENT: Starting ticket key collection (${trigger.toUpperCase()})`
-      )
+      log.debug(`🚀 Starting ticket key collection (${trigger.toUpperCase()})`)
 
       // Step 1: Extract ticket keys from DOM
       const ticketKeys = extractTicketKeysFromPage()
@@ -162,8 +164,8 @@ export default defineContentScript({
         return
       }
 
-      console.log(
-        `🚀 CONTENT: Extracted ${ticketKeys.length} ticket keys (${trigger.toUpperCase()})`
+      log.debug(
+        `🚀 Extracted ${ticketKeys.length} ticket keys (${trigger.toUpperCase()})`
       )
 
       // Step 2: Send keys to background service for processing
@@ -177,9 +179,7 @@ export default defineContentScript({
         throw new Error(`Background processing failed: ${result.error}`)
       }
 
-      console.log(
-        `🚀 CONTENT: Ticket key collection completed (${trigger.toUpperCase()})`
-      )
+      log.debug(`🚀 Ticket key collection completed (${trigger.toUpperCase()})`)
     }
 
     // Enhanced URL change detection
@@ -199,53 +199,112 @@ export default defineContentScript({
       smartDebounceCollect('initial', 2000)
     }
 
-    // Smart DOM observation with throttling
+    // Performance-optimized DOM observation with targeted containers
     let observationCount = 0
     const MAX_OBSERVATIONS = 50 // Limit observations per session
+    const observers: MutationObserver[] = []
 
-    const observer = new MutationObserver((mutations) => {
-      observationCount++
+    const createOptimizedObserver = () => {
+      return new MutationObserver((mutations) => {
+        observationCount++
 
-      // Only process mutations that might contain ticket data
-      const relevantMutation = mutations.some((mutation) => {
-        const target = mutation.target as Element
-        return (
-          target.nodeType === Node.ELEMENT_NODE &&
-          (target.matches?.(SELECTORS.cards) ||
-            target.querySelector?.(SELECTORS.cards) ||
-            target.matches?.(SELECTORS.searchResults) ||
-            target.querySelector?.(SELECTORS.searchResults))
-        )
+        // Only process mutations that might contain ticket data
+        const relevantMutation = mutations.some((mutation) => {
+          const target = mutation.target as Element
+          return (
+            target.nodeType === Node.ELEMENT_NODE &&
+            (target.matches?.(SELECTORS.cards) ||
+              target.querySelector?.(SELECTORS.cards) ||
+              target.matches?.(SELECTORS.searchResults) ||
+              target.querySelector?.(SELECTORS.searchResults))
+          )
+        })
+
+        if (relevantMutation && observationCount < MAX_OBSERVATIONS) {
+          smartDebounceCollect('dom', 4000) // Longer delay for DOM changes
+        } else if (observationCount >= MAX_OBSERVATIONS) {
+          // Disconnect all observers temporarily
+          disconnectAllObservers()
+          // Reconnect with reduced sensitivity after a delay
+          setTimeout(() => {
+            observationCount = 0
+            startTargetedObservation()
+          }, 30000) // 30 second break
+        }
+      })
+    }
+
+    const disconnectAllObservers = () => {
+      observers.forEach((observer) => observer.disconnect())
+      observers.length = 0
+    }
+
+    const startTargetedObservation = () => {
+      // Disconnect existing observers first
+      disconnectAllObservers()
+
+      // Target specific Jira containers instead of entire document.body
+      const targetSelectors = [
+        // Main board containers
+        '[data-testid="platform-board-kit.ui.board.board"]',
+        '[data-testid="software-board.board-container.board"]',
+        // Issue list containers
+        '.issue-list',
+        '.split-view-issue-list',
+        // Search result containers
+        '#issuetable',
+        '.navigator-content',
+        // Backlog containers
+        '.js-work-data',
+        '.ghx-backlog-container'
+      ]
+
+      let observersCreated = 0
+      targetSelectors.forEach((selector) => {
+        const containers = document.querySelectorAll(selector)
+        containers.forEach((container) => {
+          if (container) {
+            const observer = createOptimizedObserver()
+            observer.observe(container, {
+              childList: true,
+              subtree: true,
+              attributes: false
+            })
+            observers.push(observer)
+            observersCreated++
+            log.debug(`Started observing container: ${selector}`)
+          }
+        })
       })
 
-      if (relevantMutation && observationCount < MAX_OBSERVATIONS) {
-        smartDebounceCollect('dom', 4000) // Longer delay for DOM changes
-      } else if (observationCount >= MAX_OBSERVATIONS) {
-        observer.disconnect()
-        // Reconnect with reduced sensitivity after a delay
-        setTimeout(() => {
-          observationCount = 0
-          observer.observe(document.body, {
-            childList: true,
-            subtree: true,
-            attributes: false
-          })
-        }, 30000) // 30 second break
+      // Fallback: if no specific containers found, observe document.body with reduced scope
+      if (observersCreated === 0) {
+        log.debug(
+          'No specific containers found, using document.body fallback with reduced scope'
+        )
+        const fallbackObserver = createOptimizedObserver()
+        fallbackObserver.observe(document.body, {
+          childList: true,
+          subtree: false, // Reduced scope - only direct children
+          attributes: false
+        })
+        observers.push(fallbackObserver)
+      } else {
+        log.debug(
+          `Created ${observersCreated} targeted observers for DOM monitoring`
+        )
       }
-    })
+    }
 
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: false
-    })
+    // Start the optimized observation
+    startTargetedObservation()
 
     // URL change detection with reduced frequency
     const urlCheckInterval = setInterval(checkUrlChange, 2000) // Check every 2 seconds instead of 1
 
     // Cleanup function
     return () => {
-      observer.disconnect()
+      disconnectAllObservers()
       clearTimeout(collectTimeout)
       clearInterval(urlCheckInterval)
     }

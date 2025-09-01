@@ -1,5 +1,6 @@
 import Fuse from 'fuse.js'
 
+import { logger } from '@/utils/logger'
 import { searchCache } from '@/utils/search/cache'
 import { createScoringError } from '@/utils/search/errors'
 import { calculateContextScore } from '@/utils/search/scoring'
@@ -7,6 +8,9 @@ import { JiraTicket } from '~/storage'
 
 import { FUSE_OPTIONS, SEARCH_LIMITS, SCORING_WEIGHTS } from './config'
 import { SearchContext, ScoredTicket } from './types'
+
+// Create a namespaced logger for search operations
+const log = logger.namespace('SearchEngine')
 
 /**
  * Get recent tickets based on context scoring
@@ -99,7 +103,13 @@ export function searchTickets(
           ticket.key,
           error instanceof Error ? error.message : 'Unknown error'
         )
-        console.warn('Error calculating context score:', scoringError)
+        log.warn('Error calculating context score:', {
+          ticketKey: ticket.key,
+          error: scoringError,
+          query,
+          fallback: 'Using contextScore = 0'
+        })
+        // Continue with contextScore = 0 as fallback
       }
 
       // Calculate match bonuses
@@ -118,7 +128,12 @@ export function searchTickets(
           summaryMatchBonus
       }
     } catch (error) {
-      console.warn('Error processing search result:', error)
+      log.warn('Error processing search result:', {
+        ticketKey: fuseResult.item.key,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        query,
+        fallback: 'Using score = 0'
+      })
       return {
         ticket: fuseResult.item,
         score: 0

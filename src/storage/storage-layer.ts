@@ -2,6 +2,8 @@
  * Core storage layer implementation
  */
 
+import { WxtStorageItem } from '#imports'
+
 import { StorageKey } from './keys'
 import type { StorageValueRecord } from './schema'
 import { storageItems } from './storage-items'
@@ -24,7 +26,12 @@ export class PersistLayer {
     key: T,
     value: StorageValueRecord[T]
   ): Promise<void> {
-    return await storageItems[key].setValue(value as never)
+    // Type-safe storage item access with proper typing
+    const storageItem = storageItems[key] as WxtStorageItem<
+      StorageValueRecord[T],
+      Record<string, unknown>
+    >
+    return await storageItem.setValue(value)
   }
 
   /**
@@ -44,7 +51,8 @@ export class PersistLayer {
       oldValue: StorageValueRecord[T] | null
     ) => void
   ) {
-    return storageItems[key].watch(callback as never)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return storageItems[key].watch(callback as any)
   }
 
   /**

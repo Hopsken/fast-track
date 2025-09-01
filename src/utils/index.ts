@@ -4,3 +4,4 @@
 
 export * from './dom'
 export * from './extension'
+export * from './logger'
