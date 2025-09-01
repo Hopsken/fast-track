@@ -62,7 +62,7 @@ export function TicketItem({
       </div>
 
       {/* Priority Icon */}
-      <PriorityIcon priority={ticket.priority} className="flex-shrink-0" />
+      {/* <PriorityIcon priority={ticket.priority} className="flex-shrink-0" /> */}
 
       {/* Status Badge */}
       <StatusBadge status={ticket.status} className="flex-shrink-0" />
