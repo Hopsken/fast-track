@@ -4,7 +4,13 @@
  */
 
 import { BaseClient } from 'jira.js'
-import { Issues, Myself, Projects, ServerInfo } from 'jira.js/version3'
+import {
+  IssueSearch,
+  Issues,
+  Myself,
+  Projects,
+  ServerInfo
+} from 'jira.js/version3'
 
 import type { JiraApiConfig } from './types'
 
@@ -14,6 +20,7 @@ import type { JiraApiConfig } from './types'
 export class JiraClient extends BaseClient {
   // jira.js modules
   issues = new Issues(this)
+  issueSearch = new IssueSearch(this)
   myself = new Myself(this)
   projects = new Projects(this)
   serverInfo = new ServerInfo(this)

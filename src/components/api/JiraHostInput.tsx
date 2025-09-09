@@ -31,7 +31,7 @@ export function JiraHostInput() {
   const handleSave = () => {
     if (isValid) {
       const normalizedUrl = normalizeJiraUrl(inputValue)
-      updateJiraConfig({ host: normalizedUrl })
+      updateJiraConfig({ baseUrl: normalizedUrl })
     }
   }
 

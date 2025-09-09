@@ -5,9 +5,9 @@
 import { useMemoizedFn } from 'ahooks'
 import { useState, useEffect } from 'react'
 import { HiCheckCircle, HiXCircle, HiClock } from 'react-icons/hi'
-import { browser } from 'wxt/browser'
 
 import { useJiraConfig } from '~/hooks/useStorageSettings'
+import { getTicketService } from '~/services/ticket-service'
 
 export function ApiConnectionStatus() {
   const { isConfigComplete } = useJiraConfig()
@@ -27,17 +27,12 @@ export function ApiConnectionStatus() {
     setErrorMessage('')
 
     try {
-      const response = await browser.runtime.sendMessage({
-        type: 'TEST_API_CONNECTION'
-      })
-
-      if (response.success && response.data?.success) {
-        setConnectionStatus('success')
-      } else {
+      const svc = getTicketService()
+      const result = await svc.testConnection()
+      if (result.success) setConnectionStatus('success')
+      else {
         setConnectionStatus('error')
-        setErrorMessage(
-          response.data?.error || response.error || 'Connection test failed'
-        )
+        setErrorMessage(result.error || 'Connection test failed')
       }
     } catch {
       setConnectionStatus('error')

@@ -5,12 +5,9 @@
 import { useCallback } from 'react'
 
 import { StorageValueRecord } from '@/storage'
+import type { JiraApiConfig } from '~/lib/jira/types'
 import { StorageKey, STORAGE_GROUPS } from '~/storage/keys'
-import type {
-  DarkModeOption,
-  CustomBackground,
-  JiraApiConfig
-} from '~/storage/types'
+import type { DarkModeOption, CustomBackground } from '~/storage/types'
 
 import { useStorage, useMultipleStorage } from './useStorage'
 
@@ -67,15 +64,14 @@ export function useJiraConfig() {
       const updates: Partial<{ [key in StorageKey]: StorageValueRecord[key] }> =
         {}
 
-      if (config.host !== undefined) {
-        updates[StorageKey.JiraHost] = config.host
-        updates[StorageKey.JiraUrl] = config.host // Keep both for compatibility
+      if (config.baseUrl !== undefined) {
+        updates[StorageKey.JiraHost] = config.baseUrl
       }
       if (config.email !== undefined) {
         updates[StorageKey.JiraUserEmail] = config.email
       }
-      if (config.token !== undefined) {
-        updates[StorageKey.JiraApiToken] = config.token
+      if (config.apiToken !== undefined) {
+        updates[StorageKey.JiraApiToken] = config.apiToken
       }
 
       updateValues(updates)
@@ -86,7 +82,6 @@ export function useJiraConfig() {
   const clearJiraConfig = useCallback(() => {
     updateValues({
       [StorageKey.JiraHost]: '',
-      [StorageKey.JiraUrl]: '',
       [StorageKey.JiraApiToken]: '',
       [StorageKey.JiraUserEmail]: ''
     })
@@ -104,15 +99,14 @@ export function useJiraConfig() {
     if (!isConfigComplete()) return null
 
     return {
-      host: values[StorageKey.JiraHost] ?? '',
+      baseUrl: values[StorageKey.JiraHost] ?? '',
       email: values[StorageKey.JiraUserEmail] ?? '',
-      token: values[StorageKey.JiraApiToken] ?? ''
+      apiToken: values[StorageKey.JiraApiToken] ?? ''
     }
   }, [values, isConfigComplete])
 
   return {
     jiraHost: values[StorageKey.JiraHost] ?? '',
-    jiraUrl: values[StorageKey.JiraUrl] ?? '', // For compatibility
     apiToken: values[StorageKey.JiraApiToken] ?? '',
     userEmail: values[StorageKey.JiraUserEmail] ?? '',
     updateJiraConfig,

@@ -4,6 +4,7 @@
  */
 
 import type { Issue } from 'jira.js/version3/models/issue'
+import type { IssuePickerSuggestions } from 'jira.js/version3/models/issuePickerSuggestions'
 import { chunk, compact, flatMap, map } from 'lodash-es'
 
 import type { JiraTicket } from '~/storage'
@@ -62,33 +63,23 @@ export class JiraIssueService {
         hasQuery: !!query
       })
 
-      // Use raw request to access Issue Picker endpoint
-      const response = await (
-        this.client as unknown as {
-          sendRequest: <T>(req: {
-            url: string
-            method: string
-            params?: Record<string, unknown>
-          }) => Promise<T>
-        }
-      ).sendRequest<any>({
-        url: '/rest/api/3/issue/picker',
-        method: 'GET',
-        params: query && query.trim() ? { query } : undefined
-      })
+      // Use jira.js Issue Search API for Issue Picker
+      const response: IssuePickerSuggestions =
+        await this.client.issueSearch.getIssuePickerResource(
+          query && query.trim() ? { query } : {}
+        )
 
       // Response shape: { sections: [{ issues: [{ key, summary, ...}] } ...] }
-      const sections = Array.isArray(response?.sections)
-        ? (response.sections as any[])
-        : []
+      const sections: NonNullable<IssuePickerSuggestions['sections']> =
+        Array.isArray(response?.sections) ? (response.sections ?? []) : []
 
       const issueKeys = Array.from(
         new Set(
           sections.flatMap((sec) =>
             Array.isArray(sec?.issues)
-              ? (sec.issues as any[])
+              ? sec.issues
                   .map((i) => i?.key)
-                  .filter((k) => typeof k === 'string')
+                  .filter((k): k is string => typeof k === 'string')
               : []
           )
         )

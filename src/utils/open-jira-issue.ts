@@ -7,8 +7,7 @@ function containsOnlyNumbers(str: string) {
 }
 
 export async function openJiraIssue(ticket: string) {
-  let jiraUrl = await persistLayer.get(StorageKey.JiraUrl)
-
+  let jiraUrl = (await persistLayer.get(StorageKey.JiraHost)) as string
   if (!jiraUrl) {
     openOptionsPage()
     return

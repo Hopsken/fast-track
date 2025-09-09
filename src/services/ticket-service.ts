@@ -24,15 +24,13 @@ export class TicketService {
    */
   private async getApiService(): Promise<JiraApiService> {
     // Get API configuration from storage (with backward compatibility)
-    const [jiraHost, jiraUrl, apiToken, userEmail] = await Promise.all([
+    const [jiraHost, apiToken, userEmail] = await Promise.all([
       persistLayer.get(StorageKey.JiraHost),
-      persistLayer.get(StorageKey.JiraUrl),
       persistLayer.get(StorageKey.JiraApiToken),
       persistLayer.get(StorageKey.JiraUserEmail)
     ])
 
-    // Use JiraHost if available, otherwise fall back to JiraUrl for backward compatibility
-    const baseUrl = jiraHost || jiraUrl
+    const baseUrl = jiraHost
 
     if (!baseUrl || !apiToken || !userEmail) {
       throw new Error(

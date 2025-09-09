@@ -41,12 +41,6 @@ export const storageItems = {
     fallback: STORAGE_DEFAULTS[StorageKey.License]
   }),
 
-  [StorageKey.JiraUrl]: storage.defineItem<
-    StorageValueRecord[StorageKey.JiraUrl]
-  >(`local:${StorageKey.JiraUrl}`, {
-    fallback: STORAGE_DEFAULTS[StorageKey.JiraUrl]
-  }),
-
   [StorageKey.JiraHost]: storage.defineItem<
     StorageValueRecord[StorageKey.JiraHost]
   >(`local:${StorageKey.JiraHost}`, {

@@ -1,7 +1,10 @@
-import { ApiConfiguration } from '../sections/JiraConnection/ApiConfiguration'
-import { ApiConnectionStatus } from '../sections/JiraConnection/ApiConnectionStatus'
-import { JiraHostInput } from '../sections/JiraConnection/JiraHostInput'
-import { TokenGenerationGuide } from '../sections/JiraConnection/TokenGenerationGuide'
+import {
+  ApiConfiguration,
+  ApiConnectionStatus,
+  JiraHostInput,
+  TokenGenerationGuide
+} from '~/components/api'
+
 import { PrimaryIssueKey } from '../sections/QuickAccess/PrimaryIssueKey'
 import { ShortcutManagement } from '../sections/QuickAccess/ShortcutManagement'
 

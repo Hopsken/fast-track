@@ -10,7 +10,6 @@ export type {
   CustomBackground,
   LicenseInfo,
   DarkModeOption,
-  JiraApiConfig,
   JiraStatus,
   JiraPriority,
   JiraAssignee,

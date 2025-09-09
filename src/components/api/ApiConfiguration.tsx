@@ -21,7 +21,7 @@ export function ApiConfiguration() {
 
   const handleTokenSave = () => {
     if (localToken !== apiToken) {
-      updateJiraConfig({ token: localToken })
+      updateJiraConfig({ apiToken: localToken })
     }
   }
 

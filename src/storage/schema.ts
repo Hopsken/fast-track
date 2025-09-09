@@ -20,7 +20,6 @@ export type StorageValueRecord = {
   [StorageKey.AutoFullScreen]: boolean
   [StorageKey.CustomBackground]: CustomBackground | undefined
   [StorageKey.License]: LicenseInfo | null
-  [StorageKey.JiraUrl]: string
   [StorageKey.JiraHost]: string
   [StorageKey.JiraApiToken]: string
   [StorageKey.JiraUserEmail]: string
@@ -38,7 +37,6 @@ export const STORAGE_DEFAULTS: { [K in StorageKey]: StorageValueRecord[K] } = {
   [StorageKey.AutoFullScreen]: false,
   [StorageKey.CustomBackground]: undefined,
   [StorageKey.License]: null,
-  [StorageKey.JiraUrl]: '',
   [StorageKey.JiraHost]: '',
   [StorageKey.JiraApiToken]: '',
   [StorageKey.JiraUserEmail]: '',

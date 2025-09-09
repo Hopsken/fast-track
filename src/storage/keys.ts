@@ -13,7 +13,6 @@ export enum StorageKey {
   License = 'ls-license',
 
   // Jira Configuration
-  JiraUrl = 'jira-url',
   JiraHost = 'jira-host',
   JiraApiToken = 'jira-api-token',
   JiraUserEmail = 'jira-user-email',
@@ -35,7 +34,6 @@ export const STORAGE_GROUPS = {
     StorageKey.CustomBackground
   ] as const,
   JIRA_CONFIG: [
-    StorageKey.JiraUrl,
     StorageKey.JiraHost,
     StorageKey.JiraApiToken,
     StorageKey.JiraUserEmail

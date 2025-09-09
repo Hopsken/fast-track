@@ -11,10 +11,12 @@ export { AboutTab } from './tabs/AboutTab'
 
 // Section components
 export { PrimaryIssueKey } from './sections/QuickAccess/PrimaryIssueKey'
-export { JiraHostInput } from './sections/JiraConnection/JiraHostInput'
-export { ApiConnectionStatus } from './sections/JiraConnection/ApiConnectionStatus'
-export { ApiConfiguration } from './sections/JiraConnection/ApiConfiguration'
-export { TokenGenerationGuide } from './sections/JiraConnection/TokenGenerationGuide'
+export {
+  JiraHostInput,
+  ApiConnectionStatus,
+  ApiConfiguration,
+  TokenGenerationGuide
+} from '~/components/api'
 export { SearchDataOverview } from './sections/DataManagement/SearchDataOverview'
 export { SearchDataActions } from './sections/DataManagement/SearchDataActions'
 export { AboutSection } from './sections/AboutSection'
