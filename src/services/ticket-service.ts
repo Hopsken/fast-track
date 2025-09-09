@@ -80,6 +80,22 @@ export class TicketService {
   }
 
   /**
+   * Gets Jira Issue Picker suggestions (for empty or initial searches)
+   */
+  async getIssuePickerSuggestions(query?: string): Promise<JiraTicket[]> {
+    try {
+      const apiService = await this.getApiService()
+      return await apiService.getIssuePickerSuggestions(query)
+    } catch (error) {
+      console.error(
+        '❌ TicketService: Failed to fetch issue picker suggestions:',
+        error
+      )
+      return []
+    }
+  }
+
+  /**
    * Tests the API connection
    */
   async testConnection(): Promise<{

@@ -36,6 +36,10 @@ export class JiraApiService {
     return this.issueService.getIssues(issueKeys)
   }
 
+  async getIssuePickerSuggestions(query?: string): Promise<JiraTicket[]> {
+    return this.issueService.getIssuePickerSuggestions(query)
+  }
+
   // ============================================================================
   // Connection Operations (Delegated to JiraConnectionService)
   // ============================================================================

@@ -53,6 +53,68 @@ export class JiraIssueService {
   }
 
   /**
+   * Fetches suggested issues from Jira Issue Picker API and returns full tickets
+   * When query is omitted or empty, Jira returns personalized suggestions.
+   */
+  async getIssuePickerSuggestions(query?: string): Promise<JiraTicket[]> {
+    try {
+      console.log('🎯 JiraAPI: Fetching issue picker suggestions...', {
+        hasQuery: !!query
+      })
+
+      // Use raw request to access Issue Picker endpoint
+      const response = await (
+        this.client as unknown as {
+          sendRequest: <T>(req: {
+            url: string
+            method: string
+            params?: Record<string, unknown>
+          }) => Promise<T>
+        }
+      ).sendRequest<any>({
+        url: '/rest/api/3/issue/picker',
+        method: 'GET',
+        params: query && query.trim() ? { query } : undefined
+      })
+
+      // Response shape: { sections: [{ issues: [{ key, summary, ...}] } ...] }
+      const sections = Array.isArray(response?.sections)
+        ? (response.sections as any[])
+        : []
+
+      const issueKeys = Array.from(
+        new Set(
+          sections.flatMap((sec) =>
+            Array.isArray(sec?.issues)
+              ? (sec.issues as any[])
+                  .map((i) => i?.key)
+                  .filter((k) => typeof k === 'string')
+              : []
+          )
+        )
+      ) as string[]
+
+      if (issueKeys.length === 0) {
+        console.log('ℹ️ JiraAPI: No issue picker suggestions found')
+        return []
+      }
+
+      // Reuse bulk issue fetch to get full ticket details
+      const tickets = await this.getIssues(issueKeys)
+      console.log(
+        `✅ JiraAPI: Retrieved ${tickets.length}/${issueKeys.length} suggested tickets`
+      )
+      return tickets
+    } catch (error) {
+      console.error(
+        '❌ JiraAPI: Failed to fetch issue picker suggestions:',
+        error
+      )
+      return []
+    }
+  }
+
+  /**
    * Fetches multiple issues using bulk API with functional patterns
    */
   async getIssues(issueKeys: string[]): Promise<JiraTicket[]> {

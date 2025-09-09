@@ -5,6 +5,7 @@ import { StorageKey } from '@/storage'
 import { TicketStore } from '@/stores/useTicketStore'
 import { storageToStream } from '@/utils/storageToStream'
 import { toStream } from '@/utils/toStream'
+import { getTicketService } from '~/services/ticket-service'
 
 import { SearchStreamService, type SearchResult } from './SearchStreamService'
 
@@ -20,7 +21,17 @@ export class SearchOrchestrator {
   private subscription?: Subscription
 
   constructor() {
-    this.searchService = new SearchStreamService()
+    // Provide suggestions via background TicketService when query is empty
+    this.searchService = new SearchStreamService(async () => {
+      try {
+        const svc = getTicketService()
+        const suggestions = await svc.getIssuePickerSuggestions()
+        return suggestions || []
+      } catch (e) {
+        console.warn('Suggestion provider failed:', e)
+        return []
+      }
+    })
   }
 
   /**

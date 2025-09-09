@@ -27,6 +27,11 @@ export interface SearchResult {
  * without any state management concerns.
  */
 export class SearchStreamService {
+  constructor(
+    private suggestionsProvider?: (
+      context: SearchContext
+    ) => Promise<JiraTicket[]>
+  ) {}
   /**
    * Creates a search results stream from input observables
    *
@@ -85,8 +90,29 @@ export class SearchStreamService {
         let results: JiraTicket[]
 
         if (!query.trim()) {
-          // Handle empty query - show recent tickets
-          results = getRecentTickets(tickets, context)
+          // Handle empty query - prefer server suggestions, fallback to recent tickets
+          const maybePromise = this.suggestionsProvider
+            ? this.suggestionsProvider(context)
+            : Promise.resolve([] as JiraTicket[])
+
+          maybePromise
+            .then((suggested) => {
+              const effective =
+                Array.isArray(suggested) && suggested.length > 0
+                  ? suggested
+                  : getRecentTickets(tickets, context)
+
+              subscriber.next({ query, results: effective, isError: false })
+              subscriber.complete()
+            })
+            .catch((err) => {
+              console.warn('Issue picker suggestions failed:', err)
+              const fallback = getRecentTickets(tickets, context)
+              subscriber.next({ query, results: fallback, isError: false })
+              subscriber.complete()
+            })
+
+          return
         } else {
           // Validate search query
           if (query.length > 200) {
@@ -98,11 +124,7 @@ export class SearchStreamService {
         }
 
         // Emit successful result
-        subscriber.next({
-          query,
-          results,
-          isError: false
-        })
+        subscriber.next({ query, results, isError: false })
         subscriber.complete()
       } catch (error) {
         console.error('Search error:', error)
