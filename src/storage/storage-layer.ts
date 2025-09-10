@@ -2,10 +2,8 @@
  * Core storage layer implementation
  */
 
-import { WxtStorageItem } from '#imports'
-
 import { StorageKey } from './keys'
-import type { StorageValueRecord } from './schema'
+import type { StorageValue } from './schema'
 import { storageItems } from './storage-items'
 
 /**
@@ -15,8 +13,8 @@ export class PersistLayer {
   /**
    * Gets a value from storage
    */
-  async get<T extends StorageKey>(key: T): Promise<StorageValueRecord[T]> {
-    return (await storageItems[key].getValue()) as StorageValueRecord[T]
+  async get<T extends StorageKey>(key: T): Promise<StorageValue<T>> {
+    return (await storageItems[key].getValue()) as StorageValue<T>
   }
 
   /**
@@ -24,13 +22,9 @@ export class PersistLayer {
    */
   async set<T extends StorageKey>(
     key: T,
-    value: StorageValueRecord[T]
+    value: StorageValue<T>
   ): Promise<void> {
-    // Type-safe storage item access with proper typing
-    const storageItem = storageItems[key] as WxtStorageItem<
-      StorageValueRecord[T],
-      Record<string, unknown>
-    >
+    const storageItem = storageItems[key]
     return await storageItem.setValue(value)
   }
 
@@ -47,8 +41,8 @@ export class PersistLayer {
   watch<T extends StorageKey>(
     key: T,
     callback: (
-      newValue: StorageValueRecord[T] | null,
-      oldValue: StorageValueRecord[T] | null
+      newValue: StorageValue<T> | null,
+      oldValue: StorageValue<T> | null
     ) => void
   ) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,7 +54,7 @@ export class PersistLayer {
    */
   async getMultiple<T extends StorageKey>(
     keys: T[]
-  ): Promise<{ [K in T]: StorageValueRecord[K] }> {
+  ): Promise<{ [K in T]: StorageValue<K> }> {
     const values = await Promise.all(
       keys.map(async (key) => ({
         key,
@@ -73,7 +67,7 @@ export class PersistLayer {
         acc[key] = value
         return acc
       },
-      {} as { [K in T]: StorageValueRecord[K] }
+      {} as { [K in T]: StorageValue<K> }
     )
   }
 
@@ -81,10 +75,10 @@ export class PersistLayer {
    * Sets multiple values in storage
    */
   async setMultiple(values: {
-    [K in StorageKey]?: StorageValueRecord[K]
+    [K in StorageKey]?: StorageValue<K>
   }): Promise<void> {
     const setPromises = Object.entries(values).map(([key, value]) =>
-      this.set(key as StorageKey, value as StorageValueRecord[StorageKey])
+      this.set(key as StorageKey, value as StorageValue<StorageKey>)
     )
 
     await Promise.all(setPromises)
@@ -103,7 +97,7 @@ export class PersistLayer {
    */
   async getGroup<T extends StorageKey>(
     keys: readonly T[]
-  ): Promise<{ [K in T]: StorageValueRecord[K] }> {
+  ): Promise<{ [K in T]: StorageValue<K> }> {
     return this.getMultiple([...keys])
   }
 }

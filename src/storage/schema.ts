@@ -28,6 +28,8 @@ export type StorageValueRecord = {
   [StorageKey.TicketViewHistory]: TicketViewRecord[]
 }
 
+export type StorageValue<T extends StorageKey> = StorageValueRecord[T]
+
 /**
  * Default values for storage items
  */
