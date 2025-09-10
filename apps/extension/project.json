@@ -83,17 +83,22 @@
       "outputs": ["{projectRoot}/.output"]
     },
     "lint": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/eslint:lint",
       "options": {
-        "cwd": "apps/extension",
-        "command": "eslint src --ext .ts,.tsx"
+        "lintFilePatterns": [
+          "apps/extension/src/**/*.{ts,tsx,js,jsx}"
+        ],
+        "format": "stylish"
       }
     },
     "lint:fix": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/eslint:lint",
       "options": {
-        "cwd": "apps/extension",
-        "command": "eslint src --ext .ts,.tsx --fix"
+        "lintFilePatterns": [
+          "apps/extension/src/**/*.{ts,tsx,js,jsx}"
+        ],
+        "fix": true,
+        "format": "stylish"
       }
     },
     "format": {
@@ -120,4 +125,3 @@
   },
   "tags": []
 }
-
