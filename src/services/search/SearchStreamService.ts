@@ -1,4 +1,4 @@
-import { combineLatest, Observable, of } from 'rxjs'
+import { combineLatest, Observable, of, from } from 'rxjs'
 import {
   debounceTime,
   distinctUntilChanged,
@@ -12,6 +12,8 @@ import {
 import { getRecentTickets, searchTickets } from '@/stores/slices/search/engine'
 import type { SearchContext } from '@/stores/slices/search/types'
 import { JiraTicket, TicketViewRecord } from '~/storage'
+
+import { TicketService } from '../ticket-service'
 
 export interface SearchResult {
   query: string
@@ -27,11 +29,7 @@ export interface SearchResult {
  * without any state management concerns.
  */
 export class SearchStreamService {
-  constructor(
-    private suggestionsProvider?: (
-      context: SearchContext
-    ) => Promise<JiraTicket[]>
-  ) {}
+  constructor(private ticketService: TicketService) {}
   /**
    * Creates a search results stream from input observables
    *
@@ -45,20 +43,54 @@ export class SearchStreamService {
     ticketData$: Observable<JiraTicket[]>,
     contextData$: Observable<SearchContext>
   ): Observable<SearchResult> {
-    return combineLatest([
-      searchQuery$.pipe(
-        debounceTime(150),
-        distinctUntilChanged(),
-        startWith('')
-      ),
-      ticketData$.pipe(startWith([])),
-      contextData$.pipe(
-        startWith({
-          viewHistory: [],
-          userEmail: '',
-          primaryPrefix: ''
+    const normalizedQuery$ = searchQuery$.pipe(
+      debounceTime(150),
+      distinctUntilChanged(),
+      startWith('')
+    )
+
+    const normalizedTickets$ = ticketData$.pipe(startWith([]))
+
+    const normalizedContext$ = contextData$.pipe(
+      startWith({
+        viewHistory: [],
+        userEmail: '',
+        primaryPrefix: ''
+      })
+    )
+
+    // Fetch suggestions when query is empty; treat suggestions as an additional
+    // ticket source and merge with existing tickets downstream.
+    const suggestions$ = from(
+      this.ticketService.getIssuePickerSuggestions()
+    ).pipe(
+      startWith([]),
+      catchError((err) => {
+        console.warn('Issue picker suggestions failed:', err)
+        return of([] as JiraTicket[])
+      })
+    )
+
+    // Merge base tickets and suggestions by key
+    const candidateTickets$ = combineLatest([
+      normalizedTickets$,
+      suggestions$
+    ]).pipe(
+      map(([tickets, suggested]) => {
+        const merged = new Map<string, JiraTicket>()
+        tickets.forEach((t) => merged.set(t.key, t))
+        suggested.forEach((s) => {
+          if (s && s.key) merged.set(s.key, s)
         })
-      )
+        return Array.from(merged.values())
+      }),
+      shareReplay(1)
+    )
+
+    return combineLatest([
+      normalizedQuery$,
+      candidateTickets$,
+      normalizedContext$
     ]).pipe(
       switchMap(([query, tickets, context]) =>
         this.performSearchAsObservable(query, tickets, context)
@@ -90,28 +122,10 @@ export class SearchStreamService {
         let results: JiraTicket[]
 
         if (!query.trim()) {
-          // Handle empty query - prefer server suggestions, fallback to recent tickets
-          const maybePromise = this.suggestionsProvider
-            ? this.suggestionsProvider(context)
-            : Promise.resolve([] as JiraTicket[])
-
-          maybePromise
-            .then((suggested) => {
-              const effective =
-                Array.isArray(suggested) && suggested.length > 0
-                  ? suggested
-                  : getRecentTickets(tickets, context)
-
-              subscriber.next({ query, results: effective, isError: false })
-              subscriber.complete()
-            })
-            .catch((err) => {
-              console.warn('Issue picker suggestions failed:', err)
-              const fallback = getRecentTickets(tickets, context)
-              subscriber.next({ query, results: fallback, isError: false })
-              subscriber.complete()
-            })
-
+          // Empty query: compute recent tickets from provided candidate set
+          const effective = getRecentTickets(tickets, context)
+          subscriber.next({ query, results: effective, isError: false })
+          subscriber.complete()
           return
         } else {
           // Validate search query

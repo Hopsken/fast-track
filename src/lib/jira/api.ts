@@ -36,8 +36,9 @@ export class JiraApiService {
     return this.issueService.getIssues(issueKeys)
   }
 
-  async getIssuePickerSuggestions(query?: string): Promise<JiraTicket[]> {
-    return this.issueService.getIssuePickerSuggestions(query)
+  async getIssuePickerSuggestions(): Promise<JiraTicket[]> {
+    console.log('🎯 JiraAPI: Fetching issue picker suggestions...')
+    return this.issueService.getIssuePickerSuggestions()
   }
 
   // ============================================================================

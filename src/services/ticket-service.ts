@@ -60,37 +60,23 @@ export class TicketService {
    */
   async fetchTicketDetails(ticketKeys: string[]): Promise<JiraTicket[]> {
     console.log('🔄 TicketService: Fetching details for tickets:', ticketKeys)
+    const apiService = await this.getApiService()
 
-    try {
-      const apiService = await this.getApiService()
+    // Use bulk getIssues method instead of manual batching
+    const tickets = await apiService.getIssues(ticketKeys)
 
-      // Use bulk getIssues method instead of manual batching
-      const tickets = await apiService.getIssues(ticketKeys)
-
-      console.log(
-        `🎉 TicketService: Successfully fetched ${tickets.length}/${ticketKeys.length} tickets`
-      )
-      return tickets
-    } catch (error) {
-      console.error('❌ TicketService: Failed to fetch ticket details:', error)
-      throw error
-    }
+    console.log(
+      `🎉 TicketService: Successfully fetched ${tickets.length}/${ticketKeys.length} tickets`
+    )
+    return tickets
   }
 
   /**
    * Gets Jira Issue Picker suggestions (for empty or initial searches)
    */
-  async getIssuePickerSuggestions(query?: string): Promise<JiraTicket[]> {
-    try {
-      const apiService = await this.getApiService()
-      return await apiService.getIssuePickerSuggestions(query)
-    } catch (error) {
-      console.error(
-        '❌ TicketService: Failed to fetch issue picker suggestions:',
-        error
-      )
-      return []
-    }
+  async getIssuePickerSuggestions(): Promise<JiraTicket[]> {
+    const apiService = await this.getApiService()
+    return await apiService.getIssuePickerSuggestions()
   }
 
   /**

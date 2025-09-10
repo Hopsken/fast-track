@@ -22,16 +22,7 @@ export class SearchOrchestrator {
 
   constructor() {
     // Provide suggestions via background TicketService when query is empty
-    this.searchService = new SearchStreamService(async () => {
-      try {
-        const svc = getTicketService()
-        const suggestions = await svc.getIssuePickerSuggestions()
-        return suggestions || []
-      } catch (e) {
-        console.warn('Suggestion provider failed:', e)
-        return []
-      }
-    })
+    this.searchService = new SearchStreamService(getTicketService())
   }
 
   /**
