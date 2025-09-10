@@ -1,0 +1,57 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "targetDefaults": {
+    "build": {
+      "outputs": ["{projectRoot}/.output"],
+      "cache": true
+    },
+    "build:chrome": {
+      "outputs": ["{projectRoot}/.output"],
+      "cache": true
+    },
+    "build:ff": {
+      "outputs": ["{projectRoot}/.output"],
+      "cache": true
+    },
+    "build:edge": {
+      "outputs": ["{projectRoot}/.output"],
+      "cache": true
+    },
+    "zip": {
+      "outputs": ["{projectRoot}/.output"],
+      "cache": true
+    },
+    "zip:chrome": {
+      "outputs": ["{projectRoot}/.output"],
+      "cache": true
+    },
+    "zip:firefox": {
+      "outputs": ["{projectRoot}/.output"],
+      "cache": true
+    },
+    "lint": {
+      "cache": true
+    },
+    "lint:fix": {
+      "cache": true
+    },
+    "format": {
+      "cache": true
+    },
+    "format:check": {
+      "cache": true
+    },
+    "typecheck": {
+      "cache": true
+    }
+  },
+  "defaultBase": "master",
+  "plugins": [
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "eslint:lint"
+      }
+    }
+  ]
+}

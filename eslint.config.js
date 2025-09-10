@@ -40,7 +40,7 @@ export default [
         ecmaFeatures: {
           jsx: true
         },
-        project: './tsconfig.json'
+        project: ['./tsconfig.json', './apps/*/tsconfig.json']
       }
     },
     plugins: {
@@ -58,8 +58,8 @@ export default [
       },
       'import-x/resolver-next': [
         createTypeScriptImportResolver({
-          alwaysTryTypes: true, // Always try to resolve types under `<root>@types` directory
-          project: './tsconfig.json'
+          alwaysTryTypes: true,
+          project: ['./tsconfig.json', './apps/*/tsconfig.json']
         })
       ],
       'import-x/core-modules': ['#imports']

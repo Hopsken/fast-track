@@ -1,0 +1,7 @@
+{
+  "extends": ["./.wxt/tsconfig.json", "../../tsconfig.base.json"],
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "resolveJsonModule": true
+  }
+}

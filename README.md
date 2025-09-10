@@ -1,3 +1,18 @@
+Monorepo (Nx) structure: this repository now uses Nx with the browser extension located under `apps/extension`. Future apps (e.g., website) can be added under `apps/` and shared code under `packages/`.
+
+Key commands
+
+- Dev (Chromium): `pnpm dev` → runs `nx run extension:dev`
+- Dev (Firefox): `pnpm dev:ff` → runs `nx run extension:dev:ff`
+- Build (Chromium): `pnpm build` → runs `nx run extension:build`
+- Build (Chrome/Firefox/Edge): `pnpm build:chrome | build:ff | build:edge`
+- Zip: `pnpm zip` or `pnpm zip:chrome` / `pnpm zip:firefox`
+- Lint/Format/Typecheck: `pnpm lint | format:check | typecheck`
+
+Source code for the extension has moved from `src/` to `apps/extension/src/`.
+
+---
+
 This is a [Plasmo extension](https://docs.plasmo.com/) project bootstrapped with [`plasmo init`](https://www.npmjs.com/package/plasmo).
 
 ## Getting Started

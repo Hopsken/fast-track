@@ -2,27 +2,32 @@
   "name": "jira-boost",
   "displayName": "Jira Boost",
   "version": "2.0.0",
+  "private": true,
   "type": "module",
   "description": "Quick search and access to your Jira tickets with enhanced board experience. Search by ticket key, summary, assignee, or status with lightning-fast results.",
   "author": "hopsken",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "wxt -b chromium",
-    "dev:ff": "wxt -b firefox",
-    "dev:edge": "wxt -b edge",
-    "build": "wxt build -b chromium",
-    "build:chrome": "wxt build -b chrome",
-    "build:ff": "wxt build -b firefox",
-    "build:edge": "wxt build -b edge",
-    "zip": "pnpm run zip:chrome && pnpm run zip:firefox",
-    "zip:chrome": "wxt zip -b chrome",
-    "zip:firefox": "wxt zip -b firefox",
+    "dev": "nx run extension:dev",
+    "dev:ff": "nx run extension:dev:ff",
+    "dev:edge": "nx run extension:dev:edge",
+    "build": "nx run extension:build",
+    "build:chrome": "nx run extension:build-chrome",
+    "build:ff": "nx run extension:build-firefox",
+    "build:edge": "nx run extension:build-edge",
+    "zip": "nx run extension:zip",
+    "zip:chrome": "nx run extension:zip-chrome",
+    "zip:firefox": "nx run extension:zip-firefox",
     "clean": "rimraf build",
-    "postinstall": "wxt prepare",
-    "lint": "eslint src --ext .ts,.tsx",
-    "lint:fix": "eslint src --ext .ts,.tsx --fix",
-    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
-    "typecheck": "tsc --noEmit"
+    "postinstall": "pnpm -C apps/extension exec wxt prepare",
+    "lint": "nx run extension:lint",
+    "lint:fix": "nx run extension:lint:fix",
+    "format": "nx run extension:format",
+    "format:check": "nx run extension:format:check",
+    "typecheck": "nx run extension:typecheck"
   },
   "dependencies": {
     "@ctrl/tinycolor": "^4.1.0",
@@ -83,7 +88,9 @@
     "prettier-plugin-tailwindcss": "^0.6.14",
     "rimraf": "^6.0.1",
     "tailwindcss": "^4.1.12",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "nx": "21.5.1",
+    "@nx/eslint": "21.5.1"
   },
   "packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c"
 }
