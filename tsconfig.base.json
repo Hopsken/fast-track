@@ -9,8 +9,10 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "jsx": "react-jsx",
+    "experimentalDecorators": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@internal/logger": ["packages/logger/src/index.ts"]
+    }
   }
 }
-
