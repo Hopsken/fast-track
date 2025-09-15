@@ -6,8 +6,8 @@ import { useMemoizedFn } from 'ahooks'
 import { useState, useEffect } from 'react'
 import { HiCheckCircle, HiXCircle, HiClock } from 'react-icons/hi'
 
-import { useJiraConfig } from '~/hooks/useStorageSettings'
-import { getTicketService } from '~/services/ticket-service'
+import { useJiraConfig } from '@/hooks/useJiraConfig'
+import { getTicketService } from '@/services/ticket-service'
 
 export function ApiConnectionStatus() {
   const { isConfigComplete } = useJiraConfig()

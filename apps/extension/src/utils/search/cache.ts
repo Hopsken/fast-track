@@ -1,4 +1,4 @@
-import type { JiraTicket } from '~/storage'
+import type { JiraTicket } from '@/lib/storage'
 
 interface CacheEntry<T> {
   data: T

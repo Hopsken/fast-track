@@ -1,6 +1,6 @@
 import { StateCreator } from 'zustand'
 
-import { JiraTicket } from '~/storage'
+import { JiraTicket } from '@/lib/storage'
 
 import { SearchSlice } from './createSearchSlice'
 

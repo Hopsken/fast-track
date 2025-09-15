@@ -4,98 +4,41 @@
  * This service provides type-safe, cross-context access to ticket operations.
  * Functions are called from content scripts but executed in the background.
  */
+import { defineProxyService, flattenPromise } from '@webext-core/proxy-service'
 
-import { defineProxyService } from '@webext-core/proxy-service'
-import { isEqual } from 'lodash-es'
-
-import { JiraApiService, type JiraApiConfig } from '~/lib/jira'
-import { persistLayer } from '~/storage'
-import { StorageKey } from '~/storage/keys'
-import type { JiraTicket } from '~/storage/types'
+import { JiraTicket } from '@/types'
+import { JiraAPI } from '~/lib/jira'
 
 /**
  * Ticket service implementation
  */
 export class TicketService {
-  private cachedApiService: JiraApiService | null = null
-  private cachedConfig: JiraApiConfig | null = null
-  /**
-   * Creates and returns a configured JiraApiService instance with caching
-   */
-  private async getApiService(): Promise<JiraApiService> {
-    // Get API configuration from storage (with backward compatibility)
-    const [jiraHost, apiToken, userEmail] = await Promise.all([
-      persistLayer.get(StorageKey.JiraHost),
-      persistLayer.get(StorageKey.JiraApiToken),
-      persistLayer.get(StorageKey.JiraUserEmail)
-    ])
+  private jira: JiraAPI
 
-    const baseUrl = jiraHost
-
-    if (!baseUrl || !apiToken || !userEmail) {
-      throw new Error(
-        'Jira API configuration is incomplete. Please configure API settings.'
-      )
-    }
-
-    const currentConfig: JiraApiConfig = {
-      baseUrl,
-      email: userEmail,
-      apiToken
-    }
-
-    // Return cached service if configuration hasn't changed
-    if (this.cachedApiService && isEqual(this.cachedConfig, currentConfig)) {
-      return this.cachedApiService
-    }
-
-    // Create new service instance and cache it
-    this.cachedApiService = new JiraApiService(currentConfig)
-    this.cachedConfig = currentConfig
-
-    return this.cachedApiService
+  constructor(jiraAPI: Promise<JiraAPI>) {
+    this.jira = flattenPromise(jiraAPI) as unknown as JiraAPI
   }
+
   /**
    * Fetches ticket details using the background API service
    */
   async fetchTicketDetails(ticketKeys: string[]): Promise<JiraTicket[]> {
-    console.log('🔄 TicketService: Fetching details for tickets:', ticketKeys)
-    const apiService = await this.getApiService()
-
-    // Use bulk getIssues method instead of manual batching
-    const tickets = await apiService.getIssues(ticketKeys)
-
-    console.log(
-      `🎉 TicketService: Successfully fetched ${tickets.length}/${ticketKeys.length} tickets`
-    )
-    return tickets
+    return this.jira.issues.getIssues(ticketKeys)
   }
 
   /**
    * Gets Jira Issue Picker suggestions (for empty or initial searches)
    */
   async getIssuePickerSuggestions(): Promise<JiraTicket[]> {
-    const apiService = await this.getApiService()
-    return await apiService.getIssuePickerSuggestions()
+    return this.jira.issues.getIssuePickerSuggestions()
   }
 
   /**
    * Tests the API connection
    */
-  async testConnection(): Promise<{
-    success: boolean
-    error?: string
-    user?: unknown
-  }> {
-    try {
-      const apiService = await this.getApiService()
-      return await apiService.testConnection()
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      }
-    }
+  async testConnection() {
+    console.log('testConnection')
+    return this.jira.connections.testConnection()
   }
 }
 
@@ -108,7 +51,7 @@ export class TicketService {
  */
 export const [registerTicketService, getTicketService] = defineProxyService(
   'TicketService',
-  () => new TicketService()
+  (jiraAPI: Promise<JiraAPI>) => new TicketService(jiraAPI)
 )
 
 /**

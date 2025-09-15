@@ -1,9 +1,8 @@
-import { type Subscription } from 'rxjs'
+import { of, type Subscription } from 'rxjs'
 import { StoreApi } from 'zustand'
 
-import { StorageKey } from '@/storage'
+import { fromStorage$ } from '@/lib/storage'
 import { TicketStore } from '@/stores/useTicketStore'
-import { storageToStream } from '@/utils/storageToStream'
 import { toStream } from '@/utils/toStream'
 import { getTicketService } from '~/services/ticket-service'
 
@@ -43,28 +42,13 @@ export class SearchOrchestrator {
     })
 
     // Create observables from WXT storage using storageToStream utility
-    const ticketData$ = storageToStream(StorageKey.TicketsData, {
-      fireImmediately: true
-    })
 
-    const userEmail$ = storageToStream(StorageKey.JiraUserEmail, {
-      fireImmediately: true
-    })
+    const ticketData$ = of([])
 
-    const viewHistory$ = storageToStream(StorageKey.TicketViewHistory, {
-      fireImmediately: true
-    })
-
-    const primaryPrefix$ = storageToStream(StorageKey.PrimaryIssueKeyPrefix, {
-      fireImmediately: true
-    })
+    const userEmail$ = fromStorage$('JiraUserEmail')
 
     // Create context observable
-    const contextData$ = this.searchService.createContextObservable(
-      userEmail$,
-      viewHistory$,
-      primaryPrefix$
-    )
+    const contextData$ = this.searchService.createContextObservable(userEmail$)
 
     // Create the main search stream
     const searchResults$ = this.searchService.createSearchStream(

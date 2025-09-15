@@ -4,7 +4,7 @@ import { logger } from '@/utils/logger'
 import { searchCache } from '@/utils/search/cache'
 import { createScoringError } from '@/utils/search/errors'
 import { calculateContextScore } from '@/utils/search/scoring'
-import { JiraTicket } from '~/storage'
+import { JiraTicket } from '@/lib/storage'
 
 import { FUSE_OPTIONS, SEARCH_LIMITS, SCORING_WEIGHTS } from './config'
 import { SearchContext, ScoredTicket } from './types'

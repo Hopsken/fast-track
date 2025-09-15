@@ -1,14 +1,18 @@
-import { useStorage, StorageKey } from '~/storage'
+import { useStorage } from '@/hooks'
+import { StorageKey, StorageValue } from '@/lib/storage'
 
 import { FormField, type FormFieldProps } from './FormField'
 
-export type ToggleFieldProps = Omit<FormFieldProps, 'children'> & {
-  storageKey: StorageKey.ColorCard | StorageKey.AutoFullScreen
+export type ToggleFieldProps<T extends StorageKey> = Omit<
+  FormFieldProps,
+  'children'
+> & {
+  storageKey: StorageValue<T> extends boolean ? StorageKey : never
 }
 
-export function ToggleField(props: ToggleFieldProps) {
+export function ToggleField<T extends StorageKey>(props: ToggleFieldProps<T>) {
   const { storageKey, ...formFieldProps } = props
-  const [checked, setChecked] = useStorage(storageKey, false)
+  const [checked, setChecked] = useStorage(storageKey)
 
   return (
     <FormField {...formFieldProps}>
@@ -17,6 +21,8 @@ export function ToggleField(props: ToggleFieldProps) {
         className="toggle toggle-lg"
         checked={Boolean(checked)}
         onChange={(e) => {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
           setChecked(e.target.checked)
         }}
         aria-label={`Toggle ${formFieldProps.title}`}

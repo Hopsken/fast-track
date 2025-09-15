@@ -11,7 +11,7 @@ import {
 
 import { getRecentTickets, searchTickets } from '@/stores/slices/search/engine'
 import type { SearchContext } from '@/stores/slices/search/types'
-import { JiraTicket, TicketViewRecord } from '~/storage'
+import { JiraTicket, TicketViewRecord } from '@/lib/storage'
 
 import { TicketService } from '../ticket-service'
 

@@ -6,10 +6,11 @@ import {
   deactivateLicense,
   validateLicense
 } from '~/lib/lemonsqueezy'
-import { useStorage, StorageKey } from '~/storage'
+
+import { useStorage } from './useStorage'
 
 export function useLicense() {
-  const [license, setLicense] = useStorage(StorageKey.License)
+  const [license, setLicense] = useStorage('License')
 
   const revalidate = useMemoizedFn(async () => {
     if (!license) return { valid: false, error: 'No license' }

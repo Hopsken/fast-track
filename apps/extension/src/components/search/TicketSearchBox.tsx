@@ -1,7 +1,7 @@
 import { useRef, KeyboardEvent } from 'react'
 import { HiSearch, HiX } from 'react-icons/hi'
 
-import { type JiraTicket } from '@/storage'
+import { type JiraTicket } from '@/lib/storage'
 import {
   useNavigationActions,
   useIsSearching,

@@ -2,10 +2,10 @@
  * Component for API token and email configuration
  */
 
-import { useState, KeyboardEvent } from 'react'
+import { useState, KeyboardEvent, useEffect } from 'react'
 import { HiEye, HiEyeOff, HiMail, HiKey } from 'react-icons/hi'
 
-import { useJiraConfig } from '~/hooks/useStorageSettings'
+import { useJiraConfig } from '@/hooks/useJiraConfig'
 
 export function ApiConfiguration() {
   const { apiToken, userEmail, updateJiraConfig } = useJiraConfig()
@@ -13,15 +13,20 @@ export function ApiConfiguration() {
   const [localEmail, setLocalEmail] = useState(userEmail)
   const [localToken, setLocalToken] = useState(apiToken)
 
+  useEffect(() => {
+    setLocalEmail(userEmail)
+    setLocalToken(apiToken)
+  }, [userEmail, apiToken])
+
   const handleEmailSave = () => {
     if (localEmail !== userEmail) {
-      updateJiraConfig({ email: localEmail })
+      updateJiraConfig({ JiraUserEmail: localEmail })
     }
   }
 
   const handleTokenSave = () => {
     if (localToken !== apiToken) {
-      updateJiraConfig({ apiToken: localToken })
+      updateJiraConfig({ JiraApiToken: localToken })
     }
   }
 
@@ -55,7 +60,7 @@ export function ApiConfiguration() {
             type="email"
             value={localEmail}
             onChange={(e) => setLocalEmail(e.target.value)}
-            onKeyPress={handleEmailKeyPress}
+            onKeyDown={handleEmailKeyPress}
             onBlur={handleEmailSave}
             placeholder="your-email@company.com"
             className="block w-full rounded-md border border-gray-300 py-2 pl-10 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
@@ -82,7 +87,7 @@ export function ApiConfiguration() {
             type={showToken ? 'text' : 'password'}
             value={localToken}
             onChange={(e) => setLocalToken(e.target.value)}
-            onKeyPress={handleTokenKeyPress}
+            onKeyDown={handleTokenKeyPress}
             onBlur={handleTokenSave}
             placeholder="Enter your Jira API token"
             className="block w-full rounded-md border border-gray-300 py-2 pr-10 pl-10 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"

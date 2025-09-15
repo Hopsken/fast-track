@@ -5,21 +5,18 @@
 
 import { defineBackground } from '#imports'
 
+import { getJiraApi } from '@/lib/jira'
 import { registerTicketService } from '~/services/ticket-service'
 
 import { InstallationHandlerService } from './services/installation-handler'
 import { OmniboxHandlerService } from './services/omnibox-handler'
-import { initializeTicketCollectionService } from './services/ticket-collection-service'
 
 export default defineBackground(() => {
   console.log('🚀 Background script initializing...')
 
   try {
     // Initialize proxy services
-    registerTicketService()
-
-    // Initialize messaging services
-    initializeTicketCollectionService()
+    registerTicketService(getJiraApi())
 
     // Initialize other services
     OmniboxHandlerService.initialize()

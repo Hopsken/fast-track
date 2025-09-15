@@ -4,20 +4,16 @@ import {
   OptionsHeader,
   TabNavigation,
   GeneralTab,
-  DisplayTab,
-  SearchTab,
   LicenseTab,
   AboutTab
 } from '~/components/options'
 import { useVersion } from '~/hooks/useVersion'
-import { useStorage, StorageKey } from '~/storage'
 
 import '~/assets/styles/main.css'
 
 function OptionsPage() {
   const version = useVersion()
   const [activeTab, setActiveTab] = useState('general')
-  const [ticketsData] = useStorage(StorageKey.TicketsData, [])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -29,10 +25,6 @@ function OptionsPage() {
 
           <div className="p-6">
             {activeTab === 'general' && <GeneralTab />}
-            {activeTab === 'display' && <DisplayTab />}
-            {activeTab === 'search' && (
-              <SearchTab ticketCount={ticketsData.length} />
-            )}
             {activeTab === 'license' && <LicenseTab />}
             {activeTab === 'about' && <AboutTab version={version} />}
           </div>

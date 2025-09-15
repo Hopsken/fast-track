@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import type { JiraAssignee } from '~/storage'
+import { JiraAssignee } from '@/types'
 
 interface AssigneeAvatarProps {
   assignee?: JiraAssignee

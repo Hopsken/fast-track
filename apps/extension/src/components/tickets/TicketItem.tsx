@@ -6,7 +6,7 @@ import {
   // PriorityIcon,
   AssigneeAvatar
 } from '~/components/ui/jira'
-import { JiraTicket } from '~/storage'
+import { JiraTicket } from '@/lib/storage'
 import { HighlightedText } from '~/utils/text-highlighting'
 
 interface TicketItemProps {

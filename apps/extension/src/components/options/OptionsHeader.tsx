@@ -1,6 +1,6 @@
+import { useStorage } from '@/hooks/useStorage'
 import logoUrl from '~/assets/logo.png'
 import { ProBadge } from '~/components/ProBadge'
-import { useStorage, StorageKey } from '~/storage'
 
 interface OptionsHeaderProps {
   version: string
@@ -8,7 +8,7 @@ interface OptionsHeaderProps {
 }
 
 export function OptionsHeader({ version, onTabChange }: OptionsHeaderProps) {
-  const [license] = useStorage(StorageKey.License)
+  const [license] = useStorage('License')
 
   const handleProBadgeClick = () => {
     if (onTabChange) {

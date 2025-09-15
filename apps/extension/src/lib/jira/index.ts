@@ -1,22 +1,32 @@
 // Main service (facade pattern)
-export { JiraApiService } from './api'
+import { combineLatest, firstValueFrom } from 'rxjs'
 
-// Individual services (for advanced usage)
-export { JiraClient } from './client'
-export { JiraIssueService } from './issue-service'
-export { JiraConnectionService } from './connection-service'
+import { fromStorage$ } from '../storage'
 
-// Types
-export type { JiraApiConfig, JiraConnectionTestResult } from './types'
+import { JiraAPI } from './api'
 
-// Utilities
-export {
-  extractJiraUrlFromCurrentPage,
-  extractJiraInstanceName,
-  isValidJiraUrl,
-  normalizeJiraUrl,
-  buildIssueUrl,
-  extractIssueKeyFromUrl,
-  isJiraIssueUrl,
-  JiraUrlBuilder
-} from './url-helpers'
+export type { JiraAPI }
+
+export type { JiraApiConfig } from './types'
+
+export async function getJiraApi() {
+  const jiraAPIConfig = combineLatest([
+    fromStorage$('JiraHost'),
+    fromStorage$('JiraUserEmail'),
+    fromStorage$('JiraApiToken')
+  ])
+
+  const initialConfig = await firstValueFrom(jiraAPIConfig)
+
+  const jiraAPI = new JiraAPI({
+    baseUrl: initialConfig[0],
+    email: initialConfig[1],
+    apiToken: initialConfig[2]
+  })
+
+  jiraAPIConfig.subscribe(([baseUrl, email, apiToken]) => {
+    jiraAPI.updateConfig({ baseUrl, email, apiToken })
+  })
+
+  return jiraAPI
+}

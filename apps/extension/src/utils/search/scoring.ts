@@ -4,7 +4,7 @@ import type {
   JiraStatus,
   JiraPriority,
   JiraAssignee
-} from '~/storage'
+} from '@/lib/storage'
 
 import { memoizeWithTTL } from './cache'
 

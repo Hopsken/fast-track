@@ -5,12 +5,12 @@
 import { useState, useEffect, KeyboardEvent } from 'react'
 import { HiGlobeAlt, HiCheck, HiX } from 'react-icons/hi'
 
-import { useJiraConfig } from '~/hooks/useStorageSettings'
+import { useJiraConfig } from '@/hooks/useJiraConfig'
 import {
   isValidJiraUrl,
   normalizeJiraUrl,
   extractJiraInstanceName
-} from '~/lib/jira'
+} from '@/utils/jira/url-helpers'
 
 export function JiraHostInput() {
   const { jiraHost, updateJiraConfig } = useJiraConfig()
@@ -31,7 +31,7 @@ export function JiraHostInput() {
   const handleSave = () => {
     if (isValid) {
       const normalizedUrl = normalizeJiraUrl(inputValue)
-      updateJiraConfig({ baseUrl: normalizedUrl })
+      updateJiraConfig({ JiraHost: normalizedUrl })
     }
   }
 

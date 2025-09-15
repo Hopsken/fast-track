@@ -1,81 +1,60 @@
-/**
- * Main storage hook for React components
- */
-
 import { useState, useEffect } from 'react'
 
-import { StorageKey } from '~/storage/keys'
-import { type StorageValueRecord, STORAGE_DEFAULTS } from '~/storage/schema'
-import { storageItems } from '~/storage/storage-items'
+import { getStorageItem, StorageKey, StorageValue } from '@/lib/storage'
 
 /**
  * React hook for accessing WXT storage with automatic updates
  */
 export function useStorage<T extends StorageKey>(
-  key: T,
-  defaultValue?: StorageValueRecord[T]
+  key: T
 ): [
-  StorageValueRecord[T],
+  StorageValue<T>,
   (
-    value:
-      | StorageValueRecord[T]
-      | ((prev: StorageValueRecord[T]) => StorageValueRecord[T])
+    value: StorageValue<T> | ((prev: StorageValue<T>) => StorageValue<T>)
   ) => void
 ] {
-  const [fallbackValue] = useState(
-    (defaultValue ?? STORAGE_DEFAULTS[key]) as StorageValueRecord[T]
-  )
-  const [value, setValue] = useState<StorageValueRecord[T]>(fallbackValue)
+  const [storageItem] = useState(getStorageItem(key))
+  const [value, setValue] = useState<StorageValue<T>>(storageItem.fallback)
 
   useEffect(() => {
-    // Get initial value safely
-    const storageItem = storageItems[key]
-
-    if (storageItem) {
-      storageItem
-        .getValue()
-        .then((storageValue) => {
-          setValue((storageValue ?? fallbackValue) as StorageValueRecord[T])
-        })
-        .catch((error) => {
-          console.warn(`Failed to get storage value for key ${key}:`, error)
-          setValue(fallbackValue)
-        })
-
-      // Watch for changes
-      return storageItem.watch((newValue) => {
-        setValue((newValue ?? fallbackValue) as StorageValueRecord[T])
+    storageItem
+      .getValue()
+      .then((storageValue) => {
+        setValue(storageValue)
       })
-    } else {
-      console.warn(`Storage item not found for key: ${key}`)
-      setValue(fallbackValue)
-    }
-  }, [key, fallbackValue])
+      .catch((error) => {
+        console.warn(
+          `Failed to get storage value for key ${storageItem.key}:`,
+          error
+        )
+        setValue(storageItem.fallback)
+      })
+
+    // Watch for changes
+    return storageItem.watch((newValue) => {
+      setValue(newValue)
+    })
+  }, [storageItem])
 
   const setStorageValue = (
-    newValue:
-      | StorageValueRecord[T]
-      | ((prev: StorageValueRecord[T]) => StorageValueRecord[T])
+    newValue: StorageValue<T> | ((prev: StorageValue<T>) => StorageValue<T>)
   ) => {
-    const storageItem = storageItems[key]
-
-    if (storageItem) {
-      const finalValue =
-        typeof newValue === 'function'
-          ? (
-              newValue as (prev: StorageValueRecord[T]) => StorageValueRecord[T]
-            )(value)
-          : newValue
-
-      storageItem
-        .setValue(finalValue as never)
-        .then(() => setValue(finalValue))
-        .catch((error) => {
-          console.error(`Failed to set storage value for key ${key}:`, error)
-        })
-    } else {
+    if (!storageItem) {
       console.warn(`Storage item not found for key: ${key}`)
+      return
     }
+
+    const finalValue =
+      typeof newValue === 'function'
+        ? (newValue as (prev: StorageValue<T>) => StorageValue<T>)(value)
+        : newValue
+
+    storageItem
+      .setValue(finalValue)
+      .then(() => setValue(finalValue))
+      .catch((error) => {
+        console.error(`Failed to set storage value for key ${key}:`, error)
+      })
   }
 
   return [value, setStorageValue]
@@ -87,36 +66,31 @@ export function useStorage<T extends StorageKey>(
 export function useMultipleStorage<T extends StorageKey>(
   keys: readonly T[]
 ): [
-  { [K in T]: StorageValueRecord[K] },
-  (updates: Partial<{ [K in T]: StorageValueRecord[K] }>) => void
+  { [K in T]: StorageValue<K> },
+  (updates: Partial<{ [K in T]: StorageValue<K> }>) => void
 ] {
-  const [values, setValues] = useState<{ [K in T]: StorageValueRecord[K] }>(
-    () => {
-      // Initialize with default values
-      const initialValues = {} as { [K in T]: StorageValueRecord[K] }
-      keys.forEach((key) => {
-        initialValues[key] = STORAGE_DEFAULTS[key]
-      })
-      return initialValues
-    }
-  )
+  const [values, setValues] = useState<{ [K in T]: StorageValue<K> }>(() => {
+    // Initialize with default values
+    const initialValues = {} as { [K in T]: StorageValue<K> }
+    keys.forEach((key) => {
+      initialValues[key] = getStorageItem(key).fallback
+    })
+    return initialValues
+  })
 
   useEffect(() => {
     // Get initial values
     const getInitialValues = async () => {
-      const initialValues = {} as { [K in T]: StorageValueRecord[K] }
+      const initialValues = {} as { [K in T]: StorageValue<K> }
 
       await Promise.all(
         keys.map(async (key) => {
           try {
-            const value = await storageItems[key].getValue()
-            initialValues[key] = (value ??
-              STORAGE_DEFAULTS[key]) as StorageValueRecord[typeof key]
+            const value = await getStorageItem(key).getValue()
+            initialValues[key] = value ?? getStorageItem(key).fallback
           } catch (error) {
             console.warn(`Failed to get initial value for ${key}:`, error)
-            initialValues[key] = STORAGE_DEFAULTS[
-              key
-            ] as StorageValueRecord[typeof key]
+            initialValues[key] = getStorageItem(key).fallback
           }
         })
       )
@@ -128,10 +102,10 @@ export function useMultipleStorage<T extends StorageKey>(
 
     // Set up watchers
     const unwatchFunctions = keys.map((key) => {
-      return storageItems[key].watch((newValue) => {
+      return getStorageItem(key).watch((newValue) => {
         setValues((prev) => ({
           ...prev,
-          [key]: newValue ?? STORAGE_DEFAULTS[key]
+          [key]: newValue ?? getStorageItem(key).fallback
         }))
       })
     })
@@ -142,10 +116,10 @@ export function useMultipleStorage<T extends StorageKey>(
   }, [keys])
 
   const updateValues = async (
-    updates: Partial<{ [K in T]: StorageValueRecord[K] }>
+    updates: Partial<{ [K in T]: StorageValue<K> }>
   ) => {
     const updatePromises = Object.entries(updates).map(([key, value]) => {
-      const storageItem = storageItems[key as T]
+      const storageItem = getStorageItem(key as StorageKey)
       return storageItem.setValue(value as never)
     })
 

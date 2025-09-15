@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import type { JiraIssueType } from '~/storage'
+import { JiraIssueType } from '@/types'
 
 interface IssueTypeIconProps {
   issueType: JiraIssueType

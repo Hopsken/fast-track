@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import type { JiraPriority } from '~/storage'
+import { JiraPriority } from '@/types'
 
 interface PriorityIconProps {
   priority?: JiraPriority

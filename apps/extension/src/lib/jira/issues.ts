@@ -7,7 +7,7 @@ import type { Issue } from 'jira.js/version3/models/issue'
 import type { IssuePickerSuggestions } from 'jira.js/version3/models/issuePickerSuggestions'
 import { chunk, compact, flatMap, map } from 'lodash-es'
 
-import type { JiraTicket } from '~/storage'
+import { JiraTicket } from '@/types'
 
 import type { JiraClient } from './client'
 
@@ -40,13 +40,8 @@ export class JiraIssueService {
         ]
       })
 
-      const ticket = this.convertToTicket(issue)
-
-      console.log(
-        `✅ JiraAPI: Successfully converted issue ${issueKey} to ticket:`,
-        ticket
-      )
-      return ticket
+      console.log(`✅ JiraAPI: Successfully fetched issue ${issueKey}`)
+      return this.convertToTicket(issue)
     } catch (error) {
       console.error(`❌ JiraAPI: Failed to fetch issue ${issueKey}:`, error)
       return null
@@ -117,24 +112,9 @@ export class JiraIssueService {
     const batchSize = 100 // jira.js bulkFetchIssues limit
     const batches = chunk(issueKeys, batchSize)
 
-    const batchResults = await Promise.all(
-      map(batches, async (batch, index) => {
-        console.log(
-          `📦 JiraAPI: Processing bulk batch ${index + 1}/${batches.length} (${batch.length} issues)`
-        )
+    const tasks = batches.map((batch) => this.processBulkBatch(batch))
 
-        const result = await this.processBulkBatch(batch)
-
-        // Add small delay between bulk requests to respect rate limits
-        if (index < batches.length - 1) {
-          await new Promise((resolve) =>
-            setTimeout(resolve, this.rateLimitDelay)
-          )
-        }
-
-        return result
-      })
-    )
+    const batchResults = await Promise.all(tasks)
 
     const tickets = flatMap(batchResults)
 
@@ -189,40 +169,8 @@ export class JiraIssueService {
     } catch (error) {
       console.error(`❌ JiraAPI: Bulk fetch failed for batch:`, error)
 
-      // Fallback to individual requests for this batch
-      console.log(
-        `🔄 JiraAPI: Falling back to individual requests for ${batch.length} issues`
-      )
-      return this.processBatch(batch)
+      return []
     }
-  }
-
-  /**
-   * Processes a batch of issue keys (fallback method)
-   */
-  private async processBatch(batch: string[]): Promise<JiraTicket[]> {
-    const batchPromises = batch.map(async (key, index) => {
-      // Add small delay between requests to respect rate limits
-      if (index > 0) {
-        await new Promise((resolve) => setTimeout(resolve, this.rateLimitDelay))
-      }
-      return this.getIssue(key)
-    })
-
-    const batchResults = await Promise.allSettled(batchPromises)
-
-    return compact(
-      map(batchResults, (result, index) => {
-        if (result.status === 'fulfilled' && result.value) {
-          return result.value
-        }
-        console.warn(
-          `⚠️ JiraAPI: Failed to fetch issue ${batch[index]}:`,
-          result.status === 'rejected' ? result.reason : 'Unknown error'
-        )
-        return null // Will be removed by compact()
-      })
-    )
   }
 
   /**
@@ -264,9 +212,8 @@ export class JiraIssueService {
         : undefined,
       projectKey: issue.fields?.project?.key || '',
       boardName: issue.fields?.project?.name || '',
-      url: `${config.baseUrl}/browse/${issue.key}`,
-      lastViewed: new Date().toISOString(),
-      viewCount: 1
+      url: issue.self ?? `${config.baseUrl}/browse/${issue.key}`,
+      lastViewed: new Date().toISOString()
     }
   }
 

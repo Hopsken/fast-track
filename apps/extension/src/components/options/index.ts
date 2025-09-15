@@ -4,21 +4,16 @@ export { TabNavigation, tabs } from './TabNavigation'
 
 // Tab components
 export { GeneralTab } from './tabs/GeneralTab'
-export { DisplayTab } from './tabs/DisplayTab'
-export { SearchTab } from './tabs/SearchTab'
 export { LicenseTab } from './tabs/LicenseTab'
 export { AboutTab } from './tabs/AboutTab'
 
 // Section components
-export { PrimaryIssueKey } from './sections/QuickAccess/PrimaryIssueKey'
 export {
   JiraHostInput,
   ApiConnectionStatus,
   ApiConfiguration,
   TokenGenerationGuide
 } from '~/components/api'
-export { SearchDataOverview } from './sections/DataManagement/SearchDataOverview'
-export { SearchDataActions } from './sections/DataManagement/SearchDataActions'
 export { AboutSection } from './sections/AboutSection'
 export {
   LicenseStatus,

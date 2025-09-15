@@ -5,7 +5,6 @@ import {
   TokenGenerationGuide
 } from '~/components/api'
 
-import { PrimaryIssueKey } from '../sections/QuickAccess/PrimaryIssueKey'
 import { ShortcutManagement } from '../sections/QuickAccess/ShortcutManagement'
 
 export function GeneralTab() {
@@ -29,7 +28,6 @@ export function GeneralTab() {
         </h2>
         <div className="space-y-6">
           <ShortcutManagement />
-          <PrimaryIssueKey />
         </div>
       </div>
     </div>

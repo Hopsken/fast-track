@@ -1,4 +1,4 @@
-import { JiraTicket, TicketViewRecord } from '~/storage'
+import { JiraTicket, TicketViewRecord } from '@/lib/storage'
 
 // Search state type
 export type SearchState = 'idle' | 'searching' | 'success' | 'error'

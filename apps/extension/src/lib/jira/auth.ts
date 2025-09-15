@@ -3,13 +3,24 @@
  * Handles connection testing, validation, and health checks
  */
 
+import type { ServerInformation } from 'jira.js/version3/models/serverInformation'
+
 import type { JiraClient } from './client'
-import type { JiraConnectionTestResult } from './types'
+
+export interface JiraConnectionTestResult {
+  success: boolean
+  user?: {
+    accountId: string
+    displayName: string
+    emailAddress: string
+  }
+  error?: string
+}
 
 /**
  * Service for connection-related operations and validation
  */
-export class JiraConnectionService {
+export class JiraAuthService {
   constructor(private client: JiraClient) {}
 
   /**
@@ -65,7 +76,7 @@ export class JiraConnectionService {
   /**
    * Gets server information
    */
-  async getServerInfo(): Promise<unknown> {
+  async getServerInfo(): Promise<ServerInformation> {
     try {
       console.log('ℹ️ JiraAPI: Fetching server info...')
 

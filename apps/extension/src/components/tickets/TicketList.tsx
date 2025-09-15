@@ -2,8 +2,8 @@ import { useMemoizedFn } from 'ahooks'
 import { useEffect, useRef } from 'react'
 import { HiInformationCircle } from 'react-icons/hi'
 
+import { JiraTicket } from '@/types'
 import { useTicketListHotkeys } from '~/hooks/useTicketListHotkeys'
-import { JiraTicket, StorageKey, TicketViewRecord, useStorage } from '~/storage'
 import {
   useSelectedIndex,
   useSearchResults,
@@ -26,38 +26,10 @@ export function TicketList({ onTicketClick }: TicketListProps) {
   const isSearching = useIsSearching()
   const { navigate } = useNavigationActions()
 
-  const [viewHistory, setViewHistory] = useStorage(
-    StorageKey.TicketViewHistory,
-    []
-  )
   const listRef = useRef<HTMLDivElement>(null)
 
   // Handle ticket click with view history tracking
   const handleTicketClick = useMemoizedFn(async (ticket: JiraTicket) => {
-    // Update view history
-    const existingRecord = viewHistory.find(
-      (record) => record.ticketKey === ticket.key
-    )
-    const updatedHistory = existingRecord
-      ? viewHistory.map((record) =>
-          record.ticketKey === ticket.key
-            ? {
-                ...record,
-                viewCount: record.viewCount + 1,
-                lastViewed: new Date().toISOString()
-              }
-            : record
-        )
-      : [
-          ...viewHistory,
-          {
-            ticketKey: ticket.key,
-            viewCount: 1,
-            lastViewed: new Date().toISOString()
-          } as TicketViewRecord
-        ]
-
-    setViewHistory(updatedHistory.slice(0, 100)) // Keep only recent 100 records
     onTicketClick(ticket)
   })
 

@@ -2,7 +2,7 @@ import { useMemoizedFn } from 'ahooks'
 import { useHotkeys } from 'react-hotkeys-hook'
 
 import { NavigationSlice } from '@/stores/slices/createNavigationSlice'
-import { JiraTicket } from '~/storage'
+import type { JiraTicket } from '@/types'
 
 interface UseTicketListHotkeysParams {
   searchResults: JiraTicket[]
