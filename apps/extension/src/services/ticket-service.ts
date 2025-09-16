@@ -60,6 +60,10 @@ class TicketServiceImpl {
   async testConnection() {
     return this.jira.connections.testConnection()
   }
+
+  hasValidConfig() {
+    return this.jira.hasValidConfig()
+  }
 }
 
 /**

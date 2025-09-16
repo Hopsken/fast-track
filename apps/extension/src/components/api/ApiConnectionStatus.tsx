@@ -29,8 +29,12 @@ export function ApiConnectionStatus() {
     try {
       const svc = getTicketService()
       const result = await svc.testConnection()
-      if (result.success) setConnectionStatus('success')
-      else {
+      if (result.success) {
+        setConnectionStatus('success')
+
+        // Load suggestions after successful connection test
+        svc.loadSuggestions()
+      } else {
         setConnectionStatus('error')
         setErrorMessage(result.error || 'Connection test failed')
       }

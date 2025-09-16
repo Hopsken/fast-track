@@ -22,7 +22,7 @@ declare global {
 
 let database: Database
 
-export async function initRxDB(): Promise<Database> {
+export async function getDatabase(): Promise<Database> {
   if (database) return database
 
   if (import.meta.env.DEV) {

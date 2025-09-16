@@ -6,10 +6,11 @@
 import { defineBackground } from '#imports'
 
 import { getJiraApi } from '@/lib/jira'
-import { initRxDB } from '@/repository'
+import { getDatabase } from '@/repository'
 import { registerSearchService } from '@/services/search-service'
 import { registerTicketService } from '~/services/ticket-service'
 
+import { BackgroundAlarmsService } from './services/background-alarms'
 import { InstallationHandlerService } from './services/installation-handler'
 import { OmniboxHandlerService } from './services/omnibox-handler'
 
@@ -17,13 +18,17 @@ export default defineBackground(() => {
   console.log('🚀 Background script initializing...')
 
   try {
-    initRxDB()
+    getDatabase()
       .then((database) => {
         console.log('✅ RxDB initialized successfully')
 
         // Initialize proxy services
-        registerTicketService(getJiraApi(), database)
+        const ticketService = registerTicketService(getJiraApi(), database)
         registerSearchService(database)
+
+        // Initialize alarms service
+        const alarmsService = new BackgroundAlarmsService(ticketService)
+        return alarmsService.initialize()
       })
       .catch((error) => {
         console.error('❌ RxDB initialization failed:', error)

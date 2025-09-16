@@ -48,4 +48,9 @@ export class JiraAPI {
   getConfig(): JiraApiConfig {
     return this.client.getConfig()
   }
+
+  hasValidConfig(): boolean {
+    const { baseUrl, email, apiToken } = this.getConfig()
+    return !!baseUrl && !!email && !!apiToken
+  }
 }
