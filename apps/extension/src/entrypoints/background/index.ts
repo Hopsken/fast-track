@@ -6,6 +6,7 @@
 import { defineBackground } from '#imports'
 
 import { getJiraApi } from '@/lib/jira'
+import { initRxDB } from '@/repository'
 import { registerTicketService } from '~/services/ticket-service'
 
 import { InstallationHandlerService } from './services/installation-handler'
@@ -15,6 +16,7 @@ export default defineBackground(() => {
   console.log('🚀 Background script initializing...')
 
   try {
+    initRxDB()
     // Initialize proxy services
     registerTicketService(getJiraApi())
 

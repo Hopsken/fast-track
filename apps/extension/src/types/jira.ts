@@ -28,7 +28,7 @@ export interface JiraPriority {
 }
 
 export interface JiraTicket {
-  id: string
+  id: number
   key: string
   summary: string
   issueType: JiraIssueType
