@@ -100,7 +100,16 @@ export const issueSchema: RxJsonSchema<JiraTicket> = {
       type: 'string'
     },
     lastViewed: {
-      type: 'string'
+      type: ['string', 'null'],
+      format: 'date-time'
+    },
+    created: {
+      type: 'string',
+      format: 'date-time'
+    },
+    updated: {
+      type: 'string',
+      format: 'date-time'
     }
   },
   required: ['id', 'key', 'summary', 'issueType', 'status']

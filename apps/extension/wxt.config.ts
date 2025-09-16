@@ -16,7 +16,7 @@ export default defineConfig({
     omnibox: {
       keyword: 'jira'
     },
-    permissions: ['storage', 'tabs'],
+    permissions: ['storage', 'tabs', 'alarms'],
     browser_specific_settings: {
       gecko: {
         id: '{df6c8f8c-469a-4c88-8b45-23ff390f1d7d}'

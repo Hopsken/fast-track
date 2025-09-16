@@ -38,5 +38,8 @@ export interface JiraTicket {
   projectKey: string
   boardName: string
   url: string
-  lastViewed: string
+
+  lastViewed: string | null
+  created: string
+  updated: string
 }

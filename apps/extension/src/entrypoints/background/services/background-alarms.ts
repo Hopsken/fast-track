@@ -1,3 +1,5 @@
+import { Browser, browser } from '#imports'
+
 import { TicketService } from '@/services/ticket-service'
 
 export interface AlarmConfig {
@@ -28,11 +30,11 @@ export class BackgroundAlarmsService {
     await this.clearAllAlarms()
 
     // Set up alarm listeners
-    chrome.alarms.onAlarm.addListener(this.handleAlarm.bind(this))
+    browser.alarms.onAlarm.addListener(this.handleAlarm.bind(this))
 
     // Create alarms
     for (const alarm of this.alarms) {
-      await chrome.alarms.create(alarm.name, {
+      await browser.alarms.create(alarm.name, {
         periodInMinutes: alarm.periodInMinutes
       })
       console.info(`Created alarm: ${alarm.name} (${alarm.periodInMinutes}min)`)
@@ -42,7 +44,7 @@ export class BackgroundAlarmsService {
     await this.runInitialRefresh()
   }
 
-  private async handleAlarm(alarm: chrome.alarms.Alarm) {
+  private async handleAlarm(alarm: Browser.alarms.Alarm) {
     const alarmConfig = this.alarms.find((a) => a.name === alarm.name)
     if (!alarmConfig) {
       console.warn(`Unknown alarm: ${alarm.name}`)
@@ -85,16 +87,16 @@ export class BackgroundAlarmsService {
   }
 
   private async clearAllAlarms() {
-    const existingAlarms = await chrome.alarms.getAll()
+    const existingAlarms = await browser.alarms.getAll()
     for (const alarm of existingAlarms) {
       if (this.alarms.some((a) => a.name === alarm.name)) {
-        await chrome.alarms.clear(alarm.name)
+        await browser.alarms.clear(alarm.name)
       }
     }
   }
 
   async destroy() {
     await this.clearAllAlarms()
-    chrome.alarms.onAlarm.removeListener(this.handleAlarm.bind(this))
+    browser.alarms.onAlarm.removeListener(this.handleAlarm.bind(this))
   }
 }

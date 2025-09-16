@@ -9,6 +9,8 @@ import { chunk, compact, flatMap, map } from 'lodash-es'
 
 import { JiraTicket } from '@/types'
 
+import { toISODateString } from '../date'
+
 import type { JiraClient } from './client'
 
 const issueFields = [
@@ -19,7 +21,10 @@ const issueFields = [
   'status',
   'assignee',
   'priority',
-  'project'
+  'project',
+  'created',
+  'updated',
+  'lastViewed'
 ]
 
 /**
@@ -238,7 +243,13 @@ export class JiraIssueService {
       projectKey: issue.fields?.project?.key || '',
       boardName: issue.fields?.project?.name || '',
       url: issue.self ?? `${config.baseUrl}/browse/${issue.key}`,
-      lastViewed: new Date().toISOString()
+      lastViewed: issue.fields.lastViewed
+        ? toISODateString(issue.fields.lastViewed)
+        : null,
+      created: issue.fields.created
+        ? toISODateString(issue.fields.created)
+        : '',
+      updated: issue.fields.updated ? toISODateString(issue.fields.updated) : ''
     }
   }
 
