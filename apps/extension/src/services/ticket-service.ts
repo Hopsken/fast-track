@@ -6,18 +6,23 @@
  */
 import { logging } from '@internal/logger'
 import { defineProxyService, flattenPromise } from '@webext-core/proxy-service'
+import { uniqBy } from 'lodash-es'
 
+import { Database } from '@/repository'
 import { JiraTicket } from '@/types'
+import { concatPromises } from '@/utils/promise'
 import { JiraAPI } from '~/lib/jira'
 
 /**
  * Ticket service implementation
  */
-export class TicketService {
+class TicketServiceImpl {
   private jira: JiraAPI
+  private database: Database
 
-  constructor(jiraAPI: Promise<JiraAPI>) {
+  constructor(jiraAPI: Promise<JiraAPI>, database: Database) {
     this.jira = flattenPromise(jiraAPI) as unknown as JiraAPI
+    this.database = database
   }
 
   /**
@@ -28,10 +33,24 @@ export class TicketService {
   }
 
   /**
-   * Gets Jira Issue Picker suggestions (for empty or initial searches)
+   * Loads suggestions related to the current user
    */
-  async getIssuePickerSuggestions(): Promise<JiraTicket[]> {
-    return this.jira.issues.getIssuePickerSuggestions()
+  async loadSuggestions(): Promise<JiraTicket[]> {
+    const results = await concatPromises([
+      this.jira.issues.getIssuePickerSuggestions(),
+      this.jira.issues.getMyInProgressIssues(),
+      this.jira.issues.getMyRecentDoneIssues(),
+      this.jira.issues.getMyWatchingIssues()
+    ])
+
+    const uniqTickets = uniqBy(results, 'key')
+
+    console.info('Loaded suggestions', uniqTickets)
+
+    const result = await this.database.issues.bulkUpsert(uniqTickets)
+    console.info('Upsert result', result)
+
+    return uniqTickets
   }
 
   /**
@@ -52,10 +71,11 @@ export class TicketService {
  */
 export const [registerTicketService, getTicketService] = defineProxyService(
   'TicketService',
-  (jiraAPI: Promise<JiraAPI>) => new TicketService(jiraAPI)
+  (jiraAPI: Promise<JiraAPI>, database: Database) =>
+    new TicketServiceImpl(jiraAPI, database)
 )
 
 /**
  * Type helper for the ticket service
  */
-export type TicketServiceType = InstanceType<typeof TicketService>
+export type TicketService = InstanceType<typeof TicketServiceImpl>

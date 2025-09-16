@@ -7,6 +7,7 @@ import { defineBackground } from '#imports'
 
 import { getJiraApi } from '@/lib/jira'
 import { initRxDB } from '@/repository'
+import { registerSearchService } from '@/services/search-service'
 import { registerTicketService } from '~/services/ticket-service'
 
 import { InstallationHandlerService } from './services/installation-handler'
@@ -17,17 +18,24 @@ export default defineBackground(() => {
 
   try {
     initRxDB()
-    // Initialize proxy services
-    registerTicketService(getJiraApi())
+      .then((database) => {
+        console.log('✅ RxDB initialized successfully')
+
+        // Initialize proxy services
+        registerTicketService(getJiraApi(), database)
+        registerSearchService(database)
+      })
+      .catch((error) => {
+        console.error('❌ RxDB initialization failed:', error)
+      })
 
     // Initialize other services
     OmniboxHandlerService.initialize()
-    InstallationHandlerService.initialize()
-
-    // Set up omnibox default suggestion
     OmniboxHandlerService.setDefaultSuggestion(
       'Search Jira tickets or enter ticket key (e.g., PROJ-123)'
     )
+
+    InstallationHandlerService.initialize()
 
     console.log('✅ Background script initialized successfully')
     console.log('📊 Services status:')

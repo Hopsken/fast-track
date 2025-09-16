@@ -1,5 +1,7 @@
 import { addRxPlugin, createRxDatabase, RxDatabase } from 'rxdb/plugins/core'
-import { getRxStorageLocalstorage } from 'rxdb/plugins/storage-localstorage'
+// import { wrappedKeyCompressionStorage } from 'rxdb/plugins/key-compression'
+import { RxDBQueryBuilderPlugin } from 'rxdb/plugins/query-builder'
+import { getRxStorageMemory } from 'rxdb/plugins/storage-memory'
 import { wrappedValidateZSchemaStorage } from 'rxdb/plugins/validate-z-schema'
 
 import {
@@ -12,18 +14,33 @@ export type Database = RxDatabase<{
   issues: IssueCollection
 }>
 
+declare global {
+  interface Window {
+    db: Database
+  }
+}
+
+let database: Database
+
 export async function initRxDB(): Promise<Database> {
-  if (import.meta.env.NODE_ENV === 'development') {
+  if (database) return database
+
+  if (import.meta.env.DEV) {
+    console.log('RxDB: Development mode enabled')
     await import('rxdb/plugins/dev-mode').then((module) =>
       addRxPlugin(module.RxDBDevModePlugin)
     )
   }
 
-  const database: Database = await createRxDatabase({
+  addRxPlugin(RxDBQueryBuilderPlugin)
+
+  database = await createRxDatabase({
     name: 'jira-boost',
+    // storage: wrappedKeyCompressionStorage({
     storage: wrappedValidateZSchemaStorage({
-      storage: getRxStorageLocalstorage()
+      storage: getRxStorageMemory()
     }),
+    // }),
     closeDuplicates: true
   })
 
@@ -34,6 +51,10 @@ export async function initRxDB(): Promise<Database> {
       statics: issueCollectionMethods
     }
   })
+
+  if (import.meta.env.DEV) {
+    self.db = database
+  }
 
   return database
 }

@@ -28,15 +28,15 @@ export interface JiraPriority {
 }
 
 export interface JiraTicket {
-  id: number
+  id: string
   key: string
   summary: string
   issueType: JiraIssueType
   status: JiraStatus
-  assignee?: JiraAssignee
-  priority?: JiraPriority
+  assignee: JiraAssignee | null
+  priority: JiraPriority | null
   projectKey: string
-  boardName?: string
+  boardName: string
   url: string
   lastViewed: string
 }

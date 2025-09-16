@@ -1,16 +1,17 @@
 import { useState, useEffect, useCallback } from 'react'
 import { HiCog } from 'react-icons/hi'
 
-// import { initializeSearchOrchestration } from '@/services/search/searchOrchestrator'
+import { initializeSearchOrchestration } from '@/services/search/searchOrchestrator'
 import { getTicketService } from '@/services/ticket-service'
+import { useTicketStore } from '@/stores/useTicketStore'
 import { JiraTicket } from '@/types'
 import { ErrorBoundary } from '~/components/ErrorBoundary'
 import { TicketSearchBox } from '~/components/search'
 import { TicketList } from '~/components/tickets'
 import { useTicketSearch } from '~/hooks/useTicketSearch'
-// import { useTicketStore } from '~/stores/useTicketStore'
 import { openOptionsPage, openInNewTab } from '~/utils/extension'
 import { getCurrentShortcut, formatShortcut } from '~/utils/shortcuts'
+
 import '~/assets/styles/main.css'
 
 function App() {
@@ -18,22 +19,16 @@ function App() {
 
   const [shortcutText, setShortcutText] = useState('Alt+J to search')
 
-  // // Initialize search orchestration
-  // useEffect(() => {
-  //   const subscription = initializeSearchOrchestration(useTicketStore)
-
-  //   // Cleanup subscription on unmount
-  //   return () => {
-  //     subscription.unsubscribe()
-  //   }
-  // }, [])
-
+  // Initialize search orchestration
   useEffect(() => {
-    getTicketService()
-      .getIssuePickerSuggestions()
-      .then((tickets) => {
-        console.log(tickets)
-      })
+    const subscription = initializeSearchOrchestration(useTicketStore)
+
+    getTicketService().loadSuggestions()
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [])
 
   useEffect(() => {

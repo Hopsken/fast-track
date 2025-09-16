@@ -6,12 +6,12 @@ export const issueSchema: RxJsonSchema<JiraTicket> = {
   title: 'Issue schema',
   description: 'Jira issue',
   version: 0,
-  keyCompression: true,
+  // keyCompression: true,
   primaryKey: 'key',
   type: 'object',
   properties: {
     id: {
-      type: 'number'
+      type: 'string'
     },
     key: {
       type: 'string',
@@ -33,7 +33,8 @@ export const issueSchema: RxJsonSchema<JiraTicket> = {
         description: {
           type: 'string'
         }
-      }
+      },
+      required: ['name', 'iconUrl', 'description']
     },
     status: {
       type: 'object',
@@ -56,12 +57,14 @@ export const issueSchema: RxJsonSchema<JiraTicket> = {
             name: {
               type: 'string'
             }
-          }
+          },
+          required: ['key', 'colorName', 'name']
         }
-      }
+      },
+      required: ['name', 'description', 'statusCategory']
     },
     assignee: {
-      type: 'object',
+      type: ['object', 'null'],
       properties: {
         displayName: {
           type: 'string'
@@ -72,10 +75,11 @@ export const issueSchema: RxJsonSchema<JiraTicket> = {
         avatarUrls: {
           type: 'string'
         }
-      }
+      },
+      required: ['displayName', 'emailAddress', 'avatarUrls']
     },
     priority: {
-      type: 'object',
+      type: ['object', 'null'],
       properties: {
         name: {
           type: 'string'
@@ -83,7 +87,8 @@ export const issueSchema: RxJsonSchema<JiraTicket> = {
         iconUrl: {
           type: 'string'
         }
-      }
+      },
+      required: ['name', 'iconUrl']
     },
     projectKey: {
       type: 'string'

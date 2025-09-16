@@ -11,6 +11,17 @@ import { JiraTicket } from '@/types'
 
 import type { JiraClient } from './client'
 
+const issueFields = [
+  'id',
+  'key',
+  'summary',
+  'issuetype',
+  'status',
+  'assignee',
+  'priority',
+  'project'
+]
+
 /**
  * Service for issue-related operations with functional programming patterns
  */
@@ -28,16 +39,7 @@ export class JiraIssueService {
 
       const issue = await this.client.issues.getIssue({
         issueIdOrKey: issueKey,
-        fields: [
-          'id',
-          'key',
-          'summary',
-          'issuetype',
-          'status',
-          'assignee',
-          'priority',
-          'project'
-        ]
+        fields: issueFields
       })
 
       console.log(`✅ JiraAPI: Successfully fetched issue ${issueKey}`)
@@ -100,6 +102,38 @@ export class JiraIssueService {
     }
   }
 
+  private async searchIssuesUsingJql(
+    jql: string,
+    maxResults?: number
+  ): Promise<JiraTicket[]> {
+    const response =
+      await this.client.issueSearch.searchForIssuesUsingJqlEnhancedSearchPost({
+        jql,
+        fields: issueFields,
+        maxResults
+      })
+
+    return response.issues?.map((issue) => this.convertToTicket(issue)) ?? []
+  }
+
+  async getMyInProgressIssues(): Promise<JiraTicket[]> {
+    return this.searchIssuesUsingJql(
+      'assignee = currentUser() AND statusCategory = "In Progress" ORDER BY updated DESC'
+    )
+  }
+
+  async getMyRecentDoneIssues(): Promise<JiraTicket[]> {
+    return this.searchIssuesUsingJql(
+      'assignee = currentUser() AND statusCategory = Done AND resolved >= -14d ORDER BY resolved DESC'
+    )
+  }
+
+  async getMyWatchingIssues(): Promise<JiraTicket[]> {
+    return this.searchIssuesUsingJql(
+      'watcher = currentUser() ORDER BY updated DESC'
+    )
+  }
+
   /**
    * Fetches multiple issues using bulk API with functional patterns
    */
@@ -132,16 +166,7 @@ export class JiraIssueService {
       // Use bulk fetch API to get multiple issues at once
       const searchResult = await this.client.issues.bulkFetchIssues({
         issueIdsOrKeys: batch,
-        fields: [
-          'id',
-          'key',
-          'summary',
-          'issuetype',
-          'status',
-          'assignee',
-          'priority',
-          'project'
-        ]
+        fields: issueFields
       })
 
       const tickets = compact(
@@ -180,7 +205,7 @@ export class JiraIssueService {
     const config = this.client.getConfig()
 
     return {
-      id: issue.id,
+      id: String(issue.id),
       key: issue.key,
       summary: issue.fields?.summary || '',
       issueType: {
@@ -203,13 +228,13 @@ export class JiraIssueService {
             emailAddress: issue.fields.assignee.emailAddress || '',
             avatarUrls: issue.fields.assignee.avatarUrls?.['48x48'] || ''
           }
-        : undefined,
+        : null,
       priority: issue.fields?.priority
         ? {
             name: issue.fields.priority.name || '',
             iconUrl: issue.fields.priority.iconUrl || ''
           }
-        : undefined,
+        : null,
       projectKey: issue.fields?.project?.key || '',
       boardName: issue.fields?.project?.name || '',
       url: issue.self ?? `${config.baseUrl}/browse/${issue.key}`,

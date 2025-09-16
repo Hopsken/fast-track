@@ -1,12 +1,10 @@
-import { of, type Subscription } from 'rxjs'
+import { switchMap, type Subscription } from 'rxjs'
 import { StoreApi } from 'zustand'
 
-import { fromStorage$ } from '@/lib/storage'
+import { getSearchService, SearchService } from '@/services/search-service'
 import { TicketStore } from '@/stores/useTicketStore'
+import { JiraTicket } from '@/types'
 import { toStream } from '@/utils/toStream'
-import { getTicketService } from '~/services/ticket-service'
-
-import { SearchStreamService, type SearchResult } from './SearchStreamService'
 
 /**
  * External orchestrator that manages RxJS streams and updates Zustand store
@@ -16,12 +14,12 @@ import { SearchStreamService, type SearchResult } from './SearchStreamService'
  * to avoid circular dependencies.
  */
 export class SearchOrchestrator {
-  private searchService: SearchStreamService
+  private searchService: SearchService
   private subscription?: Subscription
 
   constructor() {
     // Provide suggestions via background TicketService when query is empty
-    this.searchService = new SearchStreamService(getTicketService())
+    this.searchService = getSearchService()
   }
 
   /**
@@ -41,35 +39,24 @@ export class SearchOrchestrator {
       fireImmediately: true
     })
 
-    // Create observables from WXT storage using storageToStream utility
-
-    const ticketData$ = of([])
-
-    const userEmail$ = fromStorage$('JiraUserEmail')
-
-    // Create context observable
-    const contextData$ = this.searchService.createContextObservable(userEmail$)
-
     // Create the main search stream
-    const searchResults$ = this.searchService.createSearchStream(
-      searchQuery$,
-      ticketData$,
-      contextData$
+    const searchResults$ = searchQuery$.pipe(
+      switchMap((query) => this.searchService.search(query))
     )
 
     // Subscribe to search results and update Zustand store externally
     this.subscription = searchResults$.subscribe({
-      next: (result: SearchResult) => {
+      next: (result: JiraTicket[]) => {
         const state = store.getState()
 
-        if (result.isError) {
+        if (result.length === 0) {
           // Handle error case
-          state.setSearchError(result.error || 'Search failed')
-          state.setSearchResults(result.results) // May include fallback results
+          state.setSearchError('No results found')
+          state.setSearchResults(result) // May include fallback results
         } else {
           // Handle success case
           state.setSearchError(undefined)
-          state.setSearchResults(result.results)
+          state.setSearchResults(result)
         }
 
         // Auto-reset navigation selection when results change
