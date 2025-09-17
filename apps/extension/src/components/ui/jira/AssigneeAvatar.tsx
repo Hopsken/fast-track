@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { JiraAssignee } from '@/types'
 
 interface AssigneeAvatarProps {
-  assignee?: JiraAssignee
+  assignee: JiraAssignee | null
   size?: string
   className?: string
 }

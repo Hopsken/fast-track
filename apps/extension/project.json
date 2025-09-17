@@ -85,18 +85,14 @@
     "lint": {
       "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": [
-          "apps/extension/src/**/*.{ts,tsx,js,jsx}"
-        ],
+        "lintFilePatterns": ["apps/extension/src/**/*.{ts,tsx,js,jsx}"],
         "format": "stylish"
       }
     },
     "lint:fix": {
       "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": [
-          "apps/extension/src/**/*.{ts,tsx,js,jsx}"
-        ],
+        "lintFilePatterns": ["apps/extension/src/**/*.{ts,tsx,js,jsx}"],
         "fix": true,
         "format": "stylish"
       }

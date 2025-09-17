@@ -4,5 +4,6 @@
     "jsx": "react-jsx",
     "resolveJsonModule": true,
     "experimentalDecorators": true
-  }
+  },
+  "references": []
 }

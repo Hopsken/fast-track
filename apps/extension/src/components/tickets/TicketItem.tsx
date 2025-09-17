@@ -1,12 +1,12 @@
 import { MouseEvent, KeyboardEvent } from 'react'
 
+import { JiraTicket } from '@/types'
 import {
   IssueTypeIcon,
   StatusBadge,
   // PriorityIcon,
   AssigneeAvatar
 } from '~/components/ui/jira'
-import { JiraTicket } from '@/lib/storage'
 import { HighlightedText } from '~/utils/text-highlighting'
 
 interface TicketItemProps {
