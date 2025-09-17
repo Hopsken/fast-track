@@ -8,12 +8,28 @@ import jsxA11y from 'eslint-plugin-jsx-a11y'
 import importX from 'eslint-plugin-import-x'
 import sonarjs from 'eslint-plugin-sonarjs'
 import unicorn from 'eslint-plugin-unicorn'
+import nx from '@nx/eslint-plugin'
 import prettier from 'eslint-plugin-prettier/recommended'
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript'
 
 export default [
   // Base ESLint recommended rules
   js.configs.recommended,
+
+  // Global ignores for performance optimization
+  {
+    ignores: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/.output/**',
+      '**/.next/**',
+      '**/coverage/**',
+      '**/.nx/cache/**',
+      '**/tmp/**',
+      '**/*.min.js',
+      '**/build/**'
+    ]
+  },
 
   // Global configuration for all files
   {
@@ -40,11 +56,16 @@ export default [
         ecmaFeatures: {
           jsx: true
         },
-        project: ['./tsconfig.json', './apps/*/tsconfig.json']
+        project: [
+          './tsconfig.json',
+          './apps/*/tsconfig.json',
+          './packages/*/tsconfig.json'
+        ]
       }
     },
     plugins: {
       '@typescript-eslint': tseslint,
+      '@nx': nx,
       react: react,
       'react-hooks': reactHooks,
       'jsx-a11y': jsxA11y,
@@ -85,6 +106,16 @@ export default [
 
       // JSX Accessibility rules
       ...jsxA11y.configs.recommended.rules,
+      'jsx-a11y/anchor-is-valid': 'error',
+      'jsx-a11y/alt-text': 'error',
+      'jsx-a11y/aria-props': 'error',
+      'jsx-a11y/aria-proptypes': 'error',
+      'jsx-a11y/aria-unsupported-elements': 'error',
+      'jsx-a11y/click-events-have-key-events': 'error',
+      'jsx-a11y/interactive-supports-focus': 'error',
+      'jsx-a11y/label-has-associated-control': 'error',
+      'jsx-a11y/no-autofocus': 'warn',
+      'jsx-a11y/no-static-element-interactions': 'error',
 
       // Import rules (using import-x)
       'import-x/order': [
@@ -161,6 +192,21 @@ export default [
       'no-useless-computed-key': 'error',
       quotes: ['error', 'single', { avoidEscape: true }],
 
+      // NX-specific rules for monorepo management
+      '@nx/enforce-module-boundaries': [
+        'error',
+        {
+          enforceBuildableLibDependency: true,
+          allow: ['^.*/eslint(.base)?.config.[cm]?js$'],
+          depConstraints: [
+            {
+              sourceTag: '*',
+              onlyDependOnLibsWithTags: ['*']
+            }
+          ]
+        }
+      ],
+
       // Function and complexity rules
       'max-params': ['warn', 3],
       'max-depth': ['warn', 4],
@@ -188,10 +234,24 @@ export default [
   // Test files configuration
   {
     files: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}'],
+    languageOptions: {
+      globals: {
+        describe: 'readonly',
+        it: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        jest: 'readonly'
+      }
+    },
     rules: {
       'sonarjs/no-duplicate-string': 'off',
       'max-params': 'off',
-      '@typescript-eslint/no-explicit-any': 'off'
+      '@typescript-eslint/no-explicit-any': 'off',
+      'no-undef': 'off' // Test globals are defined above
     }
   },
 

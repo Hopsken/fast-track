@@ -50,7 +50,18 @@ export class JiraAPI {
   }
 
   hasValidConfig(): boolean {
-    const { baseUrl, email, apiToken } = this.getConfig()
-    return !!baseUrl && !!email && !!apiToken
+    const { baseUrl, authType, email, apiToken, accessToken } = this.getConfig()
+
+    if (!baseUrl) {
+      return false
+    }
+
+    // Validate based on auth type
+    if (authType === 'oauth') {
+      return !!accessToken
+    } else {
+      // Default to API key validation
+      return !!email && !!apiToken
+    }
   }
 }

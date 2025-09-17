@@ -1,21 +1,36 @@
-import { FlatCompat } from '@eslint/eslintrc'
-import { dirname } from 'path'
-import { fileURLToPath } from 'url'
-import js from '@eslint/js'
-import { fixupConfigRules } from '@eslint/compat'
-import nx from '@nx/eslint-plugin'
 import baseConfig from '../../eslint.config.js'
-const compat = new FlatCompat({
-  baseDirectory: dirname(fileURLToPath(import.meta.url)),
-  recommendedConfig: js.configs.recommended
-})
+import nextPlugin from '@next/eslint-plugin-next'
 
 export default [
-  ...fixupConfigRules(compat.extends('next')),
-  ...fixupConfigRules(compat.extends('next/core-web-vitals')),
   ...baseConfig,
-  ...nx.configs['flat/react-typescript'],
   {
-    ignores: ['.next/**/*']
+    files: ['**/*.{js,jsx,ts,tsx}'],
+    plugins: {
+      '@next/next': nextPlugin
+    },
+    rules: {
+      // Next.js specific rules
+      ...nextPlugin.configs.recommended.rules,
+      ...nextPlugin.configs['core-web-vitals'].rules,
+
+      // Override any base rules if needed for Next.js
+      'react/react-in-jsx-scope': 'off' // Already handled in base config
+    }
+  },
+  {
+    files: ['**/*.spec.{ts,tsx}', '**/*.test.{ts,tsx}'],
+    languageOptions: {
+      globals: {
+        describe: 'readonly',
+        it: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        jest: 'readonly'
+      }
+    }
+  },
+  {
+    ignores: ['.next/**/*', 'node_modules/**/*']
   }
 ]

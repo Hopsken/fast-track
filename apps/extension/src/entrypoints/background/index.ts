@@ -12,6 +12,7 @@ import { registerTicketService } from '~/services/ticket-service'
 
 import { BackgroundAlarmsService } from './services/background-alarms'
 import { InstallationHandlerService } from './services/installation-handler'
+import { OAuthBackgroundService } from './services/oauth-background-service'
 import { OmniboxHandlerService } from './services/omnibox-handler'
 
 export default defineBackground(() => {
@@ -28,7 +29,14 @@ export default defineBackground(() => {
 
         // Initialize alarms service
         const alarmsService = new BackgroundAlarmsService(ticketService)
-        return alarmsService.initialize()
+
+        // Initialize OAuth background service
+        const oauthService = new OAuthBackgroundService()
+
+        return Promise.all([
+          alarmsService.initialize(),
+          oauthService.initialize()
+        ])
       })
       .catch((error) => {
         console.error('❌ RxDB initialization failed:', error)
@@ -46,6 +54,7 @@ export default defineBackground(() => {
     console.log('📊 Services status:')
     console.log('  - Ticket Service: Registered via proxy service')
     console.log('  - Ticket Collection: Messaging service active')
+    console.log('  - OAuth Background Service: Token refresh monitoring active')
     console.log(
       '  - Extension Version:',
       InstallationHandlerService.getVersion()

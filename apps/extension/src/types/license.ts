@@ -1,3 +1,11 @@
+export interface ApiKeyBackup {
+  host: string
+  email: string
+  apiToken: string
+  backupDate: string
+  version: string
+}
+
 export interface LicenseInfo {
   valid: boolean
   lastChecked: string
@@ -16,4 +24,5 @@ export interface LicenseInfo {
     product_id: number
     store_id: number
   }
+  apiKeyBackup?: ApiKeyBackup
 }

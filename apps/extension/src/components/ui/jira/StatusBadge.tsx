@@ -1,4 +1,4 @@
-import { JiraStatus } from '@/types'
+import type { JiraStatus } from '@/types/jira'
 
 interface StatusBadgeProps {
   status: JiraStatus
