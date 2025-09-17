@@ -4,6 +4,8 @@
 
 Jira Boost is a modern browser extension built as an Nx monorepo that provides lightning-fast search and enhanced access to Jira tickets. The extension enables users to quickly search tickets by key, summary, assignee, or status with keyboard shortcuts and real-time results.
 
+The system implements a comprehensive OAuth flow for secure authentication, custom event-based communication between extension and website components, and follows SOLID principles with clean code practices throughout the codebase.
+
 **Tech Stack:**
 - **Frontend**: React 19 + TypeScript + Tailwind CSS + DaisyUI
 - **Build System**: WXT Framework + Nx Monorepo + Vite
@@ -13,6 +15,12 @@ Jira Boost is a modern browser extension built as an Nx monorepo that provides l
 - **Messaging**: @webext-core/proxy-service for cross-context communication
 - **Reactive Programming**: RxJS for search orchestration
 - **Development**: ESLint + Prettier + TypeScript strict mode
+- **Website**: Next.js React framework for the companion website
+
+**Authentication & Security:**
+- **OAuth 2.0**: Secure authentication flow
+- **Custom Event System**: Secure communication between extension and website
+- **Token Management**: Secure storage and handling of authentication tokens
 
 ## Architecture Patterns
 
@@ -58,9 +66,15 @@ graph TD
 ### Runtime Topology
 - **Background Script** (`apps/extension/src/entrypoints/background/`): Service coordinator that initializes RxDB, registers proxy services, handles omnibox integration, and manages installation events
 - **Content Scripts** (`apps/extension/src/entrypoints/*.content.ts`): Lightweight modules injected into Jira pages for dark mode, card highlighting, theme management, and ticket collection
+  - **OAuth Callback Handler**: Manages secure authentication flow completion
+  - **Extension Communicator**: Facilitates secure message passing between components
 - **UI Applications**: 
   - **Popup** (`apps/extension/src/entrypoints/popup/`): React 19 app for quick search with keyboard navigation
   - **Options** (`apps/extension/src/entrypoints/options/`): Configuration interface for API setup and preferences
+- **Website Integration**: 
+  - **OAuth Flow Management**: Handles secure authentication with Jira Cloud
+  - **Extension Communication**: Custom event system for secure data exchange
+  - **Configuration Interface**: Web-based setup and management tools
 
 ## Data Layer Architecture
 
@@ -240,11 +254,12 @@ export default defineConfig({
 - **Browser-Specific**: Conditional manifest properties and polyfills
 
 ### Nx Monorepo Integration
-- **Project Structure**: `apps/extension` with shared `packages/logger`
-- **Build Targets**: Defined in `apps/extension/project.json`
+- **Project Structure**: `apps/extension` and `apps/website` with shared `packages/logger`
+- **Build Targets**: Defined in `apps/extension/project.json` and `apps/website/project.json`
 - **Scripts**: Root-level scripts proxy to Nx targets
-- **Linting**: Unified ESLint configuration with flat config
+- **Linting**: Unified ESLint configuration with flat config (excludes .next directory for website)
 - **CI/CD**: Automated builds and artifact uploads
+- **Code Quality Tools**: TypeScript strict mode, comprehensive linting rules with project-specific exclusions
 
 ## Extension Features
 

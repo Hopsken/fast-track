@@ -1,5 +1,44 @@
 Monorepo (Nx) structure: this repository now uses Nx with the browser extension located under `apps/extension`. Future apps (e.g., website) can be added under `apps/` and shared code under `packages/`.
 
+## Development
+
+### Key Nx Commands
+
+```bash
+# Extension development
+nx dev extension          # Start development server
+nx build extension        # Build for production (use for validation)
+nx zip extension          # Create distribution package
+
+# Website development
+nx dev website           # Start Next.js dev server
+nx build website         # Build for production
+
+# Code quality
+nx lint extension        # Run ESLint for extension
+nx lint website          # Run ESLint for website (excludes .next directory)
+nx test                  # Run tests
+nx typecheck            # TypeScript validation across all projects
+```
+
+### Code Quality & Review Process
+
+1. **ESLint Configuration**: Each project has tailored ESLint rules
+   - Extension: Standard WXT/React rules
+   - Website: Next.js rules with .next directory exclusion
+
+2. **TypeScript Strict Mode**: Enforced across all projects
+
+3. **Development Workflow**:
+   - Run `nx lint [project]` before commits
+   - Use `nx build [project]` instead of dev commands for validation
+   - Follow SOLID principles and clean code practices (see CODING_STANDARDS.md)
+
+4. **Authentication Flow**:
+   - OAuth 2.0 implementation for secure Jira integration
+   - Custom event system for extension-website communication
+   - Secure token management and storage
+
 Key commands
 
 - Dev (Chromium): `pnpm dev` → runs `nx run extension:dev`
@@ -47,7 +86,17 @@ This should create a production bundle for your extension, ready to be zipped an
 
 The easiest way to deploy your Plasmo extension is to use the built-in [bpp](https://bpp.browser.market) GitHub action. Prior to using this action however, make sure to build your extension and upload the first version to the store to establish the basic credentials. Then, simply follow [this setup instruction](https://docs.plasmo.com/framework/workflows/submit) and you should be on your way for automated submission!
 
+## Architecture & Documentation
+
+- **ARCHITECTURE.md**: Comprehensive system architecture and patterns
+- **CODING_STANDARDS.md**: Coding best practices and SOLID principles
+- **DEVELOPMENT.md**: Development environment setup and procedures
+
 ## TODO
+
+- [ ] Re-implement search history feature using RxDB for persistence and better UX
+- [ ] Enhance OAuth flow error handling and user feedback
+- [ ] Implement comprehensive test coverage for authentication components
 
 ### Search History Feature
 - **Status**: Removed due to bugs
