@@ -348,7 +348,10 @@ export class OAuthTokenManager {
     }
   }
 
-  async validateAndSaveTokens(tokens: OAuthTokens): Promise<boolean> {
+  async validateAndSaveTokens(tokens: OAuthTokens): Promise<{
+    success: boolean
+    error?: string
+  }> {
     try {
       // Validate tokens
       const parsedTokens = oauthTokensSchema.parse(tokens)
@@ -360,10 +363,15 @@ export class OAuthTokenManager {
       await this.setAuthType('oauth')
       await this.storeTokens(parsedTokens)
 
-      return true
+      return {
+        success: true
+      }
     } catch (error) {
       console.error('Error validating and saving tokens:', error)
-      return false
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      }
     }
   }
 
@@ -375,7 +383,7 @@ export class OAuthTokenManager {
       avatarUrl: string
     }
 
-    const response = await ky.post<AccessibleResource[]>(
+    const response = await ky.get<AccessibleResource[]>(
       'https://api.atlassian.com/oauth/token/accessible-resources',
       {
         headers: {

@@ -111,8 +111,6 @@ export function buildJiraOAuthUrl(
   url.searchParams.set('state', options.state)
   url.searchParams.set('response_type', 'code')
   url.searchParams.set('prompt', 'consent')
-  url.searchParams.set('code_challenge', options.codeChallenge)
-  url.searchParams.set('code_challenge_method', 'S256')
 
   return url.toString()
 }

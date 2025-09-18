@@ -21,7 +21,7 @@ export class OAuthCallbackService {
   async initialize(): Promise<void> {
     onMessage('OAUTH_TOKEN_RECEIVED', async (message) => {
       // validate tokens, and store it
-      oauthManager.validateAndSaveTokens(message.data)
+      return await oauthManager.validateAndSaveTokens(message.data)
     })
 
     this.startPeriodicRefresh()

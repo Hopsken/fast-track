@@ -11,5 +11,8 @@ import { OAuthTokens } from './storage'
  * All services should import sendMessage/onMessage from this file
  */
 export const { sendMessage, onMessage } = defineExtensionMessaging<{
-  OAUTH_TOKEN_RECEIVED: OAuthTokens
+  OAUTH_TOKEN_RECEIVED(tokens: OAuthTokens): {
+    success: boolean
+    error?: string
+  }
 }>()

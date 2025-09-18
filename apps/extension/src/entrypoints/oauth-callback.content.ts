@@ -80,7 +80,10 @@ function initializeSecureOAuthCommunication(): void {
       log.debug('Processing token data:', tokenData)
 
       // Forward tokens to background script
-      await sendMessage('OAUTH_TOKEN_RECEIVED', tokenData)
+      const { success, error } = await sendMessage(
+        'OAUTH_TOKEN_RECEIVED',
+        tokenData
+      )
 
       log.debug('Tokens successfully forwarded to background')
 
@@ -90,8 +93,11 @@ function initializeSecureOAuthCommunication(): void {
         {
           detail: {
             source: 'content_script',
-            success: true,
-            message: 'Tokens received and forwarded successfully'
+            success: success ?? false,
+            message: success
+              ? 'Tokens received and forwarded successfully'
+              : undefined,
+            error: error ?? undefined
           }
         }
       )
