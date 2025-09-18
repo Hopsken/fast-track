@@ -12,8 +12,8 @@ import {
   ServerInfo
 } from 'jira.js/version3'
 
-import type { JiraApiConfig, JiraOAuthConfig, JiraApiKeyConfig } from './types'
 import { oauthManager } from './oauth-manager'
+import type { JiraApiConfig, JiraOAuthConfig, JiraApiKeyConfig } from './types'
 
 /**
  * Base Jira client with authentication and jira.js module access
@@ -33,7 +33,7 @@ export class JiraClient extends BaseClient {
 
     // Validate authentication based on type
     const authConfig = JiraClient.validateAndGetAuthConfig(jiraConfig)
-    
+
     super(authConfig)
   }
 
@@ -41,8 +41,9 @@ export class JiraClient extends BaseClient {
    * Validate configuration and return jira.js auth config
    */
   private static validateAndGetAuthConfig(config: JiraApiConfig) {
-    const authType = config.authType || (config.email && config.apiToken ? 'api_key' : 'oauth')
-    
+    const authType =
+      config.authType || (config.email && config.apiToken ? 'api_key' : 'oauth')
+
     if (authType === 'oauth') {
       if (!config.accessToken) {
         throw new Error('Access token is required for OAuth authentication')
@@ -57,7 +58,9 @@ export class JiraClient extends BaseClient {
       }
     } else {
       if (!config.email || !config.apiToken) {
-        throw new Error('Email and API token are required for API key authentication')
+        throw new Error(
+          'Email and API token are required for API key authentication'
+        )
       }
       return {
         host: config.baseUrl,
@@ -91,8 +94,12 @@ export class JiraClient extends BaseClient {
   /**
    * Create client with OAuth authentication
    */
-  static async createWithOAuth(config: { baseUrl: string; accessToken?: string }): Promise<JiraClient> {
-    const accessToken = config.accessToken || await oauthManager.getValidAccessToken()
+  static async createWithOAuth(config: {
+    baseUrl: string
+    accessToken?: string
+  }): Promise<JiraClient> {
+    const accessToken =
+      config.accessToken || (await oauthManager.getValidAccessToken())
     if (!accessToken) {
       throw new Error('No valid OAuth access token available')
     }
@@ -142,7 +149,11 @@ export class JiraClient extends BaseClient {
    * Check if client is using API key authentication
    */
   isApiKeyClient(): boolean {
-    return this.jiraConfig.authType === 'api_key' || (!this.jiraConfig.authType && !!(this.jiraConfig.email && this.jiraConfig.apiToken))
+    return (
+      this.jiraConfig.authType === 'api_key' ||
+      (!this.jiraConfig.authType &&
+        !!(this.jiraConfig.email && this.jiraConfig.apiToken))
+    )
   }
 
   /**

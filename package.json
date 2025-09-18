@@ -43,7 +43,9 @@
     "date-fns": "^4.1.0",
     "fuse.js": "^7.1.0",
     "jira.js": "^5.2.2",
+    "ky": "^1.10.0",
     "lodash-es": "^4.17.21",
+    "loglevel": "^1.9.2",
     "nanoid": "^5.1.5",
     "next": "~15.2.4",
     "p-queue": "^8.1.1",
@@ -61,6 +63,7 @@
     "unimport": "^5.2.0",
     "unsplash-js": "^7.0.19",
     "wxt": "^0.20.8",
+    "zod": "^4.1.9",
     "zustand": "^5.0.8"
   },
   "devDependencies": {

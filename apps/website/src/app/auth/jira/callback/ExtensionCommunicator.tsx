@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { z } from 'zod'
 
 import { TokenData } from './type'
 
@@ -10,20 +11,29 @@ interface ExtensionCommunicatorProps {
 
 // Custom event interfaces for type safety
 interface TokenEventData {
-  id: string
-  timestamp: number
   source: 'page'
   tokenData: TokenData
 }
 
 interface ConfirmationEventData {
-  id: string
-  timestamp: number
   source: 'content_script'
   success: boolean
   message?: string
   error?: string
 }
+
+declare global {
+  interface WindowEventMap {
+    'jira-oauth-tokens': CustomEvent<TokenEventData>
+    'jira-oauth-confirmation': CustomEvent<ConfirmationEventData>
+  }
+}
+
+const tokenDataSchema = z.object({
+  access_token: z.string(),
+  refresh_token: z.string(),
+  expires_in: z.number()
+})
 
 export default function ExtensionCommunicator({
   tokenData
@@ -34,12 +44,9 @@ export default function ExtensionCommunicator({
   const [errorMessage, setErrorMessage] = useState<string>('')
 
   useEffect(() => {
-    const generateEventId = () => {
-      return `evt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    }
-
-    // Validate token data before dispatching
-    if (!tokenData || !tokenData.access_token || !tokenData.refresh_token) {
+    try {
+      tokenDataSchema.parse(tokenData)
+    } catch {
       setCommunicationStatus('error')
       setErrorMessage('Invalid token data structure')
       return
@@ -47,8 +54,6 @@ export default function ExtensionCommunicator({
 
     // Dispatch custom event with token data
     const tokenEventData: TokenEventData = {
-      id: generateEventId(),
-      timestamp: Date.now(),
       source: 'page',
       tokenData
     }
@@ -60,18 +65,19 @@ export default function ExtensionCommunicator({
     window.dispatchEvent(tokenEvent)
 
     // Listen for confirmation events from content script
-    const handleConfirmationEvent = (event: CustomEvent) => {
+    const handleConfirmationEvent = (
+      event: CustomEvent<ConfirmationEventData>
+    ) => {
       try {
         // Validate event data structure
         if (!event.detail || typeof event.detail !== 'object') {
           return
         }
 
-        const confirmationData = event.detail as ConfirmationEventData
+        const confirmationData = event.detail
 
         // Validate confirmation data
         if (
-          !confirmationData.timestamp ||
           !confirmationData.source ||
           confirmationData.source !== 'content_script'
         ) {
@@ -79,7 +85,7 @@ export default function ExtensionCommunicator({
         }
 
         setCommunicationStatus(confirmationData.success ? 'success' : 'error')
-        if (!confirmationData.success && confirmationData.error) {
+        if (confirmationData.error) {
           setErrorMessage(confirmationData.error)
         }
 
@@ -96,10 +102,7 @@ export default function ExtensionCommunicator({
     }
 
     // Add event listener for confirmation events
-    window.addEventListener(
-      'jira-oauth-confirmation',
-      handleConfirmationEvent as EventListener
-    )
+    window.addEventListener('jira-oauth-confirmation', handleConfirmationEvent)
 
     // Set timeout for communication
     const timeoutId = setTimeout(() => {
@@ -110,9 +113,9 @@ export default function ExtensionCommunicator({
     return () => {
       window.removeEventListener(
         'jira-oauth-confirmation',
-        handleConfirmationEvent as EventListener
+        handleConfirmationEvent
       )
-      clearTimeout(timeoutId)
+      window.clearTimeout(timeoutId)
     }
   }, [tokenData])
 

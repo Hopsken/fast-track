@@ -1,6 +1,6 @@
 {
   "name": "website",
   "devDependencies": {
-    "@internal/logger": "*"
+    "@internal/logger": "workspace:*"
   }
 }

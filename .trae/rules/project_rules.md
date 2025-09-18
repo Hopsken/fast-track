@@ -17,6 +17,8 @@ Don't run wxt dev command to check build, use wxt build instead.
 
 Don't run any `dev` command, ask the user to run them. To validate implementation, run eslint commands first, then run typescript typecheck making sure everything is correct.
 
+Important: this is a NX monorepo, always try to run nx commands instead of running commands directly.
+
 ## Coding Best Practices
 
 ### SOLID Principles

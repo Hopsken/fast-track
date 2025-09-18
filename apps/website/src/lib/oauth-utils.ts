@@ -15,14 +15,6 @@ export interface JiraTokenResponse {
   scope: string
 }
 
-export interface JiraAccessibleResources {
-  id: string
-  name: string
-  url: string
-  scopes: string[]
-  avatarUrl: string
-}
-
 /**
  * Generate PKCE code verifier and challenge
  */
@@ -92,59 +84,8 @@ export async function exchangeCodeForTokens(
 
   if (!response.ok) {
     const errorData = await response.text()
+    console.error({ code, redirectUri, env: process.env })
     throw new Error(`Token exchange failed: ${errorData}`)
-  }
-
-  return response.json()
-}
-
-/**
- * Get accessible Jira resources for the user
- */
-export async function getAccessibleResources(
-  accessToken: string
-): Promise<JiraAccessibleResources[]> {
-  const response = await fetch(
-    'https://api.atlassian.com/oauth/token/accessible-resources',
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: 'application/json'
-      }
-    }
-  )
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to get accessible resources: ${response.statusText}`
-    )
-  }
-
-  return response.json()
-}
-
-/**
- * Refresh access token using refresh token
- */
-export async function refreshAccessToken(
-  refreshToken: string
-): Promise<JiraTokenResponse> {
-  const response = await fetch('https://auth.atlassian.com/oauth/token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      grant_type: 'refresh_token',
-      client_id: process.env.JIRA_CLIENT_ID!,
-      client_secret: process.env.JIRA_CLIENT_SECRET!,
-      refresh_token: refreshToken
-    })
-  })
-
-  if (!response.ok) {
-    const errorData = await response.text()
-    throw new Error(`Token refresh failed: ${errorData}`)
   }
 
   return response.json()

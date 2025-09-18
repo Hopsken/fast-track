@@ -7,7 +7,7 @@ import {
   HiOutlineExclamationTriangle
 } from 'react-icons/hi2'
 
-import { OAuth } from '@/lib/jira/oauth-flow'
+import { oauthManager } from '@/lib/jira/oauth-manager'
 
 interface OAuthSetupGuideProps {
   onStartOAuth: () => void
@@ -16,16 +16,9 @@ interface OAuthSetupGuideProps {
 export const OAuthSetupGuide: React.FC<OAuthSetupGuideProps> = ({
   onStartOAuth
 }) => {
-  const handleStartOAuth = async () => {
-    try {
-      const result = await OAuth.start()
-      if (!result.success) {
-        console.error('Failed to start OAuth flow:', result.error)
-      }
-      onStartOAuth()
-    } catch (error) {
-      console.error('Failed to start OAuth flow:', error)
-    }
+  const handleStartOAuth = () => {
+    oauthManager.initiateFlow()
+    onStartOAuth()
   }
 
   return (

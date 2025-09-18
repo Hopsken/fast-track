@@ -5,9 +5,10 @@
 
 import type { ServerInformation } from 'jira.js/version3/models/serverInformation'
 
+import type { AuthType } from '@/lib/storage/schema'
+
 import type { JiraClient } from './client'
 import { oauthManager } from './oauth-manager'
-import type { AuthType } from '@/lib/storage/schema'
 
 export interface JiraConnectionTestResult {
   success: boolean
@@ -55,7 +56,11 @@ export class JiraAuthService {
   /**
    * Validates configuration for both OAuth and API key authentication
    */
-  validateConfig(): { isValid: boolean; missingFields: string[]; authType: AuthType } {
+  validateConfig(): {
+    isValid: boolean
+    missingFields: string[]
+    authType: AuthType
+  } {
     const config = this.client.getConfig()
     const missingFields: string[] = []
     const authType = config.authType || 'api_key'
@@ -88,7 +93,11 @@ export class JiraAuthService {
   /**
    * Validates OAuth token and refreshes if needed
    */
-  async validateOAuthToken(): Promise<{ isValid: boolean; refreshed: boolean; error?: string }> {
+  async validateOAuthToken(): Promise<{
+    isValid: boolean
+    refreshed: boolean
+    error?: string
+  }> {
     try {
       const isExpired = await oauthManager.isTokenExpired()
       if (!isExpired) {
@@ -155,7 +164,10 @@ export class JiraAuthService {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'OAuth connection test failed'
+        error:
+          error instanceof Error
+            ? error.message
+            : 'OAuth connection test failed'
       }
     }
   }

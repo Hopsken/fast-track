@@ -6,27 +6,19 @@ import { WxtStorageItem, storage } from '#imports'
 
 import type { LicenseInfo } from '~/types'
 
-
-export type AuthType = 'oauth' | 'api_key' | null;
+export type AuthType = 'oauth' | 'api_key'
 
 export interface OAuthTokens {
-  access_token: string; // Encrypted
-  refresh_token: string; // Encrypted
-  expires_at: string; // ISO timestamp
-  token_type: 'Bearer';
+  access_token: string
+  refresh_token: string
+  expires_at: string // ISO timestamp
 }
 
 export interface OAuthUserInfo {
-  account_id: string;
-  email: string;
-  display_name: string;
-  avatar_url?: string;
-}
-
-export interface OAuthSettings {
-  auto_refresh: boolean;
-  notification_enabled: boolean;
-  migration_completed: boolean;
+  account_id: string
+  email: string
+  display_name: string
+  avatar_url?: string
 }
 
 type StorageItems = {
@@ -35,12 +27,8 @@ type StorageItems = {
   JiraApiToken: string
   JiraUserEmail: string
   AuthType: AuthType
-  PreferredAuthType: AuthType
   OAuthTokens: OAuthTokens | null
   OAuthUserInfo: OAuthUserInfo | null
-  LastRefresh: string
-  ClientId: string
-  OAuthSettings: OAuthSettings
 }
 
 export type StorageKey = keyof StorageItems
@@ -55,45 +43,28 @@ const STORAGE_DEFAULTS: StorageItems = {
   JiraHost: '',
   JiraApiToken: '',
   JiraUserEmail: '',
-  AuthType: null,
-  PreferredAuthType: 'oauth', // Default to OAuth as preferred
+  AuthType: 'oauth',
   OAuthTokens: null,
-  OAuthUserInfo: null,
-  LastRefresh: '',
-  ClientId: '',
-  OAuthSettings: {
-    auto_refresh: true,
-    notification_enabled: true,
-    migration_completed: false
-  }
+  OAuthUserInfo: null
 }
 
-export const JIRA_CONFIG = {
-  HOST: 'JiraHost',
-  API_TOKEN: 'JiraApiToken',
-  USER_EMAIL: 'JiraUserEmail',
-} as const;
-
-export const OAUTH_CONFIG = {
-  AUTH_TYPE: 'AuthType',
-  PREFERRED_AUTH_TYPE: 'PreferredAuthType',
-  TOKENS: 'OAuthTokens',
-  USER_INFO: 'OAuthUserInfo',
-  LAST_REFRESH: 'LastRefresh',
-  CLIENT_ID: 'ClientId',
-  SETTINGS: 'OAuthSettings',
-} as const;
-
-export const LICENSE = {
-  INFO: 'License',
-} as const;
-
-// Storage key groups for organization
+// Enhanced storage key groups with logical organization
 export const STORAGE_GROUPS = {
-  JIRA_CONFIG: ['JiraHost', 'JiraApiToken', 'JiraUserEmail'] as const,
-  LICENSE: ['License'] as const,
-  OAUTH: ['AuthType', 'PreferredAuthType', 'OAuthTokens', 'OAuthUserInfo', 'LastRefresh', 'ClientId', 'OAuthSettings'] as const
-}
+  // Authentication core
+  AUTH_CORE: ['AuthType'],
+
+  // API Key authentication group
+  API_KEY_AUTH: ['JiraHost', 'JiraApiToken', 'JiraUserEmail'],
+
+  // OAuth authentication group
+  OAUTH_AUTH: ['OAuthTokens', 'OAuthUserInfo'],
+
+  // Jira configuration (combined API key auth for compatibility)
+  JIRA_CONFIG: ['JiraHost', 'JiraApiToken', 'JiraUserEmail'],
+
+  // License management
+  LICENSE: ['License']
+} satisfies Record<string, (keyof StorageItems)[]>
 
 /**
  * WXT storage items with type safety and default values

@@ -1,148 +1,109 @@
 import { defineContentScript } from '#imports'
+import { sendMessage } from '@/lib/messaging'
+import { OAuthTokens } from '@/lib/storage'
+import loglevel from 'loglevel'
+import { z } from 'zod'
 
-import { oauthCommunication } from '@/lib/jira/oauth-communication'
+const log = loglevel.getLogger('OAuthCallbackContentScript')
+const allowedOrigins = ['https://jiraboost.com', 'http://localhost:4000']
 
-/**
- * Content script for secure OAuth callback communication
- * Runs only on the OAuth callback page to handle secure token exchange
- */
-
-// Custom event interfaces for type safety
 interface TokenEventData {
-  id: string
-  timestamp: number
   source: 'page'
-  tokenData: {
-    access_token: string
-    refresh_token: string
-    [key: string]: any
-  }
+  tokenData: OAuthTokens
 }
 
 interface ConfirmationEventData {
-  id: string
-  timestamp: number
   source: 'content_script'
   success: boolean
   message?: string
   error?: string
 }
 
-// Utility functions
-const generateMessageId = () => {
-  return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+declare global {
+  interface WindowEventMap {
+    'jira-oauth-tokens': CustomEvent<TokenEventData>
+    'jira-oauth-confirmation': CustomEvent<ConfirmationEventData>
+  }
 }
 
-// Removed generateRequestId - no longer needed for custom events
+/**
+ * Content script for secure OAuth callback communication
+ * Runs only on the OAuth callback page to handle secure token exchange
+ */
 export default defineContentScript({
-  matches: [
-    'https://jiraboost.com/auth/jira/callback*',
-    'http://localhost:4000/auth/jira/callback*',
-    'http://localhost:3000/auth/jira/callback*'
-  ],
+  matches: ['https://jiraboost.com/auth/jira/callback*', 'http://localhost/*'],
   runAt: 'document_start',
   main() {
-    console.log('OAuth Content Script: Loaded on callback page')
+    log.debug('Loaded on callback page')
 
     // Initialize secure OAuth communication
     initializeSecureOAuthCommunication()
   }
 })
 
+function validateEvent(event: CustomEvent, schema: z.ZodType) {
+  try {
+    schema.parse(event.detail)
+  } catch (error) {
+    log.error('Invalid event data:', error)
+    throw error
+  }
+}
+
 /**
  * Initialize secure OAuth communication for the callback page
  */
 function initializeSecureOAuthCommunication(): void {
-  // Allowed origins for OAuth communication
-  const allowedOrigins = [
-    'https://jiraboost.com',
-    'https://www.jiraboost.com',
-    'http://localhost:3000',
-    'http://localhost:4000'
-  ]
-
-  // Custom event-based communication - no request tracking needed
-
   // Listen for custom events from the page script
-  const handleOAuthTokensEvent = async (event: CustomEvent) => {
-    console.log('OAuth Content Script: Received custom event:', event.detail)
+  const handleOAuthTokensEvent = async (event: CustomEvent<TokenEventData>) => {
     try {
       // Validate event data structure
-      if (!event.detail || typeof event.detail !== 'object') {
-        console.warn('OAuth Content Script: Invalid event data structure')
-        return
-      }
+      validateEvent(
+        event,
+        z.object({
+          source: z.literal('page'),
+          tokenData: z.object({
+            access_token: z.string(),
+            refresh_token: z.string(),
+            expires_at: z.iso.datetime()
+          })
+        })
+      )
 
       // Validate origin (check if we're on an allowed domain)
       const currentOrigin = window.location.origin
       if (!allowedOrigins.includes(currentOrigin)) {
-        console.warn('OAuth Content Script: Invalid origin:', currentOrigin)
         return
       }
 
-      // Validate event data
-      const eventData = event.detail
-      if (
-        !eventData.timestamp ||
-        !eventData.source ||
-        eventData.source !== 'page'
-      ) {
-        console.warn('OAuth Content Script: Invalid event data:', eventData)
-        return
-      }
-
-      // Validate token data structure
-      if (!eventData.tokenData) {
-        console.error('OAuth Content Script: No token data in event')
-        return
-      }
-
-      const { tokenData } = eventData
-      if (!tokenData.access_token || !tokenData.refresh_token) {
-        console.error(
-          'OAuth Content Script: Invalid token data structure:',
-          tokenData
-        )
-        return
-      }
-
-      console.log('OAuth Content Script: Processing token data:', tokenData)
+      const tokenData = event.detail.tokenData
+      log.debug('Processing token data:', tokenData)
 
       // Forward tokens to background script
-      await chrome.runtime.sendMessage({
-        type: 'OAUTH_TOKEN_RECEIVED',
-        payload: {
-          type: 'JIRA_OAUTH_SUCCESS',
-          data: tokenData,
-          origin: window.location.origin
-        }
-      })
+      await sendMessage('OAUTH_TOKEN_RECEIVED', tokenData)
 
-      console.log(
-        'OAuth Content Script: Tokens successfully forwarded to background'
-      )
+      log.debug('Tokens successfully forwarded to background')
 
       // Dispatch success confirmation event
-      const confirmationEvent = new CustomEvent('jira-oauth-confirmation', {
-        detail: {
-          id: generateMessageId(),
-          timestamp: Date.now(),
-          source: 'content_script',
-          success: true,
-          message: 'Tokens received and forwarded successfully'
+      const confirmationEvent = new CustomEvent<ConfirmationEventData>(
+        'jira-oauth-confirmation',
+        {
+          detail: {
+            source: 'content_script',
+            success: true,
+            message: 'Tokens received and forwarded successfully'
+          }
         }
-      })
+      )
 
       window.dispatchEvent(confirmationEvent)
-      console.log('OAuth Content Script: Dispatched success confirmation event')
+      log.debug('Dispatched success confirmation event')
     } catch (error) {
-      console.error('OAuth Content Script: Error handling token event:', error)
+      log.error('Error handling token event:', error)
 
       // Dispatch error confirmation event
       const errorEvent = new CustomEvent('jira-oauth-confirmation', {
         detail: {
-          id: generateMessageId(),
-          timestamp: Date.now(),
           source: 'content_script',
           success: false,
           error: error instanceof Error ? error.message : 'Unknown error'
@@ -153,17 +114,5 @@ function initializeSecureOAuthCommunication(): void {
     }
   }
 
-  // Add event listener for custom token events
-  window.addEventListener(
-    'jira-oauth-tokens',
-    handleOAuthTokensEvent as EventListener
-  )
-
-  console.log('OAuth Content Script: Custom event communication initialized')
-  console.log('OAuth Content Script: Waiting for token event from page...')
+  window.addEventListener('jira-oauth-tokens', handleOAuthTokensEvent)
 }
-
-// Content script now uses custom events:
-// 1. Page dispatches 'jira-oauth-tokens' custom event with token data
-// 2. Content script receives event and forwards tokens to background
-// 3. Content script dispatches 'jira-oauth-confirmation' event with result

@@ -107,8 +107,7 @@ const processAuthentication = async (
     const tokenData: TokenData = {
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
-      expires_in: tokens.expires_in,
-      extension_id: sessionData.extension_id
+      expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString()
     }
 
     return {

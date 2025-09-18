@@ -12,7 +12,7 @@ import { registerTicketService } from '~/services/ticket-service'
 
 import { BackgroundAlarmsService } from './services/background-alarms'
 import { InstallationHandlerService } from './services/installation-handler'
-import { OAuthBackgroundService } from './services/oauth-background-service'
+import { OAuthCallbackService } from './services/oauth-callback-handler'
 import { OmniboxHandlerService } from './services/omnibox-handler'
 
 export default defineBackground(() => {
@@ -30,8 +30,8 @@ export default defineBackground(() => {
         // Initialize alarms service
         const alarmsService = new BackgroundAlarmsService(ticketService)
 
-        // Initialize OAuth background service
-        const oauthService = new OAuthBackgroundService()
+        // Initialize OAuth callback service
+        const oauthService = new OAuthCallbackService()
 
         return Promise.all([
           alarmsService.initialize(),
