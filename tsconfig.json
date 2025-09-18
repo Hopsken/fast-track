@@ -1,7 +1,15 @@
 {
   "extends": "./tsconfig.base.json",
-  "compilerOptions": {
-    "jsx": "react-jsx"
-  },
-  "references": []
+  "files": [],
+  "references": [
+    {
+      "path": "./apps/extension"
+    },
+    {
+      "path": "./apps/website"
+    },
+    {
+      "path": "./packages/logger"
+    }
+  ]
 }

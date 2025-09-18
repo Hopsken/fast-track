@@ -1,5 +1,5 @@
 {
-  "name": "extension",
+  "name": "website",
   "devDependencies": {
     "@internal/logger": "*"
   }

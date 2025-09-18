@@ -10,10 +10,7 @@
     "resolveJsonModule": true,
     "jsx": "react-jsx",
     "experimentalDecorators": true,
-    "baseUrl": ".",
-    "paths": {
-      "@internal/logger": ["packages/logger/src/index.ts"],
-      "@/*": ["src/*"]
-    }
+    "composite": true,
+    "declaration": true
   }
 }

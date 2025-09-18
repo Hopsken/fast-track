@@ -5,6 +5,7 @@ Always use context7 when i need code generation, setup or configuration steps, o
 Use these known libraries in the following:
 
 - Wxt: `/wxt-dev/wxt`
+- NX: `/nrwl/nx`
 - RxJS: `/reactivex/rxjs`
 - Zustand: `/pmndrs/zustand`
 - Jira.js: `/mrrefactoring/jira.js`

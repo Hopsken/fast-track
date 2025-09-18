@@ -1,9 +1,18 @@
 {
-  "extends": "./.wxt/tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "jsx": "react-jsx",
-    "resolveJsonModule": true,
-    "experimentalDecorators": true
+    "paths": {
+      "@": ["./src"],
+      "@/*": ["./src/*"],
+      "~": ["./src"],
+      "~/*": ["./src/*"]
+    }
   },
-  "references": []
+  "include": ["src/**/*", "specs/**/*", "*.ts", "*.d.ts", ".wxt/wxt.d.ts"],
+  "exclude": ["./.output"],
+  "references": [
+    {
+      "path": "../../packages/logger"
+    }
+  ]
 }

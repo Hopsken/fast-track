@@ -56,11 +56,8 @@ export default [
         ecmaFeatures: {
           jsx: true
         },
-        project: [
-          './tsconfig.json',
-          './apps/*/tsconfig.json',
-          './packages/*/tsconfig.json'
-        ]
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname
       }
     },
     plugins: {
@@ -86,7 +83,7 @@ export default [
       'import-x/core-modules': ['#imports']
     },
     rules: {
-      // TypeScript ESLint rules
+      // TypeScript rules
       ...tseslint.configs.recommended.rules,
       '@typescript-eslint/no-unused-vars': [
         'error',
@@ -104,7 +101,7 @@ export default [
       'react/jsx-uses-react': 'off',
       'react/jsx-uses-vars': 'error',
 
-      // JSX Accessibility rules
+      // Accessibility rules
       ...jsxA11y.configs.recommended.rules,
       'jsx-a11y/anchor-is-valid': 'error',
       'jsx-a11y/alt-text': 'error',
@@ -117,7 +114,7 @@ export default [
       'jsx-a11y/no-autofocus': 'warn',
       'jsx-a11y/no-static-element-interactions': 'error',
 
-      // Import rules (using import-x)
+      // Import rules
       'import-x/order': [
         'warn',
         {
@@ -141,26 +138,25 @@ export default [
           alphabetize: { order: 'asc', caseInsensitive: true }
         }
       ],
-      'import-x/no-unresolved': 'error', // Re-enabled with TypeScript resolver
+      'import-x/no-unresolved': 'error',
       'import-x/no-unused-modules': 'off',
-      'import-x/namespace': 'error', // Re-enabled with TypeScript resolver
-      'import-x/no-duplicates': 'error', // Re-enabled with TypeScript resolver
+      'import-x/namespace': 'error',
+      'import-x/no-duplicates': 'error',
 
-      // SonarJS rules for code quality and cognitive complexity
-      // Using cognitive complexity (mental difficulty) instead of cyclomatic complexity (path counting)
+      // SonarJS rules
       'sonarjs/cognitive-complexity': ['error', 15],
       'sonarjs/no-duplicate-string': ['warn', { threshold: 5 }],
       'sonarjs/prefer-immediate-return': 'warn',
       'sonarjs/prefer-object-literal': 'warn',
       'sonarjs/no-small-switch': 'off',
 
-      // Unicorn rules for best practices
-      'unicorn/filename-case': 'off', // Disable to allow PascalCase for React components
-      'unicorn/no-null': 'off', // Allow null for React refs and some APIs
-      'unicorn/prevent-abbreviations': 'off', // Too strict for existing codebase
-      'unicorn/prefer-top-level-await': 'off', // Not supported in all environments
-      'unicorn/prefer-module': 'off', // CommonJS is still used in config files
-      'unicorn/import-style': 'off', // Allow flexible import styles
+      // Unicorn rules
+      'unicorn/filename-case': 'off',
+      'unicorn/no-null': 'off',
+      'unicorn/prevent-abbreviations': 'off',
+      'unicorn/prefer-top-level-await': 'off',
+      'unicorn/prefer-module': 'off',
+      'unicorn/import-style': 'off',
       'unicorn/prefer-node-protocol': 'error',
       'unicorn/prefer-ternary': 'error',
       'unicorn/prefer-logical-operator-over-ternary': 'error',
@@ -175,8 +171,8 @@ export default [
       'unicorn/prefer-default-parameters': 'error',
       'unicorn/prefer-number-properties': 'error',
 
-      // General code quality rules
-      'no-console': 'off', // Allow console for extension debugging
+      // General rules
+      'no-console': 'off',
       'no-debugger': 'error',
       'no-alert': 'error',
       'no-eval': 'error',
@@ -192,12 +188,12 @@ export default [
       'no-useless-computed-key': 'error',
       quotes: ['error', 'single', { avoidEscape: true }],
 
-      // NX-specific rules for monorepo management
+      // Nx rules
       '@nx/enforce-module-boundaries': [
         'error',
         {
           enforceBuildableLibDependency: true,
-          allow: ['^.*/eslint(.base)?.config.[cm]?js$'],
+          allow: ['^.*/eslint(.base)?\\.config.[cm]?js$'],
           depConstraints: [
             {
               sourceTag: '*',
@@ -207,15 +203,47 @@ export default [
         }
       ],
 
-      // Function and complexity rules
+      // Code quality rules
       'max-params': ['warn', 3],
       'max-depth': ['warn', 4],
       'max-nested-callbacks': ['warn', 3]
-      // Note: Using SonarJS cognitive-complexity instead of ESLint's complexity rule
     }
   },
 
-  // Configuration files (allow CommonJS)
+  // Configuration files without type checking
+  {
+    files: [
+      '*.config.{js,ts,mjs,cjs}',
+      '*.config.*.{js,ts,mjs,cjs}',
+      'jest.config.ts',
+      'next-env.d.ts',
+      'index.d.ts',
+      '**/*.spec.{ts,tsx}',
+      '**/*.test.{ts,tsx}'
+    ],
+    languageOptions: {
+      parser: tsparser,
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: 'module'
+      }
+    },
+    plugins: {
+      '@typescript-eslint': tseslint,
+      '@nx': nx
+    },
+    rules: {
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_' }
+      ],
+      '@typescript-eslint/no-explicit-any': 'off',
+      'unicorn/prefer-module': 'off',
+      '@typescript-eslint/no-var-requires': 'off'
+    }
+  },
+
+  // Node.js config files
   {
     files: ['*.config.{js,ts}', '*.config.*.{js,ts}', '.prettierrc.cjs'],
     languageOptions: {
@@ -231,9 +259,9 @@ export default [
     }
   },
 
-  // Test files configuration
+  // Test files
   {
-    files: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}'],
+    files: ['**/*.{test,spec}.{ts,tsx,js,jsx}'],
     languageOptions: {
       globals: {
         describe: 'readonly',
@@ -251,10 +279,10 @@ export default [
       'sonarjs/no-duplicate-string': 'off',
       'max-params': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      'no-undef': 'off' // Test globals are defined above
+      'no-undef': 'off'
     }
   },
 
-  // Prettier integration (must be last to override formatting rules)
+  // Prettier configuration (must be last)
   prettier
 ]
