@@ -110,6 +110,13 @@
         "cwd": "apps/extension",
         "command": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,md}\""
       }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/extension",
+        "command": "tsc --noEmit"
+      }
     }
   },
   "tags": []

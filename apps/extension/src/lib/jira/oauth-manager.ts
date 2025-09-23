@@ -1,14 +1,24 @@
-import { getStorageItem } from '@/lib/storage'
+import { browser } from '#imports'
+
 import ky from 'ky'
 import loglevel from 'loglevel'
+import z from 'zod'
+
+import { getStorageItem } from '@/lib/storage'
 
 import {
   type OAuthTokens,
   type OAuthUserInfo,
   type AuthType
 } from '../storage/schema'
-import { browser } from '#imports'
-import z from 'zod'
+
+type AccessibleResource = {
+  id: string
+  name: string
+  url: string
+  scopes: string[]
+  avatarUrl: string
+}
 
 const log = loglevel.getLogger('OAuthTokenManager')
 
@@ -285,7 +295,7 @@ export class OAuthTokenManager {
       // Fallback to local storage check
       const authType = await getStorageItem('AuthType').getValue()
       const tokens = await getStorageItem('OAuthTokens').getValue()
-      const userInfo = await getStorageItem('OAuthUserInfo').getValue()
+      // const userInfo = await getStorageItem('OAuthUserInfo').getValue()
 
       const isTokenExpired = tokens
         ? this.isTokenExpiredByDate(tokens.expires_at)
@@ -296,7 +306,7 @@ export class OAuthTokenManager {
         authType,
         hasTokens: !!tokens,
         tokenExpiry: tokens?.expires_at,
-        userInfo: userInfo || undefined,
+        // userInfo: userInfo || undefined,
         isTokenExpired
       }
     } catch (error) {
@@ -357,11 +367,18 @@ export class OAuthTokenManager {
       const parsedTokens = oauthTokensSchema.parse(tokens)
 
       const resources = await this.getAccessibleResources(parsedTokens)
+      const myself = await this.getMyself(parsedTokens, resources)
 
       log.debug('Accessible resources:', resources)
 
       await this.setAuthType('oauth')
       await this.storeTokens(parsedTokens)
+      await this.storeUserInfo({
+        accountId: myself.accountId,
+        email: myself.emailAddress,
+        name: myself.displayName,
+        avatarUrl: myself.avatarUrls['48x48']
+      })
 
       return {
         success: true
@@ -375,16 +392,37 @@ export class OAuthTokenManager {
     }
   }
 
-  async getAccessibleResources(token: OAuthTokens) {
-    type AccessibleResource = {
-      name: string
-      url: string
-      scopes: string[]
-      avatarUrl: string
-    }
-
+  private async getAccessibleResources(token: OAuthTokens) {
     const response = await ky.get<AccessibleResource[]>(
       'https://api.atlassian.com/oauth/token/accessible-resources',
+      {
+        headers: {
+          Authorization: `Bearer ${token.access_token}`
+        }
+      }
+    )
+    return response.json()
+  }
+
+  private async getMyself(
+    token: OAuthTokens,
+    [jiraInstance]: AccessibleResource[]
+  ) {
+    type AtlassianUser = {
+      accountId: string
+      avatarUrls: {
+        '48x48': string
+      }
+      displayName: string
+      emailAddress: string
+    }
+
+    if (!jiraInstance) {
+      throw new Error('Jira resource not found')
+    }
+
+    const response = await ky.get<AtlassianUser>(
+      `https://api.atlassian.com/ex/jira/${jiraInstance.id}/rest/api/3/myself`,
       {
         headers: {
           Authorization: `Bearer ${token.access_token}`

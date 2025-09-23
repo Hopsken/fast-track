@@ -31,7 +31,7 @@ export function ShortcutManagement() {
   }
 
   return (
-    <div className="rounded-lg border bg-gray-50 p-4">
+    <div className="rounded-lg border border-gray-200 p-4">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="mb-2 flex items-center gap-2">

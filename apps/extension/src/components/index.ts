@@ -4,6 +4,7 @@
 
 // Organized component exports
 export * from './api'
+export * from './auth'
 export * from './tickets'
 export * from './search'
 export * from './ui'

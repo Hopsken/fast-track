@@ -15,10 +15,10 @@ export interface OAuthTokens {
 }
 
 export interface OAuthUserInfo {
-  account_id: string
+  accountId: string
   email: string
-  display_name: string
-  avatar_url?: string
+  name: string
+  avatarUrl?: string
 }
 
 type StorageItems = {

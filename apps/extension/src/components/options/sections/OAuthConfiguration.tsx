@@ -199,7 +199,7 @@ export function OAuthConfiguration({
               <User className="h-5 w-5 text-gray-400" />
               <div>
                 <p className="text-sm font-medium text-gray-900">
-                  {userInfo.display_name}
+                  {userInfo.name}
                 </p>
                 <p className="text-xs text-gray-500">{userInfo.email}</p>
               </div>
