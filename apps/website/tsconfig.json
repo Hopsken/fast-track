@@ -4,9 +4,10 @@
   "include": [
     "*.d.ts",
     "*.ts",
+    ".next/types/**/*.ts",
     "specs/**/*",
     "src/**/*",
-    ".next/types/**/*.ts"
+    "../../dist/apps/website/.next/types/**/*.ts"
   ],
   "references": [
     {

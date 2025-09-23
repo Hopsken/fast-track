@@ -58,11 +58,6 @@ jobs:
       - name: Run type checking
         run: pnpm run typecheck
 
-      - name: Build extensions
-        run: |
-          pnpm run build:chrome
-          pnpm run build:ff
-
       - name: Create zip artifacts
         run: pnpm run zip
 
@@ -70,14 +65,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: jira-boost-chrome-v${{ steps.package_version.outputs.version }}
-          path: apps/extension/.output/jira-boost-${{ steps.package_version.outputs.version }}-chrome.zip
+          path: apps/extension/.output/extension-${{ steps.package_version.outputs.version }}-chrome.zip
           retention-days: 30
 
       - name: Upload Firefox extension artifact
         uses: actions/upload-artifact@v4
         with:
           name: jira-boost-firefox-v${{ steps.package_version.outputs.version }}
-          path: apps/extension/.output/jira-boost-${{ steps.package_version.outputs.version }}-firefox.zip
+          path: apps/extension/.output/extension-${{ steps.package_version.outputs.version }}-firefox.zip
           retention-days: 30
 
       - name: List build outputs
