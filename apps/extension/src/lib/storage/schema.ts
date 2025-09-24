@@ -4,22 +4,12 @@
 
 import { WxtStorageItem, storage } from '#imports'
 
-import type { LicenseInfo } from '~/types'
-
-export type AuthType = 'oauth' | 'api_key'
-
-export interface OAuthTokens {
-  access_token: string
-  refresh_token: string
-  expires_at: string // ISO timestamp
-}
-
-export interface OAuthUserInfo {
-  accountId: string
-  email: string
-  name: string
-  avatarUrl?: string
-}
+import type {
+  AuthType,
+  JiraOAuthConfig,
+  JiraUserInfo,
+  LicenseInfo
+} from '~/types'
 
 type StorageItems = {
   License: LicenseInfo | null
@@ -27,8 +17,8 @@ type StorageItems = {
   JiraApiToken: string
   JiraUserEmail: string
   AuthType: AuthType
-  OAuthTokens: OAuthTokens | null
-  OAuthUserInfo: OAuthUserInfo | null
+  OAuthTokens: JiraOAuthConfig | null
+  OAuthUserInfo: JiraUserInfo | null
 }
 
 export type StorageKey = keyof StorageItems

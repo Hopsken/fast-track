@@ -3,7 +3,7 @@
  * Handles authentication, configuration, and provides access to jira.js modules
  */
 
-import { BaseClient } from 'jira.js'
+import { BaseClient, Config } from 'jira.js'
 import {
   IssueSearch,
   Issues,
@@ -11,14 +11,21 @@ import {
   Projects,
   ServerInfo
 } from 'jira.js/version3'
+import { skipWhile, Subscription, switchMap, timer } from 'rxjs'
 
-import { oauthManager } from './oauth-manager'
-import type { JiraApiConfig, JiraOAuthConfig, JiraApiKeyConfig } from './types'
+import { fromStorage$, getStorageItem } from '../storage'
+
+import { AuthApi } from './auth-api'
+import type { JiraApiConfig } from './types'
 
 /**
  * Base Jira client with authentication and jira.js module access
  */
 export class JiraClient extends BaseClient {
+  private static subscription: Subscription | null = null
+
+  private authApi = new AuthApi()
+
   // jira.js modules
   issues = new Issues(this)
   issueSearch = new IssueSearch(this)
@@ -27,43 +34,21 @@ export class JiraClient extends BaseClient {
   serverInfo = new ServerInfo(this)
 
   constructor(private jiraConfig: JiraApiConfig) {
-    if (!jiraConfig.baseUrl) {
-      throw new Error('Base URL is required for Jira client')
-    }
-
-    // Validate authentication based on type
-    const authConfig = JiraClient.validateAndGetAuthConfig(jiraConfig)
-
+    const authConfig = JiraClient.getAuthConfig(jiraConfig)
     super(authConfig)
+
+    if (jiraConfig.type === 'oauth' && !JiraClient.subscription) {
+      JiraClient.subscription = this.setupAutoRefreshTokenSubscription()
+    }
   }
 
   /**
    * Validate configuration and return jira.js auth config
    */
-  private static validateAndGetAuthConfig(config: JiraApiConfig) {
-    const authType =
-      config.authType || (config.email && config.apiToken ? 'api_key' : 'oauth')
-
-    if (authType === 'oauth') {
-      if (!config.accessToken) {
-        throw new Error('Access token is required for OAuth authentication')
-      }
+  private static getAuthConfig(config: JiraApiConfig): Config {
+    if (config.type === 'api_key') {
       return {
-        host: config.baseUrl,
-        authentication: {
-          oauth2: {
-            accessToken: config.accessToken
-          }
-        }
-      }
-    } else {
-      if (!config.email || !config.apiToken) {
-        throw new Error(
-          'Email and API token are required for API key authentication'
-        )
-      }
-      return {
-        host: config.baseUrl,
+        host: config.host,
         authentication: {
           basic: {
             email: config.email,
@@ -72,88 +57,59 @@ export class JiraClient extends BaseClient {
         }
       }
     }
+
+    if (config.type === 'oauth') {
+      return {
+        host: `https://api.atlassian.com/ex/jira/${config.instance_id}`,
+        authentication: {
+          oauth2: {
+            accessToken: config.access_token
+          }
+        }
+      }
+    }
+
+    throw new Error(`Unsupported authentication type: ${config}`)
   }
 
   /**
    * Updates the client configuration
    */
-  updateConfig(newConfig: Partial<JiraApiConfig>): void {
-    this.jiraConfig = { ...this.jiraConfig, ...newConfig }
-
-    if (!this.jiraConfig.baseUrl) {
-      throw new Error('Base URL is required for Jira client')
-    }
-
-    // Validate and get new auth configuration
-    const authConfig = JiraClient.validateAndGetAuthConfig(this.jiraConfig)
-
+  private updateClientConfig(newConfig: JiraApiConfig): void {
     // Reinitialize the client with new configuration
-    Object.assign(this, new JiraClient(this.jiraConfig))
-  }
-
-  /**
-   * Create client with OAuth authentication
-   */
-  static async createWithOAuth(config: {
-    baseUrl: string
-    accessToken?: string
-  }): Promise<JiraClient> {
-    const accessToken =
-      config.accessToken || (await oauthManager.getValidAccessToken())
-    if (!accessToken) {
-      throw new Error('No valid OAuth access token available')
-    }
-
-    return new JiraClient({
-      baseUrl: config.baseUrl,
-      authType: 'oauth',
-      accessToken
-    })
-  }
-
-  /**
-   * Create client with API key authentication
-   */
-  static createWithApiKey(config: JiraApiKeyConfig): JiraClient {
-    return new JiraClient(config)
+    Object.assign(this, new JiraClient(newConfig))
   }
 
   /**
    * Refresh OAuth token and update client if needed
    */
-  async refreshOAuthToken(): Promise<boolean> {
-    if (this.jiraConfig.authType !== 'oauth') {
-      return false
-    }
+  private setupAutoRefreshTokenSubscription() {
+    return fromStorage$('OAuthTokens')
+      .pipe(
+        skipWhile((tokens) => !tokens),
+        switchMap((tokens) => {
+          if (!tokens) throw new Error('No tokens found')
 
-    const newAccessToken = await oauthManager.getValidAccessToken()
-    if (!newAccessToken) {
-      return false
-    }
+          const expiresAtMs = new Date(tokens.expires_at).getTime()
 
-    if (newAccessToken !== this.jiraConfig.accessToken) {
-      this.updateConfig({ accessToken: newAccessToken })
-    }
-
-    return true
-  }
-
-  /**
-   * Check if client is using OAuth authentication
-   */
-  isOAuthClient(): boolean {
-    return this.jiraConfig.authType === 'oauth'
-  }
-
-  /**
-   * Check if client is using API key authentication
-   */
-  isApiKeyClient(): boolean {
-    return (
-      this.jiraConfig.authType === 'api_key' ||
-      (!this.jiraConfig.authType &&
-        !!(this.jiraConfig.email && this.jiraConfig.apiToken))
-    )
+          // Schedule refresh 5 minutes before token expires
+          // if less than 5 min, refresh immediately
+          const refreshDelay = Math.max(
+            expiresAtMs - Date.now() - 5 * 60 * 1000,
+            0
+          )
+          return timer(refreshDelay).pipe(
+            switchMap(() => this.authApi.refreshToken(tokens))
+          )
+        })
+      )
+      .subscribe((newTokens) => {
+        if (newTokens) {
+          // Persist refreshed tokens so future refreshes are correctly scheduled
+          getStorageItem('OAuthTokens').setValue(newTokens)
+          this.updateClientConfig(newTokens)
+        }
+      })
   }
 
   /**

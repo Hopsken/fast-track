@@ -207,8 +207,6 @@ export class JiraIssueService {
    * Converts a jira.js Issue to internal ticket format
    */
   private convertToTicket(issue: Issue): JiraTicket {
-    const config = this.client.getConfig()
-
     return {
       id: String(issue.id),
       key: issue.key,
@@ -242,7 +240,7 @@ export class JiraIssueService {
         : null,
       projectKey: issue.fields?.project?.key || '',
       boardName: issue.fields?.project?.name || '',
-      url: issue.self ?? `${config.baseUrl}/browse/${issue.key}`,
+      url: issue.self ?? '',
       lastViewed: issue.fields.lastViewed
         ? toISODateString(issue.fields.lastViewed)
         : null,

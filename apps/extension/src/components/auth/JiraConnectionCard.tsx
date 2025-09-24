@@ -4,10 +4,10 @@ import {
   // HiArrowTopRightOnSquare as ExternalLink
 } from 'react-icons/hi2'
 
-import { OAuthUserInfo } from '@/lib/storage'
+import { JiraUserInfo } from '@/types'
 
 export interface JiraConnectionCardProps {
-  user: OAuthUserInfo
+  user: JiraUserInfo
   onSettings?: () => void
   onDisconnect?: () => void
 }

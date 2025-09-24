@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react'
 
 import { JiraConnectionCard, JiraConnectionSetup } from '@/components/auth'
 import { useStorage } from '@/hooks'
-import { oauthManager } from '@/lib/jira/oauth-manager'
+import { getAuthService } from '@/services/auth-service'
 
 import { ShortcutManagement } from '../sections/QuickAccess/ShortcutManagement'
 
@@ -14,7 +14,9 @@ export function GeneralTab() {
   const handleConnect = useCallback(async () => {
     setIsLoading(true)
     try {
-      await oauthManager.initiateFlow()
+      const authService = getAuthService()
+      const nextUrl = await authService.connect()
+      window.open(nextUrl, '_blank')
     } catch (error) {
       console.error('Error connecting to Jira:', error)
     } finally {

@@ -15,8 +15,6 @@ import { useMultipleStorage } from './useStorage'
 export function useJiraConfig() {
   const [values, updateValues] = useMultipleStorage(STORAGE_GROUPS.JIRA_CONFIG)
 
-  console.log({ values })
-
   const clearJiraConfig = useCallback(() => {
     updateValues({
       JiraHost: '',

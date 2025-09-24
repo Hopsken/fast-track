@@ -2,23 +2,6 @@
  * Jira API type definitions
  */
 
-export interface JiraApiConfig {
-  baseUrl: string
-  email?: string
-  apiToken?: string
-  authType?: 'api_key' | 'oauth'
-  accessToken?: string
-}
+import { JiraApiKeyConfig, JiraOAuthConfig } from '@/types'
 
-export interface JiraOAuthConfig {
-  baseUrl: string
-  accessToken: string
-  authType: 'oauth'
-}
-
-export interface JiraApiKeyConfig {
-  baseUrl: string
-  email: string
-  apiToken: string
-  authType: 'api_key'
-}
+export type JiraApiConfig = JiraApiKeyConfig | JiraOAuthConfig

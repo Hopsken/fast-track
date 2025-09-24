@@ -3,7 +3,8 @@
  * Provides a unified interface by orchestrating specialized services
  */
 
-import { JiraAuthService } from './auth'
+import { JiraUserInfo } from '@/types'
+
 import { JiraClient } from './client'
 import { JiraIssueService } from './issues'
 import { JiraApiConfig } from './types'
@@ -14,54 +15,27 @@ import { JiraApiConfig } from './types'
 export class JiraAPI {
   private client: JiraClient
   private _issueService: JiraIssueService
-  private _authService: JiraAuthService
 
   constructor(config: JiraApiConfig) {
     this.client = new JiraClient(config)
     this._issueService = new JiraIssueService(this.client)
-    this._authService = new JiraAuthService(this.client)
   }
 
   public get issues() {
     return this._issueService
   }
 
-  public get connections() {
-    return this._authService
-  }
-
-  // ============================================================================
-  // Configuration (Delegated to JiraClient)
-  // ============================================================================
-
-  /**
-   * Updates the service configuration
-   */
-  updateConfig(newConfig: Partial<JiraApiConfig>): void {
-    this.client.updateConfig(newConfig)
-
-    // Reinitialize services with updated client
-    this._issueService = new JiraIssueService(this.client)
-    this._authService = new JiraAuthService(this.client)
+  public async getMyself(): Promise<JiraUserInfo> {
+    const currentUser = await this.client.myself.getCurrentUser()
+    return {
+      accountId: currentUser.accountId,
+      email: currentUser.emailAddress ?? '',
+      name: currentUser.displayName ?? '',
+      avatarUrl: currentUser.avatarUrls?.['16x16']
+    }
   }
 
   getConfig(): JiraApiConfig {
     return this.client.getConfig()
-  }
-
-  hasValidConfig(): boolean {
-    const { baseUrl, authType, email, apiToken, accessToken } = this.getConfig()
-
-    if (!baseUrl) {
-      return false
-    }
-
-    // Validate based on auth type
-    if (authType === 'oauth') {
-      return !!accessToken
-    } else {
-      // Default to API key validation
-      return !!email && !!apiToken
-    }
   }
 }

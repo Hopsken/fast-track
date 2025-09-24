@@ -8,11 +8,11 @@ import { defineBackground } from '#imports'
 import { getJiraApi } from '@/lib/jira'
 import { getDatabase } from '@/repository'
 import { registerSearchService } from '@/services/search-service'
+import { registerAuthService } from '~/services/auth-service'
 import { registerTicketService } from '~/services/ticket-service'
 
 import { BackgroundAlarmsService } from './services/background-alarms'
 import { InstallationHandlerService } from './services/installation-handler'
-import { OAuthCallbackService } from './services/oauth-callback-handler'
 import { OmniboxHandlerService } from './services/omnibox-handler'
 
 export default defineBackground(() => {
@@ -29,20 +29,15 @@ export default defineBackground(() => {
 
         // Initialize alarms service
         const alarmsService = new BackgroundAlarmsService(ticketService)
-
-        // Initialize OAuth callback service
-        const oauthService = new OAuthCallbackService()
-
-        return Promise.all([
-          alarmsService.initialize(),
-          oauthService.initialize()
-        ])
+        return Promise.all([alarmsService.initialize()])
       })
       .catch((error) => {
         console.error('❌ RxDB initialization failed:', error)
       })
 
     // Initialize other services
+    registerAuthService()
+
     OmniboxHandlerService.initialize()
     OmniboxHandlerService.setDefaultSuggestion(
       'Search Jira tickets or enter ticket key (e.g., PROJ-123)'
