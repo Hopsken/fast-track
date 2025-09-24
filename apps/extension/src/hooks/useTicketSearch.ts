@@ -2,6 +2,7 @@ import { useMemoizedFn, useMount } from 'ahooks'
 import { useState } from 'react'
 
 import { onMessage } from '@/lib/message'
+import { mergeTickets } from '@/lib/ticket'
 import { getSearchService } from '@/services/search-service'
 import {
   useSearchQuery,
@@ -34,10 +35,15 @@ export function useTicketSearch() {
       const { tickets, search } = payload.data
       const state = useTicketStore.getState()
       // ignore search result if search doesn't match or user is selecting any ticket to avoid race conditions
-      if (state.searchQuery !== search || state.selectedIndex > 0) {
+      if (state.searchQuery !== search) {
         return
       }
-      actions.setSearchResults(tickets)
+
+      if (state.selectedIndex > 0) {
+        actions.setSearchResults(mergeTickets(state.searchResults, tickets))
+      } else {
+        actions.setSearchResults(tickets)
+      }
     })
 
     searchService.initialize()
