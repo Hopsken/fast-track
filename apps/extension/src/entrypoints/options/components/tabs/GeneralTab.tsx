@@ -1,9 +1,9 @@
 import { useCallback, useRef, useState } from 'react'
 
-import { JiraConnectionCard, JiraConnectionSetup } from '@/components/auth'
 import { useStorage } from '@/hooks'
 import { getAuthService } from '@/services/auth-service'
 
+import { JiraConnectionCard, JiraConnectionSetup } from '../auth'
 import { ShortcutManagement } from '../sections/QuickAccess/ShortcutManagement'
 
 export function GeneralTab() {

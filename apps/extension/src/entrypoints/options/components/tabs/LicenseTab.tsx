@@ -1,9 +1,10 @@
+import { useLicense } from '~/hooks/useLicense'
+
 import {
   LicenseStatus,
   UpgradeSection,
   ManageLicenseSection
-} from '~/components/options/sections/LicenseManagement'
-import { useLicense } from '~/hooks/useLicense'
+} from '../sections/LicenseManagement'
 
 export function LicenseTab() {
   const { license } = useLicense()

@@ -4,7 +4,7 @@
 
 // Organized component exports
 export * from './api'
-export * from './auth'
+export * from '../entrypoints/options/components/auth'
 export * from './tickets'
 export * from './search'
 export * from './ui'

@@ -1,13 +1,14 @@
 import { useState } from 'react'
 
+import { useVersion } from '~/hooks/useVersion'
+
 import {
   OptionsHeader,
   TabNavigation,
   GeneralTab,
   LicenseTab,
   AboutTab
-} from '~/components/options'
-import { useVersion } from '~/hooks/useVersion'
+} from './components'
 
 import '~/assets/styles/main.css'
 
