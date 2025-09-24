@@ -1,11 +1,15 @@
-import { useMemoizedFn } from 'ahooks'
+import { useMemoizedFn, useMount } from 'ahooks'
+import { useState } from 'react'
 
+import { onMessage } from '@/lib/message'
+import { getSearchService } from '@/services/search-service'
 import {
   useSearchQuery,
   useSearchResults,
   useSearchError,
   useIsSearching,
-  useSearchActions
+  useSearchActions,
+  useTicketStore
 } from '~/stores/useTicketStore'
 
 export function useTicketSearch() {
@@ -16,14 +20,30 @@ export function useTicketSearch() {
   const isSearching = useIsSearching()
   const actions = useSearchActions()
 
+  const [searchService] = useState(() => getSearchService())
+
   // Simple search handler - just updates query, RxJS orchestrator handles the rest
   const handleSearch = useMemoizedFn((query: string) => {
-    try {
-      // Update search query - orchestrator will handle the actual search
-      actions.setSearchQuery(query)
-    } catch (error) {
-      console.error('Error handling search:', error)
-      actions.setSearchError('Search failed')
+    // Update search query - orchestrator will handle the actual search
+    actions.setSearchQuery(query)
+    searchService.onSearchInput(query)
+  })
+
+  useMount(() => {
+    const unsubscribe = onMessage('onSearchResult', (payload) => {
+      const { tickets, search } = payload.data
+      const state = useTicketStore.getState()
+      // ignore search result if search doesn't match or user is selecting any ticket to avoid race conditions
+      if (state.searchQuery !== search || state.selectedIndex > 0) {
+        return
+      }
+      actions.setSearchResults(tickets)
+    })
+
+    searchService.initialize()
+
+    return () => {
+      unsubscribe()
     }
   })
 

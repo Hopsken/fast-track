@@ -4,7 +4,6 @@
  * This service provides type-safe, cross-context access to ticket operations.
  * Functions are called from content scripts but executed in the background.
  */
-import { logging } from '@internal/logger'
 import { defineProxyService, flattenPromise } from '@webext-core/proxy-service'
 import { uniqBy } from 'lodash-es'
 
@@ -53,16 +52,8 @@ class TicketServiceImpl {
     return uniqTickets
   }
 
-  /**
-   * Tests the API connection
-   */
-  @logging()
-  async testConnection() {
-    return this.jira.connections.testConnection()
-  }
-
-  hasValidConfig() {
-    return this.jira.hasValidConfig()
+  async isConfigured() {
+    return this.jira.getConfig() != null
   }
 }
 

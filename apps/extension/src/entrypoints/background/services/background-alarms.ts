@@ -53,7 +53,8 @@ export class BackgroundAlarmsService {
 
     try {
       // Check if authentication is configured
-      if (!this.ticketService.hasValidConfig()) {
+      const hasValidConfig = await this.ticketService.isConfigured()
+      if (!hasValidConfig) {
         console.info(`Skipping ${alarm.name} - authentication not configured`)
         return
       }
@@ -71,7 +72,8 @@ export class BackgroundAlarmsService {
   }
 
   private async runInitialRefresh() {
-    if (!this.ticketService.hasValidConfig()) {
+    const hasValidConfig = await this.ticketService.isConfigured()
+    if (!hasValidConfig) {
       console.info('Skipping initial refresh - authentication not configured')
       return
     }

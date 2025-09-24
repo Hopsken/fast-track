@@ -24,8 +24,6 @@ export const useTicketStore = create<TicketStore>()(
   )
 )
 
-// Auto-reset functionality is handled directly in the search slice
-
 // Selectors for common use cases
 export const useSearchQuery = () => useTicketStore((state) => state.searchQuery)
 export const useSearchResults = () =>

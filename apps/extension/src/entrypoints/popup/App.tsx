@@ -1,9 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { HiCog } from 'react-icons/hi'
 
-import { initializeSearchOrchestration } from '@/services/search/searchOrchestrator'
 import { getTicketService } from '@/services/ticket-service'
-import { useTicketStore } from '@/stores/useTicketStore'
 import { JiraTicket } from '@/types'
 import { ErrorBoundary } from '~/components/ErrorBoundary'
 import { TicketSearchBox } from '~/components/search'
@@ -21,14 +19,7 @@ function App() {
 
   // Initialize search orchestration
   useEffect(() => {
-    const subscription = initializeSearchOrchestration(useTicketStore)
-
     getTicketService().loadSuggestions()
-
-    // Cleanup subscription on unmount
-    return () => {
-      subscription.unsubscribe()
-    }
   }, [])
 
   useEffect(() => {
