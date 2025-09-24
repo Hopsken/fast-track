@@ -6,6 +6,7 @@ import z from 'zod'
 import { JiraAPI } from '@/lib/jira'
 import { AuthApi } from '@/lib/jira/auth-api'
 import { getStorageItem } from '@/lib/storage'
+import { Database } from '@/repository'
 import { ReceivedTokenPayload, JiraUserInfo } from '@/types'
 
 const tokenSchema = z.object({
@@ -19,7 +20,7 @@ class AuthServiceImpl {
   private userInfoStorage = getStorageItem('OAuthUserInfo')
   private authApi = new AuthApi()
 
-  constructor() {}
+  constructor(private database: Database) {}
 
   public async receiveTokens(
     tokens: ReceivedTokenPayload
@@ -42,9 +43,14 @@ class AuthServiceImpl {
     return this.initiateFlow()
   }
 
-  public disconnect() {
-    this.tokenStorage.removeValue()
-    this.userInfoStorage.removeValue()
+  public async disconnect() {
+    await Promise.all([
+      this.tokenStorage.removeValue(),
+      this.userInfoStorage.removeValue(),
+      this.database.collections.issues.remove()
+    ])
+
+    return true
   }
 
   /**
@@ -66,5 +72,5 @@ class AuthServiceImpl {
 
 export const [registerAuthService, getAuthService] = defineProxyService(
   'AuthService',
-  () => new AuthServiceImpl()
+  (database: Database) => new AuthServiceImpl(database)
 )

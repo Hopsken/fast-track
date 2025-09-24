@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 import { JiraConnectionCard, JiraConnectionSetup } from '@/components/auth'
 import { useStorage } from '@/hooks'
@@ -11,10 +11,11 @@ export function GeneralTab() {
   const [oauthUserInfo] = useStorage('OAuthUserInfo')
   const [isLoading, setIsLoading] = useState(false)
 
+  const authService = useRef(getAuthService()).current
+
   const handleConnect = useCallback(async () => {
     setIsLoading(true)
     try {
-      const authService = getAuthService()
       const nextUrl = await authService.connect()
       window.open(nextUrl, '_blank')
     } catch (error) {
@@ -22,12 +23,19 @@ export function GeneralTab() {
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [authService])
+
+  const handleDisconnect = useCallback(() => {
+    authService.disconnect()
+  }, [authService])
 
   return (
     <div className="space-y-8">
       {oauthUserInfo ? (
-        <JiraConnectionCard user={oauthUserInfo} />
+        <JiraConnectionCard
+          user={oauthUserInfo}
+          onDisconnect={handleDisconnect}
+        />
       ) : (
         <JiraConnectionSetup onConnect={handleConnect} isLoading={isLoading} />
       )}

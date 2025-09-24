@@ -26,6 +26,7 @@ export default defineBackground(() => {
         // Initialize proxy services
         const ticketService = registerTicketService(getJiraApi(), database)
         registerSearchService(database)
+        registerAuthService(database)
 
         // Initialize alarms service
         const alarmsService = new BackgroundAlarmsService(ticketService)
@@ -36,8 +37,6 @@ export default defineBackground(() => {
       })
 
     // Initialize other services
-    registerAuthService()
-
     OmniboxHandlerService.initialize()
     OmniboxHandlerService.setDefaultSuggestion(
       'Search Jira tickets or enter ticket key (e.g., PROJ-123)'
