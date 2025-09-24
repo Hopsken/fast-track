@@ -7,6 +7,7 @@
 import { defineProxyService, flattenPromise } from '@webext-core/proxy-service'
 import { uniqBy } from 'lodash-es'
 
+import { getStorageItem } from '@/lib/storage'
 import { Database } from '@/repository'
 import { JiraTicket } from '@/types'
 import { concatPromises } from '@/utils/promise'
@@ -18,6 +19,8 @@ import { JiraAPI } from '~/lib/jira'
 class TicketServiceImpl {
   private jira: JiraAPI
   private database: Database
+
+  private lastSyncStorage = getStorageItem('LastSyncAt')
 
   constructor(jiraAPI: Promise<JiraAPI>, database: Database) {
     this.jira = flattenPromise(jiraAPI) as unknown as JiraAPI
@@ -34,7 +37,12 @@ class TicketServiceImpl {
   /**
    * Loads suggestions related to the current user
    */
-  async loadSuggestions(): Promise<JiraTicket[]> {
+  async loadSuggestions(force = false): Promise<JiraTicket[]> {
+    const shouldSync = await this.shouldSync(force)
+    if (!shouldSync) {
+      return []
+    }
+
     const results = await concatPromises([
       this.jira.issues.getIssuePickerSuggestions(),
       this.jira.issues.getMyInProgressIssues(),
@@ -44,12 +52,24 @@ class TicketServiceImpl {
 
     const uniqTickets = uniqBy(results, 'key')
 
-    console.info('Loaded suggestions', uniqTickets)
+    await this.database.issues.bulkUpsert(uniqTickets)
 
-    const result = await this.database.issues.bulkUpsert(uniqTickets)
-    console.info('Upsert result', result)
-
+    this.lastSyncStorage.setValue(Date.now().toString())
     return uniqTickets
+  }
+
+  private async shouldSync(force = false) {
+    if (force) return true
+
+    const lastSyncAt = await this.lastSyncStorage.getValue()
+    if (!lastSyncAt || force) {
+      return true
+    }
+
+    const lastSyncDate = new Date(lastSyncAt)
+    const now = new Date()
+    const diff = now.getTime() - lastSyncDate.getTime()
+    return diff > 1000 * 60 // 1 min
   }
 
   async isConfigured() {
