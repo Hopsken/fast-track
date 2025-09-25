@@ -2,10 +2,7 @@ import ky from 'ky'
 
 import { JiraOAuthConfig } from '@/types'
 
-const authApi = ky.extend({
-  prefixUrl: 'https://auth.atlassian.com',
-  timeout: 10000
-})
+import { boostApi } from '../api'
 
 type AccessibleResource = {
   id: string
@@ -45,17 +42,13 @@ export class AuthApi {
   }
 
   async refreshToken(tokens: JiraOAuthConfig): Promise<JiraOAuthConfig> {
-    const clientId = import.meta.env.VITE_JIRA_CLIENT_ID
-
-    const newTokens = await authApi
+    const newTokens = await boostApi
       .post<{
         access_token: string
         refresh_token: string
         expires_in: number // in seconds
-      }>('oauth/token', {
+      }>('api/auth/jira/refresh', {
         json: {
-          grant_type: 'refresh_token',
-          client_id: clientId,
           refresh_token: tokens.refresh_token
         }
       })

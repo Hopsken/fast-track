@@ -88,6 +88,7 @@ export class JiraClient extends BaseClient {
       .pipe(
         skipWhile((tokens) => !tokens),
         switchMap((tokens) => {
+          console.info({ tokens })
           if (!tokens) throw new Error('No tokens found')
 
           const expiresAtMs = new Date(tokens.expires_at).getTime()

@@ -39,11 +39,7 @@ export function useTicketSearch() {
         return
       }
 
-      if (state.selectedIndex > 0) {
-        actions.setSearchResults(mergeTickets(state.searchResults, tickets))
-      } else {
-        actions.setSearchResults(tickets)
-      }
+      actions.setSearchResults(mergeTickets(state.searchResults, tickets))
     })
 
     searchService.initialize()
