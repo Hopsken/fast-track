@@ -31,7 +31,8 @@ export function useJiraConfig() {
     if (!isConfigComplete()) return null
 
     return {
-      baseUrl: values.JiraHost ?? '',
+      type: 'api_key',
+      host: values.JiraHost ?? '',
       email: values.JiraUserEmail ?? '',
       apiToken: values.JiraApiToken ?? ''
     }

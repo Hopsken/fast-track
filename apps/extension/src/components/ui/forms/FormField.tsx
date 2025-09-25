@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from 'class-variance-authority'
-import type { PropsWithChildren, ReactNode, KeyboardEvent } from 'react'
+import type { PropsWithChildren, ReactNode } from 'react'
 
 import { cn } from '~/lib/utils'
 
@@ -44,23 +44,12 @@ export function FormField(props: PropsWithChildren<FormFieldProps>) {
     children
   } = props
 
-  const handleKeyPress = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (onClick && (event.key === 'Enter' || event.key === ' ')) {
-      event.preventDefault()
-      onClick()
-    }
-  }
-
   const variant = onClick ? 'clickable' : 'default'
 
   return (
     <FormItem>
       <div
         className={cn(formFieldVariants({ size, variant }), className)}
-        onClick={onClick}
-        onKeyDown={handleKeyPress}
-        tabIndex={onClick ? 0 : undefined}
-        role={onClick ? 'button' : undefined}
         aria-label={
           onClick
             ? `${title}. ${typeof description === 'string' ? description : 'Interactive field'}`

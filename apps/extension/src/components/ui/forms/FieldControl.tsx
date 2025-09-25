@@ -10,22 +10,11 @@ export type FieldControlProps = {
 export function FieldControl(props: PropsWithChildren<FieldControlProps>) {
   const { size = 'sm' } = props
 
-  const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (props.onClick && (event.key === 'Enter' || event.key === ' ')) {
-      event.preventDefault()
-      props.onClick()
-    }
-  }
-
   return (
     <div
       className={`field flex items-center ${
         props.onClick ? 'cursor-pointer' : ''
       }`}
-      onClick={props.onClick}
-      onKeyDown={handleKeyPress}
-      tabIndex={props.onClick ? 0 : undefined}
-      role={props.onClick ? 'button' : undefined}
       aria-label={
         props.onClick ? `${props.title}. ${props.description}` : undefined
       }>

@@ -1,9 +1,3 @@
-/**
- * Components barrel export - Main entry point
- */
-
-// Organized component exports
-export * from './api'
 export * from '../entrypoints/options/components/auth'
 export * from './tickets'
 export * from './search'
