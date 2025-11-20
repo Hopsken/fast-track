@@ -10,12 +10,23 @@ import {
 
 import { sendMessage } from '@/lib/message'
 import { Database } from '@/repository'
+import { JiraTicket } from '@/types'
 
-class SearchServiceImpl {
+import { TicketService } from './ticket-service'
+
+export interface SearchService {
+  initialize(): Promise<void>
+  onSearchInput(query: string): Promise<void>
+}
+
+class SearchServiceImpl implements SearchService {
   private search$ = new BehaviorSubject<string>('')
   private ready$ = new BehaviorSubject<boolean>(false)
 
-  constructor(private database: Database) {
+  constructor(
+    private database: Database,
+    private ticketService: TicketService
+  ) {
     this.setupSearchListener()
   }
 
@@ -41,25 +52,44 @@ class SearchServiceImpl {
   }
 
   private async handleSearch(query: string) {
-    const tickets = await this.searchStoredTickets(query)
+    const cachedTickets = await this.searchStoredTickets(query)
 
+    this.emitResults(query, cachedTickets)
+
+    if (!query.trim()) return
+
+    try {
+      const remoteTickets = await this.ticketService.searchTickets(query)
+      if (this.search$.getValue() !== query) {
+        return
+      }
+
+      this.emitResults(query, remoteTickets)
+    } catch (error) {
+      console.error('SearchService: remote search failed', error)
+    }
+  }
+
+  private emitResults(search: string, tickets: JiraTicket[]) {
     sendMessage('onSearchResult', {
-      search: query,
+      search,
       tickets
     })
-
-    // perform api search and emit again
   }
 
   private async searchStoredTickets(query: string) {
-    if (!query) return this.database.issues.find().limit(10).exec()
-    return this.database.issues.find().where('summary').regex(query).exec()
+    const { issues } = this.database.collections
+
+    if (!query) return issues.find().limit(10).exec()
+    return issues.find().where('summary').regex(query).exec()
   }
 }
 
-export const [registerSearchService, getSearchService] = defineProxyService(
+export const [registerSearchService, getSearchService] = defineProxyService<
+  SearchService,
+  [Database, TicketService]
+>(
   'SearchService',
-  (database: Database) => new SearchServiceImpl(database)
+  (database: Database, ticketService: TicketService) =>
+    new SearchServiceImpl(database, ticketService)
 )
-
-export type SearchService = InstanceType<typeof SearchServiceImpl>

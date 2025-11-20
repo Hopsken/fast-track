@@ -76,6 +76,7 @@ export class JiraClient extends BaseClient {
    * Updates the client configuration
    */
   private updateClientConfig(newConfig: JiraApiConfig): void {
+    this.jiraConfig = newConfig
     // Reinitialize the client with new configuration
     Object.assign(this, new JiraClient(newConfig))
   }
@@ -118,5 +119,15 @@ export class JiraClient extends BaseClient {
    */
   getConfig(): JiraApiConfig {
     return { ...this.jiraConfig }
+  }
+
+  /**
+   * Base URL for user-facing Jira pages
+   */
+  getWebBaseUrl(): string {
+    const host = this.jiraConfig.host
+    if (!host) return ''
+
+    return host.endsWith('/') ? host.slice(0, -1) : host
   }
 }

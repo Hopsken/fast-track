@@ -24,8 +24,8 @@ export default defineBackground(() => {
         console.log('✅ RxDB initialized successfully')
 
         // Initialize proxy services
-        const ticketService = registerTicketService(getJiraApi(), database)
-        registerSearchService(database)
+        const ticketService = registerTicketService(getJiraApi, database)
+        registerSearchService(database, ticketService)
         registerAuthService(database)
 
         // Initialize alarms service

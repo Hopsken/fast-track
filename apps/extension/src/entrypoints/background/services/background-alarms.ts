@@ -10,6 +10,7 @@ export interface AlarmConfig {
 
 export class BackgroundAlarmsService {
   private alarms: AlarmConfig[] = []
+  private readonly boundHandleAlarm = this.handleAlarm.bind(this)
 
   constructor(private ticketService: TicketService) {
     this.setupAlarms()
@@ -30,7 +31,7 @@ export class BackgroundAlarmsService {
     await this.clearAllAlarms()
 
     // Set up alarm listeners
-    browser.alarms.onAlarm.addListener(this.handleAlarm.bind(this))
+    browser.alarms.onAlarm.addListener(this.boundHandleAlarm)
 
     // Create alarms
     for (const alarm of this.alarms) {
@@ -99,6 +100,6 @@ export class BackgroundAlarmsService {
 
   async destroy() {
     await this.clearAllAlarms()
-    browser.alarms.onAlarm.removeListener(this.handleAlarm.bind(this))
+    browser.alarms.onAlarm.removeListener(this.boundHandleAlarm)
   }
 }

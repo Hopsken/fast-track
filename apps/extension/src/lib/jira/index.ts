@@ -1,6 +1,4 @@
-import { firstValueFrom, skipWhile } from 'rxjs'
-
-import { fromStorage$ } from '../storage'
+import { getStorageItem } from '../storage'
 
 import { JiraAPI } from './api'
 
@@ -8,16 +6,26 @@ export { JiraAPI }
 
 export type { JiraApiConfig } from './types'
 
+let cachedJira: { client: JiraAPI; signature: string } | null = null
+
 /**
  * Get Jira API with intelligent authentication flow
  * Respects user's preferred authentication method, with smart fallback
  */
 export async function getJiraApi() {
-  const oauthTokens = await firstValueFrom(
-    fromStorage$('OAuthTokens').pipe(skipWhile((tokens) => !tokens))
-  )
+  const oauthTokens = await getStorageItem('OAuthTokens').getValue()
   if (!oauthTokens) {
-    throw new Error('Jira OAuth tokens not found')
+    return null
   }
-  return new JiraAPI(oauthTokens)
+
+  const signature = `${oauthTokens.instance_id}:${oauthTokens.access_token}:${oauthTokens.refresh_token}`
+
+  if (!cachedJira || cachedJira.signature !== signature) {
+    cachedJira = {
+      client: new JiraAPI(oauthTokens),
+      signature
+    }
+  }
+
+  return cachedJira.client
 }

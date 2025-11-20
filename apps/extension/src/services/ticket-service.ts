@@ -4,7 +4,7 @@
  * This service provides type-safe, cross-context access to ticket operations.
  * Functions are called from content scripts but executed in the background.
  */
-import { defineProxyService, flattenPromise } from '@webext-core/proxy-service'
+import { defineProxyService } from '@webext-core/proxy-service'
 import { uniqBy } from 'lodash-es'
 
 import { getStorageItem } from '@/lib/storage'
@@ -13,48 +13,97 @@ import { JiraTicket } from '@/types'
 import { concatPromises } from '@/utils/promise'
 import { JiraAPI } from '~/lib/jira'
 
+export interface TicketService {
+  fetchTicketDetails(ticketKeys: string[]): Promise<JiraTicket[]>
+  loadSuggestions(force?: boolean): Promise<JiraTicket[]>
+  searchTickets(query: string): Promise<JiraTicket[]>
+  isConfigured(): Promise<boolean>
+}
+
 /**
  * Ticket service implementation
  */
-class TicketServiceImpl {
-  private jira: JiraAPI
+class TicketServiceImpl implements TicketService {
   private database: Database
+  private jiraFactory: () => Promise<JiraAPI | null>
 
   private lastSyncStorage = getStorageItem('LastSyncAt')
 
-  constructor(jiraAPI: Promise<JiraAPI>, database: Database) {
-    this.jira = flattenPromise(jiraAPI) as unknown as JiraAPI
+  constructor(
+    jiraApiFactory: () => Promise<JiraAPI | null>,
+    database: Database
+  ) {
+    this.jiraFactory = jiraApiFactory
     this.database = database
+  }
+
+  private async getJira(): Promise<JiraAPI | null> {
+    try {
+      return await this.jiraFactory()
+    } catch (error) {
+      console.error('TicketService: failed to initialize Jira client', error)
+      return null
+    }
   }
 
   /**
    * Fetches ticket details using the background API service
    */
   async fetchTicketDetails(ticketKeys: string[]): Promise<JiraTicket[]> {
-    return this.jira.issues.getIssues(ticketKeys)
+    const jira = await this.getJira()
+    if (!jira) {
+      console.info('TicketService: fetchTicketDetails skipped, not configured')
+      return []
+    }
+
+    return jira.issues.getIssues(ticketKeys)
   }
 
   /**
    * Loads suggestions related to the current user
    */
   async loadSuggestions(force = false): Promise<JiraTicket[]> {
+    const jira = await this.getJira()
+    if (!jira) {
+      console.info('TicketService: loadSuggestions skipped, not configured')
+      return []
+    }
+
     const shouldSync = await this.shouldSync(force)
     if (!shouldSync) {
       return []
     }
 
     const results = await concatPromises([
-      this.jira.issues.getIssuePickerSuggestions(),
-      this.jira.issues.getMyInProgressIssues(),
-      this.jira.issues.getMyRecentDoneIssues(),
-      this.jira.issues.getMyWatchingIssues()
+      jira.issues.getIssuePickerSuggestions(),
+      jira.issues.getMyInProgressIssues(),
+      jira.issues.getMyRecentDoneIssues(),
+      jira.issues.getMyWatchingIssues()
     ])
 
     const uniqTickets = uniqBy(results, 'key')
 
-    await this.database.issues.bulkUpsert(uniqTickets)
+    await this.database.collections.issues.bulkUpsert(uniqTickets)
 
     this.lastSyncStorage.setValue(Date.now().toString())
+    return uniqTickets
+  }
+
+  async searchTickets(query: string): Promise<JiraTicket[]> {
+    const jira = await this.getJira()
+    if (!jira) {
+      console.info('TicketService: search skipped, not configured')
+      return []
+    }
+
+    if (!query.trim()) {
+      return []
+    }
+
+    const results = await jira.issues.getIssuePickerSuggestions(query)
+    const uniqTickets = uniqBy(results, 'key')
+
+    await this.database.collections.issues.bulkUpsert(uniqTickets)
     return uniqTickets
   }
 
@@ -73,7 +122,7 @@ class TicketServiceImpl {
   }
 
   async isConfigured() {
-    return this.jira.getConfig() != null
+    return (await this.getJira()) != null
   }
 }
 
@@ -84,13 +133,11 @@ class TicketServiceImpl {
  * - registerTicketService: Function to register the service in background script
  * - getTicketService: Function to get service instance from any context
  */
-export const [registerTicketService, getTicketService] = defineProxyService(
+export const [registerTicketService, getTicketService] = defineProxyService<
+  TicketService,
+  [() => Promise<JiraAPI | null>, Database]
+>(
   'TicketService',
-  (jiraAPI: Promise<JiraAPI>, database: Database) =>
-    new TicketServiceImpl(jiraAPI, database)
+  (jiraApiFactory: () => Promise<JiraAPI | null>, database: Database) =>
+    new TicketServiceImpl(jiraApiFactory, database)
 )
-
-/**
- * Type helper for the ticket service
- */
-export type TicketService = InstanceType<typeof TicketServiceImpl>

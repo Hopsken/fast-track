@@ -1,0 +1,10 @@
+# TODO
+
+- [x] Fix RxDB accessors in services to use `database.collections.issues` instead of `database.issues` (breaks search results and suggestions).
+- [x] Switch RxDB storage from in-memory to persistent (IndexedDB, optionally with key compression) so cached tickets survive background restarts.
+- [x] Implement live Jira search (Issue Picker/JQL) and merge with cached results; add error handling and proper loading states.
+- [x] Store/use human-facing Jira browse URLs for tickets (e.g., `${host}/browse/${key}`) instead of API `issue.self`, so popup opens real issue pages.
+- [ ] Make auth flow resilient: handle token refresh failures, clarify/implement API-key support, and surface graceful UX/errors.
+- [x] Keep a stable alarms listener reference in `BackgroundAlarmsService.destroy` to avoid leaks when teardown runs.
+- [ ] Add user-facing error states for failed searches/auth and ensure popup reflects connectivity issues.
+- [ ] Run launch QA: `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, plus manual smoke for connect → search → open issue, omnibox shortcut, and browser restart persistence.
