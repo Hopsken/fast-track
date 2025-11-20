@@ -35,7 +35,7 @@ export async function getDatabase(): Promise<Database> {
   addRxPlugin(RxDBQueryBuilderPlugin)
 
   database = await createRxDatabase({
-    name: 'jira-boost',
+    name: 'fast-track',
     // storage: wrappedKeyCompressionStorage({
     storage: wrappedValidateZSchemaStorage({
       storage: getRxStorageMemory()

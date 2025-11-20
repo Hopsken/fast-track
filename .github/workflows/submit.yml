@@ -1,4 +1,4 @@
-name: "Submit to Web Store"
+name: 'Submit to Web Store'
 on:
   workflow_dispatch:
 
@@ -43,4 +43,4 @@ jobs:
         uses: PlasmoHQ/bpp@v3
         with:
           keys: ${{ secrets.SUBMIT_KEYS }}
-          artifact: apps/extension/.output/jira-boost-${{ steps.package_version.outputs.version }}-chrome.zip
+          artifact: apps/extension/.output/fast-track-${{ steps.package_version.outputs.version }}-chrome.zip

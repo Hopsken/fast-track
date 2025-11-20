@@ -2,16 +2,18 @@
 
 ## Overview
 
-This document outlines the coding standards and best practices for the Jira Boost project. These guidelines ensure code quality, maintainability, and consistency across the codebase.
+This document outlines the coding standards and best practices for the Fast Track project. These guidelines ensure code quality, maintainability, and consistency across the codebase.
 
 ## SOLID Principles
 
 ### Single Responsibility Principle (SRP)
+
 - Each class/function should have one reason to change
 - Keep hooks focused on a single concern (storage, API calls, UI state)
 - Separate business logic from UI components
 
 **Example:**
+
 ```typescript
 // Good: Focused hook for API configuration
 const useJiraApiConfig = () => {
@@ -26,11 +28,13 @@ const useStorageValue = <T>(key: string) => {
 ```
 
 ### Open-Closed Principle (OCP)
+
 - Open for extension, closed for modification
 - Use composition and dependency injection
 - Create extensible hook patterns for new storage types
 
 **Example:**
+
 ```typescript
 // Extensible storage interface
 interface StorageAdapter<T> {
@@ -46,14 +50,17 @@ class ChromeStorageAdapter implements StorageAdapter<any> {
 ```
 
 ### Liskov Substitution Principle (LSP)
+
 - Derived classes must be substitutable for base classes
 - Ensure storage implementations can be swapped without breaking code
 
 ### Interface Segregation Principle (ISP)
+
 - Clients shouldn't depend on unused interfaces
 - Create focused TypeScript interfaces for specific use cases
 
 **Example:**
+
 ```typescript
 // Good: Focused interfaces
 interface Searchable {
@@ -77,18 +84,21 @@ interface SearchService {
 ```
 
 ### Dependency Inversion Principle (DIP)
+
 - Depend on abstractions, not concretions
 - Use generic types and interfaces rather than concrete implementations
 
 ## Core Design Principles
 
 ### DRY (Don't Repeat Yourself)
+
 - Eliminate code duplication
 - Create reusable hooks for common storage patterns
 - Extract common logic into utility functions
 - Use TypeScript generics to avoid repetitive type definitions
 
 **Example:**
+
 ```typescript
 // Good: Generic storage hook
 const useStorageValue = <T>(key: string, defaultValue: T) => {
@@ -101,12 +111,14 @@ const useTheme = () => useStorageValue('theme', 'light')
 ```
 
 ### KISS (Keep It Simple, Stupid)
+
 - Favor simplicity over complexity
 - Write clear, readable code over clever solutions
 - Break complex functions into smaller, focused ones
 - Use descriptive names that explain intent
 
 ### YAGNI (You Aren't Gonna Need It)
+
 - Don't over-engineer
 - Implement features when needed, not in anticipation
 - Avoid premature abstractions and generalizations
@@ -117,19 +129,33 @@ const useTheme = () => useStorageValue('theme', 'light')
 ### Naming Conventions
 
 **Variables and Functions:**
+
 ```typescript
 // Good: Descriptive, searchable names
-const useJiraApiConfig = () => { /* */ }
-const getStorageValue = (key: string) => { /* */ }
-const updateTicketData = (ticket: JiraTicket) => { /* */ }
+const useJiraApiConfig = () => {
+  /* */
+}
+const getStorageValue = (key: string) => {
+  /* */
+}
+const updateTicketData = (ticket: JiraTicket) => {
+  /* */
+}
 
 // Bad: Abbreviated, unclear names
-const useConfig = () => { /* */ }
-const getVal = (k: string) => { /* */ }
-const updTkt = (t: any) => { /* */ }
+const useConfig = () => {
+  /* */
+}
+const getVal = (k: string) => {
+  /* */
+}
+const updTkt = (t: any) => {
+  /* */
+}
 ```
 
 **Boolean Variables:**
+
 ```typescript
 // Good: Clear boolean intent
 const isEnabled = true
@@ -144,6 +170,7 @@ const update = checkCondition()
 ```
 
 **Constants:**
+
 ```typescript
 // Good: Descriptive constants
 const MAX_SEARCH_RESULTS = 50
@@ -157,6 +184,7 @@ const JIRA_API_ENDPOINTS = {
 ### Function Design
 
 **Keep Functions Small:**
+
 ```typescript
 // Good: Small, focused function (< 20 lines)
 const validateJiraConfig = (config: JiraApiConfig): boolean => {
@@ -175,6 +203,7 @@ const processSearchResults = (results: JiraTicket[]) => {
 ```
 
 **Minimize Parameters:**
+
 ```typescript
 // Good: Use objects for multiple parameters
 interface SearchOptions {
@@ -202,13 +231,14 @@ const searchTickets = (
 ```
 
 **Prefer Early Returns:**
+
 ```typescript
 // Good: Early returns reduce nesting
 const processTicket = (ticket: JiraTicket | null) => {
   if (!ticket) return null
   if (!ticket.key) return null
   if (ticket.status === 'archived') return null
-  
+
   return {
     id: ticket.key,
     title: ticket.summary,
@@ -236,6 +266,7 @@ const processTicket = (ticket: JiraTicket | null) => {
 ### Comments and Documentation
 
 **Write Self-Documenting Code:**
+
 ```typescript
 // Good: Code explains itself
 const isValidJiraTicketKey = (key: string): boolean => {
@@ -252,6 +283,7 @@ const validate = (k: string): boolean => {
 ```
 
 **Use Comments for "Why", Not "What":**
+
 ```typescript
 // Good: Explains business logic
 const debounceDelay = 300 // Prevent excessive API calls while user is typing
@@ -261,10 +293,11 @@ const debounceDelay = 300 // Set debounce delay to 300ms
 ```
 
 **JSDoc for Public APIs:**
+
 ```typescript
 /**
  * Searches for Jira tickets based on the provided query.
- * 
+ *
  * @param query - The search query string
  * @param options - Optional search configuration
  * @returns Promise resolving to an array of matching tickets
@@ -281,6 +314,7 @@ export const searchTickets = async (
 ### Logging Practices
 
 **Avoid Console Logs:**
+
 ```typescript
 // Bad: Console logs in production code
 const searchTickets = async (query: string) => {
@@ -302,15 +336,16 @@ const searchTickets = async (query: string) => {
 ### Error Handling Practices
 
 **Let Meaningful Errors Bubble Up:**
+
 ```typescript
 // Good: Let specific errors bubble up
 const fetchTicket = async (id: string): Promise<JiraTicket> => {
   const response = await fetch(`/api/tickets/${id}`)
-  
+
   if (!response.ok) {
     throw new JiraApiError(`Failed to fetch ticket ${id}`, response.status)
   }
-  
+
   return response.json()
 }
 
@@ -327,6 +362,7 @@ const fetchTicket = async (id: string): Promise<JiraTicket | null> => {
 ```
 
 **Use Specific Error Handling:**
+
 ```typescript
 // Good: Handle specific error cases
 const authenticateUser = async (credentials: Credentials) => {
@@ -334,10 +370,14 @@ const authenticateUser = async (credentials: Credentials) => {
     return await jiraClient.authenticate(credentials)
   } catch (error) {
     if (error instanceof AuthenticationError) {
-      throw new UserFriendlyError('Invalid credentials. Please check your email and API token.')
+      throw new UserFriendlyError(
+        'Invalid credentials. Please check your email and API token.'
+      )
     }
     if (error instanceof NetworkError) {
-      throw new UserFriendlyError('Unable to connect to Jira. Please check your internet connection.')
+      throw new UserFriendlyError(
+        'Unable to connect to Jira. Please check your internet connection.'
+      )
     }
     throw error // Re-throw unexpected errors
   }
@@ -349,6 +389,7 @@ const authenticateUser = async (credentials: Credentials) => {
 ### Type Safety
 
 **Use Strict Configuration:**
+
 ```json
 // tsconfig.json
 {
@@ -363,6 +404,7 @@ const authenticateUser = async (credentials: Credentials) => {
 ```
 
 **Avoid `any` Type:**
+
 ```typescript
 // Good: Specific types
 interface JiraTicket {
@@ -382,13 +424,13 @@ interface JiraTicket {
 ```
 
 **Use Type Assertions Sparingly:**
+
 ```typescript
 // Good: Type guards
 const isJiraTicket = (obj: unknown): obj is JiraTicket => {
-  return typeof obj === 'object' && 
-         obj !== null && 
-         'key' in obj && 
-         'summary' in obj
+  return (
+    typeof obj === 'object' && obj !== null && 'key' in obj && 'summary' in obj
+  )
 }
 
 // Bad: Unsafe type assertion
@@ -398,6 +440,7 @@ const ticket = response.data as JiraTicket // Could be wrong
 ### Generic Usage
 
 **Use Generics for Reusability:**
+
 ```typescript
 // Good: Generic storage hook
 const useStorageValue = <T>(
@@ -424,6 +467,7 @@ const useTypedStorage = <K extends keyof StorageKey>(
 ### Interface Design
 
 **Keep Interfaces Focused:**
+
 ```typescript
 // Good: Focused interfaces
 interface SearchableTicket {
@@ -440,10 +484,11 @@ interface DisplayableTicket {
 }
 
 // Use composition when needed
-type FullTicket = SearchableTicket & DisplayableTicket & {
-  created: Date
-  updated: Date
-}
+type FullTicket = SearchableTicket &
+  DisplayableTicket & {
+    created: Date
+    updated: Date
+  }
 ```
 
 ## React/Hook Best Practices
@@ -451,24 +496,32 @@ type FullTicket = SearchableTicket & DisplayableTicket & {
 ### Hook Design
 
 **Follow Naming Convention:**
+
 ```typescript
 // Good: Clear hook names
-const useJiraTicketSearch = (query: string) => { /* */ }
-const useStorageValue = <T>(key: string, defaultValue: T) => { /* */ }
-const useDebounced = <T>(value: T, delay: number) => { /* */ }
+const useJiraTicketSearch = (query: string) => {
+  /* */
+}
+const useStorageValue = <T>(key: string, defaultValue: T) => {
+  /* */
+}
+const useDebounced = <T>(value: T, delay: number) => {
+  /* */
+}
 ```
 
 **Keep Hooks Focused:**
+
 ```typescript
 // Good: Single responsibility
 const useJiraAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState<User | null>(null)
-  
+
   const login = useCallback(async (credentials: Credentials) => {
     // Only handles authentication logic
   }, [])
-  
+
   return { isAuthenticated, user, login }
 }
 
@@ -477,21 +530,22 @@ const useJiraApi = () => {
   const searchTickets = useCallback(async (query: string) => {
     // Only handles API calls
   }, [])
-  
+
   return { searchTickets }
 }
 ```
 
 **Return Consistent Data Structures:**
+
 ```typescript
 // Good: Consistent return pattern
 const useAsyncOperation = <T>(operation: () => Promise<T>) => {
   const [data, setData] = useState<T | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
-  
+
   // Implementation
-  
+
   return { data, loading, error, execute }
 }
 ```
@@ -499,12 +553,13 @@ const useAsyncOperation = <T>(operation: () => Promise<T>) => {
 ### State Management
 
 **Prefer Local State:**
+
 ```typescript
 // Good: Local state for component-specific data
 const SearchInput = () => {
   const [query, setQuery] = useState('')
   const [isFocused, setIsFocused] = useState(false)
-  
+
   // Component-specific state stays local
 }
 
@@ -517,25 +572,26 @@ const useTicketStore = create<TicketStore>((set, get) => ({
 ```
 
 **Use Proper Dependency Arrays:**
+
 ```typescript
 // Good: Correct dependencies
 const useTicketSearch = (query: string) => {
   const [results, setResults] = useState<JiraTicket[]>([])
-  
+
   useEffect(() => {
     if (!query) {
       setResults([])
       return
     }
-    
+
     const searchTickets = async () => {
       const tickets = await api.search(query)
       setResults(tickets)
     }
-    
+
     searchTickets()
   }, [query]) // Correct dependency
-  
+
   return results
 }
 ```
@@ -545,6 +601,7 @@ const useTicketSearch = (query: string) => {
 ### Storage Patterns
 
 **Type-Safe Storage:**
+
 ```typescript
 // Good: Type-safe storage keys
 interface StorageSchema {
@@ -561,7 +618,7 @@ const storage = {
     const result = await browser.storage.local.get(key)
     return result[key] ?? null
   },
-  
+
   async set<K extends keyof StorageSchema>(
     key: K,
     value: StorageSchema[K]
@@ -572,6 +629,7 @@ const storage = {
 ```
 
 **Error Handling for Storage:**
+
 ```typescript
 // Good: Proper error handling
 const useStorageValue = <K extends keyof StorageSchema>(
@@ -580,7 +638,7 @@ const useStorageValue = <K extends keyof StorageSchema>(
 ) => {
   const [value, setValue] = useState<StorageSchema[K]>(defaultValue)
   const [error, setError] = useState<Error | null>(null)
-  
+
   useEffect(() => {
     const loadValue = async () => {
       try {
@@ -592,20 +650,23 @@ const useStorageValue = <K extends keyof StorageSchema>(
         setError(err instanceof Error ? err : new Error('Storage error'))
       }
     }
-    
+
     loadValue()
   }, [key])
-  
-  const updateValue = useCallback(async (newValue: StorageSchema[K]) => {
-    try {
-      await storage.set(key, newValue)
-      setValue(newValue)
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Storage error'))
-    }
-  }, [key])
-  
+
+  const updateValue = useCallback(
+    async (newValue: StorageSchema[K]) => {
+      try {
+        await storage.set(key, newValue)
+        setValue(newValue)
+        setError(null)
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Storage error'))
+      }
+    },
+    [key]
+  )
+
   return { value, updateValue, error }
 }
 ```
@@ -613,6 +674,7 @@ const useStorageValue = <K extends keyof StorageSchema>(
 ### Content Script Organization
 
 **Keep Content Scripts Lightweight:**
+
 ```typescript
 // Good: Lightweight content script
 const initializeTicketHighlighting = () => {
@@ -623,12 +685,12 @@ const initializeTicketHighlighting = () => {
       }
     })
   })
-  
+
   observer.observe(document.body, {
     childList: true,
     subtree: true
   })
-  
+
   // Cleanup on unload
   window.addEventListener('beforeunload', () => {
     observer.disconnect()
@@ -646,16 +708,17 @@ if (document.readyState === 'loading') {
 ### Background Script Design
 
 **Keep Background Scripts Stateless:**
+
 ```typescript
 // Good: Stateless background script
 class BackgroundService {
   private database: Database | null = null
-  
+
   async initialize() {
     this.database = await initializeDatabase()
     this.registerMessageHandlers()
   }
-  
+
   private registerMessageHandlers() {
     browser.runtime.onMessage.addListener(async (message, sender) => {
       switch (message.type) {
@@ -668,7 +731,7 @@ class BackgroundService {
       }
     })
   }
-  
+
   private async handleTicketSearch(query: string) {
     if (!this.database) {
       throw new Error('Database not initialized')
@@ -683,6 +746,7 @@ class BackgroundService {
 ### File Structure
 
 **Group Related Functionality:**
+
 ```
 src/
 ├── components/          # React components
@@ -697,6 +761,7 @@ src/
 ```
 
 **Use Index Files for Clean Imports:**
+
 ```typescript
 // components/index.ts
 export { SearchInput } from './search/SearchInput'
@@ -710,10 +775,15 @@ import { SearchInput, TicketCard, Button } from '@/components'
 ### Import/Export Patterns
 
 **Use Named Exports:**
+
 ```typescript
 // Good: Named exports
-export const useJiraAuth = () => { /* */ }
-export const useTicketSearch = () => { /* */ }
+export const useJiraAuth = () => {
+  /* */
+}
+export const useTicketSearch = () => {
+  /* */
+}
 
 // Good: Grouped imports
 import { useJiraAuth, useTicketSearch } from '@/hooks'
@@ -722,6 +792,7 @@ import type { JiraTicket, User } from '@/types'
 ```
 
 **Group Imports by Type:**
+
 ```typescript
 // External libraries
 import React, { useState, useEffect, useCallback } from 'react'
@@ -741,6 +812,7 @@ import type { JiraTicket, SearchOptions } from '@/types'
 ### Unit Testing
 
 **Test Business Logic:**
+
 ```typescript
 // Good: Test pure functions
 describe('validateJiraConfig', () => {
@@ -748,7 +820,7 @@ describe('validateJiraConfig', () => {
     const config = { email: 'test@example.com', apiToken: 'token' }
     expect(validateJiraConfig(config)).toBe(false)
   })
-  
+
   it('should return true for valid config', () => {
     const config = {
       baseUrl: 'https://company.atlassian.net',
@@ -761,6 +833,7 @@ describe('validateJiraConfig', () => {
 ```
 
 **Test Hook Behavior:**
+
 ```typescript
 // Good: Test custom hooks
 import { renderHook, act } from '@testing-library/react'
@@ -771,19 +844,19 @@ describe('useTicketSearch', () => {
     const { result } = renderHook(() => useTicketSearch(''))
     expect(result.current.results).toEqual([])
   })
-  
+
   it('should update results when query changes', async () => {
     const { result, rerender } = renderHook(
       ({ query }) => useTicketSearch(query),
       { initialProps: { query: '' } }
     )
-    
+
     rerender({ query: 'PROJ-123' })
-    
+
     await act(async () => {
       // Wait for async operations
     })
-    
+
     expect(result.current.results.length).toBeGreaterThan(0)
   })
 })
@@ -794,15 +867,16 @@ describe('useTicketSearch', () => {
 ### React Optimization
 
 **Use Proper Memoization:**
+
 ```typescript
 // Good: Memoize expensive calculations
 const SearchResults = ({ tickets, query }: Props) => {
   const filteredTickets = useMemo(() => {
-    return tickets.filter(ticket => 
+    return tickets.filter(ticket =>
       ticket.summary.toLowerCase().includes(query.toLowerCase())
     )
   }, [tickets, query])
-  
+
   return (
     <div>
       {filteredTickets.map(ticket => (
@@ -815,12 +889,12 @@ const SearchResults = ({ tickets, query }: Props) => {
 // Good: Memoize callbacks
 const SearchInput = ({ onSearch }: Props) => {
   const [query, setQuery] = useState('')
-  
+
   const handleSubmit = useCallback((e: FormEvent) => {
     e.preventDefault()
     onSearch(query)
   }, [query, onSearch])
-  
+
   return (
     <form onSubmit={handleSubmit}>
       <input value={query} onChange={(e) => setQuery(e.target.value)} />
@@ -832,21 +906,22 @@ const SearchInput = ({ onSearch }: Props) => {
 ### Debouncing and Throttling
 
 **Debounce User Input:**
+
 ```typescript
 // Good: Debounced search
 const useDebounced = <T>(value: T, delay: number): T => {
   const [debouncedValue, setDebouncedValue] = useState<T>(value)
-  
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedValue(value)
     }, delay)
-    
+
     return () => {
       clearTimeout(handler)
     }
   }, [value, delay])
-  
+
   return debouncedValue
 }
 
@@ -854,16 +929,16 @@ const useDebounced = <T>(value: T, delay: number): T => {
 const SearchComponent = () => {
   const [query, setQuery] = useState('')
   const debouncedQuery = useDebounced(query, 300)
-  
+
   useEffect(() => {
     if (debouncedQuery) {
       searchTickets(debouncedQuery)
     }
   }, [debouncedQuery])
-  
+
   return (
-    <input 
-      value={query} 
+    <input
+      value={query}
       onChange={(e) => setQuery(e.target.value)}
       placeholder="Search tickets..."
     />
@@ -871,4 +946,4 @@ const SearchComponent = () => {
 }
 ```
 
-These coding standards ensure maintainable, performant, and reliable code across the Jira Boost project. Regular code reviews should enforce these practices and identify areas for improvement.
+These coding standards ensure maintainable, performant, and reliable code across the Fast Track project. Regular code reviews should enforce these practices and identify areas for improvement.

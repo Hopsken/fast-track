@@ -17,7 +17,7 @@ export class StyleInjector {
     }
 
     const element = document.createElement('style')
-    element.id = `jira-boost-${id}`
+    element.id = `fast-track-${id}`
     element.textContent = content
 
     this.styleElements.set(id, element)

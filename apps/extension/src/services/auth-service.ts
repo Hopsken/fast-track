@@ -64,7 +64,7 @@ class AuthServiceImpl {
     const isDevelopment = process.env.NODE_ENV === 'development'
     const baseUrl = isDevelopment
       ? 'http://localhost:4000'
-      : 'https://jiraboost.com'
+      : 'https://teamusement.com'
 
     return `${baseUrl}/auth/jira?extension_id=${currentExtensionId}`
   }

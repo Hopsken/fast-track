@@ -1,14 +1,15 @@
-# Jira Boost - Architecture Analysis & Documentation
+# Fast Track - Architecture Analysis & Documentation
 
 ## 1. Product Overview
 
-Jira Boost is a browser extension that provides quick search and enhanced access to Jira tickets with improved board experience. Built as an Nx monorepo, it enables users to search tickets by key, summary, assignee, or status with lightning-fast results and keyboard shortcuts.
+Fast Track is a browser extension that provides quick search and enhanced access to Jira tickets with improved board experience. Built as an Nx monorepo, it enables users to search tickets by key, summary, assignee, or status with lightning-fast results and keyboard shortcuts.
 
 ## 2. Core Features
 
 ### 2.1 Feature Module
 
-Our Jira Boost extension consists of the following main components:
+Our Fast Track extension consists of the following main components:
+
 1. **Quick Search Interface**: Popup with real-time ticket search and keyboard navigation
 2. **Options Page**: Configuration interface for Jira API settings and preferences
 3. **Background Services**: Ticket data management, API orchestration, and omnibox integration
@@ -17,17 +18,18 @@ Our Jira Boost extension consists of the following main components:
 
 ### 2.2 Page Details
 
-| Component | Module Name | Feature Description |
-|-----------|-------------|--------------------|
-| Popup | Quick Search | Real-time ticket search, keyboard navigation (Alt+J), result highlighting |
-| Options | Configuration | Jira API setup, host permissions, token management, license management |
-| Background | Service Coordinator | RxDB initialization, proxy service registration, omnibox handling |
-| Content Scripts | Page Enhancement | Dark mode toggle, card highlighting, theme management, standup mode |
-| Omnibox | Search Integration | Address bar search with "jira" keyword, suggestion display |
+| Component       | Module Name         | Feature Description                                                       |
+| --------------- | ------------------- | ------------------------------------------------------------------------- |
+| Popup           | Quick Search        | Real-time ticket search, keyboard navigation (Alt+J), result highlighting |
+| Options         | Configuration       | Jira API setup, host permissions, token management, license management    |
+| Background      | Service Coordinator | RxDB initialization, proxy service registration, omnibox handling         |
+| Content Scripts | Page Enhancement    | Dark mode toggle, card highlighting, theme management, standup mode       |
+| Omnibox         | Search Integration  | Address bar search with "jira" keyword, suggestion display                |
 
 ## 3. Core Process
 
 ### User Search Flow
+
 1. User opens popup (Alt+J) or uses omnibox ("jira" keyword)
 2. Types search query → Zustand state updates
 3. RxJS pipeline debounces input → triggers background search
@@ -51,6 +53,7 @@ graph TD
 ## 4. User Interface Design
 
 ### 4.1 Design Style
+
 - **Primary Colors**: Tailwind CSS with DaisyUI components
 - **Button Style**: Rounded corners with hover states
 - **Font**: System fonts with Tailwind typography
@@ -59,13 +62,14 @@ graph TD
 
 ### 4.2 Page Design Overview
 
-| Component | Module Name | UI Elements |
-|-----------|-------------|-------------|
-| Popup | Search Interface | Input field, ticket list, keyboard shortcuts, loading states |
-| Options | Configuration | Tabbed navigation, form inputs, connection status, license badges |
-| Content | Page Enhancement | Overlay components, theme toggles, highlighting effects |
+| Component | Module Name      | UI Elements                                                       |
+| --------- | ---------------- | ----------------------------------------------------------------- |
+| Popup     | Search Interface | Input field, ticket list, keyboard shortcuts, loading states      |
+| Options   | Configuration    | Tabbed navigation, form inputs, connection status, license badges |
+| Content   | Page Enhancement | Overlay components, theme toggles, highlighting effects           |
 
 ### 4.3 Responsiveness
+
 Desktop-first design with popup constraints (400x600px), touch interaction optimized for extension context.
 
 ---
@@ -80,32 +84,32 @@ graph TD
     A --> C[Options UI]
     A --> D[Content Scripts]
     A --> E[Background Script]
-    
+
     B --> F[React 19 + Zustand]
     C --> F
     D --> G[DOM Manipulation]
     E --> H[Service Coordinator]
-    
+
     H --> I[RxDB Database]
     H --> J[Jira API Client]
     H --> K[Proxy Services]
-    
+
     subgraph "Frontend Layer"
         B
         C
         D
     end
-    
+
     subgraph "State Management"
         F
     end
-    
+
     subgraph "Background Layer"
         E
         H
         K
     end
-    
+
     subgraph "Data Layer"
         I
         J
@@ -125,18 +129,19 @@ graph TD
 
 ## 3. Route Definitions
 
-| Route | Purpose |
-|-------|----------|
-| popup.html | Main search interface, quick ticket access |
-| options.html | Configuration page, API setup, license management |
-| background | Service coordinator, API orchestration |
-| content scripts | Jira page enhancements, DOM manipulation |
+| Route           | Purpose                                           |
+| --------------- | ------------------------------------------------- |
+| popup.html      | Main search interface, quick ticket access        |
+| options.html    | Configuration page, API setup, license management |
+| background      | Service coordinator, API orchestration            |
+| content scripts | Jira page enhancements, DOM manipulation          |
 
 ## 4. API Definitions
 
 ### 4.1 Core Services
 
 **Search Service**
+
 ```typescript
 interface SearchService {
   search(query: string): Promise<JiraTicket[]>
@@ -144,6 +149,7 @@ interface SearchService {
 ```
 
 **Ticket Service**
+
 ```typescript
 interface TicketService {
   fetchTickets(): Promise<JiraTicket[]>
@@ -153,6 +159,7 @@ interface TicketService {
 ```
 
 **Proxy Service Communication**
+
 ```typescript
 // Background to UI communication
 const [registerSearchService, getSearchService] = defineProxyService(
@@ -169,26 +176,26 @@ graph TD
     B --> C[Service Layer]
     C --> D[RxDB Repository]
     C --> E[Jira API Client]
-    
+
     F[Popup/Options] --> G[Proxy Service]
     G --> B
-    
+
     H[Content Scripts] --> I[Messaging Service]
     I --> B
-    
+
     subgraph "Extension Runtime"
         A
         F
         H
     end
-    
+
     subgraph "Background Services"
         B
         C
         G
         I
     end
-    
+
     subgraph "Data Layer"
         D
         E
@@ -210,35 +217,35 @@ erDiagram
         string url
         string lastViewed
     }
-    
+
     ISSUE_TYPE {
         string name
         string iconUrl
         string description
     }
-    
+
     STATUS {
         string name
         string description
     }
-    
+
     STATUS_CATEGORY {
         string key
         string colorName
         string name
     }
-    
+
     ASSIGNEE {
         string displayName
         string emailAddress
         string avatarUrls
     }
-    
+
     PRIORITY {
         string name
         string iconUrl
     }
-    
+
     JIRA_TICKET ||--|| ISSUE_TYPE : has
     JIRA_TICKET ||--|| STATUS : has
     STATUS ||--|| STATUS_CATEGORY : belongs_to
@@ -249,6 +256,7 @@ erDiagram
 ### 6.2 Data Definition Language
 
 **RxDB Schema Definition**
+
 ```typescript
 export const issueSchema: RxJsonSchema<JiraTicket> = {
   title: 'Issue schema',
@@ -258,7 +266,7 @@ export const issueSchema: RxJsonSchema<JiraTicket> = {
   type: 'object',
   properties: {
     id: { type: 'string' },
-    key: { 
+    key: {
       type: 'string',
       maxLength: 255,
       minLength: 1
@@ -317,10 +325,11 @@ export const issueSchema: RxJsonSchema<JiraTicket> = {
 ```
 
 **Database Initialization**
+
 ```typescript
 // RxDB setup with in-memory storage
 const database = await createRxDatabase({
-  name: 'jira-boost',
+  name: 'fast-track',
   storage: wrappedValidateZSchemaStorage({
     storage: getRxStorageMemory()
   }),
@@ -342,21 +351,24 @@ database.addCollections({
 ## Development Workflow
 
 ### Build System
+
 - **WXT Framework**: Modern browser extension development
 - **Nx Monorepo**: Scalable development with shared packages
 - **Multi-browser Support**: Chrome, Firefox, Edge builds
 - **Hot Reloading**: Development mode with live updates
 
 ### Code Quality
+
 - **TypeScript**: Strict type checking with ES2022 target
 - **ESLint**: Comprehensive linting with custom rules
 - **Prettier**: Code formatting with Tailwind plugin
 - **Testing**: Jest setup for unit testing
 
 ### Extension Features
+
 - **Keyboard Shortcuts**: Alt+J for quick access
 - **Omnibox Integration**: "jira" keyword search
-- **Host Permissions**: *.atlassian.net/jira* access
+- **Host Permissions**: _.atlassian.net/jira_ access
 - **Cross-browser Compatibility**: Manifest V3 support
 
-This architecture provides a robust, scalable foundation for the Jira Boost extension with modern development practices and efficient data management.
+This architecture provides a robust, scalable foundation for the Fast Track extension with modern development practices and efficient data management.

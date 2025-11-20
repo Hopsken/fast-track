@@ -42,7 +42,7 @@ export function ShortcutManagement() {
           </div>
 
           <p className="mb-3 text-sm text-gray-600">
-            Quickly open Jira Boost from anywhere in your browser
+            Quickly open Fast Track from anywhere in your browser
           </p>
 
           <div className="flex items-center gap-3">

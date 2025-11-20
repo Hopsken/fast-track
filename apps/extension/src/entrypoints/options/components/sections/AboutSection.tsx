@@ -9,7 +9,7 @@ export function AboutSection({ version }: AboutSectionProps) {
     <div className="space-y-6">
       <FormField
         size="lg"
-        title="About Jira Boost v2"
+        title="About Fast Track v2"
         description="Enhanced Jira experience with quick ticket search">
         <div className="space-y-4 text-sm text-gray-600">
           <p className="leading-relaxed">

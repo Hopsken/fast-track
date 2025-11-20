@@ -64,14 +64,14 @@ jobs:
       - name: Upload Chrome extension artifact
         uses: actions/upload-artifact@v4
         with:
-          name: jira-boost-chrome-v${{ steps.package_version.outputs.version }}
+          name: fast-track-chrome-v${{ steps.package_version.outputs.version }}
           path: apps/extension/.output/extension-${{ steps.package_version.outputs.version }}-chrome.zip
           retention-days: 30
 
       - name: Upload Firefox extension artifact
         uses: actions/upload-artifact@v4
         with:
-          name: jira-boost-firefox-v${{ steps.package_version.outputs.version }}
+          name: fast-track-firefox-v${{ steps.package_version.outputs.version }}
           path: apps/extension/.output/extension-${{ steps.package_version.outputs.version }}-firefox.zip
           retention-days: 30
 
@@ -92,26 +92,26 @@ jobs:
       - name: Download Chrome artifact
         uses: actions/download-artifact@v4
         with:
-          name: jira-boost-chrome-v${{ needs.build.outputs.version }}
+          name: fast-track-chrome-v${{ needs.build.outputs.version }}
           path: ./artifacts/
 
       - name: Download Firefox artifact
         uses: actions/download-artifact@v4
         with:
-          name: jira-boost-firefox-v${{ needs.build.outputs.version }}
+          name: fast-track-firefox-v${{ needs.build.outputs.version }}
           path: ./artifacts/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v{0}', needs.build.outputs.version) }}
-          name: Jira Boost v${{ needs.build.outputs.version }}
+          name: Fast Track v${{ needs.build.outputs.version }}
           body: |
-            ## Jira Boost v${{ needs.build.outputs.version }}
+            ## Fast Track v${{ needs.build.outputs.version }}
 
             ### Downloads
-            - **Chrome Extension**: `jira-boost-chrome-v${{ needs.build.outputs.version }}.zip`
-            - **Firefox Extension**: `jira-boost-firefox-v${{ needs.build.outputs.version }}.zip`
+            - **Chrome Extension**: `fast-track-chrome-v${{ needs.build.outputs.version }}.zip`
+            - **Firefox Extension**: `fast-track-firefox-v${{ needs.build.outputs.version }}.zip`
 
             ### Installation
             1. Download the appropriate zip file for your browser

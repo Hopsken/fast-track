@@ -1,21 +1,22 @@
 /**
- * Main styles for Jira Boost extension
+ * Main styles for Fast Track extension
  */
 
-@import "tailwindcss";
+@import 'tailwindcss';
 @plugin "daisyui";
 
 @theme {
-  --font-family-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family-sans:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* Extension specific styles */
-.jira-boost-popup {
+.fast-track-popup {
   width: 400px;
   max-height: 600px;
 }
 
-.jira-boost-ticket-item {
+.fast-track-ticket-item {
   transition: background-color 0.2s ease;
 }
 

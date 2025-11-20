@@ -7,7 +7,7 @@ import { getAuthService } from '@/services/auth-service'
 import { ReceivedTokenPayload } from '@/types'
 
 const log = loglevel.getLogger('OAuthCallbackContentScript')
-const allowedOrigins = ['https://jiraboost.com', 'http://localhost:4000']
+const allowedOrigins = ['https://teamusement.com', 'http://localhost:4000']
 
 interface TokenEventData {
   source: 'page'
@@ -33,7 +33,10 @@ declare global {
  * Runs only on the OAuth callback page to handle secure token exchange
  */
 export default defineContentScript({
-  matches: ['https://jiraboost.com/auth/jira/callback*', 'http://localhost/*'],
+  matches: [
+    'https://teamusement.com/auth/jira/callback*',
+    'http://localhost/*'
+  ],
   runAt: 'document_start',
   main() {
     log.debug('Loaded on callback page')

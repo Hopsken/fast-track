@@ -13,7 +13,7 @@ export function LicenseStatus() {
     <FormField
       size="lg"
       title="License Status"
-      description="Your current Jira Boost Pro license information">
+      description="Your current Fast Track Pro license information">
       <div className="space-y-4">
         <div
           className="flex items-center gap-3"

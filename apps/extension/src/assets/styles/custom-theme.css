@@ -1,10 +1,11 @@
 #jira-frontend {
-  background-image: var(--jira-boost-custom-theme-image) !important;
+  background-image: var(--fast-track-custom-theme-image) !important;
   background-position: 50% !important;
   background-size: cover !important;
 }
 
-#ak-jira-navigation header, #ak-side-navigation nav {
+#ak-jira-navigation header,
+#ak-side-navigation nav {
   --ds-surface: transparent;
   --ds-menu-seperator-color: transparent;
   --ds-menu-scroll-indicator-color: transparent;
@@ -16,12 +17,14 @@
 #ak-main-content::before {
   position: absolute;
   inset: 0;
-  content: "";
+  content: '';
   background: #ffffff3d;
   backdrop-filter: blur(4px);
 }
 
-#gh, #ghx-pool, #ghx-column-header-group {
+#gh,
+#ghx-pool,
+#ghx-column-header-group {
   background: none !important;
 }
 

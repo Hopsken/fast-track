@@ -12,12 +12,14 @@
 ### Initial Setup
 
 1. **Clone the repository**:
+
    ```bash
    git clone <repository-url>
-   cd jira-boost
+   cd fast-track
    ```
 
 2. **Install dependencies**:
+
    ```bash
    npm install
    ```
@@ -32,6 +34,7 @@
 #### VS Code (Recommended)
 
 Install the following extensions:
+
 - **TypeScript and JavaScript Language Features** (built-in)
 - **ESLint** (`ms-vscode.vscode-eslint`)
 - **Prettier** (`esbenp.prettier-vscode`)
@@ -42,6 +45,7 @@ Install the following extensions:
 #### VS Code Settings
 
 Add to your `.vscode/settings.json`:
+
 ```json
 {
   "editor.formatOnSave": true,
@@ -50,10 +54,7 @@ Add to your `.vscode/settings.json`:
     "source.fixAll.eslint": true
   },
   "typescript.preferences.importModuleSpecifier": "relative",
-  "eslint.workingDirectories": [
-    "apps/extension",
-    "apps/website"
-  ]
+  "eslint.workingDirectories": ["apps/extension", "apps/website"]
 }
 ```
 
@@ -128,12 +129,14 @@ nx affected:test
 ### ESLint Configuration
 
 #### Extension ESLint (`apps/extension/eslint.config.mjs`)
+
 - **Base**: `@nx/eslint-plugin/base`
 - **TypeScript**: `@typescript-eslint/recommended`
 - **React**: `plugin:react/recommended`, `plugin:react-hooks/recommended`
 - **WXT**: Custom rules for extension development
 
 #### Website ESLint (`apps/website/eslint.config.mjs`)
+
 - **Base**: `@nx/eslint-plugin/base`
 - **Next.js**: `@next/eslint-plugin-next`
 - **TypeScript**: `@typescript-eslint/recommended`
@@ -158,6 +161,7 @@ npx eslint apps/website/src/**/*.tsx
 ### TypeScript Configuration
 
 #### Strict Mode Settings
+
 All projects use TypeScript strict mode with the following settings:
 
 ```json
@@ -211,6 +215,7 @@ nx test extension --coverage
 #### Manual Testing
 
 1. **Build the extension**:
+
    ```bash
    nx build extension
    ```
@@ -291,6 +296,7 @@ nx lint website
 ### Deployment Checklist
 
 1. **Pre-deployment validation**:
+
    ```bash
    nx lint extension website
    nx typecheck
@@ -314,11 +320,13 @@ nx lint website
 #### Build Failures
 
 1. **TypeScript errors**:
+
    ```bash
    nx typecheck extension --verbose
    ```
 
 2. **ESLint errors**:
+
    ```bash
    nx lint extension --verbose
    ```
@@ -393,8 +401,8 @@ nx test extension --profile
 
 - **main**: Production-ready code
 - **develop**: Integration branch for features
-- **feature/***: Feature development branches
-- **hotfix/***: Critical bug fixes
+- **feature/\***: Feature development branches
+- **hotfix/\***: Critical bug fixes
 
 ### Commit Guidelines
 

@@ -8,7 +8,7 @@ export default defineConfig({
   imports: false,
 
   manifest: {
-    name: 'Jira Boost',
+    name: 'Fast Track',
     version: packageJson.version,
     description:
       'Quick search and access to your Jira tickets with enhanced board experience',
@@ -23,7 +23,7 @@ export default defineConfig({
       }
     },
     action: {
-      default_title: 'Jira Boost - Quick Search',
+      default_title: 'Fast Track - Quick Search',
       default_popup: 'popup.html'
     },
     commands: {
@@ -32,7 +32,7 @@ export default defineConfig({
           default: 'Alt+J',
           mac: 'Alt+J'
         },
-        description: 'Open Jira Boost quick search'
+        description: 'Open Fast Track quick search'
       }
     }
   }
