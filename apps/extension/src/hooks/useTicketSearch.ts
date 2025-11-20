@@ -44,8 +44,8 @@ export function useTicketSearch() {
       }
 
       if (searchError) {
-        actions.setSearchError(searchError)
         actions.setSearchResults(mergeTickets(state.searchResults, tickets))
+        actions.setSearchError(searchError)
         return
       }
 
