@@ -46,18 +46,6 @@ export class JiraClient extends BaseClient {
    * Validate configuration and return jira.js auth config
    */
   private static getAuthConfig(config: JiraApiConfig): Config {
-    if (config.type === 'api_key') {
-      return {
-        host: config.host,
-        authentication: {
-          basic: {
-            email: config.email,
-            apiToken: config.apiToken
-          }
-        }
-      }
-    }
-
     if (config.type === 'oauth') {
       return {
         host: `https://api.atlassian.com/ex/jira/${config.instance_id}`,

@@ -1,9 +1,10 @@
 import { useMemoizedFn, useMount } from 'ahooks'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { onMessage } from '@/lib/message'
 import { mergeTickets } from '@/lib/ticket'
 import { getSearchService } from '@/services/search-service'
+import { getTicketService } from '@/services/ticket-service'
 import {
   useSearchQuery,
   useSearchResults,
@@ -12,6 +13,9 @@ import {
   useSearchActions,
   useTicketStore
 } from '~/stores/useTicketStore'
+
+const NOT_CONNECTED_MESSAGE =
+  'Connect your Jira account in options to start searching.'
 
 export function useTicketSearch() {
   // Get state and actions from the store
@@ -48,6 +52,24 @@ export function useTicketSearch() {
       unsubscribe()
     }
   })
+
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const configured = await getTicketService().isConfigured()
+        if (!configured) {
+          actions.setSearchError(NOT_CONNECTED_MESSAGE)
+        } else {
+          actions.setSearchError(undefined)
+        }
+      } catch (err) {
+        console.error('Failed to verify Jira connection', err)
+        actions.setSearchError('Unable to verify Jira connection.')
+      }
+    }
+
+    checkConnection()
+  }, [actions])
 
   return {
     searchQuery,

@@ -14,8 +14,6 @@ import type {
 type StorageItems = {
   License: LicenseInfo | null
   JiraHost: string
-  JiraApiToken: string
-  JiraUserEmail: string
   AuthType: AuthType
   OAuthTokens: JiraOAuthConfig | null
   OAuthUserInfo: JiraUserInfo | null
@@ -32,8 +30,6 @@ export type StorageValue<T extends StorageKey> = StorageItems[T]
 const STORAGE_DEFAULTS: StorageItems = {
   License: null,
   JiraHost: '',
-  JiraApiToken: '',
-  JiraUserEmail: '',
   AuthType: 'oauth',
   OAuthTokens: null,
   OAuthUserInfo: null,
@@ -45,14 +41,8 @@ export const STORAGE_GROUPS = {
   // Authentication core
   AUTH_CORE: ['AuthType'],
 
-  // API Key authentication group
-  API_KEY_AUTH: ['JiraHost', 'JiraApiToken', 'JiraUserEmail'],
-
   // OAuth authentication group
   OAUTH_AUTH: ['OAuthTokens', 'OAuthUserInfo'],
-
-  // Jira configuration (combined API key auth for compatibility)
-  JIRA_CONFIG: ['JiraHost', 'JiraApiToken', 'JiraUserEmail'],
 
   // License management
   LICENSE: ['License']
