@@ -36,13 +36,20 @@ export function useTicketSearch() {
 
   useMount(() => {
     const unsubscribe = onMessage('onSearchResult', (payload) => {
-      const { tickets, search } = payload.data
+      const { tickets, search, error: searchError } = payload.data
       const state = useTicketStore.getState()
       // ignore search result if search doesn't match or user is selecting any ticket to avoid race conditions
       if (state.searchQuery !== search) {
         return
       }
 
+      if (searchError) {
+        actions.setSearchError(searchError)
+        actions.setSearchResults(mergeTickets(state.searchResults, tickets))
+        return
+      }
+
+      actions.setSearchError(undefined)
       actions.setSearchResults(mergeTickets(state.searchResults, tickets))
     })
 

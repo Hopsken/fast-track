@@ -11,7 +11,14 @@ import {
   Projects,
   ServerInfo
 } from 'jira.js/version3'
-import { skipWhile, Subscription, switchMap, timer } from 'rxjs'
+import {
+  catchError,
+  of,
+  skipWhile,
+  Subscription,
+  switchMap,
+  timer
+} from 'rxjs'
 
 import { fromStorage$, getStorageItem } from '../storage'
 
@@ -89,7 +96,13 @@ export class JiraClient extends BaseClient {
             0
           )
           return timer(refreshDelay).pipe(
-            switchMap(() => this.authApi.refreshToken(tokens))
+            switchMap(() => this.authApi.refreshToken(tokens)),
+            catchError((error) => {
+              console.error('Failed to refresh Jira tokens', error)
+              getStorageItem('OAuthTokens').removeValue()
+              getStorageItem('OAuthUserInfo').removeValue()
+              return of<null>(null)
+            })
           )
         })
       )

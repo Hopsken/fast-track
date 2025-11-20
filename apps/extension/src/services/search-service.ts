@@ -67,13 +67,19 @@ class SearchServiceImpl implements SearchService {
       this.emitResults(query, remoteTickets)
     } catch (error) {
       console.error('SearchService: remote search failed', error)
+      this.emitResults(query, cachedTickets, 'Search failed. Please reconnect.')
     }
   }
 
-  private emitResults(search: string, tickets: JiraTicket[]) {
+  private emitResults(
+    search: string,
+    tickets: JiraTicket[],
+    error?: string
+  ) {
     sendMessage('onSearchResult', {
       search,
-      tickets
+      tickets,
+      error
     })
   }
 
