@@ -71,11 +71,7 @@ class SearchServiceImpl implements SearchService {
     }
   }
 
-  private emitResults(
-    search: string,
-    tickets: JiraTicket[],
-    error?: string
-  ) {
+  private emitResults(search: string, tickets: JiraTicket[], error?: string) {
     sendMessage('onSearchResult', {
       search,
       tickets,
