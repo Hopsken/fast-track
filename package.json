@@ -27,7 +27,9 @@
     "lint:fix": "nx run extension:lint:fix",
     "format": "nx run extension:format",
     "format:check": "nx run extension:format:check",
-    "typecheck": "nx run extension:typecheck"
+    "typecheck": "nx run extension:typecheck",
+    "prepare": "husky",
+    "lint-staged": "lint-staged"
   },
   "dependencies": {
     "@ctrl/tinycolor": "^4.1.0",
@@ -113,12 +115,14 @@
     "eslint-plugin-sonarjs": "^3.0.5",
     "eslint-plugin-unicorn": "^60.0.0",
     "globals": "^16.3.0",
+    "husky": "^9.1.7",
     "jest": "^30.0.2",
     "jest-environment-jsdom": "^30.0.2",
     "jest-environment-node": "^30.0.2",
     "jest-util": "^30.0.2",
     "jsonc-eslint-parser": "^2.1.0",
     "nx": "21.5.1",
+    "lint-staged": "^15.2.10",
     "postcss": "^8.5.6",
     "prettier": "3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14",

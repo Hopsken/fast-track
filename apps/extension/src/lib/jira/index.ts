@@ -1,7 +1,7 @@
 import { getStorageItem } from '../storage'
-import { AuthApi } from './auth-api'
 
 import { JiraAPI } from './api'
+import { AuthApi } from './auth-api'
 
 export { JiraAPI }
 
@@ -22,7 +22,10 @@ async function ensureValidTokens() {
   const now = Date.now()
 
   // Refresh if expired or within buffer window
-  if (Number.isFinite(expiresAtMs) && expiresAtMs - TOKEN_EXPIRY_BUFFER_MS > now) {
+  if (
+    Number.isFinite(expiresAtMs) &&
+    expiresAtMs - TOKEN_EXPIRY_BUFFER_MS > now
+  ) {
     return tokens
   }
 

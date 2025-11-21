@@ -11,14 +11,7 @@ import {
   Projects,
   ServerInfo
 } from 'jira.js/version3'
-import {
-  catchError,
-  of,
-  skipWhile,
-  Subscription,
-  switchMap,
-  timer
-} from 'rxjs'
+import { catchError, of, skipWhile, Subscription, switchMap, timer } from 'rxjs'
 
 import { fromStorage$, getStorageItem } from '../storage'
 
@@ -126,7 +119,7 @@ export class JiraClient extends BaseClient {
    * Base URL for user-facing Jira pages
    */
   getWebBaseUrl(): string {
-    const host = this.jiraConfig.host
+    const { host } = this.jiraConfig
     if (!host) return ''
 
     return host.endsWith('/') ? host.slice(0, -1) : host
