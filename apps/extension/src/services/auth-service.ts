@@ -8,7 +8,7 @@ import { AuthApi } from '@/lib/jira/auth-api'
 import { getStorageItem } from '@/lib/storage'
 import { Database } from '@/repository'
 import { JiraApiKeyConfig, ReceivedTokenPayload, JiraUserInfo } from '@/types'
-import { TicketSuggestionService } from '~/services/ticket-suggestion-service'
+import { TicketSuggestionServiceAPI } from '~/services/ticket-suggestion-service'
 
 export interface AuthService {
   receiveTokens(tokens: ReceivedTokenPayload): Promise<JiraUserInfo>
@@ -41,7 +41,7 @@ class AuthServiceImpl implements AuthService {
 
   constructor(
     private database: Database,
-    private ticketSuggestionService?: TicketSuggestionService
+    private ticketSuggestionService?: TicketSuggestionServiceAPI
   ) {}
 
   public async receiveTokens(
@@ -155,9 +155,9 @@ class AuthServiceImpl implements AuthService {
 
 export const [registerAuthService, getAuthService] = defineProxyService<
   AuthService,
-  [Database, TicketSuggestionService?]
+  [Database, TicketSuggestionServiceAPI?]
 >(
   'AuthService',
-  (database: Database, ticketSuggestionService?: TicketSuggestionService) =>
+  (database: Database, ticketSuggestionService?: TicketSuggestionServiceAPI) =>
     new AuthServiceImpl(database, ticketSuggestionService)
 )

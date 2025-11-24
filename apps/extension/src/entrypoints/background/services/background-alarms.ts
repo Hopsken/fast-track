@@ -1,6 +1,6 @@
 import { Browser, browser } from '#imports'
 
-import { TicketSuggestionService } from '@/services/ticket-suggestion-service'
+import { TicketSuggestionServiceAPI } from '@/services/ticket-suggestion-service'
 
 export interface AlarmConfig {
   name: string
@@ -12,7 +12,7 @@ export class BackgroundAlarmsService {
   private alarms: AlarmConfig[] = []
   private readonly boundHandleAlarm = this.handleAlarm.bind(this)
 
-  constructor(private ticketSuggestionService: TicketSuggestionService) {
+  constructor(private ticketSuggestionService: TicketSuggestionServiceAPI) {
     this.setupAlarms()
   }
 
