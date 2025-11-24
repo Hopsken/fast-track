@@ -117,6 +117,15 @@
         "cwd": "apps/extension",
         "command": "tsc --noEmit"
       }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/apps/extension"],
+      "options": {
+        "cwd": "apps/extension",
+        "command": "pnpm exec vitest run --config vitest.config.ts",
+        "forwardAllArgs": true
+      }
     }
   },
   "tags": []
