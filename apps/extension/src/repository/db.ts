@@ -1,5 +1,6 @@
 import { addRxPlugin, createRxDatabase, RxDatabase } from 'rxdb/plugins/core'
 import { wrappedKeyCompressionStorage } from 'rxdb/plugins/key-compression'
+import { RxDBMigrationSchemaPlugin } from 'rxdb/plugins/migration-schema'
 import { RxDBQueryBuilderPlugin } from 'rxdb/plugins/query-builder'
 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie'
 import { wrappedValidateZSchemaStorage } from 'rxdb/plugins/validate-z-schema'
@@ -33,6 +34,7 @@ export async function getDatabase(): Promise<Database> {
   }
 
   addRxPlugin(RxDBQueryBuilderPlugin)
+  addRxPlugin(RxDBMigrationSchemaPlugin)
 
   database = await createRxDatabase({
     name: 'fast-track',
@@ -52,7 +54,13 @@ export async function getDatabase(): Promise<Database> {
     issues: {
       schema: issueSchema,
       methods: issueDocMethods,
-      statics: issueCollectionMethods
+      statics: issueCollectionMethods,
+      migrationStrategies: {
+        1: async (oldDoc) => ({
+          ...oldDoc,
+          isInProgress: oldDoc.isInProgress ?? false
+        })
+      }
     }
   })
 

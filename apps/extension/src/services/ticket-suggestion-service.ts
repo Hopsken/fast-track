@@ -64,7 +64,7 @@ export class TicketSuggestionService implements TicketSuggestionServiceAPI {
     this.isRefreshing = true
 
     try {
-      const tickets = await this.ticketService.loadSuggestions(force)
+      await this.ticketService.loadSuggestions(force)
       this.lastRefreshAt = Date.now()
       this.lastReason = reason
 
@@ -73,7 +73,7 @@ export class TicketSuggestionService implements TicketSuggestionServiceAPI {
         fetchedAt: this.lastRefreshAt
       })
 
-      return tickets
+      return this.getCachedSuggestions()
     } catch (error) {
       console.error('TicketSuggestionService: refresh failed', error)
       return this.getCachedSuggestions()
@@ -88,7 +88,11 @@ export class TicketSuggestionService implements TicketSuggestionServiceAPI {
 
   async getCachedSuggestions(limit = 30): Promise<JiraTicket[]> {
     const { issues } = this.database.collections
-    return issues.find().sort({ updated: 'desc' }).limit(limit).exec()
+    return issues
+      .find()
+      .sort({ isInProgress: 'desc', updated: 'desc' })
+      .limit(limit)
+      .exec()
   }
 
   getLastRefreshMeta() {

@@ -21,7 +21,7 @@ function App() {
 
   // Initialize search orchestration
   useEffect(() => {
-    getTicketSuggestionService().refreshSuggestions('startup', { force: true })
+    getTicketSuggestionService().refreshSuggestions('startup')
   }, [])
 
   useEffect(() => {

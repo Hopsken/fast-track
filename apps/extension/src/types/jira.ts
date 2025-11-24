@@ -38,6 +38,7 @@ export interface JiraTicket {
   projectKey: string
   boardName: string
   url: string
+  isInProgress: boolean
 
   lastViewed: string | null
   created: string

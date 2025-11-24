@@ -246,6 +246,12 @@ export class JiraIssueService {
       ? `${browseBaseUrl}/browse/${issue.key}`
       : (issue.self ?? '')
 
+    const statusName = issue.fields?.status?.name?.toLowerCase?.() || ''
+    const statusKey =
+      issue.fields?.status?.statusCategory?.key?.toLowerCase?.() || ''
+    const isInProgress =
+      statusName.includes('in progress') || statusKey === 'indeterminate'
+
     return {
       id: String(issue.id),
       key: issue.key,
@@ -280,6 +286,7 @@ export class JiraIssueService {
       projectKey: issue.fields?.project?.key || '',
       boardName: issue.fields?.project?.name || '',
       url: jiraWebUrl,
+      isInProgress,
       lastViewed: issue.fields.lastViewed
         ? toISODateString(issue.fields.lastViewed)
         : null,
