@@ -48,23 +48,63 @@ const computeRelevance = (
 
   const summary = ticket.summary.toLowerCase()
   const key = ticket.key.toLowerCase()
+  const status = ticket.status?.name?.toLowerCase?.() ?? ''
+  const issueType = ticket.issueType?.name?.toLowerCase?.() ?? ''
+  const assignee = ticket.assignee?.displayName?.toLowerCase?.() ?? ''
+  const priority = ticket.priority?.name?.toLowerCase?.() ?? ''
 
-  let score = 0
+  const scoreField = (
+    value: string,
+    weights: { exact?: number; starts?: number; includes?: number },
+    subject: string
+  ) => {
+    if (!value) return 0
 
-  if (key === query) score += 200
-  if (key.startsWith(query)) score += 120
-  if (summary === query) score += 100
-  if (summary.includes(query)) score += 60
+    let subtotal = 0
 
-  for (const token of tokens) {
-    if (!token) continue
+    if (weights.exact && value === subject) subtotal += weights.exact
+    if (weights.starts && value.startsWith(subject)) subtotal += weights.starts
+    if (weights.includes && value.includes(subject))
+      subtotal += weights.includes
 
-    if (summary.startsWith(token)) score += 24
-    if (summary.includes(token)) score += 12
-    if (key.includes(token)) score += 8
+    return subtotal
   }
 
-  return score
+  const baseScore = [
+    { value: key, weights: { exact: 200, starts: 120 } },
+    { value: summary, weights: { exact: 100, includes: 60 } },
+    { value: status, weights: { exact: 80, includes: 45 } },
+    { value: issueType, weights: { exact: 70, includes: 40 } },
+    { value: assignee, weights: { exact: 60, includes: 35 } },
+    { value: priority, weights: { exact: 55, includes: 30 } }
+  ].reduce(
+    (total, field) => total + scoreField(field.value, field.weights, query),
+    0
+  )
+
+  const tokenWeights = [
+    { value: summary, weights: { starts: 24, includes: 12 } },
+    { value: key, weights: { includes: 8 } },
+    { value: status, weights: { starts: 10, includes: 8 } },
+    { value: issueType, weights: { starts: 9, includes: 8 } },
+    { value: assignee, weights: { includes: 6 } },
+    { value: priority, weights: { includes: 6 } }
+  ]
+
+  const tokenScore = tokens.reduce((total, token) => {
+    if (!token) return total
+
+    return (
+      total +
+      tokenWeights.reduce(
+        (subtotal, field) =>
+          subtotal + scoreField(field.value, field.weights, token),
+        0
+      )
+    )
+  }, 0)
+
+  return baseScore + tokenScore
 }
 
 export const rankTickets = (

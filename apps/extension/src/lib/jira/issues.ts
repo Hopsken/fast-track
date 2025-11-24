@@ -118,26 +118,32 @@ export class JiraIssueService {
       return []
     }
 
-    const escapedQuery = escapeJqlValue(trimmedQuery)
     const tokens = trimmedQuery.split(/\s+/).filter(Boolean)
 
-    const clauses: string[] = [
-      `summary ~ "${escapedQuery}"`
-      // `text ~ "${escapedQuery}"`
-    ]
+    const clauses = new Set<string>()
+    const addFieldClauses = (value: string) => {
+      const escapedValue = escapeJqlValue(value)
+
+      clauses.add(`summary ~ "${escapedValue}"`)
+      clauses.add(`status ~ "${escapedValue}"`)
+      clauses.add(`issuetype ~ "${escapedValue}"`)
+      clauses.add(`priority ~ "${escapedValue}"`)
+      clauses.add(`assignee = "${escapedValue}"`)
+      clauses.add(`text ~ "${escapedValue}"`)
+    }
 
     const keyLike = /^[A-Za-z][A-Za-z0-9]+-\d+$/.test(trimmedQuery)
     if (keyLike) {
-      clauses.unshift(`issuekey = "${trimmedQuery.toUpperCase()}"`)
+      clauses.add(`issuekey = "${trimmedQuery.toUpperCase()}"`)
     }
+
+    addFieldClauses(trimmedQuery)
 
     if (tokens.length > 1) {
-      clauses.push(
-        ...tokens.map((token) => `text ~ "${escapeJqlValue(token)}"`)
-      )
+      tokens.forEach((token) => addFieldClauses(token))
     }
 
-    const jql = `${clauses.join(' OR ')} ORDER BY updated DESC`
+    const jql = `${Array.from(clauses).join(' OR ')} ORDER BY updated DESC`
     return this.searchIssuesUsingJql(jql, maxResults)
   }
 

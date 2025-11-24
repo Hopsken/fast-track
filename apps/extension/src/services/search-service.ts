@@ -101,21 +101,23 @@ class SearchServiceImpl implements SearchService {
     }
 
     const escaped = escapeRegExp(query)
-    const summarySelector = { $regex: escaped, $options: 'i' }
-    const keySelector = { $regex: escaped, $options: 'i' }
+    const regexSelector = { $regex: escaped, $options: 'i' }
 
-    const [summaryMatches, keyMatches] = await Promise.all([
-      issues
-        .find({ selector: { summary: summarySelector } })
-        .limit(30)
-        .exec(),
-      issues
-        .find({ selector: { key: keySelector } })
-        .limit(30)
-        .exec()
-    ])
-
-    return [...summaryMatches, ...keyMatches]
+    return issues
+      .find({
+        selector: {
+          $or: [
+            { summary: regexSelector },
+            { key: regexSelector },
+            { 'status.name': regexSelector },
+            { 'issueType.name': regexSelector },
+            { 'assignee.displayName': regexSelector },
+            { 'priority.name': regexSelector }
+          ]
+        }
+      })
+      .limit(30)
+      .exec()
   }
 }
 
