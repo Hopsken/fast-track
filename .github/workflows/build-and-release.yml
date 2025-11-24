@@ -58,6 +58,9 @@ jobs:
       - name: Run type checking
         run: pnpm run typecheck
 
+      - name: Run tests with coverage
+        run: pnpm run test:coverage
+
       - name: Create zip artifacts
         run: pnpm run zip
 
