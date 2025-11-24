@@ -16,6 +16,7 @@ export function GeneralTab() {
   const [authType, setAuthType] = useStorage('AuthType')
   const [userInfo] = useStorage('OAuthUserInfo')
   const [apiKeyAuth] = useStorage('ApiKeyAuth')
+  const [jiraHost] = useStorage('JiraHost')
   const [connectingMethod, setConnectingMethod] = useState<AuthType | null>(
     null
   )
@@ -67,6 +68,11 @@ export function GeneralTab() {
   )
 
   const handleDisconnect = useCallback(() => {
+    // eslint-disable-next-line no-alert
+    const confirmed = window.confirm(
+      'Disconnect from Jira? You will need to reconnect to use the extension.'
+    )
+    if (!confirmed) return
     setError(null)
     authService.disconnect()
   }, [authService])
@@ -85,6 +91,7 @@ export function GeneralTab() {
         <JiraConnectionCard
           user={userInfo}
           authMethod={authType}
+          jiraHost={jiraHost}
           onDisconnect={handleDisconnect}
         />
       ) : (
