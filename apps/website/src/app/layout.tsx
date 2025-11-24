@@ -21,6 +21,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="shortcut icon" href="/favicon.ico" type="image/png" />
+      </head>
       <body
         className={`${spaceGrotesk.className} bg-slate-50 text-slate-900 antialiased`}>
         {children}
