@@ -26,6 +26,7 @@ export function useTicketSearch() {
   const actions = useSearchActions()
 
   const [searchService] = useState(() => getSearchService())
+  const [isAuthConfigured, setIsAuthConfigured] = useState(true)
 
   // Simple search handler - just updates query, RxJS orchestrator handles the rest
   const handleSearch = useMemoizedFn((query: string) => {
@@ -77,7 +78,9 @@ export function useTicketSearch() {
         const configured = await getTicketService().isConfigured()
         if (!configured) {
           actions.setSearchError(NOT_CONNECTED_MESSAGE)
+          setIsAuthConfigured(false)
         } else {
+          setIsAuthConfigured(true)
           actions.setSearchError(undefined)
         }
       } catch (err) {
@@ -94,6 +97,7 @@ export function useTicketSearch() {
     searchResults,
     handleSearch,
     error,
-    isSearching
+    isSearching,
+    isAuthConfigured
   }
 }

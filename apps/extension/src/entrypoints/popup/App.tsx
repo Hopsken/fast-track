@@ -15,9 +15,11 @@ import { getCurrentShortcut, formatShortcut } from '~/utils/shortcuts'
 import '~/assets/styles/main.css'
 
 function App() {
-  const { searchQuery, handleSearch } = useTicketSearch()
+  const { searchQuery, handleSearch, error, isAuthConfigured } =
+    useTicketSearch()
 
   const [shortcutText, setShortcutText] = useState('Alt+J to search')
+  const footerError = isAuthConfigured ? error : undefined
 
   // Initialize search orchestration
   useEffect(() => {
@@ -83,16 +85,33 @@ function App() {
       {/* Results Section */}
       <div className="animate-in fade-in overflow-hidden delay-150 duration-400">
         <ErrorBoundary>
-          <TicketList onTicketClick={handleTicketClick} />
+          <TicketList
+            showNotConfiguredNotice={!isAuthConfigured}
+            onOpenOptionsPage={handleOpenOptionsPage}
+            onTicketClick={handleTicketClick}
+          />
         </ErrorBoundary>
       </div>
 
       {/* Quick Actions Footer */}
       <div className="animate-in slide-in-from-bottom border-t border-gray-100 bg-gray-50 px-4 py-3 delay-200 duration-300">
         <div className="flex items-center justify-between text-xs text-gray-500">
-          <span className="font-medium transition-colors duration-200">
-            {shortcutText}
-          </span>
+          <div className="flex items-center gap-2 truncate">
+            {footerError ? (
+              <>
+                <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+                  !
+                </span>
+                <span className="truncate font-semibold text-amber-700">
+                  {footerError}
+                </span>
+              </>
+            ) : (
+              <span className="font-medium transition-colors duration-200">
+                {shortcutText}
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             <DevOnly>
               <DevRefreshSuggestionsButton />

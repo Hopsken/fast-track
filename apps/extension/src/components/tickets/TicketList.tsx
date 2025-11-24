@@ -16,9 +16,15 @@ import { TicketItem } from './TicketItem'
 
 interface TicketListProps {
   onTicketClick: (ticket: JiraTicket) => void
+  showNotConfiguredNotice?: boolean
+  onOpenOptionsPage?: () => void
 }
 
-export function TicketList({ onTicketClick }: TicketListProps) {
+export function TicketList({
+  showNotConfiguredNotice,
+  onOpenOptionsPage,
+  onTicketClick
+}: TicketListProps) {
   // Get state and actions from the unified store
   const selectedIndex = useSelectedIndex()
   const searchQuery = useSearchQuery()
@@ -62,6 +68,31 @@ export function TicketList({ onTicketClick }: TicketListProps) {
       console.warn('Error scrolling to selected item:', error)
     }
   }, [selectedIndex])
+
+  if (showNotConfiguredNotice) {
+    return (
+      <div className="animate-in fade-in space-y-3 bg-white px-6 py-10 text-center duration-300">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 transition-all duration-300">
+          <HiInformationCircle className="h-6 w-6 text-gray-400" />
+        </div>
+        <div className="space-y-1">
+          <p className="text-sm font-semibold text-gray-800">
+            Connect to Jira to search
+          </p>
+          <p className="text-xs text-gray-600">
+            Connect your Jira account in settings to start searching.
+          </p>
+        </div>
+        {onOpenOptionsPage ? (
+          <button
+            onClick={onOpenOptionsPage}
+            className="mx-auto inline-flex items-center justify-center rounded-md border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-800 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-900 active:translate-y-0">
+            Open settings
+          </button>
+        ) : null}
+      </div>
+    )
+  }
 
   if (searchResults.length === 0) {
     if (isSearching) {
