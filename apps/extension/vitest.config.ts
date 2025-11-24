@@ -1,8 +1,8 @@
 import path from 'node:path'
 
-import { defineConfig } from 'vitest/config'
+import { defineProject } from 'vitest/config'
 
-export default defineConfig({
+export default defineProject({
   resolve: {
     alias: {
       '~': path.resolve(__dirname, 'src'),
@@ -10,6 +10,7 @@ export default defineConfig({
     }
   },
   test: {
+    name: 'extension',
     environment: 'jsdom',
     globals: true,
     include: ['src/**/*.{test,spec}.{ts,tsx}'],

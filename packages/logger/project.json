@@ -19,8 +19,8 @@
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/coverage/packages/logger"],
       "options": {
-        "cwd": "packages/logger",
-        "command": "pnpm exec vitest run --config vitest.config.ts",
+        "cwd": "{workspaceRoot}",
+        "command": "pnpm exec vitest run --project logger",
         "forwardAllArgs": true
       }
     }

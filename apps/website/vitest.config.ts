@@ -1,10 +1,11 @@
-import { defineConfig } from 'vitest/config'
+import { defineProject } from 'vitest/config'
 
-export default defineConfig({
+export default defineProject({
   esbuild: {
     jsx: 'automatic'
   },
   test: {
+    name: 'website',
     environment: 'jsdom',
     globals: true,
     include: [
