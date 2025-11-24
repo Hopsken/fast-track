@@ -122,8 +122,8 @@ export class JiraIssueService {
     const tokens = trimmedQuery.split(/\s+/).filter(Boolean)
 
     const clauses: string[] = [
-      `summary ~ "${escapedQuery}"`,
-      `text ~ "${escapedQuery}"`
+      `summary ~ "${escapedQuery}"`
+      // `text ~ "${escapedQuery}"`
     ]
 
     const keyLike = /^[A-Za-z][A-Za-z0-9]+-\d+$/.test(trimmedQuery)
