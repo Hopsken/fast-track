@@ -49,10 +49,27 @@ async function ensureValidTokens() {
  * Respects user's preferred authentication method, with smart fallback
  */
 export async function getJiraApi() {
+  const authType = await getStorageItem('AuthType').getValue()
+
+  if (authType === 'apiKey') {
+    const apiKeyConfig = await getStorageItem('ApiKeyAuth').getValue()
+    if (!apiKeyConfig) return null
+
+    const signature = `apiKey:${apiKeyConfig.host}:${apiKeyConfig.email}:${apiKeyConfig.apiKey}`
+    if (!cachedJira || cachedJira.signature !== signature) {
+      cachedJira = {
+        client: new JiraAPI(apiKeyConfig),
+        signature
+      }
+    }
+
+    return cachedJira.client
+  }
+
   const oauthTokens = await ensureValidTokens()
   if (!oauthTokens) return null
 
-  const signature = `${oauthTokens.instance_id}:${oauthTokens.access_token}:${oauthTokens.refresh_token}`
+  const signature = `oauth:${oauthTokens.instance_id}:${oauthTokens.access_token}:${oauthTokens.refresh_token}`
 
   if (!cachedJira || cachedJira.signature !== signature) {
     cachedJira = {
