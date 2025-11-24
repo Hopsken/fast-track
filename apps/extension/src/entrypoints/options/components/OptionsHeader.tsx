@@ -19,7 +19,7 @@ export function OptionsHeader({ version, onTabChange }: OptionsHeaderProps) {
   return (
     <header className="mb-8 flex items-center justify-between">
       <div className="flex items-center space-x-3">
-        <img src={logoUrl} className="h-12 w-12" alt="Fast Track" />
+        <img src={logoUrl} className="h-12 w-12 rounded-xl" alt="Fast Track" />
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold text-gray-900">Fast Track</h1>
