@@ -8,6 +8,16 @@ import { AuthApi } from '@/lib/jira/auth-api'
 import { getStorageItem } from '@/lib/storage'
 import { Database } from '@/repository'
 import { JiraApiKeyConfig, ReceivedTokenPayload, JiraUserInfo } from '@/types'
+import { TicketSuggestionService } from '~/services/ticket-suggestion-service'
+
+export interface AuthService {
+  receiveTokens(tokens: ReceivedTokenPayload): Promise<JiraUserInfo>
+  connectWithApiKey(
+    credentials: Omit<JiraApiKeyConfig, 'type'>
+  ): Promise<JiraUserInfo>
+  connect(): Promise<string>
+  disconnect(): Promise<boolean>
+}
 
 const tokenSchema = z.object({
   access_token: z.string(),
@@ -21,7 +31,7 @@ const apiKeySchema = z.object({
   apiKey: z.string().min(1)
 })
 
-class AuthServiceImpl {
+class AuthServiceImpl implements AuthService {
   private tokenStorage = getStorageItem('OAuthTokens')
   private apiKeyStorage = getStorageItem('ApiKeyAuth')
   private userInfoStorage = getStorageItem('OAuthUserInfo')
@@ -29,7 +39,10 @@ class AuthServiceImpl {
   private jiraHostStorage = getStorageItem('JiraHost')
   private authApi = new AuthApi()
 
-  constructor(private database: Database) {}
+  constructor(
+    private database: Database,
+    private ticketSuggestionService?: TicketSuggestionService
+  ) {}
 
   public async receiveTokens(
     tokens: ReceivedTokenPayload
@@ -49,6 +62,7 @@ class AuthServiceImpl {
     const userInfo = await jiraApi.getMyself()
 
     await this.userInfoStorage.setValue(userInfo)
+    await this.primeSuggestionsAfterAuth()
 
     return userInfo
   }
@@ -75,10 +89,12 @@ class AuthServiceImpl {
       this.userInfoStorage.setValue(userInfo)
     ])
 
+    await this.primeSuggestionsAfterAuth()
+
     return userInfo
   }
 
-  public connect() {
+  public async connect() {
     return this.initiateFlow()
   }
 
@@ -96,6 +112,19 @@ class AuthServiceImpl {
     ])
 
     return true
+  }
+
+  private async primeSuggestionsAfterAuth() {
+    if (!this.ticketSuggestionService) return
+
+    try {
+      await this.ticketSuggestionService.handleAuthSuccess()
+    } catch (error) {
+      console.error(
+        'AuthService: failed to prefetch suggestions after auth',
+        error
+      )
+    }
   }
 
   /**
@@ -124,7 +153,11 @@ class AuthServiceImpl {
   }
 }
 
-export const [registerAuthService, getAuthService] = defineProxyService(
+export const [registerAuthService, getAuthService] = defineProxyService<
+  AuthService,
+  [Database, TicketSuggestionService?]
+>(
   'AuthService',
-  (database: Database) => new AuthServiceImpl(database)
+  (database: Database, ticketSuggestionService?: TicketSuggestionService) =>
+    new AuthServiceImpl(database, ticketSuggestionService)
 )

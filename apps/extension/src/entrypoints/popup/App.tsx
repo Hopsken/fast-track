@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { HiCog } from 'react-icons/hi'
 
-import { getTicketService } from '@/services/ticket-service'
+import { getTicketSuggestionService } from '@/services/ticket-suggestion-service'
 import { JiraTicket } from '@/types'
+import { DevOnly } from '~/components/DevOnly'
+import { DevRefreshSuggestionsButton } from '~/components/DevRefreshSuggestionsButton'
 import { ErrorBoundary } from '~/components/ErrorBoundary'
 import { TicketSearchBox } from '~/components/search'
 import { TicketList } from '~/components/tickets'
@@ -19,7 +21,7 @@ function App() {
 
   // Initialize search orchestration
   useEffect(() => {
-    getTicketService().loadSuggestions()
+    getTicketSuggestionService().refreshSuggestions('startup', { force: true })
   }, [])
 
   useEffect(() => {
@@ -91,12 +93,17 @@ function App() {
           <span className="font-medium transition-colors duration-200">
             {shortcutText}
           </span>
-          <button
-            onClick={handleOpenOptionsPage}
-            className="rounded-md p-2 text-gray-400 transition-all duration-200 ease-out hover:scale-105 hover:bg-gray-200 hover:text-gray-600 active:scale-95"
-            title="Settings">
-            <HiCog className="h-4 w-4 transition-transform duration-200" />
-          </button>
+          <div className="flex items-center gap-2">
+            <DevOnly>
+              <DevRefreshSuggestionsButton />
+            </DevOnly>
+            <button
+              onClick={handleOpenOptionsPage}
+              className="rounded-md p-2 text-gray-400 transition-all duration-200 ease-out hover:scale-105 hover:bg-gray-200 hover:text-gray-600 active:scale-95"
+              title="Settings">
+              <HiCog className="h-4 w-4 transition-transform duration-200" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

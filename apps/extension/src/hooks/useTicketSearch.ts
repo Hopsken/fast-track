@@ -60,6 +60,17 @@ export function useTicketSearch() {
     }
   })
 
+  useMount(() => {
+    const unsubscribe = onMessage('ticketsUpdated', async () => {
+      const currentQuery = useTicketStore.getState().searchQuery
+      await searchService.onSearchInput(currentQuery)
+    })
+
+    return () => {
+      unsubscribe()
+    }
+  })
+
   useEffect(() => {
     const checkConnection = async () => {
       try {

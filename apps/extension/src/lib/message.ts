@@ -8,6 +8,7 @@ interface ProtocolMap {
     tickets: JiraTicket[]
     error?: string
   }) => void
+  ticketsUpdated: (payload: { reason: string; fetchedAt: number }) => void
 }
 
 export const { sendMessage, onMessage } =
