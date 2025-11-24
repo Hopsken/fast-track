@@ -4,5 +4,11 @@
     "outDir": "../../dist/out-tsc",
     "types": ["vitest/globals", "vitest/importMeta", "node"]
   },
-  "include": ["vitest.config.ts", "src/**/*.ts"]
+  "include": [
+    "vitest.config.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.js",
+    "src/**/*.jsx"
+  ]
 }

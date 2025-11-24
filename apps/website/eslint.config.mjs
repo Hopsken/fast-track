@@ -26,7 +26,8 @@ export default [
         expect: 'readonly',
         beforeEach: 'readonly',
         afterEach: 'readonly',
-        jest: 'readonly'
+        vi: 'readonly',
+        vitest: 'readonly'
       }
     }
   },

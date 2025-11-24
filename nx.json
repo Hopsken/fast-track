@@ -73,12 +73,6 @@
       }
     },
     {
-      "plugin": "@nx/jest/plugin",
-      "options": {
-        "targetName": "test"
-      }
-    },
-    {
       "plugin": "@nx/next/plugin",
       "options": {
         "startTargetName": "start",

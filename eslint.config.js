@@ -215,7 +215,6 @@ export default [
     files: [
       '*.config.{js,ts,mjs,cjs}',
       '*.config.*.{js,ts,mjs,cjs}',
-      'jest.config.ts',
       'next-env.d.ts',
       'index.d.ts',
       '**/*.spec.{ts,tsx}',
@@ -271,8 +270,7 @@ export default [
         beforeEach: 'readonly',
         afterEach: 'readonly',
         beforeAll: 'readonly',
-        afterAll: 'readonly',
-        jest: 'readonly'
+        afterAll: 'readonly'
       }
     },
     rules: {

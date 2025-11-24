@@ -33,6 +33,15 @@
       "options": {
         "lintFilePatterns": ["apps/website/**/*.{ts,tsx,js,jsx}"]
       }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/apps/website"],
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "pnpm exec vitest run --project website",
+        "forwardAllArgs": true
+      }
     }
   }
 }
