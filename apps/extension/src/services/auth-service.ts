@@ -7,7 +7,7 @@ import { JiraAPI } from '@/lib/jira'
 import { AuthApi } from '@/lib/jira/auth-api'
 import { getStorageItem } from '@/lib/storage'
 import { Database } from '@/repository'
-import { ReceivedTokenPayload, JiraUserInfo } from '@/types'
+import { JiraApiKeyConfig, ReceivedTokenPayload, JiraUserInfo } from '@/types'
 
 const tokenSchema = z.object({
   access_token: z.string(),
@@ -15,9 +15,18 @@ const tokenSchema = z.object({
   expires_at: z.iso.datetime()
 })
 
+const apiKeySchema = z.object({
+  host: z.string().min(1),
+  email: z.email(),
+  apiKey: z.string().min(1)
+})
+
 class AuthServiceImpl {
   private tokenStorage = getStorageItem('OAuthTokens')
+  private apiKeyStorage = getStorageItem('ApiKeyAuth')
   private userInfoStorage = getStorageItem('OAuthUserInfo')
+  private authTypeStorage = getStorageItem('AuthType')
+  private jiraHostStorage = getStorageItem('JiraHost')
   private authApi = new AuthApi()
 
   constructor(private database: Database) {}
@@ -29,7 +38,12 @@ class AuthServiceImpl {
 
     const oauthConfig =
       await this.authApi.getOAuthConfigFromAccessToken(parsedTokens)
-    this.tokenStorage.setValue(oauthConfig)
+    await Promise.all([
+      this.tokenStorage.setValue(oauthConfig),
+      this.authTypeStorage.setValue('oauth'),
+      this.jiraHostStorage.setValue(oauthConfig.host),
+      this.apiKeyStorage.removeValue()
+    ])
 
     const jiraApi = new JiraAPI(oauthConfig)
     const userInfo = await jiraApi.getMyself()
@@ -39,14 +53,45 @@ class AuthServiceImpl {
     return userInfo
   }
 
+  public async connectWithApiKey(
+    credentials: Omit<JiraApiKeyConfig, 'type'>
+  ): Promise<JiraUserInfo> {
+    const parsedCredentials = apiKeySchema.parse(credentials)
+    const normalizedHost = this.normalizeHost(parsedCredentials.host)
+    const apiKeyConfig: JiraApiKeyConfig = {
+      ...parsedCredentials,
+      host: normalizedHost,
+      type: 'apiKey'
+    }
+
+    const jiraApi = new JiraAPI(apiKeyConfig)
+    const userInfo = await jiraApi.getMyself()
+
+    await Promise.all([
+      this.apiKeyStorage.setValue(apiKeyConfig),
+      this.authTypeStorage.setValue('apiKey'),
+      this.tokenStorage.removeValue(),
+      this.jiraHostStorage.setValue(normalizedHost),
+      this.userInfoStorage.setValue(userInfo)
+    ])
+
+    return userInfo
+  }
+
   public connect() {
     return this.initiateFlow()
   }
 
   public async disconnect() {
+    const currentAuthType = await this.authTypeStorage.getValue()
+    const nextAuthType = currentAuthType === 'apiKey' ? 'apiKey' : 'oauth'
+
     await Promise.all([
       this.tokenStorage.removeValue(),
+      this.apiKeyStorage.removeValue(),
       this.userInfoStorage.removeValue(),
+      this.authTypeStorage.setValue(nextAuthType),
+      this.jiraHostStorage.setValue(''),
       this.database.collections.issues.remove()
     ])
 
@@ -67,6 +112,15 @@ class AuthServiceImpl {
       : 'https://teamusement.com'
 
     return `${baseUrl}/auth/jira?extension_id=${currentExtensionId}`
+  }
+
+  private normalizeHost(host: string) {
+    const trimmed = host.trim()
+    const prefixed =
+      trimmed.startsWith('http://') || trimmed.startsWith('https://')
+        ? trimmed
+        : `https://${trimmed}`
+    return prefixed.endsWith('/') ? prefixed.slice(0, -1) : prefixed
   }
 }
 

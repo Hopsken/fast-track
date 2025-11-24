@@ -6,6 +6,7 @@ import { WxtStorageItem, storage } from '#imports'
 
 import type {
   AuthType,
+  JiraApiKeyConfig,
   JiraOAuthConfig,
   JiraUserInfo,
   LicenseInfo
@@ -17,6 +18,7 @@ type StorageItems = {
   AuthType: AuthType
   OAuthTokens: JiraOAuthConfig | null
   OAuthUserInfo: JiraUserInfo | null
+  ApiKeyAuth: JiraApiKeyConfig | null
   LastSyncAt: string | null
 }
 
@@ -33,6 +35,7 @@ const STORAGE_DEFAULTS: StorageItems = {
   AuthType: 'oauth',
   OAuthTokens: null,
   OAuthUserInfo: null,
+  ApiKeyAuth: null,
   LastSyncAt: null
 }
 
@@ -43,6 +46,9 @@ export const STORAGE_GROUPS = {
 
   // OAuth authentication group
   OAUTH_AUTH: ['OAuthTokens', 'OAuthUserInfo'],
+
+  // API key authentication group
+  API_KEY_AUTH: ['ApiKeyAuth'],
 
   // License management
   LICENSE: ['License']

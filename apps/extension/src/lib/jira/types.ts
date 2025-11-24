@@ -2,6 +2,6 @@
  * Jira API type definitions
  */
 
-import { JiraOAuthConfig } from '@/types'
+import { JiraApiKeyConfig, JiraOAuthConfig } from '@/types'
 
-export type JiraApiConfig = JiraOAuthConfig
+export type JiraApiConfig = JiraOAuthConfig | JiraApiKeyConfig

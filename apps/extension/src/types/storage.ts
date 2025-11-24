@@ -1,4 +1,4 @@
-export type AuthType = 'oauth'
+export type AuthType = 'oauth' | 'apiKey'
 
 export interface JiraOAuthConfig {
   type: 'oauth'
@@ -7,6 +7,13 @@ export interface JiraOAuthConfig {
   access_token: string
   refresh_token: string
   expires_at: string // ISO timestamp
+}
+
+export interface JiraApiKeyConfig {
+  type: 'apiKey'
+  host: string
+  email: string
+  apiKey: string
 }
 
 export type ReceivedTokenPayload = Pick<

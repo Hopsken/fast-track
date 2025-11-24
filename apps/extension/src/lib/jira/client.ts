@@ -57,6 +57,18 @@ export class JiraClient extends BaseClient {
       }
     }
 
+    if (config.type === 'apiKey') {
+      return {
+        host: config.host,
+        authentication: {
+          basic: {
+            email: config.email,
+            apiToken: config.apiKey
+          }
+        }
+      }
+    }
+
     throw new Error(`Unsupported authentication type: ${config}`)
   }
 

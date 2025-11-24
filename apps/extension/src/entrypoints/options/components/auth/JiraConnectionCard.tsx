@@ -8,12 +8,14 @@ import { JiraUserInfo } from '@/types'
 
 export interface JiraConnectionCardProps {
   user: JiraUserInfo
+  authMethod?: 'oauth' | 'apiKey'
   onSettings?: () => void
   onDisconnect?: () => void
 }
 
 export const JiraConnectionCard: React.FC<JiraConnectionCardProps> = ({
   user,
+  authMethod,
   onSettings,
   onDisconnect
 }) => {
@@ -54,8 +56,19 @@ export const JiraConnectionCard: React.FC<JiraConnectionCardProps> = ({
         </div>
 
         {/* Connected Badge */}
-        <div className="rounded-full bg-green-100 px-3 py-1">
-          <span className="text-sm font-medium text-green-800">Connected</span>
+        <div className="flex items-center gap-2">
+          <div className="rounded-full bg-green-100 px-3 py-1">
+            <span className="text-sm font-medium text-green-800">
+              Connected
+            </span>
+          </div>
+          {authMethod ? (
+            <div className="rounded-full bg-blue-100 px-3 py-1">
+              <span className="text-sm font-medium text-blue-800">
+                {authMethod === 'apiKey' ? 'API key' : 'OAuth'}
+              </span>
+            </div>
+          ) : null}
         </div>
       </div>
 
