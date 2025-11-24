@@ -27,6 +27,8 @@ const issueFields = [
   'lastViewed'
 ]
 
+const escapeJqlValue = (value: string) => value.replace(/["\\]/g, '\\$&')
+
 /**
  * Service for issue-related operations with functional programming patterns
  */
@@ -105,6 +107,38 @@ export class JiraIssueService {
       )
       return []
     }
+  }
+
+  async searchIssuesByText(
+    query: string,
+    maxResults = 30
+  ): Promise<JiraTicket[]> {
+    const trimmedQuery = query.trim()
+    if (!trimmedQuery) {
+      return []
+    }
+
+    const escapedQuery = escapeJqlValue(trimmedQuery)
+    const tokens = trimmedQuery.split(/\s+/).filter(Boolean)
+
+    const clauses: string[] = [
+      `summary ~ "${escapedQuery}"`,
+      `text ~ "${escapedQuery}"`
+    ]
+
+    const keyLike = /^[A-Za-z][A-Za-z0-9]+-\d+$/.test(trimmedQuery)
+    if (keyLike) {
+      clauses.unshift(`issuekey = "${trimmedQuery.toUpperCase()}"`)
+    }
+
+    if (tokens.length > 1) {
+      clauses.push(
+        ...tokens.map((token) => `text ~ "${escapeJqlValue(token)}"`)
+      )
+    }
+
+    const jql = `${clauses.join(' OR ')} ORDER BY updated DESC`
+    return this.searchIssuesUsingJql(jql, maxResults)
   }
 
   private async searchIssuesUsingJql(

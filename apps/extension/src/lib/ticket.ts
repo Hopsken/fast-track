@@ -10,13 +10,14 @@ export const mergeTickets = (
   prev: JiraTicket[],
   next: JiraTicket[]
 ): JiraTicket[] => {
+  const prevByKey = keyBy(prev, 'key')
   const nextByKey = keyBy(next, 'key')
 
-  const mergedPrev = prev.map((ticket) =>
-    merge({}, ticket, nextByKey[ticket.key])
+  const mergedNextFirst = next.map((ticket) =>
+    merge({}, prevByKey[ticket.key], ticket)
   )
 
-  const prevKeys = new Set(prev.map((ticket) => ticket.key))
-  const onlyFromNext = next.filter((ticket) => !prevKeys.has(ticket.key))
-  return [...mergedPrev, ...onlyFromNext]
+  const prevOnly = prev.filter((ticket) => !nextByKey[ticket.key])
+
+  return [...mergedNextFirst, ...prevOnly]
 }

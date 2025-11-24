@@ -1,4 +1,5 @@
 import { defineProxyService } from '@webext-core/proxy-service'
+import { escapeRegExp } from 'lodash-es'
 import {
   BehaviorSubject,
   combineLatest,
@@ -11,6 +12,7 @@ import {
 import { sendMessage } from '@/lib/message'
 import { Database } from '@/repository'
 import { JiraTicket } from '@/types'
+import { rankTickets } from '~/utils/ticket-ranking'
 
 import { TicketService } from './ticket-service'
 
@@ -52,22 +54,30 @@ class SearchServiceImpl implements SearchService {
   }
 
   private async handleSearch(query: string) {
-    const cachedTickets = await this.searchStoredTickets(query)
+    const normalizedQuery = query.trim()
+    const cachedTickets = await this.searchStoredTickets(normalizedQuery)
+    const rankedCached = rankTickets(cachedTickets, normalizedQuery)
 
-    this.emitResults(query, cachedTickets)
+    this.emitResults(query, rankedCached)
 
-    if (!query.trim()) return
+    if (!normalizedQuery) return
 
     try {
-      const remoteTickets = await this.ticketService.searchTickets(query)
+      const remoteTickets =
+        await this.ticketService.searchTickets(normalizedQuery)
       if (this.search$.getValue() !== query) {
         return
       }
 
-      this.emitResults(query, remoteTickets)
+      const combinedTickets = rankTickets(
+        [...cachedTickets, ...remoteTickets],
+        normalizedQuery
+      )
+
+      this.emitResults(query, combinedTickets)
     } catch (error) {
       console.error('SearchService: remote search failed', error)
-      this.emitResults(query, cachedTickets, 'Search failed. Please reconnect.')
+      this.emitResults(query, rankedCached, 'Search failed. Please reconnect.')
     }
   }
 
@@ -82,8 +92,26 @@ class SearchServiceImpl implements SearchService {
   private async searchStoredTickets(query: string) {
     const { issues } = this.database.collections
 
-    if (!query) return issues.find().limit(10).exec()
-    return issues.find().where('summary').regex(query).exec()
+    if (!query) {
+      return issues.find().sort({ updated: 'desc' }).limit(30).exec()
+    }
+
+    const escaped = escapeRegExp(query)
+    const summarySelector = { $regex: escaped, $options: 'i' }
+    const keySelector = { $regex: escaped, $options: 'i' }
+
+    const [summaryMatches, keyMatches] = await Promise.all([
+      issues
+        .find({ selector: { summary: summarySelector } })
+        .limit(30)
+        .exec(),
+      issues
+        .find({ selector: { key: keySelector } })
+        .limit(30)
+        .exec()
+    ])
+
+    return [...summaryMatches, ...keyMatches]
   }
 }
 

@@ -96,11 +96,12 @@ class TicketServiceImpl implements TicketService {
       return []
     }
 
-    if (!query.trim()) {
+    const normalizedQuery = query.trim()
+    if (!normalizedQuery) {
       return []
     }
 
-    const results = await jira.issues.getIssuePickerSuggestions(query)
+    const results = await jira.issues.searchIssuesByText(normalizedQuery)
     const uniqTickets = uniqBy(results, 'key')
 
     await this.database.collections.issues.bulkUpsert(uniqTickets)
