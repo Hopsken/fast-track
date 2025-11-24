@@ -16,6 +16,6 @@ export type IssueCollection = RxCollection<
 
 export const issueCollectionMethods: IssueCollectionMethods = {
   async listAll(this: IssueCollection) {
-    return this.find().exec()
+    return this.find().sort({ isInProgress: 'desc', updated: 'desc' }).exec()
   }
 }

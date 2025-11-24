@@ -93,7 +93,11 @@ class SearchServiceImpl implements SearchService {
     const { issues } = this.database.collections
 
     if (!query) {
-      return issues.find().sort({ updated: 'desc' }).limit(30).exec()
+      return issues
+        .find()
+        .sort({ isInProgress: 'desc', updated: 'desc' })
+        .limit(30)
+        .exec()
     }
 
     const escaped = escapeRegExp(query)

@@ -31,12 +31,14 @@
 - Content scripts: `apps/extension/src/entrypoints/*.content.ts` use `PageObserver` for Jira SPA changes.
 - Search: RxJS-based orchestration (debounce/cancel), results persisted via typed `storage/`.
 - State: Lightweight slices in `stores/` (Zustand); UI stays dumb, logic in hooks/services.
+- Authentication: OAuth is preferred; API key auth is available for Jira sites without OAuth. Persist via `AuthType`, `OAuthTokens`/`OAuthUserInfo`, and `ApiKeyAuth` with a normalized `JiraHost`. Clear incompatible creds when switching methods; never log keys or tokens.
 
 ## Testing Guidelines
 
-- Current status: No test runner configured. If adding tests, prefer Vitest + React Testing Library.
+- Tests run with Vitest; prefer React Testing Library for components.
 - Naming: Place tests next to code as `*.test.ts`/`*.test.tsx` (ESLint is configured to recognize these).
 - Scope: Unit-test utilities, services, and complex hooks; keep tests deterministic.
+- On code changes, run `pnpm lint` and unit tests with `pnpm test`.
 
 ## Commit & Pull Request Guidelines
 

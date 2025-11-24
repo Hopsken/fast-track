@@ -1,33 +1,34 @@
 import React from 'react'
-import {
-  HiCog6Tooth as Settings
-  // HiArrowTopRightOnSquare as ExternalLink
-} from 'react-icons/hi2'
+import { LuPower } from 'react-icons/lu'
 
 import { JiraUserInfo } from '@/types'
 
 export interface JiraConnectionCardProps {
   user: JiraUserInfo
   authMethod?: 'oauth' | 'apiKey'
-  onSettings?: () => void
+  jiraHost?: string
   onDisconnect?: () => void
 }
 
 export const JiraConnectionCard: React.FC<JiraConnectionCardProps> = ({
   user,
   authMethod,
-  onSettings,
+  jiraHost,
   onDisconnect
 }) => {
-  // const displayAccountId =
-  //   user.accountId.length > 10
-  //     ? `${user.accountId.substring(0, 8)}...`
-  //     : user.accountId
+  const hostname = React.useMemo(() => {
+    if (!jiraHost) return ''
+    try {
+      return new URL(jiraHost).hostname
+    } catch {
+      return jiraHost
+    }
+  }, [jiraHost])
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-6">
       {/* User Info Section */}
-      <div className="mb-6 flex items-start justify-between">
+      <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           {/* Avatar */}
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-orange-600">
@@ -49,90 +50,48 @@ export const JiraConnectionCard: React.FC<JiraConnectionCardProps> = ({
           </div>
 
           {/* User Details */}
-          <div>
+          <div className="space-y-1">
             <h3 className="text-lg font-semibold text-gray-900">{user.name}</h3>
             <p className="text-sm text-gray-600">{user.email}</p>
           </div>
         </div>
 
-        {/* Connected Badge */}
-        <div className="flex items-center gap-2">
-          <div className="rounded-full bg-green-100 px-3 py-1">
-            <span className="text-sm font-medium text-green-800">
-              Connected
-            </span>
-          </div>
-          {authMethod ? (
-            <div className="rounded-full bg-blue-100 px-3 py-1">
-              <span className="text-sm font-medium text-blue-800">
-                {authMethod === 'apiKey' ? 'API key' : 'OAuth'}
-              </span>
-            </div>
-          ) : null}
-        </div>
-      </div>
-
-      {/* Workspace Info */}
-      {/* <div className="mb-6 space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700">
-            Jira Instance
-          </span>
+        <div className="flex flex-col items-end gap-1">
+          {/* Status Row */}
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-900">
-              {workspace.name}
-            </span>
-            {workspace.url && (
-              <button
-                onClick={() =>
-                  workspace.url && window.open(workspace.url, '_blank')
-                }
-                className="text-gray-400 hover:text-gray-600"
-                title="Open workspace">
-                <ExternalLink className="h-4 w-4" />
-              </button>
-            )}
+            <div className="group relative">
+              <div
+                className="rounded-full bg-green-100 px-3 py-1"
+                aria-label="Connected">
+                <span className="text-sm font-medium text-green-800">
+                  Connected
+                </span>
+              </div>
+              {hostname ? (
+                <div className="pointer-events-none absolute top-full right-0 mt-1 hidden rounded-md bg-gray-900 px-2 py-1 text-xs whitespace-nowrap text-white shadow-lg group-hover:block">
+                  Connected to {hostname}
+                </div>
+              ) : null}
+            </div>
+            {authMethod ? (
+              <div className="rounded-full bg-blue-100 px-3 py-1">
+                <span className="text-sm font-medium text-blue-800">
+                  {authMethod === 'apiKey' ? 'API key' : 'OAuth'}
+                </span>
+              </div>
+            ) : null}
+            <button
+              onClick={onDisconnect}
+              aria-label="Disconnect"
+              className="group flex items-center gap-1 rounded-full border border-transparent px-2.5 py-1.5 text-sm font-medium text-red-700 hover:border-red-200 hover:bg-red-50 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none">
+              <LuPower className="h-4 w-4" />
+              <span className="max-w-0 overflow-hidden opacity-0 transition-all duration-200 group-hover:max-w-xs group-hover:opacity-100">
+                Disconnect
+              </span>
+            </button>
           </div>
         </div>
-
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700">Account ID</span>
-          <span className="text-sm text-gray-900">{displayAccountId}</span>
-        </div>
-      </div> */}
-
-      {/* Action Buttons */}
-      <div className="mb-4 flex gap-3">
-        <button
-          onClick={onSettings}
-          className="flex flex-1 items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none">
-          <Settings className="h-4 w-4" />
-          Settings
-        </button>
-
-        <button
-          onClick={onDisconnect}
-          className="flex flex-1 items-center justify-center gap-2 rounded-md border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none">
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-            />
-          </svg>
-          Disconnect
-        </button>
       </div>
-
-      {/* Footer Message */}
-      <p className="text-center text-sm text-gray-500">
-        Extension is ready to enhance your Jira experience
-      </p>
     </div>
   )
 }

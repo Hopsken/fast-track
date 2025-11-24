@@ -6,7 +6,7 @@ import { cn } from '~/lib/utils'
 import { FormItem, FormLabel, FormControl, FormDescription } from '../form'
 
 const formFieldVariants = cva(
-  'flex items-center gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-colors',
+  'flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-colors',
   {
     variants: {
       size: {
@@ -63,7 +63,7 @@ export function FormField(props: PropsWithChildren<FormFieldProps>) {
             {description}
           </FormDescription>
         </div>
-        <div className="flex flex-none items-center justify-center">
+        <div className="flex flex-none items-start justify-center">
           <FormControl>{children}</FormControl>
         </div>
       </div>
