@@ -13,11 +13,11 @@ export default defineProject({
     name: 'extension',
     environment: 'jsdom',
     globals: true,
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
-    server: {
-      deps: {
-        inline: ['lodash-es']
-      }
-    }
+    include: ['src/**/*.{test,spec}.{ts,tsx}']
+    // server: {
+    //   deps: {
+    //     inline: ['lodash-es']
+    //   }
+    // }
   }
 })
