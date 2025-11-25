@@ -27,7 +27,6 @@ export type { TicketService } from './interface'
 class TicketServiceImpl implements TicketService {
   private database: Database
   private jiraFactory: () => Promise<JiraAPI | null>
-  private suggestionService: TicketSuggestionService
   readonly suggestions: TicketSuggestionsAPI
 
   private lastSyncStorage = getStorageItem('LastSyncAt')
@@ -38,14 +37,7 @@ class TicketServiceImpl implements TicketService {
   ) {
     this.jiraFactory = jiraApiFactory
     this.database = database
-    this.suggestionService = new TicketSuggestionService(this, database)
-    this.suggestions = {
-      refresh: (reason, options) =>
-        this.suggestionService.refreshSuggestions(reason, options),
-      onAuthSuccess: () => this.suggestionService.handleAuthSuccess(),
-      getCached: (limit) => this.suggestionService.getCachedSuggestions(limit),
-      getLastRefreshMeta: () => this.suggestionService.getLastRefreshMeta()
-    }
+    this.suggestions = new TicketSuggestionService(this, database)
   }
 
   private async getJira(): Promise<JiraAPI | null> {

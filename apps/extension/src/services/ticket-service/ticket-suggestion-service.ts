@@ -10,20 +10,6 @@ export type SuggestionRefreshOptions = {
   force?: boolean
 }
 
-export interface TicketSuggestionServiceAPI {
-  refreshSuggestions(
-    reason: SuggestionRefreshReason,
-    options?: SuggestionRefreshOptions
-  ): Promise<JiraTicket[]>
-  handleAuthSuccess(): Promise<JiraTicket[]>
-  getCachedSuggestions(limit?: number): Promise<JiraTicket[]>
-  getLastRefreshMeta(): {
-    at: number | null
-    reason: SuggestionRefreshReason | null
-  }
-  isConfigured(): Promise<boolean>
-}
-
 export type TicketSuggestionsAPI = {
   refresh(
     reason: SuggestionRefreshReason,
@@ -37,7 +23,7 @@ export type TicketSuggestionsAPI = {
   }
 }
 
-export class TicketSuggestionService implements TicketSuggestionServiceAPI {
+export class TicketSuggestionService implements TicketSuggestionsAPI {
   private isRefreshing = false
   private lastRefreshAt: number | null = null
   private lastReason: SuggestionRefreshReason | null = null
@@ -47,11 +33,11 @@ export class TicketSuggestionService implements TicketSuggestionServiceAPI {
     private database: Database
   ) {}
 
-  async isConfigured() {
+  private async isConfigured() {
     return this.ticketService.isConfigured()
   }
 
-  async refreshSuggestions(
+  async refresh(
     reason: SuggestionRefreshReason,
     options: SuggestionRefreshOptions = {}
   ): Promise<JiraTicket[]> {
@@ -61,7 +47,7 @@ export class TicketSuggestionService implements TicketSuggestionServiceAPI {
       console.info(
         `TicketSuggestionService: Skip ${reason} refresh, another run is active`
       )
-      return this.getCachedSuggestions()
+      return this.getCached()
     }
 
     const configured = await this.ticketService.isConfigured()
@@ -69,7 +55,7 @@ export class TicketSuggestionService implements TicketSuggestionServiceAPI {
       console.info(
         `TicketSuggestionService: Skip ${reason} refresh, Jira not configured`
       )
-      return this.getCachedSuggestions()
+      return this.getCached()
     }
 
     this.isRefreshing = true
@@ -84,20 +70,20 @@ export class TicketSuggestionService implements TicketSuggestionServiceAPI {
         fetchedAt: this.lastRefreshAt
       })
 
-      return this.getCachedSuggestions()
+      return this.getCached()
     } catch (error) {
       console.error('TicketSuggestionService: refresh failed', error)
-      return this.getCachedSuggestions()
+      return this.getCached()
     } finally {
       this.isRefreshing = false
     }
   }
 
-  async handleAuthSuccess(): Promise<JiraTicket[]> {
-    return this.refreshSuggestions('auth', { force: true })
+  onAuthSuccess() {
+    return this.refresh('auth', { force: true })
   }
 
-  async getCachedSuggestions(limit = 30): Promise<JiraTicket[]> {
+  getCached(limit = 30) {
     const { issues } = this.database.collections
     return issues
       .find()
