@@ -79,7 +79,7 @@ class TicketServiceImpl implements TicketService {
 
     const results = await concatPromises([
       jira.issues.getMyUnresolvedIssues(10),
-      jira.issues.getRecentHistoryIssues(10),
+      jira.issues.getRecentHistoryIssues(20),
       jira.issues.getMyRecentDoneIssues(10),
       jira.issues.getMyWatchingIssues(10)
       // TODO add sprint tickets
