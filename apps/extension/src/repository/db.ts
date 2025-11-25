@@ -64,9 +64,9 @@ export async function getDatabase(): Promise<Database> {
     }
   })
 
-  if (import.meta.env.DEV) {
-    self.db = database
-  }
+  // if (import.meta.env.DEV) {
+  self.db = database
+  // }
 
   return database
 }
