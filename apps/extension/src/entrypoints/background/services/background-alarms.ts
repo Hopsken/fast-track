@@ -1,6 +1,6 @@
 import { Browser, browser } from '#imports'
 
-import { TicketSuggestionServiceAPI } from '@/services/ticket-suggestion-service'
+import { TicketService } from '@/services/ticket-service'
 
 export interface AlarmConfig {
   name: string
@@ -12,7 +12,7 @@ export class BackgroundAlarmsService {
   private alarms: AlarmConfig[] = []
   private readonly boundHandleAlarm = this.handleAlarm.bind(this)
 
-  constructor(private ticketSuggestionService: TicketSuggestionServiceAPI) {
+  constructor(private ticketService: TicketService) {
     this.setupAlarms()
   }
 
@@ -54,7 +54,7 @@ export class BackgroundAlarmsService {
 
     try {
       // Check if authentication is configured
-      const hasValidConfig = await this.ticketSuggestionService.isConfigured()
+      const hasValidConfig = await this.ticketService.isConfigured()
       if (!hasValidConfig) {
         console.info(`Skipping ${alarm.name} - authentication not configured`)
         return
@@ -69,11 +69,11 @@ export class BackgroundAlarmsService {
   }
 
   private async refreshRecentTickets() {
-    await this.ticketSuggestionService.refreshSuggestions('alarm')
+    await this.ticketService.suggestions.refresh('alarm')
   }
 
   private async runInitialRefresh() {
-    const hasValidConfig = await this.ticketSuggestionService.isConfigured()
+    const hasValidConfig = await this.ticketService.isConfigured()
     if (!hasValidConfig) {
       console.info('Skipping initial refresh - authentication not configured')
       return

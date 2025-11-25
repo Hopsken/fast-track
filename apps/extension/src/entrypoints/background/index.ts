@@ -8,7 +8,6 @@ import { defineBackground } from '#imports'
 import { getJiraApi } from '@/lib/jira'
 import { getDatabase } from '@/repository'
 import { registerSearchService } from '@/services/search-service'
-import { registerTicketSuggestionService } from '@/services/ticket-suggestion-service'
 import { registerAuthService } from '~/services/auth-service'
 import { registerTicketService } from '~/services/ticket-service'
 
@@ -26,17 +25,11 @@ export default defineBackground(() => {
 
         // Initialize proxy services
         const ticketService = registerTicketService(getJiraApi, database)
-        const ticketSuggestionService = registerTicketSuggestionService(
-          ticketService,
-          database
-        )
         registerSearchService(database, ticketService)
-        registerAuthService(database, ticketSuggestionService)
+        registerAuthService(database, ticketService)
 
         // Initialize alarms service
-        const alarmsService = new BackgroundAlarmsService(
-          ticketSuggestionService
-        )
+        const alarmsService = new BackgroundAlarmsService(ticketService)
         return Promise.all([alarmsService.initialize()])
       })
       .catch((error) => {

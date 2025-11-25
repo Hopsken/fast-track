@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 
-import { getTicketSuggestionService } from '@/services/ticket-suggestion-service'
+import { getTicketService } from '@/services/ticket-service'
 
 export function DevRefreshSuggestionsButton() {
   const [refreshing, setRefreshing] = useState(false)
@@ -10,7 +10,7 @@ export function DevRefreshSuggestionsButton() {
 
     try {
       setRefreshing(true)
-      await getTicketSuggestionService().refreshSuggestions('manual', {
+      await getTicketService().suggestions.refresh('manual', {
         force: true
       })
     } catch (error) {

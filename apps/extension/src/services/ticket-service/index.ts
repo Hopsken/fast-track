@@ -13,12 +13,11 @@ import { JiraTicket } from '@/types'
 import { concatPromises } from '@/utils/promise'
 import { JiraAPI } from '~/lib/jira'
 
-export interface TicketService {
-  fetchTicketDetails(ticketKeys: string[]): Promise<JiraTicket[]>
-  loadSuggestions(force?: boolean): Promise<JiraTicket[]>
-  searchTickets(query: string): Promise<JiraTicket[]>
-  isConfigured(): Promise<boolean>
-}
+import { TicketService } from './interface'
+import {
+  TicketSuggestionService,
+  TicketSuggestionsAPI
+} from './ticket-suggestion-service'
 
 /**
  * Ticket service implementation
@@ -26,6 +25,8 @@ export interface TicketService {
 class TicketServiceImpl implements TicketService {
   private database: Database
   private jiraFactory: () => Promise<JiraAPI | null>
+  private suggestionService: TicketSuggestionService
+  readonly suggestions: TicketSuggestionsAPI
 
   private lastSyncStorage = getStorageItem('LastSyncAt')
 
@@ -35,6 +36,14 @@ class TicketServiceImpl implements TicketService {
   ) {
     this.jiraFactory = jiraApiFactory
     this.database = database
+    this.suggestionService = new TicketSuggestionService(this, database)
+    this.suggestions = {
+      refresh: (reason, options) =>
+        this.suggestionService.refreshSuggestions(reason, options),
+      onAuthSuccess: () => this.suggestionService.handleAuthSuccess(),
+      getCached: (limit) => this.suggestionService.getCachedSuggestions(limit),
+      getLastRefreshMeta: () => this.suggestionService.getLastRefreshMeta()
+    }
   }
 
   private async getJira(): Promise<JiraAPI | null> {

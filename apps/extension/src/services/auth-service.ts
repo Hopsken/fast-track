@@ -8,7 +8,7 @@ import { AuthApi } from '@/lib/jira/auth-api'
 import { getStorageItem } from '@/lib/storage'
 import { Database } from '@/repository'
 import { JiraApiKeyConfig, ReceivedTokenPayload, JiraUserInfo } from '@/types'
-import { TicketSuggestionServiceAPI } from '~/services/ticket-suggestion-service'
+import { TicketService } from '~/services/ticket-service'
 
 export interface AuthService {
   receiveTokens(tokens: ReceivedTokenPayload): Promise<JiraUserInfo>
@@ -41,7 +41,7 @@ class AuthServiceImpl implements AuthService {
 
   constructor(
     private database: Database,
-    private ticketSuggestionService?: TicketSuggestionServiceAPI
+    private ticketService?: TicketService
   ) {}
 
   public async receiveTokens(
@@ -115,10 +115,10 @@ class AuthServiceImpl implements AuthService {
   }
 
   private async primeSuggestionsAfterAuth() {
-    if (!this.ticketSuggestionService) return
+    if (!this.ticketService) return
 
     try {
-      await this.ticketSuggestionService.handleAuthSuccess()
+      await this.ticketService.suggestions.onAuthSuccess()
     } catch (error) {
       console.error(
         'AuthService: failed to prefetch suggestions after auth',
@@ -155,9 +155,9 @@ class AuthServiceImpl implements AuthService {
 
 export const [registerAuthService, getAuthService] = defineProxyService<
   AuthService,
-  [Database, TicketSuggestionServiceAPI?]
+  [Database, TicketService?]
 >(
   'AuthService',
-  (database: Database, ticketSuggestionService?: TicketSuggestionServiceAPI) =>
-    new AuthServiceImpl(database, ticketSuggestionService)
+  (database: Database, ticketService?: TicketService) =>
+    new AuthServiceImpl(database, ticketService)
 )

@@ -1,21 +1,19 @@
-import { defineProxyService } from '@webext-core/proxy-service'
-
 import { Database } from '@/repository'
 import { JiraTicket } from '@/types'
 import { sendMessage } from '~/lib/message'
 
-import { TicketService } from './ticket-service'
+import type { TicketService } from './interface'
 
 export type SuggestionRefreshReason = 'auth' | 'alarm' | 'manual' | 'startup'
 
-type RefreshOptions = {
+export type SuggestionRefreshOptions = {
   force?: boolean
 }
 
 export interface TicketSuggestionServiceAPI {
   refreshSuggestions(
     reason: SuggestionRefreshReason,
-    options?: RefreshOptions
+    options?: SuggestionRefreshOptions
   ): Promise<JiraTicket[]>
   handleAuthSuccess(): Promise<JiraTicket[]>
   getCachedSuggestions(limit?: number): Promise<JiraTicket[]>
@@ -24,6 +22,19 @@ export interface TicketSuggestionServiceAPI {
     reason: SuggestionRefreshReason | null
   }
   isConfigured(): Promise<boolean>
+}
+
+export type TicketSuggestionsAPI = {
+  refresh(
+    reason: SuggestionRefreshReason,
+    options?: SuggestionRefreshOptions
+  ): Promise<JiraTicket[]>
+  onAuthSuccess(): Promise<JiraTicket[]>
+  getCached(limit?: number): Promise<JiraTicket[]>
+  getLastRefreshMeta(): {
+    at: number | null
+    reason: SuggestionRefreshReason | null
+  }
 }
 
 export class TicketSuggestionService implements TicketSuggestionServiceAPI {
@@ -42,7 +53,7 @@ export class TicketSuggestionService implements TicketSuggestionServiceAPI {
 
   async refreshSuggestions(
     reason: SuggestionRefreshReason,
-    options: RefreshOptions = {}
+    options: SuggestionRefreshOptions = {}
   ): Promise<JiraTicket[]> {
     const { force = false } = options
 
@@ -102,10 +113,3 @@ export class TicketSuggestionService implements TicketSuggestionServiceAPI {
     }
   }
 }
-
-export const [registerTicketSuggestionService, getTicketSuggestionService] =
-  defineProxyService<TicketSuggestionServiceAPI, [TicketService, Database]>(
-    'TicketSuggestionService',
-    (ticketService: TicketService, database: Database) =>
-      new TicketSuggestionService(ticketService, database)
-  )

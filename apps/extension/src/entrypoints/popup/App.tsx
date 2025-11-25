@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { HiCog } from 'react-icons/hi'
 
-import { getTicketSuggestionService } from '@/services/ticket-suggestion-service'
+import { getTicketService } from '@/services/ticket-service'
 import { JiraTicket } from '@/types'
 import { DevOnly } from '~/components/DevOnly'
 import { DevRefreshSuggestionsButton } from '~/components/DevRefreshSuggestionsButton'
@@ -23,7 +23,7 @@ function App() {
 
   // Initialize search orchestration
   useEffect(() => {
-    getTicketSuggestionService().refreshSuggestions('startup')
+    getTicketService().suggestions.refresh('startup')
   }, [])
 
   useEffect(() => {
