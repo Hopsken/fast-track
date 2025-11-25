@@ -20,6 +20,7 @@ type StorageItems = {
   OAuthUserInfo: JiraUserInfo | null
   ApiKeyAuth: JiraApiKeyConfig | null
   LastSyncAt: string | null
+  DevMode: boolean
 }
 
 export type StorageKey = keyof StorageItems
@@ -36,7 +37,8 @@ const STORAGE_DEFAULTS: StorageItems = {
   OAuthTokens: null,
   OAuthUserInfo: null,
   ApiKeyAuth: null,
-  LastSyncAt: null
+  LastSyncAt: null,
+  DevMode: false
 }
 
 // Enhanced storage key groups with logical organization
