@@ -20,7 +20,7 @@ export class BackgroundAlarmsService {
     this.alarms = [
       {
         name: 'refresh-recent-tickets',
-        periodInMinutes: 15,
+        periodInMinutes: 10,
         handler: this.refreshRecentTickets.bind(this)
       }
     ]

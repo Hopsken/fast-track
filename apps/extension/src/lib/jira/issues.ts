@@ -179,6 +179,20 @@ export class JiraIssueService {
     )
   }
 
+  async getMyUnresolvedIssues(limit = 20): Promise<JiraTicket[]> {
+    return this.searchIssuesUsingJql(
+      'assignee = currentUser() AND resolution = Unresolved ORDER BY updated DESC',
+      limit
+    )
+  }
+
+  async getRecentHistoryIssues(limit = 10): Promise<JiraTicket[]> {
+    return this.searchIssuesUsingJql(
+      'issue in issueHistory() ORDER BY lastViewed DESC, updated DESC',
+      limit
+    )
+  }
+
   /**
    * Fetches multiple issues using bulk API with functional patterns
    */
@@ -293,6 +307,7 @@ export class JiraIssueService {
       boardName: issue.fields?.project?.name || '',
       url: jiraWebUrl,
       isInProgress,
+      sources: [],
       lastViewed: issue.fields.lastViewed
         ? toISODateString(issue.fields.lastViewed)
         : null,

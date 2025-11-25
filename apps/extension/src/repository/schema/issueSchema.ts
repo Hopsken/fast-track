@@ -5,7 +5,7 @@ import { JiraTicket } from '@/types'
 export const issueSchema: RxJsonSchema<JiraTicket> = {
   title: 'Issue schema',
   description: 'Jira issue',
-  version: 1,
+  version: 0,
   // keyCompression: true,
   primaryKey: 'key',
   type: 'object',
@@ -102,6 +102,13 @@ export const issueSchema: RxJsonSchema<JiraTicket> = {
     isInProgress: {
       type: 'boolean',
       default: false
+    },
+    sources: {
+      type: 'array',
+      items: {
+        type: 'string'
+      },
+      default: []
     },
     lastViewed: {
       type: ['string', 'null'],

@@ -11,4 +11,11 @@
   - [ ] Switch remote search to JQL-based issue search.
   - [ ] Rank search results by how closely they match the query sentence.
   - [ ] For empty queries, surface the most recently started in-progress tickets first.
+- [ ] Caching strategy for fast popup access (layered: Me → Now → Predictive):
+  - [x] Seed cache with top 10 `issue in issueHistory()` (recently viewed) and refresh on popup open.
+  - [x] Keep top 20 `assignee = currentUser() AND resolution = Unresolved` refreshed every 5–10 minutes.
+  - [ ] Infer primary projects (score by: my unresolved tickets > recent history > current tab URL) to drive sprint selection.
+  - [ ] Optionally pull active sprint tickets (key, summary, status, assignee only) for the inferred project(s); lazy-load details on demand.
+  - [ ] Add page-sniff prefetch: detect `[A-Z]+-\\d+` keys in the active tab and prefetch/cache them.
+- [x] RxDB issues schema: add `sources: string[]` to track origins (e.g., `history`, `sprint`, `sniff`) for future scoring of suggestions.
 - [ ] Run launch QA: `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, plus manual smoke for connect → search → open issue, omnibox shortcut, and browser restart persistence.

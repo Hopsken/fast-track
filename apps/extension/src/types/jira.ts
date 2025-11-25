@@ -27,6 +27,8 @@ export interface JiraPriority {
   iconUrl: string
 }
 
+export type IssueSource = 'history' | 'sprint' | 'sniff' | 'picker' | 'watching'
+
 export interface JiraTicket {
   id: string
   key: string
@@ -39,6 +41,7 @@ export interface JiraTicket {
   boardName: string
   url: string
   isInProgress: boolean
+  sources: IssueSource[]
 
   lastViewed: string | null
   created: string

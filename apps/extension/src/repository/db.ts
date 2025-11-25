@@ -50,17 +50,12 @@ export async function getDatabase(): Promise<Database> {
     closeDuplicates: true
   })
 
-  database.addCollections({
+  await database.addCollections({
     issues: {
       schema: issueSchema,
       methods: issueDocMethods,
-      statics: issueCollectionMethods,
-      migrationStrategies: {
-        1: async (oldDoc) => ({
-          ...oldDoc,
-          isInProgress: oldDoc.isInProgress ?? false
-        })
-      }
+      autoMigrate: true,
+      statics: issueCollectionMethods
     }
   })
 

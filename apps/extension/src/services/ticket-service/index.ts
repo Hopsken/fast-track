@@ -9,7 +9,7 @@ import { uniqBy } from 'lodash-es'
 
 import { getStorageItem } from '@/lib/storage'
 import { Database } from '@/repository'
-import { JiraTicket } from '@/types'
+import { IssueSource, JiraTicket } from '@/types'
 import { concatPromises } from '@/utils/promise'
 import { JiraAPI } from '~/lib/jira'
 
@@ -86,13 +86,21 @@ class TicketServiceImpl implements TicketService {
     }
 
     const results = await concatPromises([
-      jira.issues.getIssuePickerSuggestions(),
+      jira.issues.getMyUnresolvedIssues(),
+      jira.issues
+        .getRecentHistoryIssues()
+        .then((tickets) => this.addSource(tickets, 'history')),
+      jira.issues
+        .getIssuePickerSuggestions()
+        .then((tickets) => this.addSource(tickets, 'picker')),
       jira.issues.getMyInProgressIssues(),
       jira.issues.getMyRecentDoneIssues(),
-      jira.issues.getMyWatchingIssues()
+      jira.issues
+        .getMyWatchingIssues()
+        .then((tickets) => this.addSource(tickets, 'watching'))
     ])
 
-    const uniqTickets = uniqBy(results, 'key')
+    const uniqTickets = this.mergeTicketsByKey(results)
 
     await this.database.collections.issues.bulkUpsert(uniqTickets)
 
@@ -134,7 +142,39 @@ class TicketServiceImpl implements TicketService {
   }
 
   async isConfigured() {
+    console.info('TicketService: isConfigured checked')
     return (await this.getJira()) != null
+  }
+
+  private addSource(tickets: JiraTicket[], source: IssueSource) {
+    return tickets.map((ticket) => ({
+      ...ticket,
+      sources: Array.from(
+        new Set([...(ticket.sources || []), source])
+      ) as IssueSource[]
+    }))
+  }
+
+  private mergeTicketsByKey(tickets: JiraTicket[]) {
+    const ticketsByKey = new Map<string, JiraTicket>()
+
+    tickets.forEach((ticket) => {
+      const existing = ticketsByKey.get(ticket.key)
+      if (!existing) {
+        ticketsByKey.set(ticket.key, ticket)
+        return
+      }
+
+      ticketsByKey.set(ticket.key, {
+        ...existing,
+        ...ticket,
+        sources: Array.from(
+          new Set([...(existing.sources || []), ...(ticket.sources || [])])
+        ) as IssueSource[]
+      })
+    })
+
+    return Array.from(ticketsByKey.values())
   }
 }
 
