@@ -20,6 +20,8 @@ export function ActionsMenu(props: ActionsMenuProps) {
 
 function ActionsMenuContent({ selectedTicket, onClose }: ActionsMenuProps) {
   const [isActionsOpen, setIsActionsOpen] = useState(false)
+  const [menuMounted, setMenuMounted] = useState(false)
+  const [menuState, setMenuState] = useState<'open' | 'closed'>('closed')
   const [actionQuery, setActionQuery] = useState('')
   const [activeActionIndex, setActiveActionIndex] = useState(0)
 
@@ -63,7 +65,9 @@ function ActionsMenuContent({ selectedTicket, onClose }: ActionsMenuProps) {
 
   const closeMenu = useMemoizedFn(() => {
     setIsActionsOpen(false)
+    setMenuState('closed')
     onClose?.()
+    setTimeout(() => setMenuMounted(false), 180)
   })
 
   const toggleActionsMenu = useMemoizedFn(() => {
@@ -72,15 +76,19 @@ function ActionsMenuContent({ selectedTicket, onClose }: ActionsMenuProps) {
       if (next) {
         setActionQuery('')
         setActiveActionIndex(0)
+        setMenuMounted(true)
+        setMenuState('open')
       } else {
+        setMenuState('closed')
         onClose?.()
+        setTimeout(() => setMenuMounted(false), 180)
       }
       return next
     })
   })
 
   // Global hotkey for opening the actions menu (Cmd/Ctrl + K)
-  useHotkeys(['cmd+k', 'ctrl+k'], toggleActionsMenu, {
+  useHotkeys(['meta+k', 'ctrl+k'], toggleActionsMenu, {
     preventDefault: true,
     enableOnFormTags: ['INPUT']
   })
@@ -164,40 +172,30 @@ function ActionsMenuContent({ selectedTicket, onClose }: ActionsMenuProps) {
   )
 
   return (
-    <div
-      className={`dropdown dropdown-end ${isActionsOpen ? 'dropdown-open' : ''} relative`}>
+    <div className={`relative font-medium`}>
       <button
         ref={actionButtonRef}
         onClick={toggleActionsMenu}
-        className="btn btn-ghost btn-xs h-auto min-h-0 gap-2 rounded-md px-3 py-2 text-[11px] font-semibold normal-case"
+        className={`btn btn-ghost btn-xs gap-2 ${isActionsOpen ? 'btn-active' : ''}`}
         title="Open actions (Cmd+K)">
         <span className="tracking-wide">Actions</span>
         <span className="kbd kbd-xs font-semibold">⌘K</span>
       </button>
 
-      {isActionsOpen ? (
+      {menuMounted ? (
         <div
           ref={actionsMenuRef}
-          className="dropdown-content menu bg-base-100 absolute right-0 bottom-12 z-20 w-80 rounded-2xl border shadow-xl">
-          <div className="flex h-72 flex-col">
-            <div className="space-y-1 border-b px-4 py-3">
-              <div className="text-base-content/70 text-xs font-semibold">
-                Quick actions
-              </div>
-              <div className="text-base-content/60 flex items-center justify-between text-xs">
-                <span className="font-semibold">{selectedTicket.key}</span>
-                <span className="kbd kbd-xs font-semibold uppercase">
-                  Enter
-                </span>
-              </div>
+          data-state={menuState}
+          className="dropdown-content actions-menu-animate text-base-content border-base-200 glass rounded-box absolute right-0 bottom-10 z-20 w-80 border shadow-xl">
+          <div className="flex h-60 flex-col">
+            <div className="p-3">
+              <span className="font-medium">{selectedTicket.key}</span>
             </div>
 
-            <ul className="menu menu-sm flex-1 gap-2 overflow-y-auto px-2 py-2">
+            <ul className="menu menu-sm w-full flex-1 gap-2 overflow-y-auto border-t border-gray-200 px-2 py-2 font-medium">
               {filteredActions.length === 0 ? (
                 <li className="w-full">
-                  <div className="alert alert-ghost border border-dashed px-3 py-4 text-center text-[11px] font-medium">
-                    No actions match “{actionQuery}”
-                  </div>
+                  <div className="text-md text-center">No results</div>
                 </li>
               ) : (
                 filteredActions.map((action, index) => {
@@ -211,18 +209,14 @@ function ActionsMenuContent({ selectedTicket, onClose }: ActionsMenuProps) {
                           action.perform()
                           closeMenu()
                         }}
-                        className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors duration-150 ${
-                          isActive
-                            ? 'bg-base-200 text-base-content'
-                            : 'bg-base-100 text-base-content hover:bg-base-200'
+                        className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm ${
+                          isActive && 'menu-focus'
                         }`}>
                         <div className="flex items-center gap-2">
                           <HiClipboardCopy className="h-4 w-4 opacity-70" />
-                          <span className="font-semibold">{action.label}</span>
+                          <span>{action.label}</span>
                         </div>
-                        <span className="kbd kbd-xs font-semibold uppercase">
-                          ↵
-                        </span>
+                        <span className="kbd kbd-xs uppercase">↵</span>
                       </button>
                     </li>
                   )
@@ -230,16 +224,14 @@ function ActionsMenuContent({ selectedTicket, onClose }: ActionsMenuProps) {
               )}
             </ul>
 
-            <div className="border-t px-3 py-2">
-              <div className="input input-bordered focus-within:ring-base-200 flex items-center gap-2 rounded-lg px-3 py-2 text-xs focus-within:ring-1">
-                <input
-                  ref={actionInputRef}
-                  value={actionQuery}
-                  onChange={(event) => setActionQuery(event.target.value)}
-                  placeholder="Search for actions..."
-                  className="placeholder-base-content/50 w-full border-0 bg-transparent px-0 text-sm font-medium focus:outline-none"
-                />
-              </div>
+            <div className="flex items-center border-t border-gray-200">
+              <input
+                ref={actionInputRef}
+                value={actionQuery}
+                onChange={(event) => setActionQuery(event.target.value)}
+                placeholder="Search for actions..."
+                className="input input-ghost placeholder-base-content/50 w-full border-0 py-2 pl-3 text-sm caret-current focus:bg-transparent focus:outline-none"
+              />
             </div>
           </div>
         </div>
