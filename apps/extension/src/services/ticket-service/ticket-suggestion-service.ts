@@ -37,10 +37,10 @@ export class TicketSuggestionService implements TicketSuggestionsAPI {
     return this.ticketService.isConfigured()
   }
 
-  async refresh(
+  refresh = async (
     reason: SuggestionRefreshReason,
     options: SuggestionRefreshOptions = {}
-  ): Promise<JiraTicket[]> {
+  ) => {
     const { force = false } = options
 
     if (this.isRefreshing) {
