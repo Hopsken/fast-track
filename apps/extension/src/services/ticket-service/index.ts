@@ -78,18 +78,11 @@ class TicketServiceImpl implements TicketService {
     }
 
     const results = await concatPromises([
-      jira.issues.getMyUnresolvedIssues(),
-      jira.issues
-        .getRecentHistoryIssues()
-        .then((tickets) => this.addSource(tickets, 'history')),
-      jira.issues
-        .getIssuePickerSuggestions()
-        .then((tickets) => this.addSource(tickets, 'picker')),
-      jira.issues.getMyInProgressIssues(),
-      jira.issues.getMyRecentDoneIssues(),
-      jira.issues
-        .getMyWatchingIssues()
-        .then((tickets) => this.addSource(tickets, 'watching'))
+      jira.issues.getMyUnresolvedIssues(10),
+      jira.issues.getRecentHistoryIssues(10),
+      jira.issues.getMyRecentDoneIssues(10),
+      jira.issues.getMyWatchingIssues(10)
+      // TODO add sprint tickets
     ])
 
     const uniqTickets = this.mergeTicketsByKey(results)
@@ -113,10 +106,10 @@ class TicketServiceImpl implements TicketService {
     }
 
     const results = await jira.issues.searchIssuesByText(normalizedQuery)
-    const uniqTickets = uniqBy(results, 'key')
-
-    await this.database.collections.issues.bulkUpsert(uniqTickets)
-    return uniqTickets
+    // skip cache search tickets for now since it contains a lot of noise tickets
+    // await this.database.collections.issues.bulkUpsert(uniqTickets)
+    // TODO: add user select tickets to cache
+    return uniqBy(results, 'key')
   }
 
   private async shouldSync(force = false) {
@@ -136,15 +129,6 @@ class TicketServiceImpl implements TicketService {
   async isConfigured() {
     console.info('TicketService: isConfigured checked')
     return (await this.getJira()) != null
-  }
-
-  private addSource(tickets: JiraTicket[], source: IssueSource) {
-    return tickets.map((ticket) => ({
-      ...ticket,
-      sources: Array.from(
-        new Set([...(ticket.sources || []), source])
-      ) as IssueSource[]
-    }))
   }
 
   private mergeTicketsByKey(tickets: JiraTicket[]) {

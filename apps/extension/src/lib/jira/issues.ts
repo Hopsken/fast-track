@@ -7,7 +7,7 @@ import type { Issue } from 'jira.js/version3/models/issue'
 import type { IssuePickerSuggestions } from 'jira.js/version3/models/issuePickerSuggestions'
 import { chunk, compact, flatMap, map } from 'lodash-es'
 
-import { JiraTicket } from '@/types'
+import { IssueSource, JiraTicket } from '@/types'
 
 import { toISODateString } from '../date'
 
@@ -125,11 +125,11 @@ export class JiraIssueService {
       const escapedValue = escapeJqlValue(value)
 
       clauses.add(`summary ~ "${escapedValue}"`)
-      clauses.add(`status ~ "${escapedValue}"`)
-      clauses.add(`issuetype ~ "${escapedValue}"`)
-      clauses.add(`priority ~ "${escapedValue}"`)
       clauses.add(`assignee = "${escapedValue}"`)
-      clauses.add(`text ~ "${escapedValue}"`)
+      // TODO: following fields are too vague to filter, may contain irrelevant issues, add until we can limit search to projects
+      // clauses.add(`status ~ "${escapedValue}"`)
+      // clauses.add(`issuetype ~ "${escapedValue}"`)
+      // clauses.add(`priority ~ "${escapedValue}"`)
     }
 
     const keyLike = /^[A-Za-z][A-Za-z0-9]+-\d+$/.test(trimmedQuery)
@@ -144,52 +144,54 @@ export class JiraIssueService {
     }
 
     const jql = `${Array.from(clauses).join(' OR ')} ORDER BY updated DESC`
-    return this.searchIssuesUsingJql(jql, maxResults)
+    return this.searchIssuesUsingJql(jql, { limit: maxResults })
   }
 
   private async searchIssuesUsingJql(
     jql: string,
-    maxResults?: number
+    options?: {
+      source?: IssueSource
+      limit?: number
+    }
   ): Promise<JiraTicket[]> {
+    const { source, limit = 30 } = options ?? {}
     const response =
       await this.client.issueSearch.searchForIssuesUsingJqlEnhancedSearchPost({
         jql,
         fields: issueFields,
-        maxResults
+        maxResults: limit
       })
 
-    return response.issues?.map((issue) => this.convertToTicket(issue)) ?? []
-  }
-
-  async getMyInProgressIssues(): Promise<JiraTicket[]> {
-    return this.searchIssuesUsingJql(
-      'assignee = currentUser() AND statusCategory = "In Progress" ORDER BY updated DESC'
+    return (
+      response.issues?.map((issue) => this.convertToTicket(issue, source)) ?? []
     )
   }
 
-  async getMyRecentDoneIssues(): Promise<JiraTicket[]> {
+  async getMyRecentDoneIssues(limit = 5): Promise<JiraTicket[]> {
     return this.searchIssuesUsingJql(
-      'assignee = currentUser() AND statusCategory = Done AND resolved >= -14d ORDER BY resolved DESC'
+      'assignee = currentUser() AND statusCategory = Done AND resolved >= -14d ORDER BY resolved DESC',
+      { limit }
     )
   }
 
-  async getMyWatchingIssues(): Promise<JiraTicket[]> {
+  async getMyWatchingIssues(limit = 5): Promise<JiraTicket[]> {
     return this.searchIssuesUsingJql(
-      'watcher = currentUser() ORDER BY updated DESC'
+      'watcher = currentUser() ORDER BY updated DESC',
+      { source: 'watching', limit }
     )
   }
 
   async getMyUnresolvedIssues(limit = 20): Promise<JiraTicket[]> {
     return this.searchIssuesUsingJql(
-      'assignee = currentUser() AND resolution = Unresolved ORDER BY updated DESC',
-      limit
+      'assignee = currentUser() AND statusCategory = "In Progress" ORDER BY updated DESC',
+      { limit }
     )
   }
 
   async getRecentHistoryIssues(limit = 10): Promise<JiraTicket[]> {
     return this.searchIssuesUsingJql(
       'issue in issueHistory() ORDER BY lastViewed DESC, updated DESC',
-      limit
+      { source: 'history', limit }
     )
   }
 
@@ -260,7 +262,7 @@ export class JiraIssueService {
   /**
    * Converts a jira.js Issue to internal ticket format
    */
-  private convertToTicket(issue: Issue): JiraTicket {
+  private convertToTicket(issue: Issue, source?: IssueSource): JiraTicket {
     const browseBaseUrl = this.client.getWebBaseUrl()
     const jiraWebUrl = browseBaseUrl
       ? `${browseBaseUrl}/browse/${issue.key}`
@@ -307,7 +309,7 @@ export class JiraIssueService {
       boardName: issue.fields?.project?.name || '',
       url: jiraWebUrl,
       isInProgress,
-      sources: [],
+      sources: source ? [source] : [],
       lastViewed: issue.fields.lastViewed
         ? toISODateString(issue.fields.lastViewed)
         : null,
