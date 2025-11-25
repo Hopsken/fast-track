@@ -10,11 +10,14 @@ import {
 } from 'rxjs'
 
 import { sendMessage } from '@/lib/message'
+import { fromStorage$ } from '@/lib/storage'
 import { Database } from '@/repository'
 import { JiraTicket } from '@/types'
 import { rankTickets } from '~/utils/ticket-ranking'
 
 import { TicketService } from './ticket-service'
+
+const DEFAULT_RESULT_LIMIT = 30
 
 export interface SearchService {
   initialize(): Promise<void>
@@ -24,11 +27,13 @@ export interface SearchService {
 class SearchServiceImpl implements SearchService {
   private search$ = new BehaviorSubject<string>('')
   private ready$ = new BehaviorSubject<boolean>(false)
+  private currentUserEmail: string | null = null
 
   constructor(
     private database: Database,
     private ticketService: TicketService
   ) {
+    this.setupUserWatcher()
     this.setupSearchListener()
   }
 
@@ -56,7 +61,9 @@ class SearchServiceImpl implements SearchService {
   private async handleSearch(query: string) {
     const normalizedQuery = query.trim()
     const cachedTickets = await this.searchStoredTickets(normalizedQuery)
-    const rankedCached = rankTickets(cachedTickets, normalizedQuery)
+    const rankedCached = normalizedQuery
+      ? rankTickets(cachedTickets, normalizedQuery)
+      : cachedTickets
 
     this.emitResults(query, rankedCached)
 
@@ -93,11 +100,7 @@ class SearchServiceImpl implements SearchService {
     const { issues } = this.database.collections
 
     if (!query) {
-      return issues
-        .find()
-        .sort({ isInProgress: 'desc', updated: 'desc' })
-        .limit(30)
-        .exec()
+      return this.getRecommendations()
     }
 
     const escaped = escapeRegExp(query)
@@ -116,8 +119,52 @@ class SearchServiceImpl implements SearchService {
           ]
         }
       })
-      .limit(30)
+      .limit(DEFAULT_RESULT_LIMIT)
       .exec()
+  }
+
+  private async getRecommendations() {
+    const { issues } = this.database.collections
+    const email = this.currentUserEmail
+
+    if (!email) {
+      return []
+    }
+
+    const assignedTickets = await issues
+      .find({
+        selector: {
+          'assignee.emailAddress': email
+        }
+      })
+      .sort({ isInProgress: 'desc', updated: 'desc' })
+      .limit(DEFAULT_RESULT_LIMIT)
+      .exec()
+
+    const remainingLimit = DEFAULT_RESULT_LIMIT - assignedTickets.length
+    if (remainingLimit <= 0) return assignedTickets
+
+    const otherTickets = await issues
+      .find({
+        selector: {
+          'assignee.emailAddress': {
+            $ne: email
+          }
+        }
+      })
+      .sort({ isInProgress: 'desc', updated: 'desc' })
+      .limit(remainingLimit)
+      .exec()
+
+    return [...assignedTickets, ...otherTickets]
+  }
+
+  private setupUserWatcher() {
+    fromStorage$('OAuthUserInfo').subscribe((userInfo) => {
+      this.currentUserEmail = userInfo?.email
+        ? userInfo.email.trim().toLowerCase()
+        : null
+    })
   }
 }
 
