@@ -7,8 +7,8 @@ module.exports = {
   useTabs: false,
   semi: false,
   singleQuote: true,
-  trailingComma: "none",
+  trailingComma: 'none',
   bracketSpacing: true,
   bracketSameLine: true,
-  plugins: [require.resolve("prettier-plugin-tailwindcss")]
+  plugins: [require.resolve('prettier-plugin-tailwindcss')]
 }

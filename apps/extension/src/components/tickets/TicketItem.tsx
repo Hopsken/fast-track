@@ -36,10 +36,10 @@ export function TicketItem({
 
   return (
     <div
-      className={`group flex cursor-pointer items-center gap-3 border-l-2 px-4 py-3 transition-all duration-200 ease-out hover:translate-x-1 ${
+      className={`group flex cursor-pointer items-center gap-3 border-l-2 px-4 py-3 transition-all duration-200 ease-out ${
         isSelected
           ? 'border-l-blue-400 bg-blue-50'
-          : 'border-l-transparent hover:border-l-gray-200 hover:bg-gray-50 hover:shadow-sm'
+          : 'border-l-transparent hover:border-l-gray-200 hover:bg-gray-100'
       }`}
       onClick={handleClick}
       onKeyDown={handleKeyDown}

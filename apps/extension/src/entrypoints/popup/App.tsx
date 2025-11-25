@@ -1,14 +1,15 @@
-import { useState, useEffect, useCallback } from 'react'
-import { HiCog } from 'react-icons/hi'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 import { getTicketService } from '@/services/ticket-service'
 import { JiraTicket } from '@/types'
+import { ActionsMenu } from '~/components/ActionsMenu'
 import { DevOnly } from '~/components/DevOnly'
 import { DevRefreshSuggestionsButton } from '~/components/DevRefreshSuggestionsButton'
 import { ErrorBoundary } from '~/components/ErrorBoundary'
 import { TicketSearchBox } from '~/components/search'
 import { TicketList } from '~/components/tickets'
 import { useTicketSearch } from '~/hooks/useTicketSearch'
+import { useSelectedTicket } from '~/stores/useTicketStore'
 import { openOptionsPage, openInNewTab } from '~/utils/extension'
 import { getCurrentShortcut, formatShortcut } from '~/utils/shortcuts'
 
@@ -20,6 +21,8 @@ function App() {
 
   const [shortcutText, setShortcutText] = useState('Alt+J to search')
   const footerError = isAuthConfigured ? error : undefined
+  const selectedTicket = useSelectedTicket()
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   // Initialize search orchestration
   useEffect(() => {
@@ -77,6 +80,7 @@ function App() {
             onChange={handleInputChange}
             onClear={handleClearSearch}
             onTicketClick={handleTicketClick}
+            inputRef={searchInputRef}
             placeholder="Search tickets..."
           />
         </ErrorBoundary>
@@ -95,7 +99,7 @@ function App() {
 
       {/* Quick Actions Footer */}
       <div className="animate-in slide-in-from-bottom border-t border-gray-100 bg-gray-50 px-4 py-3 delay-200 duration-300">
-        <div className="flex items-center justify-between text-xs text-gray-500">
+        <div className="relative flex items-center justify-between text-xs text-gray-500">
           <div className="flex items-center gap-2 truncate">
             {footerError ? (
               <>
@@ -116,12 +120,12 @@ function App() {
             <DevOnly>
               <DevRefreshSuggestionsButton />
             </DevOnly>
-            <button
-              onClick={handleOpenOptionsPage}
-              className="rounded-md p-2 text-gray-400 transition-all duration-200 ease-out hover:scale-105 hover:bg-gray-200 hover:text-gray-600 active:scale-95"
-              title="Settings">
-              <HiCog className="h-4 w-4 transition-transform duration-200" />
-            </button>
+            {selectedTicket ? (
+              <ActionsMenu
+                selectedTicket={selectedTicket}
+                onClose={() => searchInputRef.current?.focus()}
+              />
+            ) : null}
           </div>
         </div>
       </div>

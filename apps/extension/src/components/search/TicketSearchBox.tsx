@@ -1,4 +1,4 @@
-import { useRef, KeyboardEvent } from 'react'
+import { type KeyboardEvent, type RefObject } from 'react'
 import { HiSearch, HiX } from 'react-icons/hi'
 
 import { JiraTicket } from '@/types'
@@ -13,6 +13,7 @@ interface TicketSearchBoxProps {
   onChange: (value: string) => void
   onClear: () => void
   onTicketClick: (ticket: JiraTicket) => void
+  inputRef?: RefObject<HTMLInputElement | null>
   placeholder?: string
 }
 
@@ -21,9 +22,9 @@ export function TicketSearchBox({
   onChange,
   onClear,
   onTicketClick,
+  inputRef,
   placeholder = 'Search tickets...'
 }: TicketSearchBoxProps) {
-  const inputRef = useRef<HTMLInputElement>(null)
   const { navigate } = useNavigationActions()
   const isSearching = useIsSearching()
   const selectedTicket = useSelectedTicket()
@@ -70,7 +71,7 @@ export function TicketSearchBox({
           onClear()
         } else {
           navigate('escape', onTicketClick)
-          inputRef.current?.blur()
+          inputRef?.current?.blur()
           // Close popup window
           window.close()
         }
