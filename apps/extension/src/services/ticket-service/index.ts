@@ -19,6 +19,8 @@ import {
   TicketSuggestionsAPI
 } from './ticket-suggestion-service'
 
+export type { TicketService } from './interface'
+
 /**
  * Ticket service implementation
  */
