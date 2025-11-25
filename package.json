@@ -14,7 +14,7 @@
     "dev": "nx run extension:dev",
     "dev:ff": "nx run extension:dev:ff",
     "dev:edge": "nx run extension:dev:edge",
-    "build": "nx run extension:build",
+    "build": "nx run-many -t build",
     "build:chrome": "nx run extension:build-chrome",
     "build:ff": "nx run extension:build-firefox",
     "build:edge": "nx run extension:build-edge",
