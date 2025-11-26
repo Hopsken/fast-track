@@ -61,6 +61,8 @@ export function ActionPanelSubmenu({
     <ActionPanelContext.Provider
       value={{
         ...panelContext,
+        // Nested menus keep the full ancestry so the parent menu stays intact
+        // while the child renders its own sections/actions.
         menuPath: [...menuPath, stableId]
       }}>
       {children}

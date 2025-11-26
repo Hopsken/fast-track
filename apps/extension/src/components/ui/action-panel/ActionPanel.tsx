@@ -46,6 +46,9 @@ export function ActionPanel({
     registerAction,
     registerSubmenu
   } = useActionRegistry()
+  // We track ordering per menu at render time so registrations always mirror
+  // the traversal order of the rendered component tree. This keeps the menu
+  // resilient when callers wrap actions/sections in other components.
   const sectionOrderRef = useRef<Record<MenuKey, number>>({})
   const itemOrderRef = useRef<Record<MenuKey, Record<string, number>>>({})
 
@@ -86,6 +89,8 @@ export function ActionPanel({
     [currentSections]
   )
 
+  // Keep the active index valid even when a menu re-renders with a different
+  // set of items (e.g. conditional children being added or removed).
   useEffect(() => {
     if (!flattenedItems.length) return
 

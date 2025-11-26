@@ -39,6 +39,7 @@
 - Naming: Place tests next to code as `*.test.ts`/`*.test.tsx` (ESLint is configured to recognize these).
 - Scope: Unit-test utilities, services, and complex hooks; keep tests deterministic.
 - On code changes, run `pnpm lint` and unit tests with `pnpm test`.
+- Run Nx affected format/lint/typecheck for touched projects: `pnpm nx affected --target=format --target=lint --target=typecheck`.
 
 ## Commit & Pull Request Guidelines
 

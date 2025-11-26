@@ -4,6 +4,19 @@
 registered as they render. Use the exports from `~/components/ui` to compose
 panels with sections, submenus, and simple actions.
 
+## How it works
+
+- Each `ActionPanel` owns a registry keyed by the current menu path
+  (`root` + submenu IDs). Sections, actions, and submenus register when they
+  render and return their own unregister callbacks so wrappers/conditional
+  rendering stay in sync.
+- Ordering follows render order. Each menu tracks counters for section order
+  and item order so the visual list always matches the component tree,
+  including implicit sections for ungrouped actions.
+- Navigation mirrors Raycast: ↑/↓ move selection, Enter/→ trigger or open a
+  submenu, ← steps back, Esc jumps to the root menu. The first item is selected
+  by default in each menu.
+
 ## Basic panel with inline actions
 
 ```tsx
@@ -128,3 +141,7 @@ function WrappedPanel({ onRevoke }: { onRevoke: () => void }) {
   )
 }
 ```
+
+The stable `id` ensures the registry keeps the same entry even if React swaps
+or reorders nodes. Each registration returns its own unregister callback, so
+teardown flows stay colocated with render without additional bookkeeping.

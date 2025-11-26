@@ -73,6 +73,8 @@ export function useActionRegistry() {
     [ROOT_MENU_KEY]: { key: ROOT_MENU_KEY, sections: [] }
   }))
 
+  // Each register helper returns its unregister callback so call sites can tie
+  // setup/cleanup to React lifecycles without extra boilerplate.
   const registerSection = useCallback(
     (menuKey: MenuKey, section: RegisterSectionAction['section']) => {
       dispatch({
