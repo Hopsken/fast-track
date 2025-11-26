@@ -80,17 +80,16 @@ export function useActionRegistry() {
         menuKey,
         section
       })
+
+      return () =>
+        dispatch({
+          type: 'UNREGISTER_SECTION',
+          menuKey,
+          sectionId: section.id
+        })
     },
     []
   )
-
-  const unregisterSection = useCallback((menuKey: MenuKey, sectionId: string) => {
-    dispatch({
-      type: 'UNREGISTER_SECTION',
-      menuKey,
-      sectionId
-    })
-  }, [])
 
   const registerAction = useCallback(
     (
@@ -106,6 +105,14 @@ export function useActionRegistry() {
         action,
         order
       })
+
+      return () =>
+        dispatch({
+          type: 'UNREGISTER_ITEM',
+          menuKey,
+          sectionId,
+          itemId: action.id
+        })
     },
     []
   )
@@ -126,34 +133,26 @@ export function useActionRegistry() {
         submenu,
         order
       })
+
+      return () => {
+        dispatch({
+          type: 'UNREGISTER_ITEM',
+          menuKey,
+          sectionId,
+          itemId: submenu.id
+        })
+
+        dispatch({ type: 'REMOVE_MENU_TREE', menuKey: submenuKey })
+      }
     },
     []
   )
-
-  const unregisterItem = useCallback(
-    (menuKey: MenuKey, sectionId: string, itemId: string) => {
-      dispatch({
-        type: 'UNREGISTER_ITEM',
-        menuKey,
-        sectionId,
-        itemId
-      })
-    },
-    []
-  )
-
-  const removeMenuTree = useCallback((menuKey: MenuKey) => {
-    dispatch({ type: 'REMOVE_MENU_TREE', menuKey })
-  }, [])
 
   return {
     menus,
     registerSection,
-    unregisterSection,
     registerAction,
-    registerSubmenu,
-    unregisterItem,
-    removeMenuTree
+    registerSubmenu
   }
 }
 

@@ -21,7 +21,7 @@ export function Action({
   onAction
 }: ActionProps) {
   const stableId = useStableId(id, 'action')
-  const { menuPath, registerAction, unregisterItem, claimItemOrder } =
+  const { menuPath, registerAction, claimItemOrder } =
     useActionPanelContext('ActionPanel.Action')
   const sectionId = useSectionContext() ?? 'implicit-section'
   const menuKey = useMemo(() => getMenuKey(menuPath), [menuPath])
@@ -31,7 +31,7 @@ export function Action({
   )
 
   useEffect(() => {
-    registerAction(menuKey, sectionId, {
+    return registerAction(menuKey, sectionId, {
       id: stableId,
       title,
       subtitle,
@@ -40,8 +40,6 @@ export function Action({
       onAction,
       type: 'action'
     }, order)
-
-    return () => unregisterItem(menuKey, sectionId, stableId)
   }, [
     claimItemOrder,
     icon,
@@ -53,8 +51,7 @@ export function Action({
     shortcut,
     stableId,
     subtitle,
-    title,
-    unregisterItem
+    title
   ])
 
   return null

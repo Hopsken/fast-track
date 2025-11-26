@@ -17,7 +17,7 @@ export function ActionPanelSection({
   children
 }: ActionPanelSectionProps) {
   const stableId = useStableId(id, 'section')
-  const { menuPath, registerSection, unregisterSection, claimSectionOrder } =
+  const { menuPath, registerSection, claimSectionOrder } =
     useActionPanelContext('ActionPanel.Section')
   const menuKey = useMemo(() => getMenuKey(menuPath), [menuPath])
   const order = useMemo(
@@ -26,17 +26,14 @@ export function ActionPanelSection({
   )
 
   useEffect(() => {
-    registerSection(menuKey, { id: stableId, title, subtitle, order })
-
-    return () => unregisterSection(menuKey, stableId)
+    return registerSection(menuKey, { id: stableId, title, subtitle, order })
   }, [
     menuKey,
     order,
     registerSection,
     stableId,
     subtitle,
-    title,
-    unregisterSection
+    title
   ])
 
   return (

@@ -43,11 +43,8 @@ export function ActionPanel({
   const {
     menus,
     registerSection,
-    unregisterSection,
     registerAction,
-    registerSubmenu,
-    unregisterItem,
-    removeMenuTree
+    registerSubmenu
   } = useActionRegistry()
   const sectionOrderRef = useRef<Record<MenuKey, number>>({})
   const itemOrderRef = useRef<Record<MenuKey, Record<string, number>>>({})
@@ -199,11 +196,8 @@ export function ActionPanel({
     () => ({
       menuPath: [],
       registerSection,
-      unregisterSection,
       registerAction,
       registerSubmenu,
-      unregisterItem,
-      removeMenuTree,
       claimSectionOrder,
       claimItemOrder
     }),
@@ -212,10 +206,7 @@ export function ActionPanel({
       claimSectionOrder,
       registerAction,
       registerSection,
-      registerSubmenu,
-      removeMenuTree,
-      unregisterItem,
-      unregisterSection
+      registerSubmenu
     ]
   )
 

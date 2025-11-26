@@ -6,11 +6,8 @@ import { type MenuKey } from './types'
 export interface ActionPanelContextValue {
   menuPath: string[]
   registerSection: ReturnType<typeof useActionRegistry>['registerSection']
-  unregisterSection: ReturnType<typeof useActionRegistry>['unregisterSection']
   registerAction: ReturnType<typeof useActionRegistry>['registerAction']
   registerSubmenu: ReturnType<typeof useActionRegistry>['registerSubmenu']
-  unregisterItem: ReturnType<typeof useActionRegistry>['unregisterItem']
-  removeMenuTree: ReturnType<typeof useActionRegistry>['removeMenuTree']
   claimSectionOrder: (menuKey: MenuKey) => number
   claimItemOrder: (menuKey: MenuKey, sectionId: string) => number
 }
