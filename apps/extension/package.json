@@ -1,6 +1,7 @@
 {
   "name": "extension",
   "devDependencies": {
-    "@internal/logger": "workspace:*"
+    "@internal/logger": "workspace:*",
+    "@internal/ui": "workspace:*"
   }
 }

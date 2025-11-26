@@ -1,3 +1,4 @@
+import { Button } from '@internal/ui/components/button'
 import { useClickAway, useMemoizedFn } from 'ahooks'
 import { useRef, useState } from 'react'
 import { HotkeyCallback, HotkeysProvider, useHotkeys } from 'react-hotkeys-hook'
@@ -171,6 +172,7 @@ function ActionsMenuContent({ selectedTicket, onClose }: ActionsMenuProps) {
 
   return (
     <div className={`relative font-medium`}>
+      <Button>shadcn</Button>
       <button
         ref={actionButtonRef}
         onClick={toggleActionsMenu}

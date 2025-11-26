@@ -5,12 +5,16 @@
       "@": ["./src"],
       "@/*": ["./src/*"],
       "~": ["./src"],
-      "~/*": ["./src/*"]
+      "~/*": ["./src/*"],
+      "@internal/ui/*": ["../../packages/ui/*"]
     }
   },
   "include": ["src/**/*", "specs/**/*", "*.ts", "*.d.ts", ".wxt/wxt.d.ts"],
   "exclude": ["./.output"],
   "references": [
+    {
+      "path": "../../packages/ui"
+    },
     {
       "path": "../../packages/logger"
     }

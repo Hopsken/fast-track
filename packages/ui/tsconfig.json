@@ -1,0 +1,16 @@
+{
+  "files": [],
+  "include": [],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@internal/ui/*": ["./src/*"]
+    }
+  },
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    }
+  ],
+  "extends": "../../tsconfig.base.json"
+}
