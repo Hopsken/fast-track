@@ -25,7 +25,7 @@ interface RegisterActionAction {
   type: 'REGISTER_ACTION'
   menuKey: MenuKey
   sectionId: string
-  action: ActionNodeAction
+  action: ActionNodeAction & { id: string }
   order: number
 }
 
@@ -34,7 +34,7 @@ interface RegisterSubmenuAction {
   menuKey: MenuKey
   submenuKey: MenuKey
   sectionId: string
-  submenu: ActionNodeSubmenu
+  submenu: ActionNodeSubmenu & { id: string }
   order: number
 }
 
@@ -97,7 +97,7 @@ export function useActionRegistry() {
     (
       menuKey: MenuKey,
       sectionId: string,
-      action: ActionNodeAction,
+      action: ActionNodeAction & { id: string },
       order: number
     ) => {
       dispatch({
@@ -124,7 +124,7 @@ export function useActionRegistry() {
       menuKey: MenuKey,
       submenuKey: MenuKey,
       sectionId: string,
-      submenu: ActionNodeSubmenu,
+      submenu: ActionNodeSubmenu & { id: string },
       order: number
     ) => {
       dispatch({
