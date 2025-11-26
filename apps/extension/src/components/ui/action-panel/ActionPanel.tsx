@@ -6,6 +6,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState
 } from 'react'
 
@@ -17,7 +18,7 @@ import { ActionPanelSubmenu } from './ActionPanelSubmenu'
 import { ShortcutPill } from './ShortcutPill'
 import { Action } from './action'
 import { menuKeyFromPath, useActionRegistry } from './registry'
-import { type ActionNode, type ActionSectionState } from './types'
+import { type ActionNode, type ActionSectionState, type MenuKey } from './types'
 
 interface ActionPanelProps {
   title?: string
@@ -48,6 +49,27 @@ export function ActionPanel({
     unregisterItem,
     removeMenuTree
   } = useActionRegistry()
+  const sectionOrderRef = useRef<Record<MenuKey, number>>({})
+  const itemOrderRef = useRef<Record<MenuKey, Record<string, number>>>({})
+
+  sectionOrderRef.current = {}
+  itemOrderRef.current = {}
+
+  const claimSectionOrder = useCallback((menuKey: MenuKey) => {
+    const next = (sectionOrderRef.current[menuKey] ?? 0) + 1
+    sectionOrderRef.current[menuKey] = next
+    return next
+  }, [])
+
+  const claimItemOrder = useCallback(
+    (menuKey: MenuKey, sectionId: string) => {
+      const menuItems = itemOrderRef.current[menuKey] ?? {}
+      const next = (menuItems[sectionId] ?? 0) + 1
+      itemOrderRef.current[menuKey] = { ...menuItems, [sectionId]: next }
+      return next
+    },
+    []
+  )
 
   const [activePath, setActivePath] = useState<string[]>([])
   const [activeIndexByMenu, setActiveIndexByMenu] = useState<
@@ -181,9 +203,13 @@ export function ActionPanel({
       registerAction,
       registerSubmenu,
       unregisterItem,
-      removeMenuTree
+      removeMenuTree,
+      claimSectionOrder,
+      claimItemOrder
     }),
     [
+      claimItemOrder,
+      claimSectionOrder,
       registerAction,
       registerSection,
       registerSubmenu,

@@ -12,7 +12,7 @@ import {
 interface RegisterSectionAction {
   type: 'REGISTER_SECTION'
   menuKey: MenuKey
-  section: Pick<ActionSectionState, 'id' | 'title' | 'subtitle'>
+  section: Pick<ActionSectionState, 'id' | 'title' | 'subtitle' | 'order'>
 }
 
 interface UnregisterSectionAction {
@@ -26,6 +26,7 @@ interface RegisterActionAction {
   menuKey: MenuKey
   sectionId: string
   action: ActionNodeAction
+  order: number
 }
 
 interface RegisterSubmenuAction {
@@ -34,6 +35,7 @@ interface RegisterSubmenuAction {
   submenuKey: MenuKey
   sectionId: string
   submenu: ActionNodeSubmenu
+  order: number
 }
 
 interface UnregisterItemAction {
@@ -94,13 +96,15 @@ export function useActionRegistry() {
     (
       menuKey: MenuKey,
       sectionId: string,
-      action: ActionNodeAction
+      action: ActionNodeAction,
+      order: number
     ) => {
       dispatch({
         type: 'REGISTER_ACTION',
         menuKey,
         sectionId,
-        action
+        action,
+        order
       })
     },
     []
@@ -111,14 +115,16 @@ export function useActionRegistry() {
       menuKey: MenuKey,
       submenuKey: MenuKey,
       sectionId: string,
-      submenu: ActionNodeSubmenu
+      submenu: ActionNodeSubmenu,
+      order: number
     ) => {
       dispatch({
         type: 'REGISTER_SUBMENU',
         menuKey,
         submenuKey,
         sectionId,
-        submenu
+        submenu,
+        order
       })
     },
     []
@@ -157,7 +163,8 @@ function registryReducer(state: RegistryState, action: RegistryAction): Registry
     const nextSections = upsertSection(menu.sections, {
       id: action.section.id,
       title: action.section.title,
-      subtitle: action.section.subtitle
+      subtitle: action.section.subtitle,
+      order: action.section.order
     })
 
     return {
@@ -191,8 +198,8 @@ function registryReducer(state: RegistryState, action: RegistryAction): Registry
     const section = getOrCreateSection(menu.sections, action.sectionId)
     const item =
       action.type === 'REGISTER_ACTION'
-        ? action.action
-        : ({ ...action.submenu, type: 'submenu' } as ActionNode)
+        ? { ...action.action, order: action.order }
+        : ({ ...action.submenu, type: 'submenu', order: action.order } as ActionNode)
 
     const updatedSections = menu.sections.map((existing) => {
       if (existing.id !== section.id) return existing
@@ -261,29 +268,40 @@ function ensureMenuExists(state: RegistryState, menuKey: MenuKey) {
 
 function upsertSection(
   sections: ActionSectionState[],
-  section: Pick<ActionSectionState, 'id' | 'title' | 'subtitle'>
+  section: Pick<ActionSectionState, 'id' | 'title' | 'subtitle' | 'order'>
 ): ActionSectionState[] {
   const index = sections.findIndex((entry) => entry.id === section.id)
 
   if (index !== -1) {
-    return sections.map((entry, position) =>
+    const updated = sections.map((entry, position) =>
       position === index
-        ? { ...entry, title: section.title, subtitle: section.subtitle }
+        ? {
+            ...entry,
+            title: section.title,
+            subtitle: section.subtitle,
+            order: section.order ?? entry.order
+          }
         : entry
     )
+
+    return sortSections(updated)
   }
 
-  return [...sections, { ...section, items: [] }]
+  return sortSections([...sections, { ...section, items: [], order: section.order }])
 }
 
 function upsertItem(items: ActionNode[], item: ActionNode) {
   const index = items.findIndex((entry) => entry.id === item.id)
 
   if (index !== -1) {
-    return items.map((entry, position) => (position === index ? item : entry))
+    const updated = items.map((entry, position) =>
+      position === index ? { ...item, order: item.order ?? entry.order } : entry
+    )
+
+    return sortItems(updated)
   }
 
-  return [...items, item]
+  return sortItems([...items, item])
 }
 
 function getOrCreateSection(sections: ActionSectionState[], sectionId: string) {
@@ -292,9 +310,18 @@ function getOrCreateSection(sections: ActionSectionState[], sectionId: string) {
 
   const newSection: ActionSectionState = {
     id: sectionId,
-    items: []
+    items: [],
+    order: sections.length + 1
   }
 
   sections.push(newSection)
   return newSection
+}
+
+function sortSections(sections: ActionSectionState[]) {
+  return [...sections].sort((left, right) => left.order - right.order)
+}
+
+function sortItems(items: ActionNode[]) {
+  return [...items].sort((left, right) => (left.order ?? 0) - (right.order ?? 0))
 }

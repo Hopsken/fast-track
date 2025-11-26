@@ -22,12 +22,17 @@ export function ActionPanelSubmenu({
 }: ActionPanelSubmenuProps) {
   const stableId = useStableId(id, 'submenu')
   const panelContext = useActionPanelContext('ActionPanel.Submenu')
-  const { menuPath, registerSubmenu, unregisterItem, removeMenuTree } = panelContext
+  const { menuPath, registerSubmenu, unregisterItem, removeMenuTree, claimItemOrder } =
+    panelContext
   const sectionId = useSectionContext() ?? 'implicit-section'
   const menuKey = useMemo(() => getMenuKey(menuPath), [menuPath])
   const submenuKey = useMemo(
     () => getMenuKey([...menuPath, stableId]),
     [menuPath, stableId]
+  )
+  const order = useMemo(
+    () => claimItemOrder(menuKey, sectionId),
+    [claimItemOrder, menuKey, sectionId]
   )
 
   useEffect(() => {
@@ -38,7 +43,7 @@ export function ActionPanelSubmenu({
       shortcut,
       icon,
       type: 'submenu'
-    })
+    }, order)
 
     return () => {
       unregisterItem(menuKey, sectionId, stableId)
@@ -49,6 +54,7 @@ export function ActionPanelSubmenu({
     menuKey,
     registerSubmenu,
     removeMenuTree,
+    order,
     sectionId,
     shortcut,
     stableId,

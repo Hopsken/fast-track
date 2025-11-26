@@ -13,6 +13,7 @@ export interface ActionBase {
   subtitle?: string
   shortcut?: ActionShortcut
   icon?: ReactNode
+  order?: number
 }
 
 export type ActionNodeAction = ActionBase & {
@@ -30,6 +31,7 @@ export interface ActionSectionState {
   id: string
   title?: string
   subtitle?: string
+  order: number
   items: ActionNode[]
 }
 

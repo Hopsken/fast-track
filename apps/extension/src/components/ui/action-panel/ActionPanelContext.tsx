@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react'
 
 import { menuKeyFromPath, useActionRegistry } from './registry'
+import { type MenuKey } from './types'
 
 export interface ActionPanelContextValue {
   menuPath: string[]
@@ -10,6 +11,8 @@ export interface ActionPanelContextValue {
   registerSubmenu: ReturnType<typeof useActionRegistry>['registerSubmenu']
   unregisterItem: ReturnType<typeof useActionRegistry>['unregisterItem']
   removeMenuTree: ReturnType<typeof useActionRegistry>['removeMenuTree']
+  claimSectionOrder: (menuKey: MenuKey) => number
+  claimItemOrder: (menuKey: MenuKey, sectionId: string) => number
 }
 
 export const ActionPanelContext = createContext<ActionPanelContextValue | null>(
