@@ -12,7 +12,7 @@ import {
 interface RegisterSectionAction {
   type: 'REGISTER_SECTION'
   menuKey: MenuKey
-  section: Pick<ActionSectionState, 'id' | 'title' | 'subtitle' | 'order'>
+  section: Pick<ActionSectionState, 'id' | 'title' | 'order'>
 }
 
 interface UnregisterSectionAction {
@@ -167,7 +167,6 @@ function registryReducer(
     const nextSections = upsertSection(menu.sections, {
       id: action.section.id,
       title: action.section.title,
-      subtitle: action.section.subtitle,
       order: action.section.order
     })
 
@@ -276,7 +275,7 @@ function ensureMenuExists(state: RegistryState, menuKey: MenuKey) {
 
 function upsertSection(
   sections: ActionSectionState[],
-  section: Pick<ActionSectionState, 'id' | 'title' | 'subtitle' | 'order'>
+  section: Pick<ActionSectionState, 'id' | 'title' | 'order'>
 ): ActionSectionState[] {
   const index = sections.findIndex((entry) => entry.id === section.id)
 
@@ -286,7 +285,6 @@ function upsertSection(
         ? {
             ...entry,
             title: section.title,
-            subtitle: section.subtitle,
             order: section.order ?? entry.order
           }
         : entry

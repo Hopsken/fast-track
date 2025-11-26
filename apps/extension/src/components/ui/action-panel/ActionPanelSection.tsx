@@ -10,14 +10,12 @@ import { useStableId } from './use-stable-id'
 interface ActionPanelSectionProps {
   id?: string
   title?: string
-  subtitle?: string
   children: ReactNode
 }
 
 export function ActionPanelSection({
   id,
   title,
-  subtitle,
   children
 }: ActionPanelSectionProps) {
   const stableId = useStableId(id, 'section')
@@ -30,8 +28,8 @@ export function ActionPanelSection({
   )
 
   useEffect(() => {
-    return registerSection(menuKey, { id: stableId, title, subtitle, order })
-  }, [menuKey, order, registerSection, stableId, subtitle, title])
+    return registerSection(menuKey, { id: stableId, title, order })
+  }, [menuKey, order, registerSection, stableId, title])
 
   return (
     <SectionContext.Provider value={stableId}>

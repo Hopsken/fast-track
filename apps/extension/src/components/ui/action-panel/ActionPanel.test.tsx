@@ -97,4 +97,43 @@ describe('ActionPanel', () => {
       )
     ).toEqual(['Root action', 'Child menu'])
   })
+
+  it('filters actions via the search input', async () => {
+    const callbacks = {
+      visible: vi.fn(),
+      hidden: vi.fn()
+    }
+
+    render(
+      <ActionPanel title="Filterable">
+        <ActionPanel.Section title="Commands">
+          <ActionPanel.Action
+            title="Copy Issue Key"
+            onAction={callbacks.visible}
+          />
+          <ActionPanel.Action title="Open issue" onAction={callbacks.hidden} />
+        </ActionPanel.Section>
+      </ActionPanel>
+    )
+
+    const search = screen.getByPlaceholderText(/search for actions/i)
+    fireEvent.change(search, { target: { value: 'copy' } })
+
+    const items = await screen.findAllByRole('menuitem')
+
+    expect(items).toHaveLength(1)
+    expect(
+      within(items[0])
+        .getByText(/Copy Issue Key/)
+        .textContent?.trim()
+    ).toEqual('Copy Issue Key')
+    expect(screen.queryByText('Open issue')).toBeNull()
+
+    const panel = screen.getByRole('menu')
+    panel.focus()
+    fireEvent.keyDown(panel, { key: 'Enter' })
+
+    expect(callbacks.visible).toHaveBeenCalled()
+    expect(callbacks.hidden).not.toHaveBeenCalled()
+  })
 })

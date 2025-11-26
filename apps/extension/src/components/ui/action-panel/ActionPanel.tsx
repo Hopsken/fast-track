@@ -1,4 +1,5 @@
 import {
+  type ComponentPropsWithoutRef,
   type Dispatch,
   type KeyboardEvent,
   type ReactNode,
@@ -20,11 +21,16 @@ import { menuKeyFromPath, useActionRegistry } from './registry'
 import { ShortcutPill } from './ShortcutPill'
 import { type ActionNode, type ActionSectionState, type MenuKey } from './types'
 
-interface ActionPanelProps {
+interface ActionPanelProps
+  extends Omit<ComponentPropsWithoutRef<'div'>, 'title'> {
   title?: string
   description?: string
   emptyMessage?: string
   className?: string
+  searchPlaceholder?: string
+  showSearch?: boolean
+  onClose?: () => void
+  autoFocusSearch?: boolean
   children: ReactNode
 }
 
@@ -35,10 +41,14 @@ interface FlattenedItem {
 
 export function ActionPanel({
   title,
-  description,
   children,
   className = '',
-  emptyMessage = 'No actions available'
+  emptyMessage = 'No actions available',
+  searchPlaceholder = 'Search for actions...',
+  showSearch = true,
+  onClose,
+  autoFocusSearch = false,
+  ...divProps
 }: ActionPanelProps) {
   const { menus, registerSection, registerAction, registerSubmenu } =
     useActionRegistry()
@@ -70,16 +80,22 @@ export function ActionPanel({
   >({
     [menuKeyFromPath([])]: 0
   })
+  const [searchQuery, setSearchQuery] = useState('')
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   const currentKey = menuKeyFromPath(activePath)
   const currentSections = useMemo(
     () => menus[currentKey]?.sections ?? [],
     [currentKey, menus]
   )
+  const filteredSections = useMemo(
+    () => filterSections(currentSections, searchQuery),
+    [currentSections, searchQuery]
+  )
 
   const flattenedItems = useMemo(
-    () => flattenSections(currentSections),
-    [currentSections]
+    () => flattenSections(filteredSections),
+    [filteredSections]
   )
 
   // Keep the active index valid even when a menu re-renders with a different
@@ -98,6 +114,16 @@ export function ActionPanel({
 
   const activeIndex = activeIndexByMenu[currentKey] ?? 0
   const activeItem = flattenedItems[activeIndex]
+
+  useEffect(() => {
+    if (!autoFocusSearch || !showSearch) return
+
+    const frame = requestAnimationFrame(() => {
+      searchInputRef.current?.focus()
+    })
+
+    return () => cancelAnimationFrame(frame)
+  }, [autoFocusSearch, showSearch])
 
   const resetToRoot = useCallback(() => {
     setActivePath([])
@@ -160,7 +186,17 @@ export function ActionPanel({
         moveSelection(1)
       }
 
+      if (event.key.toLowerCase() === 'n' && event.ctrlKey) {
+        event.preventDefault()
+        moveSelection(1)
+      }
+
       if (event.key === 'ArrowUp') {
+        event.preventDefault()
+        moveSelection(-1)
+      }
+
+      if (event.key.toLowerCase() === 'p' && event.ctrlKey) {
         event.preventDefault()
         moveSelection(-1)
       }
@@ -179,10 +215,29 @@ export function ActionPanel({
 
       if (event.key === 'Escape') {
         event.preventDefault()
-        resetToRoot()
+        if (searchQuery) {
+          setSearchQuery('')
+          return
+        }
+
+        if (activePath.length) {
+          resetToRoot()
+          return
+        }
+
+        onClose?.()
       }
     },
-    [activeItem, closeSubmenu, handleAction, moveSelection, resetToRoot]
+    [
+      activeItem,
+      activePath.length,
+      closeSubmenu,
+      handleAction,
+      moveSelection,
+      onClose,
+      resetToRoot,
+      searchQuery
+    ]
   )
 
   const breadcrumbs = useMemo(
@@ -211,56 +266,75 @@ export function ActionPanel({
   return (
     <ActionPanelContext.Provider value={contextValue}>
       <div
+        {...divProps}
         tabIndex={0}
         onKeyDown={handleKeyDown}
         role="menu"
         aria-orientation="vertical"
         aria-label={title ?? 'Action panel'}
         className={cn(
-          'border-base-300 bg-base-100/70 text-base-content focus:ring-primary/50 flex flex-col gap-4 rounded-2xl border p-4 shadow-sm outline-none focus:ring-2',
+          'text-base-content flex h-60 w-80 flex-col font-medium',
           className
         )}>
-        <div className="flex flex-col gap-1">
-          <div className="text-base-content/70 flex items-center gap-2 text-sm font-semibold tracking-wide uppercase">
+        <div className="flex flex-col gap-2 px-3 pt-3 pb-2">
+          <div className="text-base-content/60 flex items-center gap-2 text-[11px] font-semibold tracking-[0.08em] uppercase">
             {breadcrumbs.map((crumb, index) => (
               <span key={crumb} className="flex items-center gap-2">
-                {index !== 0 && <span className="text-base-content/40">/</span>}
-                <span>{crumb}</span>
+                {index !== 0 && (
+                  <span className="text-base-content/40" aria-hidden>
+                    /
+                  </span>
+                )}
+                <span className="truncate">{crumb}</span>
               </span>
             ))}
           </div>
-          {description && (
-            <p className="text-base-content/80 text-sm">{description}</p>
-          )}
+
           {activePath.length > 0 && (
             <button
               type="button"
               onClick={closeSubmenu}
-              className="border-base-300 text-base-content/80 hover:border-base-400 hover:text-base-content flex w-fit items-center gap-2 rounded-lg border px-3 py-1 text-xs font-medium transition">
-              ← Back
+              className="btn btn-ghost btn-xs gap-1 self-start px-2">
+              <span aria-hidden>←</span>
+              Back
             </button>
           )}
         </div>
 
         {flattenedItems.length === 0 ? (
-          <div className="border-base-300 bg-base-100 text-base-content/70 flex flex-1 items-center justify-center rounded-xl border border-dashed p-8 text-sm">
-            {emptyMessage}
+          <div className="text-base-content/70 flex flex-1 items-center justify-center px-4 text-sm">
+            {searchQuery.trim() ? 'No results' : emptyMessage}
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
-            {currentSections.map((section) => (
-              <ActionSection
-                key={section.id}
-                section={section}
-                flattenedItems={flattenedItems}
-                activeIndex={activeIndex}
-                currentKey={currentKey}
-                onAction={handleAction}
-                setActiveIndexByMenu={setActiveIndexByMenu}
-              />
-            ))}
+          <div className="flex flex-1 flex-col overflow-hidden">
+            <ul className="menu menu-sm border-base-200 w-full flex-1 flex-nowrap gap-1 overflow-y-auto border-t px-2 pt-2 pb-2 font-medium">
+              {filteredSections.map((section) => (
+                <ActionSection
+                  key={section.id}
+                  section={section}
+                  flattenedItems={flattenedItems}
+                  activeIndex={activeIndex}
+                  currentKey={currentKey}
+                  onAction={handleAction}
+                  setActiveIndexByMenu={setActiveIndexByMenu}
+                />
+              ))}
+            </ul>
           </div>
         )}
+
+        {showSearch ? (
+          <div className="border-base-200 flex items-center border-t px-2">
+            <input
+              ref={searchInputRef}
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder={searchPlaceholder}
+              aria-label="Search actions"
+              className="input input-ghost placeholder-base-content/60 w-full border-0 bg-transparent px-3 py-2 text-sm caret-current focus:bg-transparent focus:outline-none"
+            />
+          </div>
+        ) : null}
 
         <SectionContext.Provider value={undefined}>
           {children}
@@ -285,79 +359,71 @@ function ActionSection({
   onAction: (node: ActionNode) => void
   setActiveIndexByMenu: Dispatch<SetStateAction<Record<string, number>>>
 }) {
+  if (section.items.length === 0) return null
+
   return (
-    <section
-      className="border-base-300 bg-base-100 overflow-hidden rounded-xl border shadow-sm"
-      aria-label={section.title ?? 'Actions'}>
-      {(section.title || section.subtitle) && (
-        <header className="border-base-200 bg-base-200/60 border-b px-4 py-2">
-          <p className="text-base-content text-sm font-semibold">
-            {section.title ?? 'Actions'}
-          </p>
-          {section.subtitle && (
-            <p className="text-base-content/70 text-xs">{section.subtitle}</p>
-          )}
-        </header>
+    <>
+      {section.title && (
+        <li
+          className="text-base-content/60 px-2 pt-2 text-[11px] font-semibold tracking-[0.08em] uppercase"
+          role="presentation">
+          <div className="flex flex-col">
+            <span className="truncate">{section.title ?? 'Actions'}</span>
+          </div>
+        </li>
       )}
 
-      <ul className="divide-base-200 divide-y">
-        {section.items.map((item) => {
-          const flattenedIndex = flattenedItems.findIndex(
-            (flattened) =>
-              flattened.node.id === (item.id ?? item.title) &&
-              flattened.sectionId === section.id
-          )
+      {section.items.map((item) => {
+        const flattenedIndex = flattenedItems.findIndex(
+          (flattened) =>
+            flattened.node.id === (item.id ?? item.title) &&
+            flattened.sectionId === section.id
+        )
 
-          const isActive = flattenedIndex === activeIndex
+        const isActive = flattenedIndex === activeIndex
 
-          return (
-            <li key={item.id ?? item.title}>
-              <button
-                type="button"
-                onMouseEnter={() =>
-                  setActiveIndexByMenu((previous) => ({
-                    ...previous,
-                    [currentKey]: flattenedIndex === -1 ? 0 : flattenedIndex
-                  }))
-                }
-                onClick={() => onAction(item)}
-                role="menuitem"
-                className={cn(
-                  'flex w-full items-center justify-between px-4 py-3 text-left transition',
-                  isActive
-                    ? 'bg-primary/10 text-base-content'
-                    : 'hover:bg-base-200'
-                )}>
-                <div className="flex items-center gap-3">
-                  <div className="border-base-300 bg-base-100 text-base-content/70 flex h-9 w-9 items-center justify-center rounded-lg border">
-                    {item.icon ?? <span className="text-base">⌘</span>}
-                  </div>
-                  <div className="space-y-0.5">
-                    <p className="text-base-content text-sm leading-none font-semibold">
-                      {item.title}
-                    </p>
-                    {item.subtitle && (
-                      <p className="text-base-content/70 text-xs">
-                        {item.subtitle}
-                      </p>
-                    )}
-                  </div>
+        return (
+          <li key={item.id ?? item.title}>
+            <button
+              type="button"
+              onMouseEnter={() =>
+                setActiveIndexByMenu((previous) => ({
+                  ...previous,
+                  [currentKey]: flattenedIndex === -1 ? 0 : flattenedIndex
+                }))
+              }
+              onClick={() => onAction(item)}
+              role="menuitem"
+              className={cn(
+                'flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition',
+                isActive
+                  ? 'menu-focus bg-base-200/80 text-base-content'
+                  : 'hover:bg-base-200/60 focus-visible:bg-base-200/80'
+              )}>
+              <div className="flex items-center gap-3">
+                <div className="text-base-content/70">
+                  {item.icon ?? <span className="text-sm">⌘</span>}
                 </div>
-
-                <div className="flex items-center gap-2">
-                  {'shortcut' in item && item.shortcut && (
-                    <ShortcutPill shortcut={item.shortcut} />
-                  )}
-                  {item.type === 'submenu' && (
-                    <span className="text-base-content/60">↵</span>
-                  )}
+                <div className="space-y-0.5">
+                  <p className="text-base-content text-sm leading-none font-semibold">
+                    {item.title}
+                  </p>
                 </div>
-              </button>
-            </li>
-          )
-        })}
-      </ul>
-    </section>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {'shortcut' in item && item.shortcut && (
+                  <ShortcutPill shortcut={item.shortcut} />
+                )}
+                {item.type === 'submenu' && (
+                  <span className="text-base-content/60">↵</span>
+                )}
+              </div>
+            </button>
+          </li>
+        )
+      })}
+    </>
   )
 }
 
@@ -374,6 +440,23 @@ function flattenSections(sections: ActionSectionState[]): FlattenedItem[] {
   })
 
   return flattened
+}
+
+function filterSections(sections: ActionSectionState[], query: string) {
+  const normalizedQuery = query.trim().toLowerCase()
+  if (!normalizedQuery) return sections
+
+  return sections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => matchesQuery(item, normalizedQuery))
+    }))
+    .filter((section) => section.items.length > 0)
+}
+
+function matchesQuery(item: ActionNode, query: string) {
+  const searchable = `${item.title}`.toLowerCase()
+  return searchable.includes(query)
 }
 
 function clampIndex(nextIndex: number, total: number) {

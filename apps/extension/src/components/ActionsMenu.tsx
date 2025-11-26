@@ -1,10 +1,15 @@
 import { useClickAway, useMemoizedFn } from 'ahooks'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { HotkeyCallback, HotkeysProvider, useHotkeys } from 'react-hotkeys-hook'
 import { HiClipboardCopy } from 'react-icons/hi'
 
 import { isPressingHotKey } from '@/lib/hotkey'
 import type { JiraTicket } from '@/types'
+import { ActionPanel } from '~/components/ui/action-panel/ActionPanel'
+import {
+  type ActionShortcut,
+  type ShortcutModifier
+} from '~/components/ui/action-panel/types'
 
 function copyToClipboard(value: string) {
   return navigator.clipboard.writeText(value)
@@ -97,26 +102,9 @@ function ActionsMenuContent({ selectedTicket, onClose }: ActionsMenuProps) {
   const [isActionsOpen, setIsActionsOpen] = useState(false)
   const [menuMounted, setMenuMounted] = useState(false)
   const [menuState, setMenuState] = useState<'open' | 'closed'>('closed')
-  const [actionQuery, setActionQuery] = useState('')
-  const [activeActionIndex, setActiveActionIndex] = useState(0)
 
-  const actionInputRef = useRef<HTMLInputElement>(null)
   const actionsMenuRef = useRef<HTMLDivElement>(null)
   const actionButtonRef = useRef<HTMLButtonElement>(null)
-
-  const filteredActions = useMemo(() => {
-    const normalizedQuery = actionQuery.trim().toLowerCase()
-    if (!normalizedQuery) return ACTION_DEFINITIONS
-    return ACTION_DEFINITIONS.filter((action) =>
-      action.label.toLowerCase().includes(normalizedQuery)
-    )
-  }, [actionQuery])
-
-  useEffect(() => {
-    setActiveActionIndex((current) =>
-      Math.min(current, Math.max(filteredActions.length - 1, 0))
-    )
-  }, [filteredActions.length])
 
   const closeMenu = useMemoizedFn(() => {
     setIsActionsOpen(false)
@@ -129,8 +117,6 @@ function ActionsMenuContent({ selectedTicket, onClose }: ActionsMenuProps) {
     setIsActionsOpen((prev) => {
       const next = !prev
       if (next) {
-        setActionQuery('')
-        setActiveActionIndex(0)
         setMenuMounted(true)
         setMenuState('open')
       } else {
@@ -153,7 +139,6 @@ function ActionsMenuContent({ selectedTicket, onClose }: ActionsMenuProps) {
     const action = ACTION_DEFINITIONS.find((item) =>
       isPressingHotKey(hotkeys, item.shortcut)
     )
-    console.log({ action })
     if (!action) return
     performAction(action.id)
   })
@@ -169,52 +154,20 @@ function ActionsMenuContent({ selectedTicket, onClose }: ActionsMenuProps) {
     enableOnFormTags: true
   })
 
+  useHotkeys(
+    ['escape'],
+    () => {
+      if (!isActionsOpen) return
+      closeMenu()
+    },
+    { enabled: isActionsOpen, enableOnFormTags: true }
+  )
+
   // Close the menu when clicking outside
   useClickAway(() => {
     if (!isActionsOpen) return
     closeMenu()
   }, [actionsMenuRef, actionButtonRef])
-
-  // Focus the action input when menu opens
-  useEffect(() => {
-    if (!isActionsOpen) return
-    const id = requestAnimationFrame(() => {
-      actionInputRef.current?.focus()
-    })
-    return () => cancelAnimationFrame(id)
-  }, [isActionsOpen])
-
-  useHotkeys(
-    ['enter', 'arrowdown', 'ctrl+n', 'arrowup', 'ctrl+p', 'escape'],
-    (_, hotkeys) => {
-      if (isPressingHotKey(hotkeys, 'enter')) {
-        const action = filteredActions[activeActionIndex]
-        if (action) {
-          performAction(action.id)
-        }
-      }
-
-      if (isPressingHotKey(hotkeys, ['arrowdown', 'ctrl+n'])) {
-        setActiveActionIndex((prev) =>
-          Math.min(prev + 1, Math.max(filteredActions.length - 1, 0))
-        )
-      }
-
-      if (isPressingHotKey(hotkeys, ['arrowup', 'ctrl+p'])) {
-        setActiveActionIndex((prev) => Math.max(prev - 1, 0))
-      }
-
-      if (isPressingHotKey(hotkeys, 'escape')) {
-        closeMenu()
-      }
-    },
-    {
-      enabled: isActionsOpen,
-      preventDefault: true,
-      enableOnFormTags: true,
-      scopes: ['actions']
-    }
-  )
 
   return (
     <div className={`relative font-medium`}>
@@ -231,57 +184,49 @@ function ActionsMenuContent({ selectedTicket, onClose }: ActionsMenuProps) {
         <div
           ref={actionsMenuRef}
           data-state={menuState}
-          className="dropdown-content actions-menu-animate text-base-content border-base-200 glass rounded-box absolute right-0 bottom-10 z-20 w-80 border shadow-xl">
-          <div className="flex h-60 flex-col">
-            <div className="p-3">
-              <span className="font-medium">{selectedTicket.key}</span>
-            </div>
-
-            <ul className="menu menu-sm w-full flex-1 flex-nowrap gap-2 overflow-y-auto border-t border-gray-200 px-2 py-2 font-medium">
-              {filteredActions.length === 0 ? (
-                <li className="w-full">
-                  <div className="text-md text-center">No results</div>
-                </li>
-              ) : (
-                filteredActions.map((action, index) => {
-                  const isActive = index === activeActionIndex
-
-                  return (
-                    <li className="w-full" key={action.id}>
-                      <button
-                        onMouseEnter={() => setActiveActionIndex(index)}
-                        onClick={() => performAction(action.id)}
-                        className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm ${
-                          isActive && 'menu-focus'
-                        }`}>
-                        <div className="flex items-center gap-2">
-                          <HiClipboardCopy className="h-4 w-4 opacity-70" />
-                          <span>{action.label}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span className="kbd kbd-xs uppercase">
-                            {action.shortcut}
-                          </span>
-                        </div>
-                      </button>
-                    </li>
-                  )
-                })
-              )}
-            </ul>
-
-            <div className="flex items-center border-t border-gray-200">
-              <input
-                ref={actionInputRef}
-                value={actionQuery}
-                onChange={(event) => setActionQuery(event.target.value)}
-                placeholder="Search for actions..."
-                className="input input-ghost placeholder-base-content/50 w-full border-0 py-2 pl-3 text-sm caret-current focus:bg-transparent focus:outline-none"
-              />
-            </div>
-          </div>
+          className="actions-menu-animate glass rounded-box absolute right-0 bottom-10 z-20">
+          <ActionPanel
+            title={selectedTicket.key}
+            description={selectedTicket.summary}
+            emptyMessage="No results"
+            className="h-60 w-80"
+            searchPlaceholder="Search for actions..."
+            onClose={closeMenu}
+            autoFocusSearch={isActionsOpen}>
+            <ActionPanel.Section title="Actions">
+              {ACTION_DEFINITIONS.map((action) => (
+                <ActionPanel.Action
+                  key={action.id}
+                  title={action.label}
+                  shortcut={toShortcut(action.shortcut)}
+                  icon={<HiClipboardCopy className="h-4 w-4 opacity-70" />}
+                  onAction={() => performAction(action.id)}
+                />
+              ))}
+            </ActionPanel.Section>
+          </ActionPanel>
         </div>
       ) : null}
     </div>
   )
+}
+
+function toShortcut(shortcut: string): ActionShortcut {
+  const parts = shortcut.split('+')
+  const key = parts.pop() ?? ''
+  const modifiers = parts
+    .map(normalizeModifier)
+    .filter((value): value is ShortcutModifier => Boolean(value))
+
+  return { key, modifiers }
+}
+
+function normalizeModifier(modifier: string): ShortcutModifier | null {
+  const normalized = modifier.toLowerCase()
+  if (normalized === 'mod') return 'cmd'
+  if (normalized === 'ctrl') return 'ctrl'
+  if (normalized === 'cmd') return 'cmd'
+  if (normalized === 'opt') return 'opt'
+  if (normalized === 'shift') return 'shift'
+  return null
 }

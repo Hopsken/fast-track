@@ -59,7 +59,7 @@ import { ActionPanel } from '~/components/ui'
 function GroupedPanel({ onDelete }: { onDelete: () => void }) {
   return (
     <ActionPanel title="Issue actions">
-      <ActionPanel.Section title="Navigation" subtitle="Move between views">
+      <ActionPanel.Section title="Navigation">
         <ActionPanel.Action
           title="Open board"
           shortcut={{ key: 'B' }}
@@ -117,11 +117,7 @@ function DestructiveAction({
   children?: ReactNode
 }) {
   return (
-    <ActionPanel.Action
-      id={id}
-      title={title}
-      subtitle="Cannot be undone"
-      onAction={onConfirm}>
+    <ActionPanel.Action id={id} title={title} onAction={onConfirm}>
       {children}
     </ActionPanel.Action>
   )

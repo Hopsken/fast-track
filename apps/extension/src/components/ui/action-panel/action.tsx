@@ -10,7 +10,7 @@ import { useStableId } from './use-stable-id'
 interface ActionProps {
   id?: string
   title: string
-  subtitle?: string
+
   shortcut?: {
     key: string
     modifiers?: Array<'cmd' | 'ctrl' | 'opt' | 'shift'>
@@ -22,7 +22,7 @@ interface ActionProps {
 export function Action({
   id,
   title,
-  subtitle,
+
   shortcut,
   icon,
   onAction
@@ -44,7 +44,7 @@ export function Action({
       {
         id: stableId,
         title,
-        subtitle,
+
         shortcut,
         icon,
         onAction,
@@ -62,7 +62,7 @@ export function Action({
     sectionId,
     shortcut,
     stableId,
-    subtitle,
+
     title
   ])
 

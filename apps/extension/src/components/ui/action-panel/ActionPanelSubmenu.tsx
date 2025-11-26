@@ -11,7 +11,6 @@ import { useStableId } from './use-stable-id'
 interface ActionPanelSubmenuProps {
   id?: string
   title: string
-  subtitle?: string
   shortcut?: {
     key: string
     modifiers?: Array<'cmd' | 'ctrl' | 'opt' | 'shift'>
@@ -23,7 +22,6 @@ interface ActionPanelSubmenuProps {
 export function ActionPanelSubmenu({
   id,
   title,
-  subtitle,
   shortcut,
   icon,
   children
@@ -50,7 +48,7 @@ export function ActionPanelSubmenu({
       {
         id: stableId,
         title,
-        subtitle,
+
         shortcut,
         icon,
         type: 'submenu'
@@ -66,7 +64,7 @@ export function ActionPanelSubmenu({
     shortcut,
     stableId,
     submenuKey,
-    subtitle,
+
     title
   ])
 
