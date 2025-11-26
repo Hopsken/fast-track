@@ -1,13 +1,20 @@
 import { type ReactNode, useEffect, useMemo } from 'react'
 
-import { getMenuKey, useActionPanelContext, useSectionContext } from './ActionPanelContext'
+import {
+  getMenuKey,
+  useActionPanelContext,
+  useSectionContext
+} from './ActionPanelContext'
 import { useStableId } from './use-stable-id'
 
 interface ActionProps {
   id?: string
   title: string
   subtitle?: string
-  shortcut?: { key: string; modifiers?: Array<'cmd' | 'ctrl' | 'opt' | 'shift'> }
+  shortcut?: {
+    key: string
+    modifiers?: Array<'cmd' | 'ctrl' | 'opt' | 'shift'>
+  }
   icon?: ReactNode
   onAction: () => void
 }
@@ -31,15 +38,20 @@ export function Action({
   )
 
   useEffect(() => {
-    return registerAction(menuKey, sectionId, {
-      id: stableId,
-      title,
-      subtitle,
-      shortcut,
-      icon,
-      onAction,
-      type: 'action'
-    }, order)
+    return registerAction(
+      menuKey,
+      sectionId,
+      {
+        id: stableId,
+        title,
+        subtitle,
+        shortcut,
+        icon,
+        onAction,
+        type: 'action'
+      },
+      order
+    )
   }, [
     claimItemOrder,
     icon,

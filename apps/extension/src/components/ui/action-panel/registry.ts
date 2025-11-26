@@ -158,7 +158,10 @@ export function useActionRegistry() {
   }
 }
 
-function registryReducer(state: RegistryState, action: RegistryAction): RegistryState {
+function registryReducer(
+  state: RegistryState,
+  action: RegistryAction
+): RegistryState {
   if (action.type === 'REGISTER_SECTION') {
     const menu = state[action.menuKey] ?? { key: action.menuKey, sections: [] }
     const nextSections = upsertSection(menu.sections, {
@@ -200,7 +203,11 @@ function registryReducer(state: RegistryState, action: RegistryAction): Registry
     const item =
       action.type === 'REGISTER_ACTION'
         ? { ...action.action, order: action.order }
-        : ({ ...action.submenu, type: 'submenu', order: action.order } as ActionNode)
+        : ({
+            ...action.submenu,
+            type: 'submenu',
+            order: action.order
+          } as ActionNode)
 
     const updatedSections = menu.sections.map((existing) => {
       if (existing.id !== section.id) return existing
@@ -288,7 +295,10 @@ function upsertSection(
     return sortSections(updated)
   }
 
-  return sortSections([...sections, { ...section, items: [], order: section.order }])
+  return sortSections([
+    ...sections,
+    { ...section, items: [], order: section.order }
+  ])
 }
 
 function upsertItem(items: ActionNode[], item: ActionNode) {
@@ -324,5 +334,7 @@ function sortSections(sections: ActionSectionState[]) {
 }
 
 function sortItems(items: ActionNode[]) {
-  return [...items].sort((left, right) => (left.order ?? 0) - (right.order ?? 0))
+  return [...items].sort(
+    (left, right) => (left.order ?? 0) - (right.order ?? 0)
+  )
 }

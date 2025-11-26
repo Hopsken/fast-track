@@ -1,6 +1,10 @@
 import { type ReactNode, useEffect, useMemo } from 'react'
 
-import { SectionContext, getMenuKey, useActionPanelContext } from './ActionPanelContext'
+import {
+  SectionContext,
+  getMenuKey,
+  useActionPanelContext
+} from './ActionPanelContext'
 import { useStableId } from './use-stable-id'
 
 interface ActionPanelSectionProps {
@@ -27,16 +31,11 @@ export function ActionPanelSection({
 
   useEffect(() => {
     return registerSection(menuKey, { id: stableId, title, subtitle, order })
-  }, [
-    menuKey,
-    order,
-    registerSection,
-    stableId,
-    subtitle,
-    title
-  ])
+  }, [menuKey, order, registerSection, stableId, subtitle, title])
 
   return (
-    <SectionContext.Provider value={stableId}>{children}</SectionContext.Provider>
+    <SectionContext.Provider value={stableId}>
+      {children}
+    </SectionContext.Provider>
   )
 }

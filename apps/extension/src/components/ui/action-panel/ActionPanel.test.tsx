@@ -29,7 +29,11 @@ describe('ActionPanel', () => {
     const items = await screen.findAllByRole('menuitem')
 
     expect(
-      items.map((item) => within(item).getByText(/First|Second|Third|Fourth/).textContent?.trim())
+      items.map((item) =>
+        within(item)
+          .getByText(/First|Second|Third|Fourth/)
+          .textContent?.trim()
+      )
     ).toEqual(['First', 'Second', 'Third', 'Fourth'])
 
     const panel = screen.getByRole('menu')
@@ -51,8 +55,14 @@ describe('ActionPanel', () => {
         <ActionPanel.Section title="Navigate">
           <ActionPanel.Action title="Root action" onAction={callbacks.root} />
           <ActionPanel.Submenu title="Child menu">
-            <ActionPanel.Action title="Child one" onAction={callbacks.childOne} />
-            <ActionPanel.Action title="Child two" onAction={callbacks.childTwo} />
+            <ActionPanel.Action
+              title="Child one"
+              onAction={callbacks.childOne}
+            />
+            <ActionPanel.Action
+              title="Child two"
+              onAction={callbacks.childTwo}
+            />
           </ActionPanel.Submenu>
         </ActionPanel.Section>
       </ActionPanel>
@@ -68,7 +78,9 @@ describe('ActionPanel', () => {
     const submenuItems = await screen.findAllByRole('menuitem')
 
     expect(
-      submenuItems.map((item) => within(item).getByText(/Child/).textContent?.trim())
+      submenuItems.map((item) =>
+        within(item).getByText(/Child/).textContent?.trim()
+      )
     ).toEqual(['Child one', 'Child two'])
 
     fireEvent.keyDown(panel, { key: 'Enter' })
@@ -78,7 +90,11 @@ describe('ActionPanel', () => {
     const rootItems = await screen.findAllByRole('menuitem')
 
     expect(
-      rootItems.map((item) => within(item).getByText(/Root action|Child menu/).textContent?.trim())
+      rootItems.map((item) =>
+        within(item)
+          .getByText(/Root action|Child menu/)
+          .textContent?.trim()
+      )
     ).toEqual(['Root action', 'Child menu'])
   })
 })

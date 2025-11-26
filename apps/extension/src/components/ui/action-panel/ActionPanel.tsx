@@ -12,12 +12,12 @@ import {
 
 import { cn } from '~/lib/utils'
 
+import { Action } from './action'
 import { ActionPanelContext, SectionContext } from './ActionPanelContext'
 import { ActionPanelSection } from './ActionPanelSection'
 import { ActionPanelSubmenu } from './ActionPanelSubmenu'
-import { ShortcutPill } from './ShortcutPill'
-import { Action } from './action'
 import { menuKeyFromPath, useActionRegistry } from './registry'
+import { ShortcutPill } from './ShortcutPill'
 import { type ActionNode, type ActionSectionState, type MenuKey } from './types'
 
 interface ActionPanelProps {
@@ -40,12 +40,8 @@ export function ActionPanel({
   className = '',
   emptyMessage = 'No actions available'
 }: ActionPanelProps) {
-  const {
-    menus,
-    registerSection,
-    registerAction,
-    registerSubmenu
-  } = useActionRegistry()
+  const { menus, registerSection, registerAction, registerSubmenu } =
+    useActionRegistry()
   // We track ordering per menu at render time so registrations always mirror
   // the traversal order of the rendered component tree. This keeps the menu
   // resilient when callers wrap actions/sections in other components.
@@ -61,15 +57,12 @@ export function ActionPanel({
     return next
   }, [])
 
-  const claimItemOrder = useCallback(
-    (menuKey: MenuKey, sectionId: string) => {
-      const menuItems = itemOrderRef.current[menuKey] ?? {}
-      const next = (menuItems[sectionId] ?? 0) + 1
-      itemOrderRef.current[menuKey] = { ...menuItems, [sectionId]: next }
-      return next
-    },
-    []
-  )
+  const claimItemOrder = useCallback((menuKey: MenuKey, sectionId: string) => {
+    const menuItems = itemOrderRef.current[menuKey] ?? {}
+    const next = (menuItems[sectionId] ?? 0) + 1
+    itemOrderRef.current[menuKey] = { ...menuItems, [sectionId]: next }
+    return next
+  }, [])
 
   const [activePath, setActivePath] = useState<string[]>([])
   const [activeIndexByMenu, setActiveIndexByMenu] = useState<
@@ -269,7 +262,9 @@ export function ActionPanel({
           </div>
         )}
 
-        <SectionContext.Provider value={undefined}>{children}</SectionContext.Provider>
+        <SectionContext.Provider value={undefined}>
+          {children}
+        </SectionContext.Provider>
       </div>
     </ActionPanelContext.Provider>
   )
@@ -342,7 +337,9 @@ function ActionSection({
                       {item.title}
                     </p>
                     {item.subtitle && (
-                      <p className="text-base-content/70 text-xs">{item.subtitle}</p>
+                      <p className="text-base-content/70 text-xs">
+                        {item.subtitle}
+                      </p>
                     )}
                   </div>
                 </div>
