@@ -12,9 +12,19 @@
       "dependsOn": ["^build"],
       "outputs": ["/.output/**"]
     },
+
     "lint": { "dependsOn": ["^lint"] },
     "lint:fix": { "cache": false, "dependsOn": ["^lint:fix"] },
-    "typecheck": { "dependsOn": ["^typecheck"] },
-    "test": { "dependsOn": ["^build"], "outputs": ["coverage/**"] }
+    "typecheck": {
+      "dependsOn": ["^transit"]
+    },
+
+    "test": {
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/vitest.config.ts"],
+      "dependsOn": ["transit"]
+    },
+    "transit": {
+      "dependsOn": ["^transit"]
+    }
   }
 }
