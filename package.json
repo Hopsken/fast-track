@@ -12,15 +12,18 @@
   ],
   "scripts": {
     "dev": "turbo run dev --filter=extension",
-    "build": "turbo run build",
+    "build": "turbo run build --filter=extension",
+    "dev:website": "turbo run dev --filter=website",
     "build:website": "turbo run build --filter=website",
     "zip": "turbo run zip --filter=extension",
-    "clean": "rimraf build",
-    "postinstall": "pnpm -C apps/extension exec wxt prepare",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:coverage": "turbo run test -- --coverage",
     "prepare": "husky",
+    "clean": "rimraf build",
+    "postinstall": "pnpm -C apps/extension exec wxt prepare",
     "lint-staged": "lint-staged"
   },
   "dependencies": {
