@@ -1,6 +1,9 @@
 {
   "extends": "@internal/typescript-config/nextjs.json",
   "files": [],
+  "compilerOptions": {
+    "plugins": [{ "name": "next" }]
+  },
   "include": [
     "*.d.ts",
     "*.ts",

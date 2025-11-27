@@ -1,11 +1,4 @@
-import baseConfig from '../../eslint.config.js'
+import { config as baseConfig } from '@internal/eslint-config/base'
 
-export default [
-  ...baseConfig,
-  {
-    files: ['**/*.json'],
-    languageOptions: {
-      parser: await import('jsonc-eslint-parser')
-    }
-  }
-]
+/** @type {import("eslint").Linter.Config[]} */
+export default baseConfig

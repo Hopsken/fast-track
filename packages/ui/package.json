@@ -15,11 +15,13 @@
   "scripts": {
     "build": "tsc --project tsconfig.lib.json",
     "lint": "eslint src --ext .ts,.tsx",
-    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
     "typecheck": "tsc --noEmit --project tsconfig.lib.json"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4"
+  },
+  "devDependencies": {
+    "@internal/tailwind-config": "workspace:*",
+    "@internal/typescript-config": "workspace:*"
   }
 }

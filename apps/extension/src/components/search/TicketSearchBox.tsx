@@ -111,7 +111,7 @@ export function TicketSearchBox({
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={isSearching ? 'Searching...' : placeholder}
-          className="w-full border-0 bg-transparent py-3 pr-10 pl-10 text-sm font-medium placeholder-gray-400 transition-all duration-200 focus:outline-none"
+          className="w-full border-0 bg-transparent py-3 pl-10 pr-10 text-sm font-medium placeholder-gray-400 transition-all duration-200 focus:outline-none"
         />
         {value && (
           <button

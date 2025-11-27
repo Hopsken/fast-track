@@ -1,5 +1,6 @@
 {
   "name": "website",
+  "type": "module",
   "scripts": {
     "dev": "next dev -p 4000",
     "build": "next build",
@@ -11,6 +12,7 @@
   },
   "devDependencies": {
     "@internal/logger": "workspace:*",
-    "@internal/typescript-config": "workspace:*"
+    "@internal/typescript-config": "workspace:*",
+    "@internal/eslint-config": "workspace:*"
   }
 }

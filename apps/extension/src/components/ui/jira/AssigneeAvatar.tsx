@@ -34,11 +34,17 @@ export function AssigneeAvatar({
 
   const getInitials = (displayName: string): string => {
     const names = displayName.trim().split(/\s+/)
+    const firstName = names[0]
+
+    if (!firstName) {
+      return ''
+    }
+
     if (names.length === 1) {
-      return names[0].substring(0, 2).toUpperCase()
+      return firstName.substring(0, 2).toUpperCase()
     }
     return (
-      names[0].charAt(0) + (names[names.length - 1]?.charAt(0) || '')
+      firstName.charAt(0) + (names[names.length - 1]?.charAt(0) || '')
     ).toUpperCase()
   }
 

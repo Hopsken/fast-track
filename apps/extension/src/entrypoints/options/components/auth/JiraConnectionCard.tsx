@@ -68,7 +68,7 @@ export const JiraConnectionCard: React.FC<JiraConnectionCardProps> = ({
                 </span>
               </div>
               {hostname ? (
-                <div className="pointer-events-none absolute top-full right-0 mt-1 hidden rounded-md bg-gray-900 px-2 py-1 text-xs whitespace-nowrap text-white shadow-lg group-hover:block">
+                <div className="pointer-events-none absolute right-0 top-full mt-1 hidden whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-xs text-white shadow-lg group-hover:block">
                   Connected to {hostname}
                 </div>
               ) : null}
@@ -83,7 +83,7 @@ export const JiraConnectionCard: React.FC<JiraConnectionCardProps> = ({
             <button
               onClick={onDisconnect}
               aria-label="Disconnect"
-              className="group flex items-center gap-1 rounded-full border border-transparent px-2.5 py-1.5 text-sm font-medium text-red-700 hover:border-red-200 hover:bg-red-50 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none">
+              className="group flex items-center gap-1 rounded-full border border-transparent px-2.5 py-1.5 text-sm font-medium text-red-700 hover:border-red-200 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
               <LuPower className="h-4 w-4" />
               <span className="max-w-0 overflow-hidden opacity-0 transition-all duration-200 group-hover:max-w-xs group-hover:opacity-100">
                 Disconnect

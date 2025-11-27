@@ -1,9 +1,5 @@
 module.exports = {
   '**/*': () => {
-    return [
-      'pnpm format',
-      'pnpm lint:fix',
-      'pnpm typecheck'
-    ]
+    return ['turbo typecheck', 'turbo lint:fix']
   }
 }

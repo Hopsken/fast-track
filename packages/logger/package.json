@@ -7,13 +7,14 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "lint": "eslint .",
+    "lint": "eslint src --ext .ts,.tsx",
     "test": "vitest run --project logger"
   },
   "dependencies": {
     "tslib": "^2.3.0"
   },
   "devDependencies": {
-    "@internal/typescript-config": "workspace:*"
+    "@internal/typescript-config": "workspace:*",
+    "@internal/eslint-config": "workspace:*"
   }
 }

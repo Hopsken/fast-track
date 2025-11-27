@@ -142,7 +142,7 @@ export async function openJiraIssue(
     // Try to get base URL from current Jira tab
     const jiraTabs = await getJiraTabs()
     if (jiraTabs.length > 0) {
-      const url = new URL(jiraTabs[0].url || '')
+      const url = new URL(jiraTabs[0]?.url || '')
       baseUrl = url.origin
     }
   }

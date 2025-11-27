@@ -1,5 +1,5 @@
-import { useMemoizedFn } from 'ahooks'
 import { useCallback, useRef, useState } from 'react'
+import { useMemoizedFn } from 'ahooks'
 
 import { useStorage } from '@/hooks'
 import { getAuthService } from '@/services/auth-service'
@@ -68,7 +68,6 @@ export function GeneralTab() {
   )
 
   const handleDisconnect = useCallback(() => {
-    // eslint-disable-next-line no-alert
     const confirmed = window.confirm(
       'Disconnect from Jira? You will need to reconnect to use the extension.'
     )

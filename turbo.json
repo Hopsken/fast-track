@@ -1,49 +1,20 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": [
-    "NODE_ENV",
-    "JIRA_CLIENT_ID",
-    "JIRA_CLIENT_SECRET",
-    "NEXT_PUBLIC_WEBSITE_URL"
-  ],
+  "globalEnv": [],
   "tasks": {
     "dev": { "cache": false, "persistent": true },
-    "dev:ff": { "cache": false, "persistent": true },
-    "dev:edge": { "cache": false, "persistent": true },
-    "start": { "cache": false, "persistent": true },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["apps/**/.output/**", "apps/**/.next/**", "dist/**"]
-    },
-    "build:chrome": {
-      "dependsOn": ["^build"],
-      "outputs": ["apps/extension/.output/**"]
-    },
-    "build:ff": {
-      "dependsOn": ["^build"],
-      "outputs": ["apps/extension/.output/**"]
-    },
-    "build:edge": {
-      "dependsOn": ["^build"],
-      "outputs": ["apps/extension/.output/**"]
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".output/**", ".next/**", "!.next/cache/**", "dist/**"]
     },
     "zip": {
-      "dependsOn": ["build:chrome", "build:ff"],
-      "outputs": ["apps/extension/.output/**"]
-    },
-    "zip:chrome": {
-      "dependsOn": ["build:chrome"],
-      "outputs": ["apps/extension/.output/**"]
-    },
-    "zip:firefox": {
-      "dependsOn": ["build:ff"],
-      "outputs": ["apps/extension/.output/**"]
+      "dependsOn": ["^build"],
+      "outputs": ["/.output/**"]
     },
     "lint": { "dependsOn": ["^lint"] },
     "lint:fix": { "cache": false, "dependsOn": ["^lint:fix"] },
-    "format": { "cache": false },
-    "format:check": {},
     "typecheck": { "dependsOn": ["^typecheck"] },
-    "test": { "dependsOn": ["^test"], "outputs": ["coverage/**"] }
+    "test": { "dependsOn": ["^build"], "outputs": ["coverage/**"] }
   }
 }

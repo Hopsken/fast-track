@@ -56,7 +56,7 @@ export const JiraApiKeySetup: React.FC<JiraApiKeySetupProps> = ({
             value={host}
             onChange={(event) => setHost(event.target.value)}
             placeholder="https://your-domain.atlassian.net"
-            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 focus:outline-none"
+            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
             required
           />
         </label>
@@ -70,7 +70,7 @@ export const JiraApiKeySetup: React.FC<JiraApiKeySetupProps> = ({
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder="you@company.com"
-            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 focus:outline-none"
+            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
             required
           />
         </label>
@@ -85,13 +85,13 @@ export const JiraApiKeySetup: React.FC<JiraApiKeySetupProps> = ({
               value={apiKey}
               onChange={(event) => setApiKey(event.target.value)}
               placeholder="Paste your Atlassian API token"
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 focus:outline-none"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
               required
             />
             <button
               type="button"
               onClick={() => setShowKey((prev) => !prev)}
-              className="min-w-[100px] rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 focus:outline-none">
+              className="min-w-[100px] rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900">
               {showKey ? 'Hide' : 'Show'}
             </button>
           </div>
@@ -106,7 +106,7 @@ export const JiraApiKeySetup: React.FC<JiraApiKeySetupProps> = ({
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50">
+          className="w-full rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
           {isLoading ? 'Connecting...' : 'Save API key'}
         </button>
       </div>

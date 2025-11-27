@@ -88,7 +88,7 @@ function App() {
       </div>
 
       {/* Results Section */}
-      <div className="animate-in fade-in overflow-hidden delay-150 duration-400">
+      <div className="animate-in fade-in duration-400 overflow-hidden delay-150">
         <ErrorBoundary>
           <TicketList
             showNotConfiguredNotice={!isAuthConfigured}

@@ -11,16 +11,15 @@
     "zip": "wxt zip -b chrome && wxt zip -b firefox",
     "zip:chrome": "wxt zip -b chrome",
     "zip:firefox": "wxt zip -b firefox",
-    "lint": "eslint src --ext .ts,.tsx --format stylish",
-    "lint:fix": "eslint src --ext .ts,.tsx --format stylish --fix",
-    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --project extension"
   },
   "devDependencies": {
     "@internal/logger": "workspace:*",
     "@internal/ui": "workspace:*",
-    "@internal/typescript-config": "workspace:*"
+    "@internal/typescript-config": "workspace:*",
+    "@internal/eslint-config": "workspace:*"
   }
 }

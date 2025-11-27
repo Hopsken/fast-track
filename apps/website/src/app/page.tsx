@@ -17,12 +17,12 @@ export default function Index() {
   return (
     <main className="relative min-h-screen overflow-hidden">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute top-[-25%] left-[-20%] h-96 w-96 rounded-full bg-sky-300/30 blur-3xl" />
-        <div className="absolute top-1/3 right-[-8%] h-80 w-80 rounded-full bg-emerald-300/30 blur-3xl" />
+        <div className="absolute left-[-20%] top-[-25%] h-96 w-96 rounded-full bg-sky-300/30 blur-3xl" />
+        <div className="absolute right-[-8%] top-1/3 h-80 w-80 rounded-full bg-emerald-300/30 blur-3xl" />
         <div className="absolute bottom-[-10%] left-1/4 h-72 w-72 rounded-full bg-amber-200/30 blur-3xl" />
       </div>
 
-      <div className="relative mx-auto flex min-h-screen max-w-5xl flex-col px-6 pt-20 pb-16 sm:pt-28">
+      <div className="relative mx-auto flex min-h-screen max-w-5xl flex-col px-6 pb-16 pt-20 sm:pt-28">
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/40">
@@ -48,7 +48,7 @@ export default function Index() {
               Instant issue access
             </p>
             <div className="space-y-4">
-              <h1 className="text-4xl leading-tight font-semibold text-slate-900 sm:text-5xl">
+              <h1 className="text-4xl font-semibold leading-tight text-slate-900 sm:text-5xl">
                 Your Jira workbench, ready in a keystroke
               </h1>
               <p className="text-lg text-slate-700">
@@ -70,8 +70,8 @@ export default function Index() {
             </div>
           </div>
 
-          <div className="space-y-4 rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-xl ring-1 shadow-slate-200/80 ring-white/60 backdrop-blur">
-            <p className="text-sm font-semibold tracking-wide text-emerald-800 uppercase">
+          <div className="space-y-4 rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-xl shadow-slate-200/80 ring-1 ring-white/60 backdrop-blur">
+            <p className="text-sm font-semibold uppercase tracking-wide text-emerald-800">
               Why Fast Track
             </p>
             <ul className="space-y-3 text-sm leading-relaxed text-slate-700">

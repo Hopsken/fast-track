@@ -1,5 +1,4 @@
 import { browser } from '#imports'
-
 import { useEffect, useState } from 'react'
 
 export function useVersion() {
