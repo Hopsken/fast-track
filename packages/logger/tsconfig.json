@@ -1,24 +1,9 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "@internal/typescript-config/base.json",
   "compilerOptions": {
     "module": "esnext",
-    "declaration": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "importHelpers": true,
-    "noImplicitOverride": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noPropertyAccessFromIndexSignature": true
+    "moduleResolution": "bundler"
   },
   "files": [],
-  "include": [],
-  "references": [
-    {
-      "path": "./tsconfig.lib.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
-    }
-  ]
+  "include": []
 }

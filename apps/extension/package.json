@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@internal/logger": "workspace:*",
-    "@internal/ui": "workspace:*"
+    "@internal/ui": "workspace:*",
+    "@internal/typescript-config": "workspace:*"
   }
 }
