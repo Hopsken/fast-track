@@ -22,6 +22,10 @@ jobs:
     outputs:
       version: ${{ steps.package_version.outputs.version }}
 
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -52,14 +56,8 @@ jobs:
         id: package_version
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
-      - name: Run linting
-        run: pnpm run lint
-
-      - name: Run type checking
-        run: pnpm run typecheck
-
-      - name: Run tests with coverage
-        run: pnpm run test:coverage
+      - name: Quality checkout
+        run: pnpm exec turbo run typecheck lint test --affected
 
       - name: Create zip artifacts
         run: pnpm run zip

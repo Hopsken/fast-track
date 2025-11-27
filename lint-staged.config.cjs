@@ -1,5 +1,5 @@
 module.exports = {
   '**/*': () => {
-    return ['turbo typecheck', 'turbo lint:fix']
+    return ['turbo run typecheck lint:fix']
   }
 }
