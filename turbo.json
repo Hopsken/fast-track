@@ -16,7 +16,7 @@
 
     "zip": {
       "dependsOn": ["^build"],
-      "outputs": ["/.output/**"]
+      "outputs": [".output/**"]
     },
 
     "lint": { "dependsOn": ["^lint"] },
