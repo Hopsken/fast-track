@@ -1,11 +1,11 @@
 # logger
 
-This library was generated with [Nx](https://nx.dev).
+This library lives inside the Turborepo workspace.
 
 ## Building
 
-Run `nx build logger` to build the library.
+Run `pnpm turbo run build --filter=@internal/logger` to build the library.
 
 ## Running unit tests
 
-Run `nx test logger` to execute the unit tests via [Vitest](https://vitest.dev/).
+Run `pnpm turbo run test --filter=@internal/logger` to execute the unit tests via [Vitest](https://vitest.dev/).

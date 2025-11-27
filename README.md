@@ -1,24 +1,30 @@
-Monorepo (Nx) structure: this repository now uses Nx with the browser extension located under `apps/extension`. Future apps (e.g., website) can be added under `apps/` and shared code under `packages/`.
+Monorepo (Turborepo) structure: this repository now uses Turborepo with the browser extension located under `apps/extension`. Future apps (e.g., website) can be added under `apps/` and shared code under `packages/`.
 
 ## Development
 
-### Key Nx Commands
+### Key Turborepo Commands
 
 ```bash
 # Extension development
-nx dev extension          # Start development server
-nx build extension        # Build for production (use for validation)
-nx zip extension          # Create distribution package
+pnpm dev                 # Start Chromium development server
+pnpm dev:ff              # Start Firefox development server
+pnpm dev:edge            # Start Edge development server
+pnpm build               # Build extension and supporting packages
+pnpm build:chrome        # Build Chrome-only bundle
+pnpm build:ff            # Build Firefox bundle
+pnpm build:edge          # Build Edge bundle
+pnpm zip                 # Create Chrome + Firefox zip outputs
 
 # Website development
-nx dev website           # Start Next.js dev server
-nx build website         # Build for production
+pnpm dev:website         # Start Next.js dev server
+pnpm build:website       # Build for production
+pnpm start:website       # Run production server locally
 
 # Code quality
-nx lint extension        # Run ESLint for extension
-nx lint website          # Run ESLint for website (excludes .next directory)
-nx test                  # Run tests
-nx typecheck            # TypeScript validation across all projects
+pnpm lint                # Run ESLint across projects
+pnpm test                # Run tests
+pnpm typecheck           # TypeScript validation across all projects
+pnpm format:check        # Prettier check without writing files
 ```
 
 ### Code Quality & Review Process
@@ -30,8 +36,8 @@ nx typecheck            # TypeScript validation across all projects
 2. **TypeScript Strict Mode**: Enforced across all projects
 
 3. **Development Workflow**:
-   - Run `nx lint [project]` before commits
-   - Use `nx build [project]` instead of dev commands for validation
+   - Run `pnpm lint` before commits
+   - Use `pnpm build` instead of dev commands for validation
    - Follow SOLID principles and clean code practices (see CODING_STANDARDS.md)
 
 4. **Authentication Flow**:
@@ -41,9 +47,9 @@ nx typecheck            # TypeScript validation across all projects
 
 Key commands
 
-- Dev (Chromium): `pnpm dev` → runs `nx run extension:dev`
-- Dev (Firefox): `pnpm dev:ff` → runs `nx run extension:dev:ff`
-- Build (Chromium): `pnpm build` → runs `nx run extension:build`
+- Dev (Chromium): `pnpm dev` → runs `turbo run dev --filter=extension`
+- Dev (Firefox): `pnpm dev:ff` → runs `turbo run dev:ff --filter=extension`
+- Build (Chromium): `pnpm build` → runs `turbo run build`
 - Build (Chrome/Firefox/Edge): `pnpm build:chrome | build:ff | build:edge`
 - Zip: `pnpm zip` or `pnpm zip:chrome` / `pnpm zip:firefox`
 - Lint/Format/Typecheck: `pnpm lint | format:check | typecheck`

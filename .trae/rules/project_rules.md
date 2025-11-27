@@ -5,7 +5,7 @@ Always use context7 when i need code generation, setup or configuration steps, o
 Use these known libraries in the following:
 
 - Wxt: `/wxt-dev/wxt`
-- NX: `/nrwl/nx`
+- Turborepo: `/vercel/turbo`
 - RxJS: `/reactivex/rxjs`
 - Zustand: `/pmndrs/zustand`
 - Jira.js: `/mrrefactoring/jira.js`
@@ -17,7 +17,7 @@ Don't run wxt dev command to check build, use wxt build instead.
 
 Don't run any `dev` command, ask the user to run them. To validate implementation, run eslint commands first, then run typescript typecheck making sure everything is correct.
 
-Important: this is a NX monorepo, always try to run nx commands instead of running commands directly.
+Important: this is a Turborepo monorepo; prefer running the orchestrated scripts (e.g., `pnpm build`, `pnpm lint`) instead of invoking underlying tools directly.
 
 ## Coding Best Practices
 

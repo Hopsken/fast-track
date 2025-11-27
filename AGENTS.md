@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-- Monorepo: Nx + pnpm workspaces.
+- Monorepo: Turborepo + pnpm workspaces.
 - Apps: Extension lives at `apps/extension`.
 - Source (extension): `apps/extension/src/` with key folders: `entrypoints/` (background, popup, options, `*.content.ts` scripts), `components/`, `hooks/`, `services/`, `storage/` (typed persistence), `stores/` (Zustand), `utils/`, `assets/`.
 - Config (extension): `apps/extension/wxt.config.ts`, `apps/extension/web-ext.config.ts`, `apps/extension/tsconfig.json` (extends `apps/extension/.wxt/tsconfig.json`), root-level `eslint.config.js`, `.prettierrc.cjs`.
@@ -11,7 +11,7 @@
 ## Build & Distribution
 
 - Important: Prefer production builds over dev. Build locally, then load the output.
-- Root scripts proxy to Nx targets for the extension app:
+- Root scripts drive Turborepo pipelines for the extension app:
   - `pnpm build` | `pnpm build:ff` | `pnpm build:edge`
   - `pnpm zip:chrome` | `pnpm zip:firefox`
 - Load the unpacked build from `apps/extension/.output/chromium-mv3` (or `firefox-mv3`).
@@ -39,7 +39,7 @@
 - Naming: Place tests next to code as `*.test.ts`/`*.test.tsx` (ESLint is configured to recognize these).
 - Scope: Unit-test utilities, services, and complex hooks; keep tests deterministic.
 - On code changes, run `pnpm lint` and unit tests with `pnpm test`.
-- Run Nx format/lint/typecheck for all projects (sandbox heads may lack a base branch): `pnpm nx run-many --target=format --target=lint --target=typecheck`.
+- Run Turborepo format/lint/typecheck for all projects (sandbox heads may lack a base branch): `pnpm format`, `pnpm lint`, and `pnpm typecheck`.
 
 ## Commit & Pull Request Guidelines
 
@@ -57,7 +57,7 @@
 
 - Prefer small, focused patches; avoid unrelated refactors.
 - Reflect any command or permission changes in `apps/extension/wxt.config.ts` and this guide.
-- When adding a new app (e.g., website), place under `apps/` and add an Nx `project.json`. Shared code should go in `packages/`.
+- When adding a new app (e.g., website), place under `apps/` and wire scripts so Turborepo can run them. Shared code should go in `packages/`.
 
 ## MCP
 

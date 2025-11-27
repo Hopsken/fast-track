@@ -14,7 +14,6 @@ import { openOptionsPage, openInNewTab } from '~/utils/extension'
 import { getCurrentShortcut, formatShortcut } from '~/utils/shortcuts'
 
 import '~/assets/styles/main.css'
-// eslint-disable-next-line @nx/enforce-module-boundaries
 import '../../../../../packages/ui/src/styles/global.css'
 
 function App() {

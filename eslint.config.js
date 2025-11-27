@@ -8,7 +8,6 @@ import jsxA11y from 'eslint-plugin-jsx-a11y'
 import importX from 'eslint-plugin-import-x'
 import sonarjs from 'eslint-plugin-sonarjs'
 import unicorn from 'eslint-plugin-unicorn'
-import nx from '@nx/eslint-plugin'
 import prettier from 'eslint-plugin-prettier/recommended'
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript'
 
@@ -24,7 +23,6 @@ export default [
       '**/.output/**',
       '**/.next/**',
       '**/coverage/**',
-      '**/.nx/cache/**',
       '**/tmp/**',
       '**/*.min.js',
       '**/build/**'
@@ -62,7 +60,6 @@ export default [
     },
     plugins: {
       '@typescript-eslint': tseslint,
-      '@nx': nx,
       react: react,
       'react-hooks': reactHooks,
       'jsx-a11y': jsxA11y,
@@ -188,21 +185,6 @@ export default [
       'no-useless-computed-key': 'error',
       quotes: ['error', 'single', { avoidEscape: true }],
 
-      // Nx rules
-      '@nx/enforce-module-boundaries': [
-        'error',
-        {
-          enforceBuildableLibDependency: true,
-          allow: ['^.*/eslint(.base)?\\.config.[cm]?js$'],
-          depConstraints: [
-            {
-              sourceTag: '*',
-              onlyDependOnLibsWithTags: ['*']
-            }
-          ]
-        }
-      ],
-
       // Code quality rules
       'max-params': ['warn', 3],
       'max-depth': ['warn', 4],
@@ -228,8 +210,7 @@ export default [
       }
     },
     plugins: {
-      '@typescript-eslint': tseslint,
-      '@nx': nx
+      '@typescript-eslint': tseslint
     },
     rules: {
       '@typescript-eslint/no-unused-vars': [

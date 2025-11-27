@@ -26,7 +26,7 @@
 
 3. **Verify setup**:
    ```bash
-   nx --version
+   turbo --version
    ```
 
 ### IDE Configuration
@@ -58,70 +58,65 @@ Add to your `.vscode/settings.json`:
 }
 ```
 
-## Nx Commands and Targets
+## Workspace Commands
 
 ### Extension Development
 
 ```bash
 # Start development server with hot reload
-nx dev extension
+pnpm dev
+
+# Browser-specific dev servers
+pnpm dev:ff
+pnpm dev:edge
 
 # Build for production (use this for validation)
-nx build extension
+pnpm build
 
-# Create distribution package
-nx zip extension
+# Create distribution packages
+pnpm zip
 
 # Run linting
-nx lint extension
+pnpm turbo run lint --filter=extension
 
 # Run tests
-nx test extension
+pnpm turbo run test --filter=extension
 
 # Type checking
-nx typecheck extension
+pnpm turbo run typecheck --filter=extension
 ```
 
 ### Website Development
 
 ```bash
 # Start Next.js development server
-nx dev website
+pnpm dev:website
 
 # Build for production
-nx build website
+pnpm build:website
 
 # Start production server
-nx start website
+pnpm start:website
 
 # Run linting (excludes .next directory)
-nx lint website
+pnpm turbo run lint --filter=website
 
 # Run tests
-nx test website
+pnpm turbo run test --filter=website
 
 # Type checking
-nx typecheck website
+pnpm turbo run typecheck --filter=website
 ```
 
 ### Cross-Project Commands
 
 ```bash
-# Run command across all projects
-nx run-many --target=lint --all
-nx run-many --target=build --all
-nx run-many --target=test --all
-
-# Run command for specific projects
-nx run-many --target=lint --projects=extension,website
-
-# Show project dependency graph
-nx graph
-
-# Show affected projects (useful for CI)
-nx affected:lint
-nx affected:build
-nx affected:test
+# Run commands across all projects
+pnpm lint
+pnpm build
+pnpm test
+pnpm typecheck
+pnpm format:check
 ```
 
 ## Code Quality Tools
@@ -130,14 +125,14 @@ nx affected:test
 
 #### Extension ESLint (`apps/extension/eslint.config.mjs`)
 
-- **Base**: `@nx/eslint-plugin/base`
+- **Base**: workspace `eslint.config.js`
 - **TypeScript**: `@typescript-eslint/recommended`
 - **React**: `plugin:react/recommended`, `plugin:react-hooks/recommended`
 - **WXT**: Custom rules for extension development
 
 #### Website ESLint (`apps/website/eslint.config.mjs`)
 
-- **Base**: `@nx/eslint-plugin/base`
+- **Base**: workspace `eslint.config.js`
 - **Next.js**: `@next/eslint-plugin-next`
 - **TypeScript**: `@typescript-eslint/recommended`
 - **Ignores**: `.next/**/*`, `node_modules/**/*`
@@ -146,12 +141,12 @@ nx affected:test
 
 ```bash
 # Lint specific project
-nx lint extension
-nx lint website
+pnpm turbo run lint --filter=extension
+pnpm turbo run lint --filter=website
 
 # Lint with auto-fix
-nx lint extension --fix
-nx lint website --fix
+pnpm turbo run lint:fix --filter=extension
+pnpm turbo run lint:fix --filter=website
 
 # Lint specific files
 npx eslint apps/extension/src/**/*.ts
@@ -181,14 +176,14 @@ All projects use TypeScript strict mode with the following settings:
 
 ```bash
 # Check all projects
-nx typecheck
+pnpm typecheck
 
 # Check specific project
-nx typecheck extension
-nx typecheck website
+pnpm turbo run typecheck --filter=extension
+pnpm turbo run typecheck --filter=website
 
 # Watch mode for development
-nx typecheck extension --watch
+pnpm turbo run typecheck --filter=extension -- --watch
 ```
 
 ## Testing Procedures
@@ -197,17 +192,17 @@ nx typecheck extension --watch
 
 ```bash
 # Run all tests
-nx test
+pnpm test
 
 # Run tests for specific project
-nx test extension
-nx test website
+pnpm turbo run test --filter=extension
+pnpm turbo run test --filter=website
 
 # Run tests in watch mode
-nx test extension --watch
+pnpm turbo run test --filter=extension -- --watch
 
 # Run tests with coverage
-nx test extension --coverage
+pnpm turbo run test --filter=extension -- --coverage
 ```
 
 ### Extension Testing
@@ -217,7 +212,7 @@ nx test extension --coverage
 1. **Build the extension**:
 
    ```bash
-   nx build extension
+   pnpm build
    ```
 
 2. **Load in browser**:
@@ -234,23 +229,23 @@ nx test extension --coverage
 
 ```bash
 # Run extension-specific tests
-nx test extension
+pnpm turbo run test --filter=extension
 
 # Test with different browsers (if configured)
-nx test extension --browsers=chrome,firefox
+pnpm turbo run test --filter=extension --browsers=chrome,firefox
 ```
 
 ### Website Testing
 
 ```bash
 # Run website tests
-nx test website
+pnpm turbo run test --filter=website
 
 # Run with coverage
-nx test website --coverage
+pnpm turbo run test --filter=website -- --coverage
 
 # Run specific test file
-nx test website --testPathPattern=auth
+pnpm turbo run test --filter=website -- --testPathPattern=auth
 ```
 
 ## Build and Deployment Process
@@ -259,38 +254,38 @@ nx test website --testPathPattern=auth
 
 ```bash
 # Development build with source maps
-nx build extension --mode=development
-nx build website --mode=development
+pnpm build --mode=development
+pnpm build:website --mode=development
 ```
 
 ### Production Builds
 
 ```bash
 # Production build (optimized)
-nx build extension
-nx build website
+pnpm build
+pnpm build:website
 
 # Create extension package
-nx zip extension
+pnpm zip
 ```
 
 ### Build Validation
 
-**Important**: Always use `nx build` instead of `nx dev` for validation:
+**Important**: Always use `pnpm build` instead of dev servers for validation:
 
 ```bash
 # Validate extension build
-nx build extension
+pnpm build
 
 # Validate website build
-nx build website
+pnpm build:website
 
 # Check for TypeScript errors
-nx typecheck
+pnpm typecheck
 
 # Check for linting issues
-nx lint extension
-nx lint website
+pnpm turbo run lint --filter=extension
+pnpm turbo run lint --filter=website
 ```
 
 ### Deployment Checklist
@@ -298,19 +293,20 @@ nx lint website
 1. **Pre-deployment validation**:
 
    ```bash
-   nx lint extension website
-   nx typecheck
-   nx test
-   nx build extension website
+   pnpm lint
+   pnpm typecheck
+   pnpm test
+   pnpm build
+   pnpm build:website
    ```
 
 2. **Extension deployment**:
-   - Create production build: `nx build extension`
-   - Create package: `nx zip extension`
+   - Create production build: `pnpm build`
+   - Create package: `pnpm zip`
    - Upload to Chrome Web Store / Firefox Add-ons
 
 3. **Website deployment**:
-   - Create production build: `nx build website`
+   - Create production build: `pnpm build:website`
    - Deploy to hosting platform (Vercel, Netlify, etc.)
 
 ## Debugging and Troubleshooting
@@ -322,13 +318,13 @@ nx lint website
 1. **TypeScript errors**:
 
    ```bash
-   nx typecheck extension --verbose
+   pnpm turbo run typecheck --filter=extension --verbose
    ```
 
 2. **ESLint errors**:
 
    ```bash
-   nx lint extension --verbose
+   pnpm turbo run lint --filter=extension --verbose
    ```
 
 3. **Dependency issues**:
@@ -385,14 +381,14 @@ logger.error('API request failed', { error, endpoint })
 
 ```bash
 # Analyze bundle size
-nx build extension --analyze
-nx build website --analyze
+pnpm build --analyze
+pnpm build:website --analyze
 
 # Check for unused dependencies
 npx depcheck
 
 # Performance profiling
-nx test extension --profile
+pnpm turbo run test --filter=extension --profile
 ```
 
 ## Git Workflow
@@ -421,8 +417,8 @@ git commit -m "refactor(shared): extract common utilities"
 npx husky install
 
 # Add pre-commit hook
-npx husky add .husky/pre-commit "nx affected:lint --fix"
-npx husky add .husky/pre-commit "nx affected:test"
+npx husky add .husky/pre-commit "pnpm lint"
+npx husky add .husky/pre-commit "pnpm test"
 ```
 
 ## Environment Variables
@@ -465,9 +461,9 @@ jobs:
           node-version: 18
           cache: 'npm'
       - run: npm ci
-      - run: nx affected:lint
-      - run: nx affected:test
-      - run: nx affected:build
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm build
 ```
 
 ### Quality Gates
@@ -479,8 +475,8 @@ jobs:
 
 ## Best Practices Summary
 
-1. **Always run linting before commits**: `nx lint [project]`
-2. **Use build commands for validation**: `nx build` instead of `nx dev`
+1. **Always run linting before commits**: `pnpm lint`
+2. **Use build commands for validation**: `pnpm build` instead of dev servers
 3. **Follow SOLID principles**: See CODING_STANDARDS.md
 4. **Write meaningful commit messages**: Use conventional commit format
 5. **Test thoroughly**: Unit tests, integration tests, manual testing

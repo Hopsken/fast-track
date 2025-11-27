@@ -1,0 +1,23 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalEnv": ["NODE_ENV"],
+  "pipeline": {
+    "dev": { "cache": false, "persistent": true },
+    "dev:ff": { "cache": false, "persistent": true },
+    "dev:edge": { "cache": false, "persistent": true },
+    "start": { "cache": false, "persistent": true },
+    "build": { "dependsOn": ["^build"], "outputs": ["apps/**/.output/**", "apps/**/.next/**", "dist/**"] },
+    "build:chrome": { "outputs": ["apps/extension/.output/**"] },
+    "build:ff": { "outputs": ["apps/extension/.output/**"] },
+    "build:edge": { "outputs": ["apps/extension/.output/**"] },
+    "zip": { "outputs": ["apps/extension/.output/**"] },
+    "zip:chrome": { "outputs": ["apps/extension/.output/**"] },
+    "zip:firefox": { "outputs": ["apps/extension/.output/**"] },
+    "lint": { "dependsOn": ["^lint"] },
+    "lint:fix": { "cache": false, "dependsOn": ["^lint:fix"] },
+    "format": { "cache": false },
+    "format:check": {},
+    "typecheck": { "dependsOn": ["^typecheck"] },
+    "test": { "dependsOn": ["^test"], "outputs": ["coverage/**"] }
+  }
+}

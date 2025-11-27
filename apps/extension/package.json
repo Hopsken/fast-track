@@ -1,5 +1,23 @@
 {
   "name": "extension",
+  "scripts": {
+    "dev": "wxt -b chromium",
+    "dev:ff": "wxt -b firefox",
+    "dev:edge": "wxt -b edge",
+    "build": "wxt build -b chromium",
+    "build:chrome": "wxt build -b chrome",
+    "build:ff": "wxt build -b firefox",
+    "build:edge": "wxt build -b edge",
+    "zip": "wxt zip -b chrome && wxt zip -b firefox",
+    "zip:chrome": "wxt zip -b chrome",
+    "zip:firefox": "wxt zip -b firefox",
+    "lint": "eslint src --ext .ts,.tsx --format stylish",
+    "lint:fix": "eslint src --ext .ts,.tsx --format stylish --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --project extension"
+  },
   "devDependencies": {
     "@internal/logger": "workspace:*",
     "@internal/ui": "workspace:*"

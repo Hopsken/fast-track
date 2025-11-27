@@ -12,6 +12,12 @@
       "default": "./src/index.ts"
     }
   },
+  "scripts": {
+    "build": "tsc --project tsconfig.lib.json --outDir dist/packages/logger",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit --project tsconfig.lib.json",
+    "test": "vitest run --project logger"
+  },
   "dependencies": {
     "tslib": "^2.3.0"
   }

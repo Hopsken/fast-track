@@ -1,7 +1,7 @@
 # ui
 
-This library was generated with [Nx](https://nx.dev).
+This library lives inside the Turborepo workspace.
 
 ## Running unit tests
 
-Run `nx test ui` to execute the unit tests via [Jest](https://jestjs.io).
+Run `pnpm turbo run test --filter=@internal/ui` to execute the unit tests via [Vitest](https://vitest.dev/) when tests are available.
