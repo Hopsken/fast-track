@@ -11,10 +11,13 @@
     "test": "vitest run --project logger"
   },
   "dependencies": {
+    "loglevel": "^1.9.2",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
+    "@internal/eslint-config": "workspace:*",
     "@internal/typescript-config": "workspace:*",
-    "@internal/eslint-config": "workspace:*"
+    "eslint": "^9.0.0",
+    "typescript": "5.9.2"
   }
 }

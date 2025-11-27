@@ -14,7 +14,7 @@ import { openOptionsPage, openInNewTab } from '~/utils/extension'
 import { getCurrentShortcut, formatShortcut } from '~/utils/shortcuts'
 
 import '~/assets/styles/main.css'
-import '../../../../../packages/ui/src/styles/global.css'
+import '@internal/tailwind-config'
 
 function App() {
   const { searchQuery, handleSearch, error, isAuthConfigured } =
