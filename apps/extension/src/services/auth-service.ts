@@ -1,5 +1,4 @@
 import { browser } from '#imports'
-
 import { defineProxyService } from '@webext-core/proxy-service'
 import z from 'zod'
 

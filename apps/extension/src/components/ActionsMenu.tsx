@@ -1,6 +1,6 @@
+import { useRef, useState } from 'react'
 import { Button } from '@internal/ui/components/button'
 import { useClickAway, useMemoizedFn } from 'ahooks'
-import { useRef, useState } from 'react'
 import { HotkeyCallback, HotkeysProvider, useHotkeys } from 'react-hotkeys-hook'
 import { HiClipboardCopy } from 'react-icons/hi'
 
@@ -186,7 +186,7 @@ function ActionsMenuContent({ selectedTicket, onClose }: ActionsMenuProps) {
         <div
           ref={actionsMenuRef}
           data-state={menuState}
-          className="actions-menu-animate glass rounded-box absolute right-0 bottom-10 z-20">
+          className="actions-menu-animate glass rounded-box absolute bottom-10 right-0 z-20">
           <ActionPanel
             title={selectedTicket.key}
             description={selectedTicket.summary}

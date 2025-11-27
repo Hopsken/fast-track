@@ -1,9 +1,5 @@
 module.exports = {
   '**/*': () => {
-    return [
-      `pnpm exec nx affected --target=format`,
-      `pnpm exec nx affected --target=lint:fix`,
-      `pnpm exec nx affected --target=typecheck`
-    ]
+    return ['turbo run typecheck lint:fix']
   }
 }

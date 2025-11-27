@@ -28,11 +28,9 @@ describe('logging decorator', () => {
     const result = service.greet('Ada Lovelace')
 
     expect(result).toBe('Hello, Ada Lovelace!')
-    expect(logSpy).toHaveBeenNthCalledWith(
-      1,
-      'Calling greet with arguments:',
-      ['Ada Lovelace']
-    )
+    expect(logSpy).toHaveBeenNthCalledWith(1, 'Calling greet with arguments:', [
+      'Ada Lovelace'
+    ])
     expect(logSpy).toHaveBeenNthCalledWith(
       2,
       'Method greet returned:',

@@ -14,8 +14,7 @@ import { openOptionsPage, openInNewTab } from '~/utils/extension'
 import { getCurrentShortcut, formatShortcut } from '~/utils/shortcuts'
 
 import '~/assets/styles/main.css'
-// eslint-disable-next-line @nx/enforce-module-boundaries
-import '../../../../../packages/ui/src/styles/global.css'
+import '@internal/tailwind-config'
 
 function App() {
   const { searchQuery, handleSearch, error, isAuthConfigured } =
@@ -89,7 +88,7 @@ function App() {
       </div>
 
       {/* Results Section */}
-      <div className="animate-in fade-in overflow-hidden delay-150 duration-400">
+      <div className="animate-in fade-in duration-400 overflow-hidden delay-150">
         <ErrorBoundary>
           <TicketList
             showNotConfiguredNotice={!isAuthConfigured}

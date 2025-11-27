@@ -1,5 +1,4 @@
 import { defineContentScript } from '#imports'
-
 import loglevel from 'loglevel'
 import { z } from 'zod'
 

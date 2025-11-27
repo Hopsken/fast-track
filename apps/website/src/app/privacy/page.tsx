@@ -45,8 +45,8 @@ export default function PrivacyPage() {
   return (
     <main className="relative min-h-screen overflow-hidden">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute top-[-25%] left-[-10%] h-80 w-80 rounded-full bg-emerald-200/50 blur-3xl" />
-        <div className="absolute top-1/4 right-[-10%] h-96 w-96 rounded-full bg-amber-200/40 blur-3xl" />
+        <div className="absolute left-[-10%] top-[-25%] h-80 w-80 rounded-full bg-emerald-200/50 blur-3xl" />
+        <div className="absolute right-[-10%] top-1/4 h-96 w-96 rounded-full bg-amber-200/40 blur-3xl" />
         <div className="absolute bottom-[-15%] left-1/3 h-72 w-72 rounded-full bg-sky-200/40 blur-3xl" />
       </div>
 
@@ -57,7 +57,7 @@ export default function PrivacyPage() {
               Privacy first
             </p>
             <div className="space-y-2">
-              <h1 className="text-4xl leading-tight font-semibold text-slate-900 sm:text-5xl">
+              <h1 className="text-4xl font-semibold leading-tight text-slate-900 sm:text-5xl">
                 Privacy Policy
               </h1>
               <p className="max-w-2xl text-lg text-slate-700">
@@ -78,7 +78,7 @@ export default function PrivacyPage() {
           {sections.map((section) => (
             <article
               key={section.title}
-              className="rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-xl ring-1 shadow-slate-200/80 ring-white/60 backdrop-blur">
+              className="rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-xl shadow-slate-200/80 ring-1 ring-white/60 backdrop-blur">
               <h2 className="mb-4 text-xl font-semibold text-slate-900">
                 {section.title}
               </h2>
@@ -96,9 +96,9 @@ export default function PrivacyPage() {
           ))}
         </div>
 
-        <div className="mt-10 space-y-4 rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-lg ring-1 shadow-slate-200/80 ring-white/60 backdrop-blur">
+        <div className="mt-10 space-y-4 rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-lg shadow-slate-200/80 ring-1 ring-white/60 backdrop-blur">
           <div className="flex flex-wrap items-center gap-3">
-            <p className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold tracking-wide text-amber-700 uppercase ring-1 ring-amber-200">
+            <p className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-700 ring-1 ring-amber-200">
               Last updated
             </p>
             <p className="text-sm text-slate-700">January 8, 2025</p>

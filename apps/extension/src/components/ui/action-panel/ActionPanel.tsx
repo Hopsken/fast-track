@@ -276,8 +276,8 @@ export function ActionPanel({
           'text-base-content flex h-60 w-80 flex-col font-medium',
           className
         )}>
-        <div className="flex flex-col gap-2 px-3 pt-3 pb-2">
-          <div className="text-base-content/60 flex items-center gap-2 text-[11px] font-semibold tracking-[0.08em] uppercase">
+        <div className="flex flex-col gap-2 px-3 pb-2 pt-3">
+          <div className="text-base-content/60 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.08em]">
             {breadcrumbs.map((crumb, index) => (
               <span key={crumb} className="flex items-center gap-2">
                 {index !== 0 && (
@@ -307,7 +307,7 @@ export function ActionPanel({
           </div>
         ) : (
           <div className="flex flex-1 flex-col overflow-hidden">
-            <ul className="menu menu-sm border-base-200 w-full flex-1 flex-nowrap gap-1 overflow-y-auto border-t px-2 pt-2 pb-2 font-medium">
+            <ul className="menu menu-sm border-base-200 w-full flex-1 flex-nowrap gap-1 overflow-y-auto border-t px-2 pb-2 pt-2 font-medium">
               {filteredSections.map((section) => (
                 <ActionSection
                   key={section.id}
@@ -365,7 +365,7 @@ function ActionSection({
     <>
       {section.title && (
         <li
-          className="text-base-content/60 px-2 pt-2 text-[11px] font-semibold tracking-[0.08em] uppercase"
+          className="text-base-content/60 px-2 pt-2 text-[11px] font-semibold uppercase tracking-[0.08em]"
           role="presentation">
           <div className="flex flex-col">
             <span className="truncate">{section.title ?? 'Actions'}</span>
@@ -405,7 +405,7 @@ function ActionSection({
                   {item.icon ?? <span className="text-sm">⌘</span>}
                 </div>
                 <div className="space-y-0.5">
-                  <p className="text-base-content text-sm leading-none font-semibold">
+                  <p className="text-base-content text-sm font-semibold leading-none">
                     {item.title}
                   </p>
                 </div>

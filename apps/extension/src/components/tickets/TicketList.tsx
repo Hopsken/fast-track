@@ -1,5 +1,5 @@
-import { useMemoizedFn } from 'ahooks'
 import { useEffect, useRef } from 'react'
+import { useMemoizedFn } from 'ahooks'
 import { HiInformationCircle } from 'react-icons/hi'
 
 import { JiraTicket } from '@/types'

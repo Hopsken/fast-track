@@ -1,16 +1,12 @@
 {
+  "extends": "@internal/typescript-config/base.json",
   "files": [],
   "include": [],
   "compilerOptions": {
     "baseUrl": ".",
+    "jsx": "react-jsx",
     "paths": {
       "@internal/ui/*": ["./src/*"]
     }
-  },
-  "references": [
-    {
-      "path": "./tsconfig.lib.json"
-    }
-  ],
-  "extends": "../../tsconfig.base.json"
+  }
 }

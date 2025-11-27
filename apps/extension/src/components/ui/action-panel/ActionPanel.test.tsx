@@ -123,7 +123,7 @@ describe('ActionPanel', () => {
 
     expect(items).toHaveLength(1)
     expect(
-      within(items[0])
+      within(items[0]!)
         .getByText(/Copy Issue Key/)
         .textContent?.trim()
     ).toEqual('Copy Issue Key')

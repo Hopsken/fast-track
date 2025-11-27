@@ -56,7 +56,7 @@ export function extractJiraInstanceName(url: string): string {
     const { hostname } = urlObj
 
     if (hostname.includes('atlassian.net')) {
-      return hostname.split('.atlassian.net')[0]
+      return hostname.split('.atlassian.net')[0] ?? ''
     }
 
     return hostname
@@ -80,7 +80,7 @@ export function extractIssueKeyFromUrl(url: string): string | null {
   try {
     const urlObj = new URL(url)
     const match = urlObj.pathname.match(/\/browse\/([A-Z]+-\d+)/)
-    return match ? match[1] : null
+    return match?.[1] ?? null
   } catch {
     return null
   }

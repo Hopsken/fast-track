@@ -1,0 +1,36 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [],
+  "tasks": {
+    "dev": { "cache": false, "persistent": true },
+
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".output/**", ".next/**", "!.next/cache/**", "dist/**"]
+    },
+
+    "website#build": {
+      "env": ["NEXT_PUBLIC_API_URL"]
+    },
+
+    "zip": {
+      "dependsOn": ["^build"],
+      "outputs": [".output/**"]
+    },
+
+    "lint": { "dependsOn": ["^lint"] },
+    "lint:fix": { "cache": false, "dependsOn": ["^lint:fix"] },
+    "typecheck": {
+      "dependsOn": ["^transit"]
+    },
+
+    "test": {
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/vitest.config.ts"],
+      "dependsOn": ["transit"]
+    },
+    "transit": {
+      "dependsOn": ["^transit"]
+    }
+  }
+}

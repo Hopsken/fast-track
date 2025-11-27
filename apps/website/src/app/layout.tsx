@@ -1,5 +1,5 @@
-import { Space_Grotesk } from 'next/font/google'
 import React from 'react'
+import { Space_Grotesk } from 'next/font/google'
 
 import './global.css'
 

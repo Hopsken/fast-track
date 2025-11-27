@@ -95,7 +95,7 @@ export function ManageLicenseSection() {
                 aria-label={`Confirm license deactivation ${isDeactivating ? '- deactivation in progress' : ''}`}>
                 {isDeactivating && (
                   <svg
-                    className="mr-2 -ml-1 h-4 w-4 animate-spin text-white"
+                    className="-ml-1 mr-2 h-4 w-4 animate-spin text-white"
                     fill="none"
                     viewBox="0 0 24 24"
                     aria-hidden="true">
