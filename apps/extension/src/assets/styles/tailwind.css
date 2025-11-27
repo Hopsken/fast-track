@@ -1,0 +1,5 @@
+@import 'tailwindcss';
+@import '@internal/tailwind-config';
+/* @import '@internal/ui/globals.css'; */
+
+@source "../../../node_modules/@internal/ui/**/*.{ts,tsx}";

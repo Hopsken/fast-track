@@ -1,8 +1,8 @@
 /**
  * Main styles for Fast Track extension
  */
-
 @import 'tailwindcss';
+@import '@internal/tailwind-config';
 @plugin "daisyui";
 
 @theme {

@@ -1,3 +1,4 @@
+import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'wxt'
 
 import packageJson from '../../package.json'
@@ -6,6 +7,10 @@ export default defineConfig({
   srcDir: 'src',
   modules: ['@wxt-dev/module-react', '@wxt-dev/auto-icons'],
   imports: false,
+
+  vite: () => ({
+    plugins: [tailwindcss()]
+  }),
 
   manifest: {
     name: 'Fast Track',
