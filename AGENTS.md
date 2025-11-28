@@ -4,6 +4,8 @@
 
 - Monorepo: Turborepo + pnpm workspaces; prefer pnpm over npm.
 - Apps: Extension at `apps/extension`; website (Next.js) at `apps/website`; shared code in `packages/`.
+- Shared UI: `packages/ui` owns Shadcn-based shared components; apps import from it,
+  and add missing pieces via the Shadcn CLI run from `packages/ui`.
 - Source (extension): `apps/extension/src/` with key folders `entrypoints/` (background, popup, options, `*.content.ts`), `components/`, `hooks/`, `services/`, `storage/` (typed persistence), `stores/`, `utils/`, `assets/`.
 - Config (extension): `apps/extension/wxt.config.ts`, `apps/extension/web-ext.config.ts`, `apps/extension/tsconfig.json` (extends `apps/extension/.wxt/tsconfig.json`), root `eslint.config.js`, `.prettierrc.cjs`.
 - Builds: extension output in `apps/extension/.output/`; zips produced via `wxt zip`. Load unpacked from `apps/extension/.output/chromium-mv3` (or `firefox-mv3`).
