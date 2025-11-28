@@ -3,7 +3,6 @@
  */
 @import 'tailwindcss';
 @import '@internal/tailwind-config';
-@plugin "daisyui";
 
 @theme {
   --font-family-sans:
@@ -20,7 +19,7 @@
   transition: background-color 0.2s ease;
 }
 
-/* Loading animation (DaisyUI doesn't provide this specific animation) */
+/* Loading animation */
 .loading-spinner {
   animation: spin 1s linear infinite;
 }
