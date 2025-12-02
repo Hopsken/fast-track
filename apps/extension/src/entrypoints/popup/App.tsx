@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Command, CommandInput } from '@internal/ui/components/command'
+import { Command } from '@internal/ui/components/command'
 
 import { getTicketService } from '@/services/ticket-service'
 import { JiraTicket } from '@/types'
@@ -63,25 +63,26 @@ function App() {
   )
 
   return (
-    <Command>
-      {/* Search Section */}
-      <ErrorBoundary
-        onError={(error, errorInfo) => {
-          console.error('🚨 TicketSearchBox Error:', error)
-          console.error('🚨 Error Info:', errorInfo)
-        }}>
-        <TicketSearchBox
-          value={searchQuery}
-          onChange={handleInputChange}
-          onClear={handleClearSearch}
-          onTicketClick={handleTicketClick}
-          inputRef={searchInputRef}
-          placeholder="Search tickets..."
-        />
-      </ErrorBoundary>
+    <div className="linear">
+      <Command
+        value={searchQuery}
+        onValueChange={handleInputChange}
+        shouldFilter={false}>
+        <ErrorBoundary
+          onError={(commandError, errorInfo) => {
+            console.error('🚨 TicketSearchBox Error:', commandError)
+            console.error('🚨 Error Info:', errorInfo)
+          }}>
+          <TicketSearchBox
+            value={searchQuery}
+            onChange={handleInputChange}
+            onClear={handleClearSearch}
+            onTicketClick={handleTicketClick}
+            inputRef={searchInputRef}
+            placeholder="Search tickets..."
+          />
+        </ErrorBoundary>
 
-      {/* Results Section */}
-      <div className="animate-in fade-in duration-400 overflow-hidden delay-150">
         <ErrorBoundary>
           <TicketList
             showNotConfiguredNotice={!isAuthConfigured}
@@ -89,35 +90,27 @@ function App() {
             onTicketClick={handleTicketClick}
           />
         </ErrorBoundary>
-      </div>
 
-      {/* Quick Actions Footer */}
-      <div className="animate-in slide-in-from-bottom border-t border-gray-100 bg-gray-50 px-4 py-3 delay-200 duration-300">
-        <div className="relative flex items-center justify-between text-xs text-gray-500">
-          <div className="flex items-center gap-2 truncate">
-            {footerError ? (
-              <>
-                <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-100 text-amber-600">
-                  !
-                </span>
-                <span className="truncate font-semibold text-amber-700">
-                  {footerError}
-                </span>
-              </>
-            ) : (
-              <span className="font-medium transition-colors duration-200">
-                {shortcutText}
-              </span>
-            )}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            padding: '12px 16px'
+          }}>
+          <span data-cmdk-linear-badge aria-live="polite">
+            {footerError ?? shortcutText}
+          </span>
+          <div data-cmdk-linear-shortcuts aria-hidden="true">
+            <kbd>Enter</kbd>
+            <kbd>Esc</kbd>
           </div>
-          <div className="flex items-center gap-2">
-            <DevOnly>
-              <DevRefreshSuggestionsButton />
-            </DevOnly>
-          </div>
+          <DevOnly>
+            <DevRefreshSuggestionsButton />
+          </DevOnly>
         </div>
-      </div>
-    </Command>
+      </Command>
+    </div>
   )
 }
 

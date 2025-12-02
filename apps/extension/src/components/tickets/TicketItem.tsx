@@ -15,13 +15,15 @@ interface TicketItemProps {
   isSelected?: boolean
   searchQuery?: string
   onClick: () => void
+  index?: number
 }
 
 export function TicketItem({
   ticket,
   isSelected = false,
   searchQuery = '',
-  onClick
+  onClick,
+  index
 }: TicketItemProps) {
   const handleClick = (e: MouseEvent) => {
     e.preventDefault()
@@ -37,39 +39,22 @@ export function TicketItem({
 
   return (
     <CommandItem
-      className={`group flex cursor-pointer items-center gap-3 border-l-2 px-4 py-3 transition-all duration-200 ease-out ${
-        isSelected
-          ? 'border-l-blue-400 bg-blue-50'
-          : 'border-l-transparent hover:border-l-gray-200 hover:bg-gray-100'
-      }`}
+      data-ticket-index={index}
+      data-selected={isSelected ? 'true' : 'false'}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="button"
       aria-label={`Open ticket ${ticket.key}: ${ticket.summary}`}>
-      {/* Issue Type Icon */}
-      <IssueTypeIcon issueType={ticket.issueType} className="flex-shrink-0" />
-
-      {/* Ticket Key */}
-      <span className="flex-shrink-0 rounded bg-gray-100 px-2 py-1 font-mono text-xs text-gray-500">
+      <IssueTypeIcon issueType={ticket.issueType} />
+      <span>
         <HighlightedText text={ticket.key} searchQuery={searchQuery} />
       </span>
-
-      {/* Summary */}
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-gray-900">
-          <HighlightedText text={ticket.summary} searchQuery={searchQuery} />
-        </p>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <HighlightedText text={ticket.summary} searchQuery={searchQuery} />
       </div>
-
-      {/* Priority Icon */}
-      {/* <PriorityIcon priority={ticket.priority} className="flex-shrink-0" /> */}
-
-      {/* Status Badge */}
-      <StatusBadge status={ticket.status} className="flex-shrink-0" />
-
-      {/* Assignee Avatar */}
-      <AssigneeAvatar assignee={ticket.assignee} className="flex-shrink-0" />
+      <StatusBadge status={ticket.status} />
+      <AssigneeAvatar assignee={ticket.assignee} />
     </CommandItem>
   )
 }

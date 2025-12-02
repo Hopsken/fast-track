@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { CommandEmpty, CommandList } from '@internal/ui/components/command'
 import { useMemoizedFn } from 'ahooks'
 import { HiInformationCircle } from 'react-icons/hi'
 
@@ -33,6 +34,13 @@ export function TicketList({
   const { navigate } = useNavigationActions()
 
   const listRef = useRef<HTMLDivElement>(null)
+  let emptyMessage = 'Tickets will appear here once collected from Jira'
+
+  if (isSearching) {
+    emptyMessage = 'Searching tickets...'
+  } else if (searchQuery) {
+    emptyMessage = 'No tickets found'
+  }
 
   // Handle ticket click with view history tracking
   const handleTicketClick = useMemoizedFn(async (ticket: JiraTicket) => {
@@ -71,96 +79,39 @@ export function TicketList({
 
   if (showNotConfiguredNotice) {
     return (
-      <div className="animate-in fade-in space-y-3 bg-white px-6 py-10 text-center duration-300">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 transition-all duration-300">
-          <HiInformationCircle className="h-6 w-6 text-gray-400" />
+      <CommandEmpty asChild>
+        <div>
+          <HiInformationCircle aria-hidden="true" />
+          <div>
+            <p>Connect to Jira to search.</p>
+            <p>Connect your Jira account in settings to start searching.</p>
+          </div>
+          {onOpenOptionsPage ? (
+            <button type="button" onClick={onOpenOptionsPage}>
+              Open settings
+            </button>
+          ) : null}
         </div>
-        <div className="space-y-1">
-          <p className="text-sm font-semibold text-gray-800">
-            Connect to Jira to search
-          </p>
-          <p className="text-xs text-gray-600">
-            Connect your Jira account in settings to start searching.
-          </p>
-        </div>
-        {onOpenOptionsPage ? (
-          <button
-            onClick={onOpenOptionsPage}
-            className="mx-auto inline-flex items-center justify-center rounded-md border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-800 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-900 active:translate-y-0">
-            Open settings
-          </button>
-        ) : null}
-      </div>
+      </CommandEmpty>
     )
   }
 
   if (searchResults.length === 0) {
-    if (isSearching) {
-      return (
-        <div className="animate-in fade-in flex flex-col items-center justify-center px-6 py-12 text-center duration-300">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-blue-50">
-            <svg
-              className="h-6 w-6 animate-spin text-blue-500"
-              fill="none"
-              viewBox="0 0 24 24">
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          </div>
-          <p className="animate-in slide-in-from-bottom-2 mb-1 text-sm font-medium text-gray-700 delay-100 duration-500">
-            Searching tickets...
-          </p>
-          <p className="animate-in slide-in-from-bottom-2 text-xs text-gray-500 delay-200 duration-500">
-            Please wait while we find your tickets
-          </p>
-        </div>
-      )
-    }
-
-    return (
-      <div className="animate-in fade-in flex flex-col items-center justify-center px-6 py-12 text-center duration-300">
-        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 transition-all duration-300 hover:scale-105 hover:bg-gray-200">
-          <HiInformationCircle className="h-6 w-6 text-gray-400 transition-colors duration-200" />
-        </div>
-        <p className="animate-in slide-in-from-bottom-2 mb-1 text-sm font-medium text-gray-700 delay-100 duration-500">
-          {searchQuery ? 'No tickets found' : 'No tickets yet'}
-        </p>
-        <p className="animate-in slide-in-from-bottom-2 text-xs text-gray-500 delay-200 duration-500">
-          {searchQuery
-            ? 'Try adjusting your search query'
-            : 'Tickets will appear here once collected from Jira'}
-        </p>
-      </div>
-    )
+    return <CommandEmpty>{emptyMessage}</CommandEmpty>
   }
 
   return (
-    <div ref={listRef} className="max-h-96 overflow-y-auto">
-      <div className="space-y-0">
-        {searchResults.map((ticket, index) => (
-          <div
-            key={ticket.key}
-            data-ticket-index={index}
-            className="animate-in slide-in-from-right duration-300 ease-out"
-            style={{ animationDelay: `${Math.min(index * 50, 500)}ms` }}>
-            <TicketItem
-              ticket={ticket}
-              isSelected={index === selectedIndex}
-              searchQuery={searchQuery}
-              onClick={() => handleTicketClick(ticket)}
-            />
-          </div>
-        ))}
-      </div>
-    </div>
+    <CommandList ref={listRef} aria-label="Ticket search results">
+      {searchResults.map((ticket, index) => (
+        <TicketItem
+          key={ticket.key}
+          ticket={ticket}
+          isSelected={index === selectedIndex}
+          searchQuery={searchQuery}
+          onClick={() => handleTicketClick(ticket)}
+          index={index}
+        />
+      ))}
+    </CommandList>
   )
 }

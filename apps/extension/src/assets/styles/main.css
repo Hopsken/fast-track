@@ -3,6 +3,7 @@
  */
 @import 'tailwindcss';
 @import './tailwind.css';
+@import './linear-command.css';
 
 /* Manual glass styling for the action menu when daisy UI helpers are absent */
 .glass {
