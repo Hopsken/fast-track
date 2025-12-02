@@ -1,4 +1,5 @@
 import { type KeyboardEvent, type RefObject } from 'react'
+import { CommandInput } from '@internal/ui/components/command'
 import { HiSearch, HiX } from 'react-icons/hi'
 
 import { JiraTicket } from '@/types'
@@ -102,13 +103,9 @@ export function TicketSearchBox({
         ) : (
           <HiSearch className="absolute left-3 h-4 w-4 text-gray-400 transition-colors duration-200" />
         )}
-        <input
+        <CommandInput
           ref={inputRef}
-          type="text"
-          // eslint-disable-next-line jsx-a11y/no-autofocus
-          autoFocus
           value={value}
-          onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={isSearching ? 'Searching...' : placeholder}
           className="w-full border-0 bg-transparent py-3 pl-10 pr-10 text-sm font-medium placeholder-gray-400 transition-all duration-200 focus:outline-none"

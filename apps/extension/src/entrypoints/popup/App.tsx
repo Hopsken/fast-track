@@ -1,15 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { Command, CommandInput } from '@internal/ui/components/command'
 
 import { getTicketService } from '@/services/ticket-service'
 import { JiraTicket } from '@/types'
-import { ActionsMenu } from '~/components/ActionsMenu'
 import { DevOnly } from '~/components/DevOnly'
 import { DevRefreshSuggestionsButton } from '~/components/DevRefreshSuggestionsButton'
 import { ErrorBoundary } from '~/components/ErrorBoundary'
 import { TicketSearchBox } from '~/components/search'
 import { TicketList } from '~/components/tickets'
 import { useTicketSearch } from '~/hooks/useTicketSearch'
-import { useSelectedTicket } from '~/stores/useTicketStore'
 import { openOptionsPage, openInNewTab } from '~/utils/extension'
 import { getCurrentShortcut, formatShortcut } from '~/utils/shortcuts'
 
@@ -19,7 +18,6 @@ function App() {
 
   const [shortcutText, setShortcutText] = useState('Alt+J to search')
   const footerError = isAuthConfigured ? error : undefined
-  const selectedTicket = useSelectedTicket()
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   // Initialize search orchestration
@@ -65,24 +63,22 @@ function App() {
   )
 
   return (
-    <div className="animate-in fade-in zoom-in-95 max-h-[600px] w-[36rem] bg-white shadow-lg duration-200 ease-out">
+    <Command>
       {/* Search Section */}
-      <div className="animate-in slide-in-from-top border-b border-gray-100 p-3 delay-75 duration-300">
-        <ErrorBoundary
-          onError={(error, errorInfo) => {
-            console.error('🚨 TicketSearchBox Error:', error)
-            console.error('🚨 Error Info:', errorInfo)
-          }}>
-          <TicketSearchBox
-            value={searchQuery}
-            onChange={handleInputChange}
-            onClear={handleClearSearch}
-            onTicketClick={handleTicketClick}
-            inputRef={searchInputRef}
-            placeholder="Search tickets..."
-          />
-        </ErrorBoundary>
-      </div>
+      <ErrorBoundary
+        onError={(error, errorInfo) => {
+          console.error('🚨 TicketSearchBox Error:', error)
+          console.error('🚨 Error Info:', errorInfo)
+        }}>
+        <TicketSearchBox
+          value={searchQuery}
+          onChange={handleInputChange}
+          onClear={handleClearSearch}
+          onTicketClick={handleTicketClick}
+          inputRef={searchInputRef}
+          placeholder="Search tickets..."
+        />
+      </ErrorBoundary>
 
       {/* Results Section */}
       <div className="animate-in fade-in duration-400 overflow-hidden delay-150">
@@ -118,16 +114,10 @@ function App() {
             <DevOnly>
               <DevRefreshSuggestionsButton />
             </DevOnly>
-            {selectedTicket ? (
-              <ActionsMenu
-                selectedTicket={selectedTicket}
-                onClose={() => searchInputRef.current?.focus()}
-              />
-            ) : null}
           </div>
         </div>
       </div>
-    </div>
+    </Command>
   )
 }
 
