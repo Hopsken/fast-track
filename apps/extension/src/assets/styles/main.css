@@ -2,86 +2,23 @@
  * Main styles for Fast Track extension
  */
 @import 'tailwindcss';
-@import '@internal/tailwind-config';
+@import './tailwind.css';
 
-@theme {
-  --font-family-sans:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-/* Extension specific styles */
-.fast-track-popup {
-  width: 400px;
-  max-height: 600px;
-}
-
-.fast-track-ticket-item {
-  transition: background-color 0.2s ease;
-}
-
-/* Loading animation */
-.loading-spinner {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Shadcn-like enter animation for dropdown menu */
-@keyframes enter {
-  0% {
-    opacity: var(--tw-enter-opacity, 1);
-    transform: translate3d(
-        var(--tw-enter-translate-x, 0),
-        var(--tw-enter-translate-y, 0),
-        0
-      )
-      scale3d(
-        var(--tw-enter-scale, 1),
-        var(--tw-enter-scale, 1),
-        var(--tw-enter-scale, 1)
-      )
-      rotate(var(--tw-enter-rotate, 0));
-  }
-}
-
-@keyframes exit {
-  to {
-    opacity: var(--tw-exit-opacity, 1);
-    transform: translate3d(
-        var(--tw-exit-translate-x, 0),
-        var(--tw-exit-translate-y, 0),
-        0
-      )
-      scale3d(
-        var(--tw-exit-scale, 1),
-        var(--tw-exit-scale, 1),
-        var(--tw-exit-scale, 1)
-      )
-      rotate(var(--tw-exit-rotate, 0));
-  }
-}
-
-.actions-menu-animate {
-  transform-origin: 100% 100%;
-}
-
-.actions-menu-animate[data-state='open'] {
-  --tw-enter-opacity: 0;
-  --tw-enter-translate-y: 8px;
-  --tw-enter-scale: 0.97;
-  animation: enter 180ms ease-out forwards;
-}
-
-.actions-menu-animate[data-state='closed'] {
-  --tw-exit-opacity: 0;
-  --tw-exit-translate-y: 8px;
-  --tw-exit-scale: 0.97;
-  animation: exit 140ms ease-in forwards;
+/* Manual glass styling for the action menu when daisy UI helpers are absent */
+.glass {
+  -webkit-backdrop-filter: blur(var(--glass-blur, 40px));
+  backdrop-filter: blur(var(--glass-blur, 40px));
+  background-color: #0000;
+  background-image:
+    linear-gradient(135deg, oklch(100% 0 0 / var(--glass-opacity, 30%)), #0000),
+    linear-gradient(
+      var(--glass-reflect-degree, 100deg),
+      oklch(100% 0 0 / var(--glass-reflect-opacity, 5%)) 25%,
+      oklch(0% 0 0 / 0) 25%
+    );
+  box-shadow:
+    0 0 0 1px oklch(100% 0 0 / var(--glass-border-opacity, 20%)) inset,
+    0 0 0 2px #0000000d;
+  text-shadow: 0 1px oklch(0% 0 0 / var(--glass-text-shadow-opacity, 5%));
+  border: none;
 }

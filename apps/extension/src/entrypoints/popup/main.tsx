@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
-import '~/assets/styles/tailwind.css'
+import '~/assets/styles/main.css'
 import App from './App'
 
 createRoot(document.getElementById('root')!).render(
