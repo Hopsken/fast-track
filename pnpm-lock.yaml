@@ -360,6 +360,9 @@ importers:
         specifier: 19.1.1
         version: 19.1.1
     devDependencies:
+      '@internal/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
       '@internal/tailwind-config':
         specifier: workspace:*
         version: link:../tailwind-config
