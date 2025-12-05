@@ -1,16 +1,14 @@
 import { useEffect, useRef } from 'react'
 import { CommandEmpty, CommandList } from '@internal/ui/components/command'
-import { useMemoizedFn } from 'ahooks'
 import { HiInformationCircle } from 'react-icons/hi'
 
 import { JiraTicket } from '@/types'
-import { useTicketListHotkeys } from '~/hooks/useTicketListHotkeys'
 import {
   useSelectedIndex,
   useSearchResults,
-  useNavigationActions,
   useSearchQuery,
-  useIsSearching
+  useIsSearching,
+  useNavigationActions
 } from '~/stores/useTicketStore'
 
 import { TicketItem } from './TicketItem'
@@ -23,17 +21,19 @@ interface TicketListProps {
 
 export function TicketList({
   showNotConfiguredNotice,
-  onOpenOptionsPage,
-  onTicketClick
+  onOpenOptionsPage
 }: TicketListProps) {
   // Get state and actions from the unified store
   const selectedIndex = useSelectedIndex()
+  const { setSelectedIndex } = useNavigationActions()
   const searchQuery = useSearchQuery()
   const searchResults = useSearchResults() // Use search results from store instead of props
   const isSearching = useIsSearching()
-  const { navigate } = useNavigationActions()
+
+  console.log({ selectedIndex })
 
   const listRef = useRef<HTMLDivElement>(null)
+
   let emptyMessage = 'Tickets will appear here once collected from Jira'
 
   if (isSearching) {
@@ -42,59 +42,24 @@ export function TicketList({
     emptyMessage = 'No tickets found'
   }
 
-  // Handle ticket click with view history tracking
-  const handleTicketClick = useMemoizedFn(async (ticket: JiraTicket) => {
-    onTicketClick(ticket)
-  })
-
-  // Handle all keyboard shortcuts for the ticket list
-  useTicketListHotkeys({
-    searchResults,
-    selectedIndex,
-    navigate,
-    handleTicketClick
-  })
-
-  // Scroll selected item into view using data attributes
-  useEffect(() => {
-    try {
-      const selectedItem = listRef.current?.querySelector(
-        `[data-ticket-index="${selectedIndex}"]`
-      ) as HTMLElement
-      if (selectedItem && listRef.current) {
-        const container = listRef.current
-        const containerRect = container.getBoundingClientRect()
-        const itemRect = selectedItem.getBoundingClientRect()
-
-        if (itemRect.bottom > containerRect.bottom) {
-          selectedItem.scrollIntoView({ block: 'end', behavior: 'smooth' })
-        } else if (itemRect.top < containerRect.top) {
-          selectedItem.scrollIntoView({ block: 'start', behavior: 'smooth' })
-        }
-      }
-    } catch (error) {
-      console.warn('Error scrolling to selected item:', error)
-    }
-  }, [selectedIndex])
-
   if (showNotConfiguredNotice) {
     return (
-      <CommandEmpty asChild>
+      <CommandEmpty>
+        <HiInformationCircle aria-hidden="true" />
         <div>
-          <HiInformationCircle aria-hidden="true" />
-          <div>
-            <p>Connect to Jira to search.</p>
-            <p>Connect your Jira account in settings to start searching.</p>
-          </div>
-          {onOpenOptionsPage ? (
-            <button type="button" onClick={onOpenOptionsPage}>
-              Open settings
-            </button>
-          ) : null}
+          <p>Connect to Jira to search.</p>
+          <p>Connect your Jira account in settings to start searching.</p>
         </div>
+        {onOpenOptionsPage ? (
+          <button type="button" onClick={onOpenOptionsPage}>
+            Open settings
+          </button>
+        ) : null}
       </CommandEmpty>
     )
   }
+
+  console.log({ searchResults })
 
   if (searchResults.length === 0) {
     return <CommandEmpty>{emptyMessage}</CommandEmpty>
@@ -106,10 +71,9 @@ export function TicketList({
         <TicketItem
           key={ticket.key}
           ticket={ticket}
-          isSelected={index === selectedIndex}
           searchQuery={searchQuery}
-          onClick={() => handleTicketClick(ticket)}
           index={index}
+          onSelect={setSelectedIndex}
         />
       ))}
     </CommandList>

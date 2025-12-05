@@ -1,4 +1,3 @@
-import { MouseEvent, KeyboardEvent } from 'react'
 import { CommandItem } from '@internal/ui/components/command'
 
 import { JiraTicket } from '@/types'
@@ -12,39 +11,23 @@ import { HighlightedText } from '~/utils/text-highlighting'
 
 interface TicketItemProps {
   ticket: JiraTicket
-  isSelected?: boolean
   searchQuery?: string
-  onClick: () => void
-  index?: number
+  index: number
+  onSelect: (index: number) => void
 }
 
 export function TicketItem({
   ticket,
-  isSelected = false,
   searchQuery = '',
-  onClick,
-  index
+  index,
+  onSelect
 }: TicketItemProps) {
-  const handleClick = (e: MouseEvent) => {
-    e.preventDefault()
-    onClick()
-  }
-
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      onClick()
-    }
-  }
-
   return (
     <CommandItem
-      data-ticket-index={index}
-      data-selected={isSelected ? 'true' : 'false'}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
       tabIndex={0}
       role="button"
+      value={ticket.key}
+      onSelect={() => onSelect(index)}
       aria-label={`Open ticket ${ticket.key}: ${ticket.summary}`}>
       <IssueTypeIcon issueType={ticket.issueType} />
       <span>

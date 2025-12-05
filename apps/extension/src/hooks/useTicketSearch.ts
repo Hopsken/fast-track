@@ -51,7 +51,7 @@ export function useTicketSearch() {
       }
 
       actions.setSearchError(undefined)
-      actions.setSearchResults(mergeTickets(state.searchResults, tickets))
+      actions.setSearchResults(tickets)
     })
 
     searchService.initialize()
