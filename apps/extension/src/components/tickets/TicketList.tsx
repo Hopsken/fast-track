@@ -2,7 +2,6 @@ import { useRef } from 'react'
 import { CommandEmpty, CommandList } from '@internal/ui/components/command'
 import { HiInformationCircle } from 'react-icons/hi'
 
-import { JiraTicket } from '@/types'
 import {
   useSearchResults,
   useSearchQuery,
@@ -51,8 +50,6 @@ export function TicketList({
       </CommandEmpty>
     )
   }
-
-  console.log({ searchResults })
 
   if (searchResults.length === 0) {
     return <CommandEmpty>{emptyMessage}</CommandEmpty>
