@@ -50,7 +50,6 @@ function App() {
           <TicketList
             showNotConfiguredNotice={!isAuthConfigured}
             onOpenOptionsPage={handleOpenOptionsPage}
-            onTicketClick={handleTicketClick}
           />
         </ErrorBoundary>
 

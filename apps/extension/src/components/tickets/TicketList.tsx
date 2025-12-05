@@ -12,7 +12,6 @@ import {
 import { TicketItem } from './TicketItem'
 
 interface TicketListProps {
-  onTicketClick: (ticket: JiraTicket) => void
   showNotConfiguredNotice?: boolean
   onOpenOptionsPage?: () => void
 }
