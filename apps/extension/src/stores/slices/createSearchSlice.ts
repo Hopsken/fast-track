@@ -2,8 +2,6 @@ import { StateCreator } from 'zustand'
 
 import { JiraTicket } from '@/types'
 
-import { NavigationSlice } from './createNavigationSlice'
-
 export type SearchState = 'idle' | 'searching' | 'success' | 'error'
 
 // Search slice interface
@@ -23,11 +21,11 @@ export interface SearchSlice {
 }
 
 export const createSearchSlice: StateCreator<
-  SearchSlice & NavigationSlice,
+  SearchSlice,
   [],
   [],
   SearchSlice
-> = (set, get) => ({
+> = (set) => ({
   // Initial state
   searchQuery: '',
   searchResults: [],
@@ -47,12 +45,6 @@ export const createSearchSlice: StateCreator<
       searchResults: results,
       searchState: 'success'
     })
-
-    // Auto-reset navigation selection when results change
-    const { resetSelection } = get()
-    if (resetSelection) {
-      resetSelection()
-    }
   },
 
   setSearchError: (error?: string) => {
