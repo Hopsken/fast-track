@@ -16,6 +16,7 @@ export function TicketSearchBox({
   return (
     <div className="relative flex h-[52px] items-center gap-3 border-b-2 border-gray-200 pl-5 pr-5">
       <CommandInput
+        autoFocus
         value={value}
         onValueChange={onValueChange}
         placeholder={isSearching ? 'Searching...' : 'Search tickets...'}

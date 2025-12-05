@@ -1,14 +1,12 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { CommandEmpty, CommandList } from '@internal/ui/components/command'
 import { HiInformationCircle } from 'react-icons/hi'
 
 import { JiraTicket } from '@/types'
 import {
-  useSelectedIndex,
   useSearchResults,
   useSearchQuery,
-  useIsSearching,
-  useNavigationActions
+  useIsSearching
 } from '~/stores/useTicketStore'
 
 import { TicketItem } from './TicketItem'
@@ -24,13 +22,9 @@ export function TicketList({
   onOpenOptionsPage
 }: TicketListProps) {
   // Get state and actions from the unified store
-  const selectedIndex = useSelectedIndex()
-  const { setSelectedIndex } = useNavigationActions()
   const searchQuery = useSearchQuery()
   const searchResults = useSearchResults() // Use search results from store instead of props
   const isSearching = useIsSearching()
-
-  console.log({ selectedIndex })
 
   const listRef = useRef<HTMLDivElement>(null)
 
@@ -67,13 +61,11 @@ export function TicketList({
 
   return (
     <CommandList ref={listRef} aria-label="Ticket search results">
-      {searchResults.map((ticket, index) => (
+      {searchResults.map((ticket) => (
         <TicketItem
           key={ticket.key}
           ticket={ticket}
           searchQuery={searchQuery}
-          index={index}
-          onSelect={setSelectedIndex}
         />
       ))}
     </CommandList>

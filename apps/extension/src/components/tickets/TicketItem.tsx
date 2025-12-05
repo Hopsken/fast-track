@@ -12,28 +12,19 @@ import { HighlightedText } from '~/utils/text-highlighting'
 interface TicketItemProps {
   ticket: JiraTicket
   searchQuery?: string
-  index: number
-  onSelect: (index: number) => void
 }
 
-export function TicketItem({
-  ticket,
-  searchQuery = '',
-  index,
-  onSelect
-}: TicketItemProps) {
+export function TicketItem({ ticket, searchQuery = '' }: TicketItemProps) {
   return (
     <CommandItem
       tabIndex={0}
       role="button"
-      value={ticket.key}
-      onSelect={() => onSelect(index)}
       aria-label={`Open ticket ${ticket.key}: ${ticket.summary}`}>
       <IssueTypeIcon issueType={ticket.issueType} />
       <span>
         <HighlightedText text={ticket.key} searchQuery={searchQuery} />
       </span>
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
         <HighlightedText text={ticket.summary} searchQuery={searchQuery} />
       </div>
       <StatusBadge status={ticket.status} />
