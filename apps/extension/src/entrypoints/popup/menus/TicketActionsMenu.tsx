@@ -7,6 +7,8 @@ import {
 import {
   ChartNoAxesColumnIncreasing,
   Clipboard,
+  GitBranch,
+  Link2,
   MessageCircle,
   Route,
   UserPen,
@@ -40,6 +42,7 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
           target={() => ({ path: '/ticket/assign', state: ticket })}
           icon={UserPen}
           title="Assign to..."
+          shortcut={{ modifiers: ['cmd', 'shift'], key: 'a' }}
         />
 
         <AssignOrUnassignMySelf ticket={ticket} />
@@ -48,12 +51,14 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
           target={() => ({ path: '/ticket/status', state: ticket })}
           icon={Route}
           title="Change status..."
+          shortcut={{ modifiers: ['cmd', 'shift'], key: 's' }}
         />
 
         <ActionPush
           target={() => ({ path: '/ticket/priority', state: ticket })}
           icon={ChartNoAxesColumnIncreasing}
           title="Change priority..."
+          shortcut={{ modifiers: ['cmd', 'shift'], key: 'p' }}
         />
         <Action icon={MessageCircle} title="Add comment..." />
       </CommandGroup>
@@ -68,24 +73,34 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
           shortcut={{ modifiers: ['cmd'], key: '.' }}
         />
         <ActionCopyToClipboard
-          icon={Clipboard}
+          icon={Link2}
           content={ticket.url}
           title="Copy issue link"
+          shortcut={{ modifiers: ['shift', 'cmd'], key: ',' }}
         />
         <ActionCopyToClipboard
           icon={Clipboard}
           content={ticket.summary}
           title="Copy issue title"
+          shortcut={{ modifiers: ['ctrl', 'shift'], key: ',' }}
         />
         <ActionCopyToClipboard
           icon={Clipboard}
+          content={`${ticket.key}: ${ticket.summary}`}
+          title="Copy issue key and title"
+          shortcut={{ modifiers: ['opt', 'shift', 'cmd'], key: '.' }}
+        />
+        <ActionCopyToClipboard
+          icon={Link2}
           content={formatted.issueTitleLink}
           title="Copy issue title as link"
+          shortcut={{ modifiers: ['opt', 'shift', 'cmd'], key: ',' }}
         />
         <ActionCopyToClipboard
-          icon={Clipboard}
+          icon={GitBranch}
           content={formatted.branchName}
           title="Copy git branch name"
+          shortcut={{ modifiers: ['shift', 'cmd'], key: '.' }}
         />
       </CommandGroup>
 
@@ -107,12 +122,14 @@ function AssignOrUnassignMySelf({ ticket }: { ticket: JiraTicket }) {
       icon={UserRoundMinus}
       title="Unassigned from me"
       onSelect={() => assignMyself({ ticket, assign: false })}
+      shortcut={{ modifiers: ['cmd', 'shift'], key: 'i' }}
     />
   ) : (
     <Action
       icon={UserRoundPlus}
       title="Assign to me"
       onSelect={() => assignMyself({ ticket, assign: true })}
+      shortcut={{ modifiers: ['cmd', 'shift'], key: 'i' }}
     />
   )
 }

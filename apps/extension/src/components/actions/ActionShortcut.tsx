@@ -7,7 +7,7 @@ import { KeyboardShortcut, KeyModifier } from '@/lib/keyboard'
 const mapModifiers = (modifier: KeyModifier) => {
   switch (modifier) {
     case 'ctrl':
-      return 'Ctrl'
+      return '⌃'
     case 'shift':
       return '⇧'
     case 'opt':

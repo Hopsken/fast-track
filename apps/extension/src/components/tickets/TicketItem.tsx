@@ -6,7 +6,8 @@ import {
   IssueTypeIcon,
   StatusBadge,
   // PriorityIcon,
-  AssigneeAvatar
+  AssigneeAvatar,
+  PriorityIcon
 } from '~/components/ui/jira'
 import { HighlightedText } from '~/utils/text-highlighting'
 
@@ -24,6 +25,14 @@ export function TicketItem({ ticket, searchQuery = '' }: TicketItemProps) {
     navigate.push('/actions', ticket)
   })
 
+  function renderPriority() {
+    const priorityName = ticket.priority?.name?.toLowerCase()
+    if (!priorityName || !ticket.priority) return null
+    if (priorityName.includes('medium')) return null
+
+    return <PriorityIcon priority={ticket.priority} />
+  }
+
   return (
     <CommandItem
       tabIndex={0}
@@ -37,6 +46,7 @@ export function TicketItem({ ticket, searchQuery = '' }: TicketItemProps) {
       <div className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
         <HighlightedText text={ticket.summary} searchQuery={searchQuery} />
       </div>
+      {renderPriority()}
       <StatusBadge status={ticket.status} />
       <AssigneeAvatar assignee={ticket.assignee} />
     </CommandItem>
