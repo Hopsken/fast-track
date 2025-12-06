@@ -44,7 +44,11 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
 
         <AssignOrUnassignMySelf ticket={ticket} />
 
-        <Action icon={Route} title="Change status..." />
+        <ActionPush
+          target={() => ({ path: '/ticket/status', state: ticket })}
+          icon={Route}
+          title="Change status..."
+        />
 
         <Action icon={ChartNoAxesColumnIncreasing} title="Change priority..." />
         <Action icon={MessageCircle} title="Add comment..." />

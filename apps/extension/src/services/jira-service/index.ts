@@ -72,7 +72,7 @@ class JiraServiceImpl {
     }, url)
   }
 
-  private async withJira<T>(
+  async withJira<T>(
     action: (jira: JiraAPI) => Promise<T>,
     context: string
   ): Promise<T> {

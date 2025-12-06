@@ -1,6 +1,7 @@
+import { StatusDetails } from 'jira.js/version3/models/statusDetails'
 import { UserDetails } from 'jira.js/version3/models/userDetails'
 
-import { JiraAssignee, JiraTicket } from '@/types'
+import { JiraAssignee, JiraStatus, JiraTicket } from '@/types'
 
 import { slugify } from '../string'
 
@@ -54,5 +55,17 @@ export function mapUserToAssignee(user: UserDetails): JiraAssignee {
       user.avatarUrls?.['32x32'] ||
       user.avatarUrls?.['24x24'] ||
       ''
+  }
+}
+
+export function mapStatus(status: StatusDetails | undefined): JiraStatus {
+  return {
+    name: status?.name || '',
+    description: status?.description || '',
+    statusCategory: {
+      key: status?.statusCategory?.key || '',
+      colorName: status?.statusCategory?.colorName || '',
+      name: status?.statusCategory?.name || ''
+    }
   }
 }

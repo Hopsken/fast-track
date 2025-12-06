@@ -12,7 +12,7 @@ import { ActionShortcut } from './ActionShortcut'
 export interface ActionProps {
   icon?: LucideIcon
   prefix?: ReactNode
-  title: string
+  title: ReactNode
   onSelect?: () => void
   shortcut?: KeyboardShortcut
   exitOnSelect?: boolean

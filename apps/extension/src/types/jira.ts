@@ -16,6 +16,12 @@ export interface JiraStatus {
   statusCategory: JiraStatusCategory
 }
 
+export interface JiraTransition {
+  id: string
+  name: string
+  to: JiraStatus
+}
+
 export interface JiraAssignee {
   displayName: string
   emailAddress: string

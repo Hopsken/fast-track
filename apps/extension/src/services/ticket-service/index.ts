@@ -11,7 +11,7 @@ import { uniqBy } from 'lodash-es'
 import { sendMessage } from '@/lib/message'
 import { getStorageItem } from '@/lib/storage'
 import { Database } from '@/repository'
-import { JiraTicket } from '@/types'
+import { JiraTicket, JiraTransition } from '@/types'
 import { mapUserToAssignee, mergeTicketsByKey } from '@/utils/jira/issues'
 import { concatPromises } from '@/utils/promise'
 import { getJiraApi, JiraAPI } from '~/lib/jira'
@@ -180,6 +180,23 @@ class TicketServiceImpl {
         console.log('assignTicket', ticketKey, assignee?.accountId ?? null)
         await jira.issues.assignIssue(ticketKey, assignee?.accountId ?? null)
         return jira.issues.getIssue(ticketKey)
+      }
+    })
+  }
+
+  async transitionTicket(ticket: JiraTicket, transition: JiraTransition) {
+    return this.updateTicketOptimistically(ticket.key, {
+      reason: 'transition',
+      buildOptimistic: (base) => ({
+        ...base,
+        status: transition.to
+      }),
+      perform: async (jira) => {
+        const refreshed = await jira.issues.transitionIssue(
+          ticket.key,
+          transition.id
+        )
+        return refreshed
       }
     })
   }

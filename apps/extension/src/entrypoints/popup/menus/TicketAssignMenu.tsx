@@ -29,9 +29,8 @@ export function TicketAssignMenu({ ticket }: { ticket: JiraTicket }) {
 
   function renderList() {
     if (isLoading) return <CommandLoading>Loading...</CommandLoading>
-    if (!users?.length) return <CommandEmpty>No matching users</CommandEmpty>
 
-    return users.map((user) => (
+    return users?.map((user) => (
       <ActionUser
         key={user.accountId || user.emailAddress || user.displayName}
         user={user}
@@ -42,6 +41,7 @@ export function TicketAssignMenu({ ticket }: { ticket: JiraTicket }) {
 
   return (
     <CommandList>
+      {!isLoading && <CommandEmpty>No matching users</CommandEmpty>}
       <CommandGroup heading="Assign to...">{renderList()}</CommandGroup>
     </CommandList>
   )

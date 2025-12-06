@@ -18,7 +18,8 @@ import {
   TicketActionsMenu,
   SearchResultMenu,
   CommandRoutes,
-  TicketAssignMenu
+  TicketAssignMenu,
+  TicketStatusMenu
 } from './menus'
 import { Footer } from './menus/Footer'
 
@@ -106,6 +107,10 @@ function App() {
 
         <CommandRoute path="/ticket/assign">
           {(ticket) => <TicketAssignMenu ticket={ticket} />}
+        </CommandRoute>
+
+        <CommandRoute path="/ticket/status">
+          {(ticket) => <TicketStatusMenu ticket={ticket} />}
         </CommandRoute>
 
         <Footer error={footerError} />
