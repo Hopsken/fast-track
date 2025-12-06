@@ -57,6 +57,13 @@ export class JiraIssueService {
     }
   }
 
+  async assignIssue(issueKey: string, accountId: string | null) {
+    await this.client.issues.assignIssue({
+      issueIdOrKey: issueKey,
+      accountId
+    })
+  }
+
   /**
    * Fetches suggested issues from Jira Issue Picker API and returns full tickets
    * When query is omitted or empty, Jira returns personalized suggestions.

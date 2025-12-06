@@ -17,13 +17,11 @@ import {
 import { Action, ActionCopyToClipboard, ActionPush } from '@/components/actions'
 import { useCurrentUser } from '@/hooks/useCurrentUser'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
+import { useMutationAssignMyself } from '@/hooks/useMutationAssignIssue'
 import { JiraTicket } from '@/types'
 import { generateBranchName, getIssueTitleLink } from '@/utils/jira/issues'
 
 export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
-  const userInfo = useCurrentUser()
-  const isAssignedByMe = userInfo?.email === ticket.assignee?.emailAddress
-
   // Get issue edit meta to prefetch assignee candidates
   useIssueEditMeta(ticket)
 
@@ -43,11 +41,9 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
           icon={UserPen}
           title="Assign to..."
         />
-        {isAssignedByMe ? (
-          <Action icon={UserRoundMinus} title="Unassigned from me" />
-        ) : (
-          <Action icon={UserRoundPlus} title="Assign to me" />
-        )}
+
+        <AssignOrUnassignMySelf ticket={ticket} />
+
         <Action icon={Route} title="Change status..." />
 
         <Action icon={ChartNoAxesColumnIncreasing} title="Change priority..." />
@@ -85,5 +81,26 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
         />
       </CommandGroup>
     </CommandList>
+  )
+}
+
+function AssignOrUnassignMySelf({ ticket }: { ticket: JiraTicket }) {
+  const userInfo = useCurrentUser()
+  const isAssignedByMe = userInfo?.email === ticket.assignee?.emailAddress
+
+  const { mutateAsync: assignMyself } = useMutationAssignMyself()
+
+  return isAssignedByMe ? (
+    <Action
+      icon={UserRoundMinus}
+      title="Unassigned from me"
+      onSelect={() => assignMyself({ ticket, assign: false })}
+    />
+  ) : (
+    <Action
+      icon={UserRoundPlus}
+      title="Assign to me"
+      onSelect={() => assignMyself({ ticket, assign: true })}
+    />
   )
 }

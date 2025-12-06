@@ -20,5 +20,5 @@ export function ActionPush<T extends RouteMap = RouteMap>({
     push(String(path), state)
   }, [target, push])
 
-  return <Action {...restProps} onSelect={onSelect} />
+  return <Action {...restProps} exitOnSelect={false} onSelect={onSelect} />
 }

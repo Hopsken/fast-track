@@ -5,7 +5,6 @@
 
 import { defineBackground } from '#imports'
 
-import { getJiraApi } from '@/lib/jira'
 import { getDatabase } from '@/repository'
 import { registerSearchService } from '@/services/search-service'
 import { registerAuthService } from '~/services/auth-service'
@@ -26,7 +25,7 @@ export default defineBackground(() => {
 
         // Initialize proxy services
         registerJiraService()
-        const ticketService = registerTicketService(getJiraApi, database)
+        const ticketService = registerTicketService(database)
         registerSearchService(database)
         registerAuthService(database)
 

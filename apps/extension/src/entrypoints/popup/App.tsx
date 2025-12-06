@@ -11,7 +11,7 @@ import {
   CommandRouter,
   useCommandRouter
 } from '@/components/CommandRouter'
-import { getTicketService } from '@/services/ticket-service'
+import { ticketService } from '@/services'
 import { useTicketSearch } from '~/hooks/useTicketSearch'
 
 import {
@@ -33,7 +33,7 @@ function App() {
 
   // Initialize search orchestration
   useEffect(() => {
-    getTicketService().suggestions.refresh('startup')
+    ticketService.suggestions.refresh('startup')
   }, [])
 
   const isSearchResultPage = router.activePage.path === '/'

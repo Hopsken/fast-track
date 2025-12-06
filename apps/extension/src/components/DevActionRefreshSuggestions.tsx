@@ -13,7 +13,7 @@ export function DevActionRefreshSuggestions() {
 
     try {
       setRefreshing(true)
-      await getTicketService().suggestions.refresh('manual', {
+      await getTicketService().refreshSuggestions('manual', {
         force: true
       })
     } catch (error) {
