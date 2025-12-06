@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
+import { Button } from '@internal/ui/components/button'
 import { Command, CommandInput } from '@internal/ui/components/command'
 import { useMemoizedFn } from 'ahooks'
+import { ArrowLeft } from 'lucide-react'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 import {
   CommandRoute,
@@ -8,17 +11,14 @@ import {
   useCommandRouter
 } from '@/components/CommandRouter'
 import { getTicketService } from '@/services/ticket-service'
-import { DevOnly } from '~/components/DevOnly'
-import { DevRefreshSuggestionsButton } from '~/components/DevRefreshSuggestionsButton'
-import { ErrorBoundary } from '~/components/ErrorBoundary'
-import { TicketSearchBox } from '~/components/search'
 import { useTicketSearch } from '~/hooks/useTicketSearch'
 
 import { TicketActionsMenu, SearchResultMenu, CommandRoutes } from './menus'
+import { Footer } from './menus/Footer'
 
 function App() {
-  const { activePage } = useCommandRouter()
-  const { searchQuery, handleSearch, isSearching, error, isAuthConfigured } =
+  const router = useCommandRouter()
+  const { handleSearch, isSearching, error, isAuthConfigured } =
     useTicketSearch()
   const [inputValue, setInputValue] = useState('')
 
@@ -29,8 +29,7 @@ function App() {
     getTicketService().suggestions.refresh('startup')
   }, [])
 
-  const isSearchResultPage = activePage.path === '/'
-  const shouldFilter = isSearchResultPage ? false : true
+  const isSearchResultPage = router.activePage.path === '/'
 
   const onCommandInputChange = useMemoizedFn((value: string) => {
     setInputValue(value)
@@ -39,10 +38,41 @@ function App() {
     }
   })
 
+  const previousPageButton =
+    router.pages.length > 1 ? (
+      <Button
+        variant={'secondary'}
+        size={'icon-xs'}
+        onClick={() => router.pop()}>
+        <ArrowLeft />
+      </Button>
+    ) : null
+
+  useHotkeys(
+    'esc',
+    () => {
+      if (inputValue) {
+        // clear input value when esc is pressed
+        onCommandInputChange('')
+      } else if (router.pages.length === 1) {
+        // close popup when esc is pressed on root page and input value is empty
+        window.close()
+      } else {
+        // pop to previous page when esc is pressed on other pages and input value is empty
+        router.pop()
+      }
+    },
+    {
+      preventDefault: true,
+      enableOnFormTags: true
+    }
+  )
+
   return (
     <div className="linear w-lg">
-      <Command loop shouldFilter={shouldFilter}>
+      <Command loop shouldFilter>
         <div className="relative flex h-[52px] items-center gap-3 border-b border-gray-200 pl-5 pr-5">
+          {previousPageButton}
           <CommandInput
             autoFocus
             value={inputValue}
@@ -61,14 +91,7 @@ function App() {
           {(ticket) => <TicketActionsMenu ticket={ticket} />}
         </CommandRoute>
 
-        <div className="flex items-center gap-2 px-4 py-2">
-          <span>{footerError}</span>
-          <ErrorBoundary>
-            <DevOnly>
-              <DevRefreshSuggestionsButton />
-            </DevOnly>
-          </ErrorBoundary>
-        </div>
+        <Footer error={footerError} />
       </Command>
     </div>
   )

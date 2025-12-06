@@ -1,5 +1,5 @@
-import { useRef } from 'react'
-import { CommandEmpty, CommandList } from '@internal/ui/components/command'
+import { Fragment } from 'react'
+import { CommandEmpty } from '@internal/ui/components/command'
 import { HiInformationCircle } from 'react-icons/hi'
 
 import {
@@ -23,8 +23,6 @@ export function TicketList({
   const searchQuery = useSearchQuery()
   const searchResults = useSearchResults() // Use search results from store instead of props
   const isSearching = useIsSearching()
-
-  const listRef = useRef<HTMLDivElement>(null)
 
   let emptyMessage = 'Tickets will appear here once collected from Jira'
 
@@ -56,7 +54,7 @@ export function TicketList({
   }
 
   return (
-    <CommandList ref={listRef} aria-label="Ticket search results">
+    <Fragment>
       {searchResults.map((ticket) => (
         <TicketItem
           key={ticket.key}
@@ -64,6 +62,6 @@ export function TicketList({
           searchQuery={searchQuery}
         />
       ))}
-    </CommandList>
+    </Fragment>
   )
 }

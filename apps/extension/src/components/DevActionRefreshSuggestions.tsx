@@ -1,8 +1,11 @@
 import { useCallback, useState } from 'react'
+import { RefreshCw } from 'lucide-react'
 
 import { getTicketService } from '@/services/ticket-service'
 
-export function DevRefreshSuggestionsButton() {
+import { Action } from './actions'
+
+export function DevActionRefreshSuggestions() {
   const [refreshing, setRefreshing] = useState(false)
 
   const handleClick = useCallback(async () => {
@@ -21,11 +24,10 @@ export function DevRefreshSuggestionsButton() {
   }, [refreshing])
 
   return (
-    <button
-      onClick={handleClick}
-      disabled={refreshing}
-      className="rounded-md border border-dashed border-gray-300 px-2 py-1 text-[11px] font-medium text-gray-600 transition-all duration-150 hover:border-gray-500 hover:text-gray-800 disabled:cursor-not-allowed disabled:opacity-60">
-      {refreshing ? 'Refreshing…' : 'Dev: Refresh suggestions'}
-    </button>
+    <Action
+      icon={RefreshCw}
+      title={refreshing ? 'Refreshing…' : 'Dev: Refresh suggestions'}
+      onSelect={handleClick}
+    />
   )
 }

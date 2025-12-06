@@ -51,7 +51,7 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
 
       <CommandSeparator />
 
-      <CommandGroup>
+      <CommandGroup heading="Misc">
         <ActionCopyToClipboard
           icon={Clipboard}
           content={ticket.key}
