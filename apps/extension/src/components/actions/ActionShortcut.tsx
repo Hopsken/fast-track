@@ -1,4 +1,5 @@
 import { CommandShortcut } from '@internal/ui/components/command'
+import { Kbd, KbdGroup } from '@internal/ui/components/kbd'
 
 import { KeyboardShortcut, KeyModifier } from '@/lib/keyboard'
 
@@ -23,10 +24,12 @@ const mapModifiers = (modifier: KeyModifier) => {
 export function ActionShortcut({ shortcut }: { shortcut: KeyboardShortcut }) {
   return (
     <CommandShortcut>
-      {shortcut.modifiers.map((modifier) => (
-        <kbd key={modifier}>{mapModifiers(modifier)}</kbd>
-      ))}
-      <kbd key={shortcut.key}>{shortcut.key}</kbd>
+      <KbdGroup>
+        {shortcut.modifiers.map((modifier) => (
+          <Kbd key={modifier}>{mapModifiers(modifier)}</Kbd>
+        ))}
+      </KbdGroup>
+      <Kbd key={shortcut.key}>{shortcut.key}</Kbd>
     </CommandShortcut>
   )
 }

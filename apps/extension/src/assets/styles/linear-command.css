@@ -38,16 +38,9 @@
     gap: 3px;
 
     kbd {
-      padding: 4px;
-      border: 0.5px solid var(--gray6);
-      border-radius: 3px;
-      min-width: 20px;
       font-family: var(--font-sans);
       font-size: 13px;
       color: var(--gray11);
-      text-transform: uppercase;
-      vertical-align: baseline;
-      text-align: center;
     }
   }
 
