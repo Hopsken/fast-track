@@ -1,6 +1,10 @@
 import { useCallback } from 'react'
 
-import { RouteMap, useCommandRouter } from '../CommandRouter'
+import {
+  RouteMap,
+  useCommandNavigate,
+  useCommandRouter
+} from '../CommandRouter'
 
 import { Action, ActionProps } from './Action'
 
@@ -13,7 +17,7 @@ export function ActionPush<T extends RouteMap = RouteMap>({
   target,
   ...restProps
 }: ActionPushProps<T>) {
-  const { push } = useCommandRouter()
+  const { push } = useCommandNavigate()
 
   const onSelect = useCallback(() => {
     const { path, state } = target()

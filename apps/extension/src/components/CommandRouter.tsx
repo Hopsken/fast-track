@@ -1,11 +1,7 @@
-import {
-  createContext,
-  ReactNode,
-  useCallback,
-  useContext,
-  useMemo,
-  useState
-} from 'react'
+import { createContext, ReactNode, useContext, useMemo } from 'react'
+import { useStore, StoreApi } from 'zustand'
+import { useShallow } from 'zustand/react/shallow'
+import { createStore } from 'zustand/vanilla'
 
 // --- Types ---
 
@@ -18,10 +14,12 @@ interface PageSnapshot<T extends RouteMap> {
   state: T[keyof T]
 }
 
-interface CommandRouterContextType<T extends RouteMap> {
+interface CommandRouterState<T extends RouteMap> {
+  search: string
+  setSearch: (search: string) => void
+
   activePage: PageSnapshot<T>
   pages: PageSnapshot<T>[]
-  // Push is strictly typed based on the Generic T
   push: <K extends keyof T>(
     path: K,
     ...args: T[K] extends void | undefined ? [state?: never] : [state: T[K]]
@@ -29,18 +27,88 @@ interface CommandRouterContextType<T extends RouteMap> {
   pop: () => void
 }
 
+type CommandRouterStore<T extends RouteMap> = StoreApi<CommandRouterState<T>>
+
 // We use 'any' here to allow generic instantiation later
-const CommandRouterContext =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  createContext<CommandRouterContextType<any> | null>(null)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const CommandRouterContext = createContext<CommandRouterStore<any> | null>(null)
+
+function createCommandRouterStore<T extends RouteMap>(
+  defaultPage: keyof T
+): CommandRouterStore<T> {
+  const defaultPageSnapshot: PageSnapshot<T> = {
+    path: defaultPage,
+
+    state: undefined as T[keyof T]
+  }
+
+  return createStore<CommandRouterState<T>>((set) => ({
+    search: '',
+    setSearch: (search) => set({ search }),
+
+    activePage: defaultPageSnapshot,
+    pages: [defaultPageSnapshot],
+
+    push: (path, ...args) => {
+      const state = args[0] as T[keyof T]
+      set((curr) => {
+        const nextPage: PageSnapshot<T> = { path, state }
+        return {
+          activePage: nextPage,
+          pages: [...curr.pages, nextPage]
+        }
+      })
+    },
+
+    pop: () => {
+      set((curr) => {
+        if (curr.pages.length <= 1) return curr
+        const pages = curr.pages.slice(0, -1)
+        const activePage = pages[pages.length - 1] ?? curr.activePage
+        return {
+          activePage,
+          pages
+        }
+      })
+    }
+  }))
+}
+
+function useCommandRouterStore<T extends RouteMap>() {
+  const store = useContext(CommandRouterContext) as CommandRouterStore<T> | null
+  if (!store)
+    throw new Error('useCommandRouter must be used within a <CommandRouter>')
+  return store
+}
 
 export function useCommandRouter<T extends RouteMap>() {
-  const context = useContext(
-    CommandRouterContext
-  ) as CommandRouterContextType<T>
-  if (!context)
-    throw new Error('useCommandRouter must be used within a <CommandRouter>')
-  return context
+  const store = useCommandRouterStore<T>()
+
+  return useStore(
+    store,
+    useShallow((state) => ({
+      activePage: state.activePage,
+      pages: state.pages,
+      push: state.push,
+      pop: state.pop
+    }))
+  )
+}
+
+export function useCommandRouterActivePage<T extends RouteMap>() {
+  const store = useCommandRouterStore<T>()
+  return useStore(store, (state) => state.activePage)
+}
+
+export function useCommandNavigate<T extends RouteMap>() {
+  const store = useCommandRouterStore<T>()
+  return useStore(
+    store,
+    useShallow((state) => ({
+      push: state.push,
+      pop: state.pop
+    }))
+  )
 }
 
 interface CommandRouterProps<T extends RouteMap> {
@@ -52,45 +120,13 @@ export function CommandRouter<T extends RouteMap>({
   children,
   defaultPage
 }: CommandRouterProps<T>) {
-  const defaultPageSnapshot = useMemo<PageSnapshot<T>>(
-    () => ({
-      path: defaultPage,
-      state: undefined as T[keyof T]
-    }),
+  const store = useMemo(
+    () => createCommandRouterStore<T>(defaultPage),
     [defaultPage]
   )
 
-  // The stack state
-  const [pages, setPages] = useState<PageSnapshot<T>[]>([
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    { path: defaultPage, state: undefined as any }
-  ])
-
-  const activePage = pages[pages.length - 1] ?? defaultPageSnapshot
-
-  const push = useCallback(
-    <K extends keyof T>(
-      path: K,
-      ...args: T[K] extends void | undefined ? [state?: never] : [state: T[K]]
-    ) => {
-      const state = args[0] as T[K]
-      setPages((curr) => [...curr, { path, state }])
-    },
-    []
-  )
-
-  const pop = useCallback(() => {
-    setPages((curr) => {
-      if (curr.length <= 1) return curr
-      const next = [...curr]
-      next.pop()
-      return next
-    })
-  }, [])
-
   return (
-    // @ts-expect-error - typescript is not able to infer the type of push
-    <CommandRouterContext.Provider value={{ activePage, pages, push, pop }}>
+    <CommandRouterContext.Provider value={store}>
       {children}
     </CommandRouterContext.Provider>
   )
@@ -105,7 +141,7 @@ export function CommandRoute<T extends RouteMap, K extends keyof T>({
   path,
   children
 }: CommandRouteProps<T, K>) {
-  const { activePage } = useCommandRouter<T>()
+  const activePage = useCommandRouterActivePage<T>()
 
   if (activePage.path !== path) return null
 

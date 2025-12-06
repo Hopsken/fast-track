@@ -1,6 +1,5 @@
+import { browser } from '#imports'
 import { useState } from 'react'
-
-import { useVersion } from '~/hooks/useVersion'
 
 import {
   OptionsHeader,
@@ -13,7 +12,7 @@ import {
 import '~/assets/styles/main.css'
 
 function OptionsPage() {
-  const version = useVersion()
+  const version = browser.runtime.getManifest().version
   const [activeTab, setActiveTab] = useState('general')
 
   return (

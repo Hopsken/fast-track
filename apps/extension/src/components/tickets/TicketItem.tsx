@@ -10,7 +10,7 @@ import {
 } from '~/components/ui/jira'
 import { HighlightedText } from '~/utils/text-highlighting'
 
-import { useCommandRouter } from '../CommandRouter'
+import { useCommandNavigate } from '../CommandRouter'
 
 interface TicketItemProps {
   ticket: JiraTicket
@@ -18,11 +18,12 @@ interface TicketItemProps {
 }
 
 export function TicketItem({ ticket, searchQuery = '' }: TicketItemProps) {
-  const { push } = useCommandRouter()
+  const navigate = useCommandNavigate()
 
   const onSelect = useMemoizedFn(() => {
-    push('/actions', ticket)
+    navigate.push('/actions', ticket)
   })
+
   return (
     <CommandItem
       tabIndex={0}
