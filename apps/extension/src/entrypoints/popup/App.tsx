@@ -12,6 +12,7 @@ import {
 } from '@/components/CommandRouter'
 import { QueryClientProvider } from '@/components/QueryClientProvider'
 import { ticketService } from '@/services'
+import { showToast } from '@/stores/useToastStore'
 import { useTicketSearch } from '~/hooks/useTicketSearch'
 
 import {
@@ -27,11 +28,8 @@ import { Footer } from './menus/Footer'
 function App() {
   const { activePage, activeSearch, history, setSearch, pop } =
     useCommandRouter()
-  const { handleSearch, isSearching, error, isAuthConfigured } =
-    useTicketSearch()
+  const { handleSearch, isSearching } = useTicketSearch()
   const inputRef = useRef<HTMLInputElement>(null)
-
-  const footerError = isAuthConfigured ? error : undefined
 
   // Initialize search orchestration
   useEffect(() => {
@@ -122,7 +120,7 @@ function App() {
           {(ticket) => <TicketPriorityMenu ticket={ticket} />}
         </CommandRoute>
 
-        <Footer error={footerError} />
+        <Footer />
       </Command>
     </div>
   )
