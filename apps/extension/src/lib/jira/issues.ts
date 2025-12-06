@@ -320,6 +320,12 @@ export class JiraIssueService {
     }
   }
 
+  public getIssueEditMetadata(issue: JiraTicket) {
+    return this.client.issues.getEditIssueMeta({
+      issueIdOrKey: issue.key
+    })
+  }
+
   /**
    * Updates the rate limit delay
    */

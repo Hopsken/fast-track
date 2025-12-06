@@ -7,21 +7,24 @@ import {
 import {
   ChartNoAxesColumnIncreasing,
   Clipboard,
-  Eye,
-  EyeOff,
   MessageCircle,
   Route,
+  UserPen,
   UserRoundMinus,
   UserRoundPlus
 } from 'lucide-react'
 
 import { Action, ActionCopyToClipboard } from '@/components/actions'
+import { useCurrentUser } from '@/hooks/useCurrentUser'
+import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
 import { JiraTicket } from '@/types'
 import { generateBranchName, getIssueTitleLink } from '@/utils/jira/issues'
 
 export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
-  const isAssignedByMe = true
-  const isWatching = true
+  const userInfo = useCurrentUser()
+  const isAssignedByMe = userInfo?.email === ticket.assignee?.emailAddress
+
+  useIssueEditMeta(ticket)
 
   const formatted = useMemo(
     () => ({
@@ -34,19 +37,16 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
   return (
     <CommandList>
       <CommandGroup heading={ticket.key}>
-        <Action icon={UserRoundPlus} title="Assign to..." />
+        <Action icon={UserPen} title="Assign to..." />
         {isAssignedByMe ? (
           <Action icon={UserRoundMinus} title="Unassigned from me" />
-        ) : null}
+        ) : (
+          <Action icon={UserRoundPlus} title="Assign to me" />
+        )}
         <Action icon={Route} title="Change status..." />
 
         <Action icon={ChartNoAxesColumnIncreasing} title="Change priority..." />
         <Action icon={MessageCircle} title="Add comment..." />
-        {isWatching ? (
-          <Action icon={EyeOff} title="Stop watching" />
-        ) : (
-          <Action icon={Eye} title="Watch" />
-        )}
       </CommandGroup>
 
       <CommandSeparator />

@@ -40,13 +40,23 @@ class TicketServiceImpl implements TicketService {
     this.suggestions = new TicketSuggestionService(this, database)
   }
 
-  private async getJira(): Promise<JiraAPI | null> {
+  public async getJira(): Promise<JiraAPI | null> {
     try {
       return await this.jiraFactory()
     } catch (error) {
       console.error('TicketService: failed to initialize Jira client', error)
       return null
     }
+  }
+
+  public async getIssueEditMeta(issue: JiraTicket): Promise<any> {
+    const jira = await this.getJira()
+    if (!jira) {
+      console.info('TicketService: getIssueEditMeta skipped, not configured')
+      return null
+    }
+
+    return jira.issues.getIssueEditMetadata(issue)
   }
 
   /**

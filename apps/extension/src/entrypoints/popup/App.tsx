@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@internal/ui/components/button'
 import { Command, CommandInput } from '@internal/ui/components/command'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useMemoizedFn } from 'ahooks'
 import { ArrowLeft } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
@@ -98,10 +99,13 @@ function App() {
 }
 
 function AppWithProviders() {
+  const [queryClient] = useState(() => new QueryClient())
   return (
-    <CommandRouter<CommandRoutes> defaultPage="/">
-      <App />
-    </CommandRouter>
+    <QueryClientProvider client={queryClient}>
+      <CommandRouter<CommandRoutes> defaultPage="/">
+        <App />
+      </CommandRouter>
+    </QueryClientProvider>
   )
 }
 
