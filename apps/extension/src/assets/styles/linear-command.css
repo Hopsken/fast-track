@@ -126,6 +126,9 @@
     height: 30px;
     display: flex;
     align-items: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   [cmdk-empty] {

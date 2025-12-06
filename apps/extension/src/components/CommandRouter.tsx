@@ -12,14 +12,12 @@ export type RouteMap = Record<string, any>
 interface PageSnapshot<T extends RouteMap> {
   path: keyof T
   state: T[keyof T]
+  search: string
 }
 
 interface CommandRouterState<T extends RouteMap> {
-  search: string
+  history: PageSnapshot<T>[]
   setSearch: (search: string) => void
-
-  activePage: PageSnapshot<T>
-  pages: PageSnapshot<T>[]
   push: <K extends keyof T>(
     path: K,
     ...args: T[K] extends void | undefined ? [state?: never] : [state: T[K]]
@@ -39,35 +37,42 @@ function createCommandRouterStore<T extends RouteMap>(
   const defaultPageSnapshot: PageSnapshot<T> = {
     path: defaultPage,
 
-    state: undefined as T[keyof T]
+    state: undefined as T[keyof T],
+    search: ''
   }
 
   return createStore<CommandRouterState<T>>((set) => ({
-    search: '',
-    setSearch: (search) => set({ search }),
+    history: [defaultPageSnapshot],
 
-    activePage: defaultPageSnapshot,
-    pages: [defaultPageSnapshot],
+    setSearch: (search) => {
+      set((curr) => {
+        if (curr.history.length === 0) return curr
+        const nextPages = [...curr.history]
+        const activePage = nextPages[nextPages.length - 1]!
+        activePage.search = search
+        return {
+          history: nextPages
+        }
+      })
+    },
 
     push: (path, ...args) => {
       const state = args[0] as T[keyof T]
       set((curr) => {
-        const nextPage: PageSnapshot<T> = { path, state }
+        const nextPage: PageSnapshot<T> = { path, state, search: '' }
         return {
-          activePage: nextPage,
-          pages: [...curr.pages, nextPage]
+          ...curr,
+          history: [...curr.history, nextPage]
         }
       })
     },
 
     pop: () => {
       set((curr) => {
-        if (curr.pages.length <= 1) return curr
-        const pages = curr.pages.slice(0, -1)
-        const activePage = pages[pages.length - 1] ?? curr.activePage
+        if (curr.history.length <= 1) return curr
         return {
-          activePage,
-          pages
+          ...curr,
+          history: curr.history.slice(0, -1)
         }
       })
     }
@@ -87,8 +92,10 @@ export function useCommandRouter<T extends RouteMap>() {
   return useStore(
     store,
     useShallow((state) => ({
-      activePage: state.activePage,
-      pages: state.pages,
+      activePage: state.history[state.history.length - 1]!,
+      activeSearch: state.history[state.history.length - 1]!.search,
+      history: state.history,
+      setSearch: state.setSearch,
       push: state.push,
       pop: state.pop
     }))
@@ -97,7 +104,7 @@ export function useCommandRouter<T extends RouteMap>() {
 
 export function useCommandRouterActivePage<T extends RouteMap>() {
   const store = useCommandRouterStore<T>()
-  return useStore(store, (state) => state.activePage)
+  return useStore(store, (state) => state.history[state.history.length - 1]!)
 }
 
 export function useCommandNavigate<T extends RouteMap>() {

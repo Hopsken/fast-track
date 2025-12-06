@@ -35,7 +35,7 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
 
   return (
     <CommandList>
-      <CommandGroup heading={ticket.key}>
+      <CommandGroup heading={`${ticket.key} - ${ticket.summary}`}>
         <ActionPush
           target={() => ({ path: '/ticket/assign', state: ticket })}
           icon={UserPen}

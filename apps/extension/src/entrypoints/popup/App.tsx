@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import { Button } from '@internal/ui/components/button'
 import { Command, CommandInput } from '@internal/ui/components/command'
 import { useMemoizedFn } from 'ahooks'
@@ -25,10 +25,10 @@ import {
 import { Footer } from './menus/Footer'
 
 function App() {
-  const router = useCommandRouter()
+  const { activePage, activeSearch, history, setSearch, pop } =
+    useCommandRouter()
   const { handleSearch, isSearching, error, isAuthConfigured } =
     useTicketSearch()
-  const [inputValue, setInputValue] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
   const footerError = isAuthConfigured ? error : undefined
@@ -38,21 +38,18 @@ function App() {
     ticketService.suggestions.refresh('startup')
   }, [])
 
-  const isSearchResultPage = router.activePage.path === '/'
+  const isSearchResultPage = activePage.path === '/'
 
   const onCommandInputChange = useMemoizedFn((value: string) => {
-    setInputValue(value)
+    setSearch(value)
     if (isSearchResultPage) {
       handleSearch(value)
     }
   })
 
   const previousPageButton =
-    router.pages.length > 1 ? (
-      <Button
-        variant={'secondary'}
-        size={'icon-xs'}
-        onClick={() => router.pop()}>
+    history.length > 1 ? (
+      <Button variant={'secondary'} size={'icon-xs'} onClick={() => pop()}>
         <ArrowLeft />
       </Button>
     ) : null
@@ -60,15 +57,15 @@ function App() {
   useHotkeys(
     'esc',
     () => {
-      if (inputValue) {
+      if (activeSearch) {
         // clear input value when esc is pressed
         onCommandInputChange('')
-      } else if (router.pages.length === 1) {
+      } else if (history.length === 1) {
         // close popup when esc is pressed on root page and input value is empty
         window.close()
       } else {
         // pop to previous page when esc is pressed on other pages and input value is empty
-        router.pop()
+        pop()
       }
     },
     {
@@ -80,7 +77,14 @@ function App() {
   // Focus input when active page changes
   useLayoutEffect(() => {
     inputRef?.current?.focus()
-  }, [router.activePage.path])
+    const rafId = window.requestAnimationFrame(() => {
+      inputRef.current?.select()
+    })
+
+    return () => {
+      window.cancelAnimationFrame(rafId)
+    }
+  }, [activePage.path])
 
   return (
     <div className="linear w-lg">
@@ -90,9 +94,9 @@ function App() {
           <CommandInput
             autoFocus
             ref={inputRef}
-            value={inputValue}
+            value={activeSearch}
             onValueChange={onCommandInputChange}
-            placeholder={isSearching ? 'Searching...' : 'Search tickets...'}
+            placeholder={'Search tickets...'}
             aria-label="Search tickets"
             aria-busy={isSearching}
           />
