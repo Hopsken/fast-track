@@ -14,7 +14,7 @@ import {
   UserRoundPlus
 } from 'lucide-react'
 
-import { Action, ActionCopyToClipboard } from '@/components/actions'
+import { Action, ActionCopyToClipboard, ActionPush } from '@/components/actions'
 import { useCurrentUser } from '@/hooks/useCurrentUser'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
 import { JiraTicket } from '@/types'
@@ -24,6 +24,7 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
   const userInfo = useCurrentUser()
   const isAssignedByMe = userInfo?.email === ticket.assignee?.emailAddress
 
+  // Get issue edit meta to prefetch assignee candidates
   useIssueEditMeta(ticket)
 
   const formatted = useMemo(
@@ -37,7 +38,11 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
   return (
     <CommandList>
       <CommandGroup heading={ticket.key}>
-        <Action icon={UserPen} title="Assign to..." />
+        <ActionPush
+          target={() => ({ path: '/ticket/assign', state: ticket })}
+          icon={UserPen}
+          title="Assign to..."
+        />
         {isAssignedByMe ? (
           <Action icon={UserRoundMinus} title="Unassigned from me" />
         ) : (

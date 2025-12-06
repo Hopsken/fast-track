@@ -61,7 +61,8 @@
     }
   }
 
-  [cmdk-item] {
+  [cmdk-item],
+  [cmdk-loading] {
     content-visibility: auto;
 
     cursor: pointer;

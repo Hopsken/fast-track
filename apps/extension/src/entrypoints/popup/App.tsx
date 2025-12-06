@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Button } from '@internal/ui/components/button'
 import { Command, CommandInput } from '@internal/ui/components/command'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -14,7 +14,12 @@ import {
 import { getTicketService } from '@/services/ticket-service'
 import { useTicketSearch } from '~/hooks/useTicketSearch'
 
-import { TicketActionsMenu, SearchResultMenu, CommandRoutes } from './menus'
+import {
+  TicketActionsMenu,
+  SearchResultMenu,
+  CommandRoutes,
+  TicketAssignMenu
+} from './menus'
 import { Footer } from './menus/Footer'
 
 function App() {
@@ -22,6 +27,7 @@ function App() {
   const { handleSearch, isSearching, error, isAuthConfigured } =
     useTicketSearch()
   const [inputValue, setInputValue] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const footerError = isAuthConfigured ? error : undefined
 
@@ -69,6 +75,11 @@ function App() {
     }
   )
 
+  // Focus input when active page changes
+  useLayoutEffect(() => {
+    inputRef?.current?.focus()
+  }, [router.activePage.path])
+
   return (
     <div className="linear w-lg">
       <Command loop shouldFilter>
@@ -76,6 +87,7 @@ function App() {
           {previousPageButton}
           <CommandInput
             autoFocus
+            ref={inputRef}
             value={inputValue}
             onValueChange={onCommandInputChange}
             placeholder={isSearching ? 'Searching...' : 'Search tickets...'}
@@ -90,6 +102,10 @@ function App() {
 
         <CommandRoute path="/actions">
           {(ticket) => <TicketActionsMenu ticket={ticket} />}
+        </CommandRoute>
+
+        <CommandRoute path="/ticket/assign">
+          {(ticket) => <TicketAssignMenu ticket={ticket} />}
         </CommandRoute>
 
         <Footer error={footerError} />

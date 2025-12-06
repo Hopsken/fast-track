@@ -35,6 +35,50 @@ export class JiraAPI {
     }
   }
 
+  public async autoComplete<T>(
+    url: string,
+    params: Record<string, string>
+  ): Promise<T> {
+    const headers = this.buildAuthorizationHeader(this.client.getConfig())
+
+    const updatedUrl = new URL(url)
+    Object.entries(params).forEach(([key, value]) => {
+      updatedUrl.searchParams.set(key, value)
+    })
+
+    const response = await fetch(updatedUrl, {
+      method: 'GET',
+      headers
+    })
+
+    if (response.ok) {
+      return response.json() as T
+    } else {
+      const result = await response.json()
+      throw new Error(JSON.stringify(result))
+    }
+  }
+
+  private buildAuthorizationHeader(config: JiraApiConfig): HeadersInit {
+    if (config.type === 'oauth') {
+      return {
+        Accept: 'application/json',
+        Authorization: `Bearer ${config.access_token}`
+      }
+    }
+
+    if (config.type === 'apiKey') {
+      return {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        // eslint-disable-next-line sonarjs/no-nested-template-literals
+        Authorization: `Basic ${btoa(`${config.email}:${config.apiKey}`)}`
+      }
+    }
+
+    throw new Error(`Unsupported authentication type: ${config}`)
+  }
+
   getConfig(): JiraApiConfig {
     return this.client.getConfig()
   }

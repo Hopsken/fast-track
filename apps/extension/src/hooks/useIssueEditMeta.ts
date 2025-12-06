@@ -10,13 +10,20 @@ export function useIssueEditMeta(issue: JiraTicket) {
 
   return useQuery({
     queryKey: queryKeys.issue.editMeta(issue),
+    staleTime: 1000 * 60 * 5,
     queryFn: async () => {
       const result = await jiraService.proxyCall(
         'issues.getIssueEditMetadata',
         issue
       )
 
-      return result
+      return result as {
+        fields?: {
+          assignee?: {
+            autoCompleteUrl: string
+          }
+        }
+      }
     }
   })
 }

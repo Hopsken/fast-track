@@ -11,3 +11,4 @@ export type CommandRoutes = {
 
 export { SearchResultMenu } from './SearchResultMenu'
 export { TicketActionsMenu } from './TicketActionsMenu'
+export { TicketAssignMenu } from './TicketAssignMenu'

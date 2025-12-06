@@ -63,14 +63,22 @@ class JiraServiceImpl {
     }, methodPath)
   }
 
+  public async autoComplete<T>(
+    url: string,
+    params: Record<string, string>
+  ): Promise<T> {
+    return this.withJira(async (jira) => {
+      return jira.autoComplete(url, params)
+    }, url)
+  }
+
   private async withJira<T>(
     action: (jira: JiraAPI) => Promise<T>,
     context: string
-  ): Promise<T | null> {
+  ): Promise<T> {
     const jira = await getJiraApi()
     if (!jira) {
-      console.info(`JiraService: ${context} skipped, not configured`)
-      return null
+      throw new Error(`JiraService: ${context} skipped, not configured`)
     }
 
     return action(jira)
