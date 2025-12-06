@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import { RefreshCw } from 'lucide-react'
 
 import { getTicketService } from '@/services/ticket-service'
+import { showToast } from '@/stores/useToastStore'
 
 import { Action } from './actions'
 
@@ -13,11 +14,23 @@ export function DevActionRefreshSuggestions() {
 
     try {
       setRefreshing(true)
+      const toast = showToast({
+        style: 'loading',
+        title: 'Refreshing suggestions...'
+      })
       await getTicketService().refreshSuggestions('manual', {
         force: true
       })
+      toast.update({
+        style: 'success',
+        title: 'Suggestions refreshed'
+      })
     } catch (error) {
-      console.error('Dev refresh suggestions failed', error)
+      showToast({
+        style: 'failure',
+        title: 'Failed to refresh suggestions',
+        message: error
+      })
     } finally {
       setRefreshing(false)
     }

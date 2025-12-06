@@ -8,6 +8,7 @@ import {
   X
 } from 'lucide-react'
 
+import { formatErrorMessage } from '@/utils/formatError'
 import {
   ToastStyle,
   useToastState,
@@ -58,7 +59,7 @@ export function Footer() {
 
     return (
       <div
-        className={cn('text-foreground group flex items-center gap-2 text-sm')}>
+        className={cn('text-foreground group flex items-center gap-2 text-xs')}>
         <div className="relative">
           <Icon
             className={cn(
@@ -76,17 +77,20 @@ export function Footer() {
           </button>
         </div>
 
-        <div className="flex-1">
-          <div className="text-xs leading-5">{activeToast.title}</div>
+        <div className="flex-1 text-xs">
+          <span>{activeToast.title}</span>
           {activeToast.message ? (
-            <div className="text-muted-foreground text-xs leading-4">
-              {activeToast.message}
-            </div>
+            <span className="text-muted-foreground">
+              {' '}
+              - {formatErrorMessage(activeToast.message)}
+            </span>
           ) : null}
         </div>
       </div>
     )
   }
+
+  if (!activeToast) return null
 
   return (
     <div

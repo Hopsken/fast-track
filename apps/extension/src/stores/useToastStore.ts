@@ -6,7 +6,7 @@ export type ToastStyle = 'loading' | 'success' | 'failure' | 'warning'
 export interface ToastConfig {
   style: ToastStyle
   title: string
-  message?: string
+  message?: unknown
   duration?: number
 }
 
