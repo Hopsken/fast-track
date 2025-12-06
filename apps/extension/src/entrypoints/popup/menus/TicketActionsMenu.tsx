@@ -5,7 +5,7 @@ import {
 } from '@internal/ui/components/command'
 import {
   ChartNoAxesColumnIncreasing,
-  ClipboardCopy,
+  Clipboard,
   Eye,
   EyeOff,
   MessageCircle,
@@ -42,14 +42,14 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
 
       <CommandGroup>
         <Action
-          icon={ClipboardCopy}
+          icon={Clipboard}
           title="Copy issue key"
           shortcut={{ modifiers: ['cmd'], key: '.' }}
         />
-        <Action icon={ClipboardCopy} title="Copy issue link" />
-        <Action icon={ClipboardCopy} title="Copy issue title" />
-        <Action icon={ClipboardCopy} title="Copy issue title as link" />
-        <Action icon={ClipboardCopy} title="Copy git branch name" />
+        <Action icon={Clipboard} title="Copy issue link" />
+        <Action icon={Clipboard} title="Copy issue title" />
+        <Action icon={Clipboard} title="Copy issue title as link" />
+        <Action icon={Clipboard} title="Copy git branch name" />
       </CommandGroup>
     </CommandList>
   )
