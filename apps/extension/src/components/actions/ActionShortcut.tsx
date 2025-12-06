@@ -1,6 +1,7 @@
 import { CommandShortcut } from '@internal/ui/components/command'
 import { Kbd, KbdGroup } from '@internal/ui/components/kbd'
 
+import { useActionShortcut } from '@/hooks/useActionShortcut'
 import { KeyboardShortcut, KeyModifier } from '@/lib/keyboard'
 
 const mapModifiers = (modifier: KeyModifier) => {
@@ -21,7 +22,14 @@ const mapModifiers = (modifier: KeyModifier) => {
   }
 }
 
-export function ActionShortcut({ shortcut }: { shortcut: KeyboardShortcut }) {
+export function ActionShortcut({
+  shortcut,
+  onSelect
+}: {
+  shortcut: KeyboardShortcut
+  onSelect: () => void
+}) {
+  useActionShortcut(shortcut, onSelect)
   return (
     <CommandShortcut>
       <KbdGroup>

@@ -43,7 +43,9 @@ export function Action({
         {title}
       </div>
 
-      {shortcut && <ActionShortcut shortcut={shortcut} />}
+      {shortcut && (
+        <ActionShortcut shortcut={shortcut} onSelect={onSelectItem} />
+      )}
     </CommandItem>
   )
 }
