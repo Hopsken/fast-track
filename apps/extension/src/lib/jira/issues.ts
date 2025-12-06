@@ -8,7 +8,8 @@ import type { IssuePickerSuggestions } from 'jira.js/version3/models/issuePicker
 import type { IssueTransition } from 'jira.js/version3/models/issueTransition'
 import { chunk, compact, flatMap, map } from 'lodash-es'
 
-import { IssueSource, JiraTicket } from '@/types'
+import { IssueSource, JiraPriority, JiraTicket } from '@/types'
+import { mapPriority } from '@/utils/jira/issues'
 
 import { toISODateString } from '../date'
 
@@ -65,27 +66,37 @@ export class JiraIssueService {
     })
   }
 
-  async getIssueTransitions(issue: JiraTicket): Promise<IssueTransition[]> {
-    try {
-      const transitions = await this.client.issues.getTransitions({
-        issueIdOrKey: issue.key,
-        sortByOpsBarAndStatus: true
-      })
+  async getPriorities(): Promise<JiraPriority[]> {
+    const priorities = await this.client.issuePriorities.getPriorities()
+    return (priorities || [])
+      .map((priority) => mapPriority(priority))
+      .filter((priority): priority is JiraPriority => !!priority.id)
+  }
 
-      return transitions.transitions ?? []
-    } catch (error) {
-      console.error(
-        `❌ JiraAPI: Failed to fetch transitions for issue ${issue.key}:`,
-        error
-      )
-      return []
-    }
+  async getIssueTransitions(issue: JiraTicket): Promise<IssueTransition[]> {
+    const transitions = await this.client.issues.getTransitions({
+      issueIdOrKey: issue.key,
+      sortByOpsBarAndStatus: true
+    })
+
+    return transitions.transitions ?? []
   }
 
   async transitionIssue(issueKey: string, transitionId: string) {
     await this.client.issues.doTransition({
       issueIdOrKey: issueKey,
       transition: { id: transitionId }
+    })
+
+    return this.getIssue(issueKey)
+  }
+
+  async updateIssuePriority(issueKey: string, priorityId: string) {
+    await this.client.issues.editIssue({
+      issueIdOrKey: issueKey,
+      fields: {
+        priority: { id: priorityId }
+      }
     })
 
     return this.getIssue(issueKey)
@@ -334,10 +345,7 @@ export class JiraIssueService {
           }
         : null,
       priority: issue.fields?.priority
-        ? {
-            name: issue.fields.priority.name || '',
-            iconUrl: issue.fields.priority.iconUrl || ''
-          }
+        ? mapPriority(issue.fields.priority)
         : null,
       projectKey: issue.fields?.project?.key || '',
       boardName: issue.fields?.project?.name || '',

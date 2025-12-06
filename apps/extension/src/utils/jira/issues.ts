@@ -1,7 +1,8 @@
+import { Priority } from 'jira.js/version3/models/priority'
 import { StatusDetails } from 'jira.js/version3/models/statusDetails'
 import { UserDetails } from 'jira.js/version3/models/userDetails'
 
-import { JiraAssignee, JiraStatus, JiraTicket } from '@/types'
+import { JiraAssignee, JiraPriority, JiraStatus, JiraTicket } from '@/types'
 
 import { slugify } from '../string'
 
@@ -67,5 +68,15 @@ export function mapStatus(status: StatusDetails | undefined): JiraStatus {
       colorName: status?.statusCategory?.colorName || '',
       name: status?.statusCategory?.name || ''
     }
+  }
+}
+
+export function mapPriority(
+  priority: Priority | JiraPriority | undefined
+): JiraPriority {
+  return {
+    id: priority?.id,
+    name: priority?.name || '',
+    iconUrl: priority?.iconUrl || ''
   }
 }

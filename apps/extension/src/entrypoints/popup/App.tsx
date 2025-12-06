@@ -15,10 +15,11 @@ import { ticketService } from '@/services'
 import { useTicketSearch } from '~/hooks/useTicketSearch'
 
 import {
-  TicketActionsMenu,
-  SearchResultMenu,
   CommandRoutes,
+  SearchResultMenu,
+  TicketActionsMenu,
   TicketAssignMenu,
+  TicketPriorityMenu,
   TicketStatusMenu
 } from './menus'
 import { Footer } from './menus/Footer'
@@ -111,6 +112,10 @@ function App() {
 
         <CommandRoute path="/ticket/status">
           {(ticket) => <TicketStatusMenu ticket={ticket} />}
+        </CommandRoute>
+
+        <CommandRoute path="/ticket/priority">
+          {(ticket) => <TicketPriorityMenu ticket={ticket} />}
         </CommandRoute>
 
         <Footer error={footerError} />

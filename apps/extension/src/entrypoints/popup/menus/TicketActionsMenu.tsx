@@ -50,7 +50,11 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
           title="Change status..."
         />
 
-        <Action icon={ChartNoAxesColumnIncreasing} title="Change priority..." />
+        <ActionPush
+          target={() => ({ path: '/ticket/priority', state: ticket })}
+          icon={ChartNoAxesColumnIncreasing}
+          title="Change priority..."
+        />
         <Action icon={MessageCircle} title="Add comment..." />
       </CommandGroup>
 

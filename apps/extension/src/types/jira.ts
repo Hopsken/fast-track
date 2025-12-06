@@ -29,6 +29,7 @@ export interface JiraAssignee {
 }
 
 export interface JiraPriority {
+  id?: string
   name: string
   iconUrl: string
 }

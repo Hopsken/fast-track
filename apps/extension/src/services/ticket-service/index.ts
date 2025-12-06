@@ -11,8 +11,12 @@ import { uniqBy } from 'lodash-es'
 import { sendMessage } from '@/lib/message'
 import { getStorageItem } from '@/lib/storage'
 import { Database } from '@/repository'
-import { JiraTicket, JiraTransition } from '@/types'
-import { mapUserToAssignee, mergeTicketsByKey } from '@/utils/jira/issues'
+import { JiraPriority, JiraTicket, JiraTransition } from '@/types'
+import {
+  mapPriority,
+  mapUserToAssignee,
+  mergeTicketsByKey
+} from '@/utils/jira/issues'
 import { concatPromises } from '@/utils/promise'
 import { getJiraApi, JiraAPI } from '~/lib/jira'
 
@@ -195,6 +199,29 @@ class TicketServiceImpl {
         const refreshed = await jira.issues.transitionIssue(
           ticket.key,
           transition.id
+        )
+        return refreshed
+      }
+    })
+  }
+
+  async updateTicketPriority(ticket: JiraTicket, priority: JiraPriority) {
+    const normalizedPriority = mapPriority(priority)
+    const { id: priorityId } = normalizedPriority
+    if (!priorityId) {
+      throw new Error('updateTicketPriority: priority id is required')
+    }
+
+    return this.updateTicketOptimistically(ticket.key, {
+      reason: 'priority',
+      buildOptimistic: (base) => ({
+        ...base,
+        priority: normalizedPriority
+      }),
+      perform: async (jira) => {
+        const refreshed = await jira.issues.updateIssuePriority(
+          ticket.key,
+          priorityId
         )
         return refreshed
       }
