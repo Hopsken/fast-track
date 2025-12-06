@@ -13,23 +13,20 @@ import { IssueSource, JiraTicket } from '@/types'
 import { concatPromises } from '@/utils/promise'
 import { JiraAPI } from '~/lib/jira'
 
-import { TicketService } from './interface'
 import {
   TicketSuggestionService,
   TicketSuggestionsAPI
 } from './ticket-suggestion-service'
 
-export type { TicketService } from './interface'
-
 /**
  * Ticket service implementation
  */
-class TicketServiceImpl implements TicketService {
+class TicketServiceImpl {
   private database: Database
-  private jiraFactory: () => Promise<JiraAPI | null>
+  public jiraFactory: () => Promise<JiraAPI | null>
   readonly suggestions: TicketSuggestionsAPI
 
-  private lastSyncStorage = getStorageItem('LastSyncAt')
+  public lastSyncStorage = getStorageItem('LastSyncAt')
 
   constructor(
     jiraApiFactory: () => Promise<JiraAPI | null>,
@@ -50,79 +47,75 @@ class TicketServiceImpl implements TicketService {
   }
 
   public async getIssueEditMeta(issue: JiraTicket): Promise<any> {
-    const jira = await this.getJira()
-    if (!jira) {
-      console.info('TicketService: getIssueEditMeta skipped, not configured')
-      return null
-    }
-
-    return jira.issues.getIssueEditMetadata(issue)
+    return this.withJira(
+      (jira) => jira.issues.getIssueEditMetadata(issue),
+      null,
+      'getIssueEditMeta'
+    )
   }
 
   /**
    * Fetches ticket details using the background API service
    */
   async fetchTicketDetails(ticketKeys: string[]): Promise<JiraTicket[]> {
-    const jira = await this.getJira()
-    if (!jira) {
-      console.info('TicketService: fetchTicketDetails skipped, not configured')
-      return []
-    }
-
-    return jira.issues.getIssues(ticketKeys)
+    return this.withJira(
+      (jira) => jira.issues.getIssues(ticketKeys),
+      [],
+      'fetchTicketDetails'
+    )
   }
 
   /**
    * Loads suggestions related to the current user
    */
   async loadSuggestions(force = false): Promise<JiraTicket[]> {
-    const jira = await this.getJira()
-    if (!jira) {
-      console.info('TicketService: loadSuggestions skipped, not configured')
-      return []
-    }
+    return this.withJira(
+      async (jira) => {
+        const shouldSync = await this.shouldSync(force)
+        if (!shouldSync) {
+          return []
+        }
 
-    const shouldSync = await this.shouldSync(force)
-    if (!shouldSync) {
-      return []
-    }
+        const results = await concatPromises([
+          jira.issues.getMyUnresolvedIssues(10),
+          jira.issues.getRecentHistoryIssues(20),
+          jira.issues.getMyRecentDoneIssues(10),
+          jira.issues.getMyWatchingIssues(10)
+          // TODO add sprint tickets
+        ])
 
-    const results = await concatPromises([
-      jira.issues.getMyUnresolvedIssues(10),
-      jira.issues.getRecentHistoryIssues(20),
-      jira.issues.getMyRecentDoneIssues(10),
-      jira.issues.getMyWatchingIssues(10)
-      // TODO add sprint tickets
-    ])
+        const uniqTickets = this.mergeTicketsByKey(results)
 
-    const uniqTickets = this.mergeTicketsByKey(results)
+        await this.database.collections.issues.bulkUpsert(uniqTickets)
 
-    await this.database.collections.issues.bulkUpsert(uniqTickets)
-
-    this.lastSyncStorage.setValue(Date.now().toString())
-    return uniqTickets
+        this.lastSyncStorage.setValue(Date.now().toString())
+        return uniqTickets
+      },
+      [],
+      'loadSuggestions'
+    )
   }
 
   async searchTickets(query: string): Promise<JiraTicket[]> {
-    const jira = await this.getJira()
-    if (!jira) {
-      console.info('TicketService: search skipped, not configured')
-      return []
-    }
-
     const normalizedQuery = query.trim()
     if (!normalizedQuery) {
       return []
     }
 
-    const results = await jira.issues.searchIssuesByText(normalizedQuery)
-    // skip cache search tickets for now since it contains a lot of noise tickets
-    // await this.database.collections.issues.bulkUpsert(uniqTickets)
-    // TODO: add user select tickets to cache
-    return uniqBy(results, 'key')
+    return this.withJira(
+      async (jira) => {
+        const results = await jira.issues.searchIssuesByText(normalizedQuery)
+        // skip cache search tickets for now since it contains a lot of noise tickets
+        // await this.database.collections.issues.bulkUpsert(uniqTickets)
+        // TODO: add user select tickets to cache
+        return uniqBy(results, 'key')
+      },
+      [],
+      'searchTickets'
+    )
   }
 
-  private async shouldSync(force = false) {
+  public async shouldSync(force = false) {
     if (force) return true
 
     const lastSyncAt = await this.lastSyncStorage.getValue()
@@ -141,7 +134,7 @@ class TicketServiceImpl implements TicketService {
     return (await this.getJira()) != null
   }
 
-  private mergeTicketsByKey(tickets: JiraTicket[]) {
+  public mergeTicketsByKey(tickets: JiraTicket[]) {
     const ticketsByKey = new Map<string, JiraTicket>()
 
     tickets.forEach((ticket) => {
@@ -162,7 +155,23 @@ class TicketServiceImpl implements TicketService {
 
     return Array.from(ticketsByKey.values())
   }
+
+  public async withJira<T>(
+    action: (jira: JiraAPI) => Promise<T>,
+    fallback: T,
+    context: string
+  ) {
+    const jira = await this.getJira()
+    if (!jira) {
+      console.info(`TicketService: ${context} skipped, not configured`)
+      return fallback
+    }
+
+    return action(jira)
+  }
 }
+
+export type TicketService = InstanceType<typeof TicketServiceImpl>
 
 /**
  * Define the proxy service

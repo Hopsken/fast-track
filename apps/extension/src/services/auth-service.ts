@@ -1,13 +1,13 @@
 import { browser } from '#imports'
 import { defineProxyService } from '@webext-core/proxy-service'
-import z from 'zod'
+import { z } from 'zod'
 
 import { JiraAPI } from '@/lib/jira'
 import { AuthApi } from '@/lib/jira/auth-api'
 import { getStorageItem } from '@/lib/storage'
 import { Database } from '@/repository'
 import { JiraApiKeyConfig, ReceivedTokenPayload, JiraUserInfo } from '@/types'
-import { TicketService } from '~/services/ticket-service'
+import { getTicketService } from '~/services/ticket-service'
 
 export interface AuthService {
   receiveTokens(tokens: ReceivedTokenPayload): Promise<JiraUserInfo>
@@ -38,10 +38,7 @@ class AuthServiceImpl implements AuthService {
   private jiraHostStorage = getStorageItem('JiraHost')
   private authApi = new AuthApi()
 
-  constructor(
-    private database: Database,
-    private ticketService?: TicketService
-  ) {}
+  constructor(private database: Database) {}
 
   public async receiveTokens(
     tokens: ReceivedTokenPayload
@@ -114,10 +111,9 @@ class AuthServiceImpl implements AuthService {
   }
 
   private async primeSuggestionsAfterAuth() {
-    if (!this.ticketService) return
-
+    const ticketService = getTicketService()
     try {
-      await this.ticketService.suggestions.onAuthSuccess()
+      await ticketService.suggestions.onAuthSuccess()
     } catch (error) {
       console.error(
         'AuthService: failed to prefetch suggestions after auth',
@@ -154,9 +150,5 @@ class AuthServiceImpl implements AuthService {
 
 export const [registerAuthService, getAuthService] = defineProxyService<
   AuthService,
-  [Database, TicketService?]
->(
-  'AuthService',
-  (database: Database, ticketService?: TicketService) =>
-    new AuthServiceImpl(database, ticketService)
-)
+  [Database]
+>('AuthService', (database: Database) => new AuthServiceImpl(database))

@@ -15,7 +15,7 @@ import { Database } from '@/repository'
 import { JiraTicket } from '@/types'
 import { rankTickets } from '~/utils/ticket-ranking'
 
-import { TicketService } from './ticket-service'
+import { getTicketService } from './ticket-service'
 
 const DEFAULT_RESULT_LIMIT = 30
 
@@ -29,10 +29,7 @@ class SearchServiceImpl implements SearchService {
   private ready$ = new BehaviorSubject<boolean>(false)
   private currentUserEmail: string | null = null
 
-  constructor(
-    private database: Database,
-    private ticketService: TicketService
-  ) {
+  constructor(private database: Database) {
     this.setupUserWatcher()
     this.setupSearchListener()
   }
@@ -70,8 +67,8 @@ class SearchServiceImpl implements SearchService {
     if (!normalizedQuery) return
 
     try {
-      const remoteTickets =
-        await this.ticketService.searchTickets(normalizedQuery)
+      const ticketService = getTicketService()
+      const remoteTickets = await ticketService.searchTickets(normalizedQuery)
       if (this.search$.getValue() !== query) {
         return
       }
@@ -170,9 +167,5 @@ class SearchServiceImpl implements SearchService {
 
 export const [registerSearchService, getSearchService] = defineProxyService<
   SearchService,
-  [Database, TicketService]
->(
-  'SearchService',
-  (database: Database, ticketService: TicketService) =>
-    new SearchServiceImpl(database, ticketService)
-)
+  [Database]
+>('SearchService', (database: Database) => new SearchServiceImpl(database))

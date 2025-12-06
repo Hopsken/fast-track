@@ -9,6 +9,7 @@ import { getJiraApi } from '@/lib/jira'
 import { getDatabase } from '@/repository'
 import { registerSearchService } from '@/services/search-service'
 import { registerAuthService } from '~/services/auth-service'
+import { registerJiraService } from '~/services/jira-service'
 import { registerTicketService } from '~/services/ticket-service'
 
 import { BackgroundAlarmsService } from './services/background-alarms'
@@ -24,9 +25,10 @@ export default defineBackground(() => {
         console.log('✅ RxDB initialized successfully')
 
         // Initialize proxy services
+        registerJiraService()
         const ticketService = registerTicketService(getJiraApi, database)
-        registerSearchService(database, ticketService)
-        registerAuthService(database, ticketService)
+        registerSearchService(database)
+        registerAuthService(database)
 
         // Initialize alarms service
         const alarmsService = new BackgroundAlarmsService(ticketService)

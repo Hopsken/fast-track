@@ -2,7 +2,7 @@ import { Database } from '@/repository'
 import { JiraTicket } from '@/types'
 import { sendMessage } from '~/lib/message'
 
-import type { TicketService } from './interface'
+import type { TicketService } from './'
 
 export type SuggestionRefreshReason = 'auth' | 'alarm' | 'manual' | 'startup'
 
