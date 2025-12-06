@@ -15,16 +15,16 @@ import {
 } from 'lucide-react'
 
 import { Action, ActionCopyToClipboard, ActionPush } from '@/components/actions'
+import { PrefetchProvider } from '@/components/PrefetchQuery'
 import { useCurrentUser } from '@/hooks/useCurrentUser'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
+import { useIssuePriorities } from '@/hooks/useIssuePriorities'
+import { useIssueTransitions } from '@/hooks/useIssueTransitions'
 import { useMutationAssignMyself } from '@/hooks/useMutationAssignIssue'
 import { JiraTicket } from '@/types'
 import { generateBranchName, getIssueTitleLink } from '@/utils/jira/issues'
 
 export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
-  // Get issue edit meta to prefetch assignee candidates
-  useIssueEditMeta(ticket)
-
   const formatted = useMemo(
     () => ({
       branchName: generateBranchName(ticket),
@@ -88,6 +88,10 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
           title="Copy git branch name"
         />
       </CommandGroup>
+
+      <PrefetchProvider>
+        <PrefetchActions ticket={ticket} />
+      </PrefetchProvider>
     </CommandList>
   )
 }
@@ -111,4 +115,12 @@ function AssignOrUnassignMySelf({ ticket }: { ticket: JiraTicket }) {
       onSelect={() => assignMyself({ ticket, assign: true })}
     />
   )
+}
+
+function PrefetchActions({ ticket }: { ticket: JiraTicket }) {
+  useIssuePriorities()
+  useIssueEditMeta(ticket)
+  useIssueTransitions(ticket)
+
+  return null
 }

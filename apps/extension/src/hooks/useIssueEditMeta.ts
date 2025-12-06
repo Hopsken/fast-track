@@ -1,14 +1,14 @@
-import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
-import { getJiraService } from '@/services/jira-service'
+import { usePrefetchOptionsIfApplicable } from '@/components/PrefetchQuery'
+import { jiraService } from '@/services'
 import { JiraTicket } from '@/types'
 import { queryKeys } from '@/utils/queryKeys'
 
 export function useIssueEditMeta(issue: JiraTicket) {
-  const [jiraService] = useState(() => getJiraService())
-
+  const queryOptions = usePrefetchOptionsIfApplicable()
   return useQuery({
+    ...queryOptions,
     queryKey: queryKeys.issue.editMeta(issue),
     staleTime: 1000 * 60 * 5,
     queryFn: async () => {
