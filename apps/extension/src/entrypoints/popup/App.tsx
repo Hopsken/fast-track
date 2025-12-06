@@ -40,9 +40,9 @@ function App() {
   })
 
   return (
-    <div className="linear w-[640px]">
+    <div className="linear w-lg">
       <Command loop shouldFilter={shouldFilter}>
-        <div className="relative flex h-[52px] items-center gap-3 border-b-2 border-gray-200 pl-5 pr-5">
+        <div className="relative flex h-[52px] items-center gap-3 border-b border-gray-200 pl-5 pr-5">
           <CommandInput
             autoFocus
             value={inputValue}

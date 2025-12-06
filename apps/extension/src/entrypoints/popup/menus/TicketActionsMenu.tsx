@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import {
   CommandGroup,
   CommandList,
@@ -14,12 +15,22 @@ import {
   UserRoundPlus
 } from 'lucide-react'
 
-import { Action } from '@/components/actions'
+import { Action, ActionCopyToClipboard } from '@/components/actions'
 import { JiraTicket } from '@/types'
+import { generateBranchName, getIssueTitleLink } from '@/utils/jira/issues'
 
 export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
   const isAssignedByMe = true
   const isWatching = true
+
+  const formatted = useMemo(
+    () => ({
+      branchName: generateBranchName(ticket),
+      issueTitleLink: getIssueTitleLink(ticket)
+    }),
+    [ticket]
+  )
+
   return (
     <CommandList>
       <CommandGroup heading={ticket.key}>
@@ -41,15 +52,32 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
       <CommandSeparator />
 
       <CommandGroup>
-        <Action
+        <ActionCopyToClipboard
           icon={Clipboard}
+          content={ticket.key}
           title="Copy issue key"
           shortcut={{ modifiers: ['cmd'], key: '.' }}
         />
-        <Action icon={Clipboard} title="Copy issue link" />
-        <Action icon={Clipboard} title="Copy issue title" />
-        <Action icon={Clipboard} title="Copy issue title as link" />
-        <Action icon={Clipboard} title="Copy git branch name" />
+        <ActionCopyToClipboard
+          icon={Clipboard}
+          content={ticket.url}
+          title="Copy issue link"
+        />
+        <ActionCopyToClipboard
+          icon={Clipboard}
+          content={ticket.summary}
+          title="Copy issue title"
+        />
+        <ActionCopyToClipboard
+          icon={Clipboard}
+          content={formatted.issueTitleLink}
+          title="Copy issue title as link"
+        />
+        <ActionCopyToClipboard
+          icon={Clipboard}
+          content={formatted.branchName}
+          title="Copy git branch name"
+        />
       </CommandGroup>
     </CommandList>
   )

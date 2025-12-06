@@ -49,6 +49,8 @@
     width: 100%;
     height: 100%;
     outline: none;
+    font-size: 15px;
+    font-weight: 400;
     background: var(--bg);
     color: var(--gray12);
     caret-color: #6e5ed2;
@@ -106,7 +108,7 @@
   }
 
   [cmdk-list] {
-    height: 280px;
+    height: 236px;
     padding: 6px;
     overflow: auto;
     overscroll-behavior: contain;
