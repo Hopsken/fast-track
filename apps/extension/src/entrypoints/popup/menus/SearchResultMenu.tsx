@@ -1,17 +1,10 @@
-import { useMemo } from 'react'
-import {
-  CommandEmpty,
-  CommandGroup,
-  CommandList,
-  CommandSeparator
-} from '@internal/ui/components/command'
+import { CommandGroup, CommandList } from '@internal/ui/components/command'
 
 import { DevActionRefreshSuggestions } from '@/components/DevActionRefreshSuggestions'
 import { DevOnly } from '@/components/DevOnly'
 import { TicketItem, TicketList } from '@/components/tickets'
 import { useIssueSuggestions } from '@/hooks/useIssueSuggestions'
 import { IssueSuggestion } from '@/services/ticket-service'
-import { JiraTicket } from '@/types'
 import { openOptionsPage } from '@/utils'
 import {
   useIsSearching,
@@ -63,6 +56,13 @@ function SuggestedTickets({ issues }: SuggestedTicketsProps) {
       {issues?.inProgress ? (
         <CommandGroup heading="In Progress">
           {issues.inProgress.map((ticket) => (
+            <TicketItem key={ticket.key} ticket={ticket} />
+          ))}
+        </CommandGroup>
+      ) : null}
+      {issues?.activeSprintTodo ? (
+        <CommandGroup heading="Upcoming">
+          {issues.activeSprintTodo.map((ticket) => (
             <TicketItem key={ticket.key} ticket={ticket} />
           ))}
         </CommandGroup>

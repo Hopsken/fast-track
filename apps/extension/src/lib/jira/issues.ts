@@ -233,6 +233,19 @@ export class JiraIssueService {
     )
   }
 
+  async getMyActiveSprintTodoIssues(limit = 20): Promise<JiraTicket[]> {
+    const jql = [
+      'sprint in openSprints()',
+      'assignee = currentUser()',
+      'statusCategory = "To Do"'
+    ].join(' AND ')
+
+    return this.searchIssuesUsingJql(`${jql} ORDER BY updated DESC`, {
+      source: 'sprint',
+      limit
+    })
+  }
+
   async getRecentHistoryIssues(limit = 10): Promise<JiraTicket[]> {
     return this.searchIssuesUsingJql(
       'issue in issueHistory() ORDER BY lastViewed DESC, updated DESC',

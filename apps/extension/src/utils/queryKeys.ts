@@ -13,6 +13,6 @@ export const queryKeys = {
   autoComplete: (url: string, query: string) => ['autoComplete', url, query],
   priorities: ['priorities'],
   tickets: {
-    myInProgress: ['tickets', 'myInProgress'] as const
+    suggestions: ['tickets', 'suggestions'] as const
   }
 }

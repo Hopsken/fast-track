@@ -32,6 +32,7 @@ import {
 
 export type IssueSuggestion = {
   inProgress: JiraTicket[]
+  activeSprintTodo: JiraTicket[]
 }
 
 /**
@@ -79,8 +80,8 @@ class TicketServiceImpl {
         jira.issues.getMyUnresolvedIssues(10),
         jira.issues.getRecentHistoryIssues(20),
         jira.issues.getMyRecentDoneIssues(10),
-        jira.issues.getMyWatchingIssues(10)
-        // TODO add sprint tickets
+        jira.issues.getMyWatchingIssues(10),
+        jira.issues.getMyActiveSprintTodoIssues(20)
       ])
 
       const uniqTickets = mergeTicketsByKey(results)
@@ -93,10 +94,15 @@ class TicketServiceImpl {
   }
 
   async getIssueSuggestions(): Promise<IssueSuggestion> {
-    return this.withJira(async () => {
-      const inProgress = await this.getMyInProgressTickets()
-      return { inProgress }
-    })
+    const [inProgress, activeSprintTodo] = await Promise.all([
+      this.getMyInProgressTickets(),
+      this.getMyActiveSprintTodoTickets()
+    ])
+
+    return {
+      inProgress,
+      activeSprintTodo
+    }
   }
 
   private async getMyInProgressTickets(limit = 20): Promise<JiraTicket[]> {
@@ -113,6 +119,39 @@ class TicketServiceImpl {
         const tickets = await jira.issues.getMyUnresolvedIssues(limit)
         await this.database.collections.issues.bulkUpsert(tickets)
         sendMessage('onIssueSuggestionsUpdated', { inProgress: tickets })
+      })
+
+      return cachedTickets
+    })
+  }
+
+  private async getMyActiveSprintTodoTickets(
+    limit = 20
+  ): Promise<JiraTicket[]> {
+    return this.withJira(async (jira) => {
+      const user = await getCurrentUser()
+      const email = user.email?.trim()
+      if (!email) {
+        return []
+      }
+
+      const cachedTickets = await this.database.collections.issues
+        .find({
+          selector: {
+            'assignee.emailAddress': email,
+            sources: { $in: ['sprint'] }
+          }
+        })
+        .sort({ updated: 'desc' })
+        .limit(limit)
+        .exec()
+
+      nextTick(async () => {
+        const tickets = await jira.issues.getMyActiveSprintTodoIssues(limit)
+        await this.database.collections.issues.bulkUpsert(tickets)
+        sendMessage('onIssueSuggestionsUpdated', {
+          activeSprintTodo: tickets
+        })
       })
 
       return cachedTickets
