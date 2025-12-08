@@ -15,6 +15,7 @@
   "scripts": {
     "build": "tsc --project tsconfig.lib.json",
     "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "typecheck": "tsc --noEmit --project tsconfig.lib.json"
   },
   "dependencies": {
