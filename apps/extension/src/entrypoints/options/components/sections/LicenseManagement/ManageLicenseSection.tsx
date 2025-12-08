@@ -2,6 +2,9 @@ import { useState } from 'react'
 
 import { FormField } from '~/components/ui/forms'
 import { useLicense } from '~/hooks/useLicense'
+import { getLogger } from '~/utils/logger'
+
+const log = getLogger('license-management')
 
 export function ManageLicenseSection() {
   const { deactivate } = useLicense()
@@ -15,7 +18,7 @@ export function ManageLicenseSection() {
       // License deactivated successfully
       setShowConfirm(false)
     } catch (err) {
-      console.error('Failed to deactivate license:', err)
+      log.error('Failed to deactivate license:', err)
     } finally {
       setIsDeactivating(false)
     }

@@ -1,3 +1,7 @@
+import { getLogger } from '~/utils/logger'
+
+const log = getLogger('shortcuts')
+
 /**
  * Utility functions for managing Chrome extension shortcuts
  */
@@ -22,7 +26,7 @@ export async function getCurrentShortcut(): Promise<string> {
     }
     return 'Alt+J'
   } catch (error) {
-    console.warn('Failed to get current shortcut:', error)
+    log.warn('Failed to get current shortcut:', error)
     return 'Alt+J'
   }
 }
@@ -41,7 +45,7 @@ export function openShortcutsPage(): void {
       window.open('chrome://extensions/shortcuts', '_blank')
     }
   } catch (error) {
-    console.warn('Failed to open shortcuts page:', error)
+    log.warn('Failed to open shortcuts page:', error)
   }
 }
 

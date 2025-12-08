@@ -4,9 +4,12 @@
 
 import { browser } from '#imports'
 
+import { getLogger } from '~/utils/logger'
 import { openJiraIssue } from '~/utils/open-jira-issue'
 
 export class OmniboxHandlerService {
+  private static log = getLogger('omnibox-handler')
+
   /**
    * Initializes omnibox event listeners
    */
@@ -27,12 +30,12 @@ export class OmniboxHandlerService {
    * Handles omnibox input when user presses Enter
    */
   private static handleOmniboxInput(text: string): void {
-    console.log('🔍 Omnibox: User entered:', text)
+    this.log.info('🔍 Omnibox: User entered:', text)
 
     try {
       openJiraIssue(text)
     } catch (error) {
-      console.error('❌ Omnibox: Failed to open Jira issue:', error)
+      this.log.error('❌ Omnibox: Failed to open Jira issue:', error)
     }
   }
 
@@ -95,9 +98,9 @@ export class OmniboxHandlerService {
     // based on recently viewed tickets from storage
     try {
       // Implementation would fetch recent tickets and update suggestions
-      console.log('📝 Omnibox: Updated suggestions from recent tickets')
+      this.log.info('📝 Omnibox: Updated suggestions from recent tickets')
     } catch (error) {
-      console.error('❌ Omnibox: Failed to update suggestions:', error)
+      this.log.error('❌ Omnibox: Failed to update suggestions:', error)
     }
   }
 }

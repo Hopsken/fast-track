@@ -16,6 +16,7 @@ import { getCurrentUser } from '@/utils/currentUser'
 import { mapPriority, mapUserToAssignee } from '@/utils/jira/issues'
 import { nextTick } from '@/utils/nextTick'
 import { getJiraApi, JiraAPI } from '~/lib/jira'
+import { getLogger } from '~/utils/logger'
 
 import {
   SuggestionRefreshOptions,
@@ -36,6 +37,7 @@ export type IssueSuggestion = {
 class TicketServiceImpl {
   private database: Database
   readonly suggestions: TicketSuggestionsAPI
+  private log = getLogger('ticket-service')
 
   constructor(database: Database) {
     this.database = database
@@ -46,7 +48,7 @@ class TicketServiceImpl {
     try {
       return await getJiraApi()
     } catch (error) {
-      console.error('TicketService: failed to initialize Jira client', error)
+      this.log.error('TicketService: failed to initialize Jira client', error)
       return null
     }
   }
@@ -55,7 +57,7 @@ class TicketServiceImpl {
     reason: SuggestionRefreshReason,
     options?: SuggestionRefreshOptions
   ) {
-    console.log('TicketService: refreshSuggestions', reason, options)
+    this.log.info('TicketService: refreshSuggestions', reason, options)
     return this.suggestions.refresh(reason, options)
   }
 
@@ -155,7 +157,7 @@ class TicketServiceImpl {
   }
 
   async isConfigured() {
-    console.info('TicketService: isConfigured checked')
+    this.log.info('TicketService: isConfigured checked')
     return (await this.getJira()) != null
   }
 
@@ -221,7 +223,7 @@ class TicketServiceImpl {
         assignee: assignee ? mapUserToAssignee(assignee) : null
       }),
       perform: async (jira) => {
-        console.log('assignTicket', ticketKey, assignee?.accountId ?? null)
+        this.log.info('assignTicket', ticketKey, assignee?.accountId ?? null)
         await jira.issues.assignIssue(ticketKey, assignee?.accountId ?? null)
         return jira.issues.getIssue(ticketKey)
       }

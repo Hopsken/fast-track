@@ -10,6 +10,7 @@ import { chunk, compact, flatMap, map } from 'lodash-es'
 
 import { IssueSource, JiraPriority, JiraTicket } from '@/types'
 import { mapPriority } from '@/utils/jira/issues'
+import { getLogger } from '~/utils/logger'
 
 import { toISODateString } from '../date'
 
@@ -30,6 +31,7 @@ const issueFields = [
 ]
 
 const escapeJqlValue = (value: string) => value.replace(/["\\]/g, '\\$&')
+const log = getLogger('jira-issues')
 
 /**
  * Service for issue-related operations with functional programming patterns
@@ -44,17 +46,17 @@ export class JiraIssueService {
    */
   async getIssue(issueKey: string): Promise<JiraTicket | null> {
     try {
-      console.log(`🎫 JiraAPI: Fetching issue ${issueKey}`)
+      log.info(`🎫 JiraAPI: Fetching issue ${issueKey}`)
 
       const issue = await this.client.issues.getIssue({
         issueIdOrKey: issueKey,
         fields: issueFields
       })
 
-      console.log(`✅ JiraAPI: Successfully fetched issue ${issueKey}`)
+      log.info(`✅ JiraAPI: Successfully fetched issue ${issueKey}`)
       return this.convertToTicket(issue)
     } catch (error) {
-      console.error(`❌ JiraAPI: Failed to fetch issue ${issueKey}:`, error)
+      log.error(`❌ JiraAPI: Failed to fetch issue ${issueKey}:`, error)
       return null
     }
   }
@@ -108,7 +110,7 @@ export class JiraIssueService {
    */
   async getIssuePickerSuggestions(query?: string): Promise<JiraTicket[]> {
     try {
-      console.log('🎯 JiraAPI: Fetching issue picker suggestions...', {
+      log.info('🎯 JiraAPI: Fetching issue picker suggestions...', {
         hasQuery: !!query
       })
 
@@ -135,21 +137,18 @@ export class JiraIssueService {
       ) as string[]
 
       if (issueKeys.length === 0) {
-        console.log('ℹ️ JiraAPI: No issue picker suggestions found')
+        log.info('ℹ️ JiraAPI: No issue picker suggestions found')
         return []
       }
 
       // Reuse bulk issue fetch to get full ticket details
       const tickets = await this.getIssues(issueKeys)
-      console.log(
+      log.info(
         `✅ JiraAPI: Retrieved ${tickets.length}/${issueKeys.length} suggested tickets`
       )
       return tickets
     } catch (error) {
-      console.error(
-        '❌ JiraAPI: Failed to fetch issue picker suggestions:',
-        error
-      )
+      log.error('❌ JiraAPI: Failed to fetch issue picker suggestions:', error)
       return []
     }
   }
@@ -257,10 +256,7 @@ export class JiraIssueService {
    * Fetches multiple issues using bulk API with functional patterns
    */
   async getIssues(issueKeys: string[]): Promise<JiraTicket[]> {
-    console.log(
-      `🎫 JiraAPI: Bulk fetching ${issueKeys.length} issues:`,
-      issueKeys
-    )
+    log.info(`🎫 JiraAPI: Bulk fetching ${issueKeys.length} issues:`, issueKeys)
 
     const batchSize = 100 // jira.js bulkFetchIssues limit
     const batches = chunk(issueKeys, batchSize)
@@ -271,7 +267,7 @@ export class JiraIssueService {
 
     const tickets = flatMap(batchResults)
 
-    console.log(
+    log.info(
       `✅ JiraAPI: Bulk fetch completed. Successfully fetched ${tickets.length}/${issueKeys.length} issues`
     )
     return tickets
@@ -293,10 +289,7 @@ export class JiraIssueService {
           try {
             return this.convertToTicket(issue)
           } catch (error) {
-            console.warn(
-              `⚠️ JiraAPI: Failed to convert issue ${issue.key}:`,
-              error
-            )
+            log.warn(`⚠️ JiraAPI: Failed to convert issue ${issue.key}:`, error)
             return null // Will be removed by compact()
           }
         })
@@ -306,12 +299,12 @@ export class JiraIssueService {
       const foundKeys = new Set(tickets.map((t) => t.key))
       const missingKeys = batch.filter((key) => !foundKeys.has(key))
       if (missingKeys.length > 0) {
-        console.warn(`⚠️ JiraAPI: Issues not found: ${missingKeys.join(', ')}`)
+        log.warn(`⚠️ JiraAPI: Issues not found: ${missingKeys.join(', ')}`)
       }
 
       return tickets
     } catch (error) {
-      console.error(`❌ JiraAPI: Bulk fetch failed for batch:`, error)
+      log.error(`❌ JiraAPI: Bulk fetch failed for batch:`, error)
 
       return []
     }

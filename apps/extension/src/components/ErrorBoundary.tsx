@@ -2,6 +2,10 @@ import { ErrorInfo, ReactNode, ComponentType } from 'react'
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { HiExclamationCircle, HiRefresh } from 'react-icons/hi'
 
+import { getLogger } from '~/utils/logger'
+
+const log = getLogger('error-boundary')
+
 interface ErrorFallbackProps {
   error: Error
   resetErrorBoundary: () => void
@@ -55,8 +59,8 @@ export function ErrorBoundary({
 }: ErrorBoundaryProps) {
   const handleError = (error: Error, errorInfo: ErrorInfo) => {
     // Log error for debugging
-    console.error('🚨 Error Boundary caught error:', error)
-    console.error('🚨 Component stack:', errorInfo.componentStack)
+    log.error('🚨 Error Boundary caught error:', error)
+    log.error('🚨 Component stack:', errorInfo.componentStack)
 
     // Call custom error handler if provided
     onError?.(error, errorInfo)
@@ -68,7 +72,7 @@ export function ErrorBoundary({
       onError={handleError}
       onReset={() => {
         // Optional: Reset any global state or clear storage
-        console.log('🔄 Error boundary reset')
+        log.info('🔄 Error boundary reset')
       }}>
       {children}
     </ReactErrorBoundary>

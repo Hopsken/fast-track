@@ -1,5 +1,9 @@
 import { ReactNode, ReactElement, createElement } from 'react'
 
+import { getLogger } from '~/utils/logger'
+
+const log = getLogger('text-highlighting')
+
 export interface HighlightedTextProps {
   text: string
   searchQuery: string
@@ -80,7 +84,7 @@ export function highlightText(text: string, searchQuery: string): ReactNode[] {
 
     return parts.length > 0 ? parts : [text]
   } catch (error) {
-    console.warn('Error in highlightText:', error)
+    log.warn('Error in highlightText:', error)
     return [text]
   }
 }
@@ -97,7 +101,7 @@ export function HighlightedText({
     const highlightedParts = highlightText(text || '', searchQuery || '')
     return createElement('span', { className }, ...highlightedParts)
   } catch (error) {
-    console.warn('Error highlighting text:', error)
+    log.warn('Error highlighting text:', error)
     // Fallback to plain text if highlighting fails
     return createElement('span', { className }, text || '')
   }

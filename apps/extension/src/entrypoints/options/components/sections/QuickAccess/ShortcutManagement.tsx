@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react'
 import { HiOutlineCog6Tooth, HiArrowTopRightOnSquare } from 'react-icons/hi2'
 
+import { getLogger } from '~/utils/logger'
 import {
   getCurrentShortcut,
   openShortcutsPage,
   formatShortcut
 } from '~/utils/shortcuts'
+
+const log = getLogger('shortcut-management')
 
 export function ShortcutManagement() {
   const [currentShortcut, setCurrentShortcut] = useState<string>('Alt+J')
@@ -17,7 +20,7 @@ export function ShortcutManagement() {
         const shortcut = await getCurrentShortcut()
         setCurrentShortcut(shortcut)
       } catch (error) {
-        console.warn('Failed to load current shortcut:', error)
+        log.warn('Failed to load current shortcut:', error)
       } finally {
         setLoading(false)
       }

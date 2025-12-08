@@ -5,8 +5,11 @@
 import { browser } from '#imports'
 
 import { openOptionsPage } from '~/utils/extension'
+import { getLogger } from '~/utils/logger'
 
 export class InstallationHandlerService {
+  private static log = getLogger('installation-handler')
+
   /**
    * Initializes installation event listeners
    */
@@ -24,7 +27,7 @@ export class InstallationHandlerService {
   private static handleInstallation(
     details: chrome.runtime.InstalledDetails
   ): void {
-    console.log('🎉 Extension installation event:', details.reason)
+    this.log.info('🎉 Extension installation event:', details.reason)
 
     switch (details.reason) {
       case 'install':
@@ -46,12 +49,12 @@ export class InstallationHandlerService {
    * Handles first-time installation
    */
   private static handleFirstInstall(): void {
-    console.log('👋 Welcome! Opening options page for first-time setup')
+    this.log.info('👋 Welcome! Opening options page for first-time setup')
 
     try {
       openOptionsPage()
     } catch (error) {
-      console.error('❌ Failed to open options page on install:', error)
+      this.log.error('❌ Failed to open options page on install:', error)
     }
   }
 
@@ -59,7 +62,7 @@ export class InstallationHandlerService {
    * Handles extension updates
    */
   private static handleUpdate(previousVersion?: string): void {
-    console.log(`🔄 Extension updated from version ${previousVersion}`)
+    this.log.info(`🔄 Extension updated from version ${previousVersion}`)
 
     // Handle migration logic if needed
     this.handleMigration(previousVersion)
@@ -69,7 +72,7 @@ export class InstallationHandlerService {
    * Handles Chrome browser updates
    */
   private static handleChromeUpdate(): void {
-    console.log('🌐 Chrome browser was updated')
+    this.log.info('🌐 Chrome browser was updated')
     // Usually no action needed
   }
 
@@ -77,7 +80,7 @@ export class InstallationHandlerService {
    * Handles shared module updates
    */
   private static handleSharedModuleUpdate(): void {
-    console.log('📦 Shared module was updated')
+    this.log.info('📦 Shared module was updated')
     // Usually no action needed
   }
 
@@ -85,7 +88,7 @@ export class InstallationHandlerService {
    * Handles extension startup (when browser starts)
    */
   private static handleStartup(): void {
-    console.log('🚀 Extension started with browser')
+    this.log.info('🚀 Extension started with browser')
 
     // Perform any startup tasks
     this.performStartupTasks()
@@ -100,7 +103,7 @@ export class InstallationHandlerService {
     if (!previousVersion) return
 
     try {
-      console.log(`🔄 Performing migration from version ${previousVersion}`)
+      this.log.info(`🔄 Performing migration from version ${previousVersion}`)
 
       // Add migration logic here based on version comparisons
       // Example:
@@ -108,9 +111,9 @@ export class InstallationHandlerService {
       //   await this.migrateToV2()
       // }
 
-      console.log('✅ Migration completed successfully')
+      this.log.info('✅ Migration completed successfully')
     } catch (error) {
-      console.error('❌ Migration failed:', error)
+      this.log.error('❌ Migration failed:', error)
     }
   }
 
@@ -120,14 +123,14 @@ export class InstallationHandlerService {
   private static async performStartupTasks(): Promise<void> {
     try {
       // Clean up old data, check for updates, etc.
-      console.log('🧹 Performing startup cleanup tasks')
+      this.log.info('🧹 Performing startup cleanup tasks')
 
       // Example tasks:
       // - Clear old cache data
       // - Update configuration if needed
       // - Sync with remote services
     } catch (error) {
-      console.error('❌ Startup tasks failed:', error)
+      this.log.error('❌ Startup tasks failed:', error)
     }
   }
 

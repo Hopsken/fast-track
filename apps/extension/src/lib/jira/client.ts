@@ -14,10 +14,14 @@ import {
 } from 'jira.js/version3'
 import { catchError, of, skipWhile, Subscription, switchMap, timer } from 'rxjs'
 
+import { getLogger } from '~/utils/logger'
+
 import { fromStorage$, getStorageItem } from '../storage'
 
 import { AuthApi } from './auth-api'
 import type { JiraApiConfig } from './types'
+
+const log = getLogger('jira-client')
 
 /**
  * Base Jira client with authentication and jira.js module access
@@ -91,7 +95,7 @@ export class JiraClient extends BaseClient {
       .pipe(
         skipWhile((tokens) => !tokens),
         switchMap((tokens) => {
-          console.info({ tokens })
+          log.info('Received OAuth tokens update')
           if (!tokens) throw new Error('No tokens found')
 
           const expiresAtMs = new Date(tokens.expires_at).getTime()
@@ -105,7 +109,7 @@ export class JiraClient extends BaseClient {
           return timer(refreshDelay).pipe(
             switchMap(() => this.authApi.refreshToken(tokens)),
             catchError((error) => {
-              console.error('Failed to refresh Jira tokens', error)
+              log.error('Failed to refresh Jira tokens', error)
               getStorageItem('OAuthTokens').removeValue()
               getStorageItem('OAuthUserInfo').removeValue()
               return of<null>(null)

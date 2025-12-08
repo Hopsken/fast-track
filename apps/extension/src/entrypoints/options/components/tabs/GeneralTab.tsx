@@ -4,6 +4,7 @@ import { useMemoizedFn } from 'ahooks'
 import { useStorage } from '@/hooks'
 import { getAuthService } from '@/services/auth-service'
 import { AuthType } from '@/types'
+import { getLogger } from '~/utils/logger'
 
 import {
   JiraApiKeySetup,
@@ -11,6 +12,8 @@ import {
   JiraConnectionSetup
 } from '../auth'
 import { ShortcutManagement } from '../sections/QuickAccess/ShortcutManagement'
+
+const log = getLogger('options-general')
 
 export function GeneralTab() {
   const [authType, setAuthType] = useStorage('AuthType')
@@ -40,7 +43,7 @@ export function GeneralTab() {
       const nextUrl = await authService.connect()
       window.open(nextUrl, '_blank')
     } catch (error) {
-      console.error('Error connecting to Jira:', error)
+      log.error('Error connecting to Jira:', error)
     } finally {
       setConnectingMethod(null)
     }
@@ -54,7 +57,7 @@ export function GeneralTab() {
         await authService.connectWithApiKey(payload)
         setAuthType('apiKey')
       } catch (err) {
-        console.error('Error connecting with API key:', err)
+        log.error('Error connecting with API key:', err)
         setError(
           err instanceof Error
             ? err.message
