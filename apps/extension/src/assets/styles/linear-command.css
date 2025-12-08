@@ -119,12 +119,17 @@
     scroll-padding-block-end: 8px;
   }
 
+  [cmdk-group] {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
   [cmdk-group-heading] {
     user-select: none;
     font-size: 0.75rem;
     font-weight: 500;
     color: var(--gray11);
-    padding: 14px 8px;
+    padding: 0px 13px;
     height: 30px;
     display: flex;
     align-items: center;

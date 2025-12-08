@@ -33,6 +33,7 @@ import {
 export type IssueSuggestion = {
   inProgress: JiraTicket[]
   activeSprintTodo: JiraTicket[]
+  viewHistory: JiraTicket[]
 }
 
 /**
@@ -94,14 +95,16 @@ class TicketServiceImpl {
   }
 
   async getIssueSuggestions(): Promise<IssueSuggestion> {
-    const [inProgress, activeSprintTodo] = await Promise.all([
+    const [inProgress, activeSprintTodo, viewHistory] = await Promise.all([
       this.getMyInProgressTickets(),
-      this.getMyActiveSprintTodoTickets()
+      this.getMyActiveSprintTodoTickets(),
+      this.getRecentHistoryTickets()
     ])
 
     return {
       inProgress,
-      activeSprintTodo
+      activeSprintTodo,
+      viewHistory
     }
   }
 
@@ -135,22 +138,35 @@ class TicketServiceImpl {
         return []
       }
 
-      const cachedTickets = await this.database.collections.issues
-        .find({
-          selector: {
-            'assignee.emailAddress': email,
-            sources: { $in: ['sprint'] }
-          }
-        })
-        .sort({ updated: 'desc' })
-        .limit(limit)
-        .exec()
+      const cachedTickets = await this.database.issues.findInOpenSprints(email)
 
       nextTick(async () => {
         const tickets = await jira.issues.getMyActiveSprintTodoIssues(limit)
         await this.database.collections.issues.bulkUpsert(tickets)
         sendMessage('onIssueSuggestionsUpdated', {
           activeSprintTodo: tickets
+        })
+      })
+
+      return cachedTickets
+    })
+  }
+
+  private async getRecentHistoryTickets(limit = 20): Promise<JiraTicket[]> {
+    return this.withJira(async (jira) => {
+      const user = await getCurrentUser()
+      const email = user.email?.trim()
+      if (!email) {
+        return []
+      }
+
+      const cachedTickets = await this.database.issues.findRecentlyViewed()
+
+      nextTick(async () => {
+        const tickets = await jira.issues.getRecentHistoryIssues(limit)
+        await this.database.collections.issues.bulkUpsert(tickets)
+        sendMessage('onIssueSuggestionsUpdated', {
+          viewHistory: tickets
         })
       })
 

@@ -5,6 +5,7 @@ import { DevOnly } from '@/components/DevOnly'
 import { TicketItem, TicketList } from '@/components/tickets'
 import { useIssueSuggestions } from '@/hooks/useIssueSuggestions'
 import { IssueSuggestion } from '@/services/ticket-service'
+import { JiraTicket } from '@/types'
 import { openOptionsPage } from '@/utils'
 import {
   useIsSearching,
@@ -51,22 +52,22 @@ interface SuggestedTicketsProps {
 }
 
 function SuggestedTickets({ issues }: SuggestedTicketsProps) {
+  function renderGroup(heading: string, tickets?: JiraTicket[]) {
+    if (!tickets?.length) return null
+
+    return (
+      <CommandGroup heading={heading}>
+        {tickets.map((ticket) => (
+          <TicketItem key={ticket.key} ticket={ticket} />
+        ))}
+      </CommandGroup>
+    )
+  }
   return (
     <>
-      {issues?.inProgress ? (
-        <CommandGroup heading="In Progress">
-          {issues.inProgress.map((ticket) => (
-            <TicketItem key={ticket.key} ticket={ticket} />
-          ))}
-        </CommandGroup>
-      ) : null}
-      {issues?.activeSprintTodo ? (
-        <CommandGroup heading="Upcoming">
-          {issues.activeSprintTodo.map((ticket) => (
-            <TicketItem key={ticket.key} ticket={ticket} />
-          ))}
-        </CommandGroup>
-      ) : null}
+      {renderGroup('In Progress', issues?.inProgress)}
+      {renderGroup('Upcoming', issues?.activeSprintTodo)}
+      {renderGroup('Recommend for you', issues?.viewHistory)}
     </>
   )
 }
