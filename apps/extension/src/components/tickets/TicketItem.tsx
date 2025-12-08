@@ -16,9 +16,19 @@ import { useCommandNavigate } from '../CommandRouter'
 interface TicketItemProps {
   ticket: JiraTicket
   searchQuery?: string
+
+  showAvatar?: boolean
+  showPriority?: boolean
+  showStatus?: boolean
 }
 
-export function TicketItem({ ticket, searchQuery = '' }: TicketItemProps) {
+export function TicketItem({
+  ticket,
+  searchQuery = '',
+  showAvatar = true,
+  showPriority = true,
+  showStatus = true
+}: TicketItemProps) {
   const navigate = useCommandNavigate()
 
   const onSelect = useMemoizedFn(() => {
@@ -26,6 +36,8 @@ export function TicketItem({ ticket, searchQuery = '' }: TicketItemProps) {
   })
 
   function renderPriority() {
+    if (!showPriority) return null
+
     const priorityName = ticket.priority?.name?.toLowerCase()
     if (!priorityName || !ticket.priority) return null
     if (priorityName.includes('medium')) return null
@@ -40,15 +52,23 @@ export function TicketItem({ ticket, searchQuery = '' }: TicketItemProps) {
       onSelect={onSelect}
       aria-label={`Open ticket ${ticket.key}: ${ticket.summary}`}>
       <IssueTypeIcon issueType={ticket.issueType} />
-      <span>
-        <HighlightedText text={ticket.key} searchQuery={searchQuery} />
-      </span>
-      <div className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
-        <HighlightedText text={ticket.summary} searchQuery={searchQuery} />
+
+      <div className="inline-flex min-w-0 flex-1">
+        <HighlightedText
+          className="overflow-hidden text-ellipsis whitespace-nowrap"
+          text={ticket.summary}
+          searchQuery={searchQuery}
+        />
+        <HighlightedText
+          text={ticket.key}
+          searchQuery={searchQuery}
+          className="ml-2 whitespace-nowrap text-gray-500"
+        />
       </div>
+
       {renderPriority()}
-      <StatusBadge status={ticket.status} />
-      <AssigneeAvatar assignee={ticket.assignee} />
+      {showStatus && <StatusBadge status={ticket.status} />}
+      {showAvatar && <AssigneeAvatar assignee={ticket.assignee} />}
     </CommandItem>
   )
 }

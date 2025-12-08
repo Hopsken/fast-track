@@ -52,21 +52,29 @@ interface SuggestedTicketsProps {
 }
 
 function SuggestedTickets({ issues }: SuggestedTicketsProps) {
-  function renderGroup(heading: string, tickets?: JiraTicket[]) {
+  function renderGroup(
+    heading: string,
+    tickets?: JiraTicket[],
+    showAvatar = true
+  ) {
     if (!tickets?.length) return null
 
     return (
       <CommandGroup heading={heading}>
         {tickets.map((ticket) => (
-          <TicketItem key={ticket.key} ticket={ticket} />
+          <TicketItem
+            key={ticket.key}
+            ticket={ticket}
+            showAvatar={showAvatar}
+          />
         ))}
       </CommandGroup>
     )
   }
   return (
     <>
-      {renderGroup('In Progress', issues?.inProgress)}
-      {renderGroup('Upcoming', issues?.activeSprintTodo)}
+      {renderGroup('In Progress', issues?.inProgress, false)}
+      {renderGroup('Upcoming', issues?.activeSprintTodo, false)}
       {renderGroup('Recommend for you', issues?.viewHistory)}
     </>
   )
