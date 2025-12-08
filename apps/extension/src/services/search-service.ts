@@ -13,6 +13,7 @@ import { sendMessage } from '@/lib/message'
 import { fromStorage$ } from '@/lib/storage'
 import { Database } from '@/repository'
 import { JiraTicket } from '@/types'
+import { getLogger } from '~/utils/logger'
 import { rankTickets } from '~/utils/ticket-ranking'
 
 import { getTicketService } from './ticket-service'
@@ -28,6 +29,7 @@ class SearchServiceImpl implements SearchService {
   private search$ = new BehaviorSubject<string>('')
   private ready$ = new BehaviorSubject<boolean>(false)
   private currentUserEmail: string | null = null
+  private log = getLogger('search-service')
 
   constructor(private database: Database) {
     this.setupUserWatcher()
@@ -80,7 +82,7 @@ class SearchServiceImpl implements SearchService {
 
       this.emitResults(query, combinedTickets)
     } catch (error) {
-      console.error('SearchService: remote search failed', error)
+      this.log.error('SearchService: remote search failed', error)
       this.emitResults(query, rankedCached, 'Search failed. Please reconnect.')
     }
   }

@@ -8,6 +8,7 @@ import { getStorageItem } from '@/lib/storage'
 import { Database } from '@/repository'
 import { JiraApiKeyConfig, ReceivedTokenPayload, JiraUserInfo } from '@/types'
 import { getTicketService } from '~/services/ticket-service'
+import { getLogger } from '~/utils/logger'
 
 export interface AuthService {
   receiveTokens(tokens: ReceivedTokenPayload): Promise<JiraUserInfo>
@@ -37,6 +38,7 @@ class AuthServiceImpl implements AuthService {
   private authTypeStorage = getStorageItem('AuthType')
   private jiraHostStorage = getStorageItem('JiraHost')
   private authApi = new AuthApi()
+  private log = getLogger('auth-service')
 
   constructor(private database: Database) {}
 
@@ -115,7 +117,7 @@ class AuthServiceImpl implements AuthService {
     try {
       await ticketService.suggestions.refresh('auth')
     } catch (error) {
-      console.error(
+      this.log.error(
         'AuthService: failed to prefetch suggestions after auth',
         error
       )

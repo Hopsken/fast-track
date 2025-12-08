@@ -4,6 +4,10 @@
 
 import { browser } from '#imports'
 
+import { getLogger } from '~/utils/logger'
+
+const log = getLogger('tabs')
+
 /**
  * Opens a URL in a new tab
  */
@@ -13,7 +17,7 @@ export async function openInNewTab(
   try {
     return await browser.tabs.create({ url })
   } catch (error) {
-    console.error('Failed to open new tab:', error)
+    log.error('Failed to open new tab:', error)
     return null
   }
 }
@@ -32,7 +36,7 @@ export async function openInCurrentTab(url: string): Promise<boolean> {
     }
     return false
   } catch (error) {
-    console.error('Failed to open in current tab:', error)
+    log.error('Failed to open in current tab:', error)
     return false
   }
 }
@@ -55,7 +59,7 @@ export async function getMatchingTabs(
   try {
     return await browser.tabs.query({ url: pattern })
   } catch (error) {
-    console.error('Failed to get matching tabs:', error)
+    log.error('Failed to get matching tabs:', error)
     return []
   }
 }
@@ -82,7 +86,7 @@ export async function focusTab(tabId: number): Promise<boolean> {
 
     return true
   } catch (error) {
-    console.error('Failed to focus tab:', error)
+    log.error('Failed to focus tab:', error)
     return false
   }
 }
@@ -95,7 +99,7 @@ export async function reloadTab(tabId: number): Promise<boolean> {
     await browser.tabs.reload(tabId)
     return true
   } catch (error) {
-    console.error('Failed to reload tab:', error)
+    log.error('Failed to reload tab:', error)
     return false
   }
 }
@@ -109,7 +113,7 @@ export async function getTabInfo(
   try {
     return await browser.tabs.get(tabId)
   } catch (error) {
-    console.error('Failed to get tab info:', error)
+    log.error('Failed to get tab info:', error)
     return null
   }
 }
@@ -148,7 +152,7 @@ export async function openJiraIssue(
   }
 
   if (!baseUrl) {
-    console.error('No Jira base URL available')
+    log.error('No Jira base URL available')
     return false
   }
 

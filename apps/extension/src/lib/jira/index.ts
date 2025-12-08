@@ -1,3 +1,5 @@
+import { getLogger } from '~/utils/logger'
+
 import { getStorageItem } from '../storage'
 
 import { JiraAPI } from './api'
@@ -10,6 +12,7 @@ export type { JiraApiConfig } from './types'
 let cachedJira: { client: JiraAPI; signature: string } | null = null
 
 const TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000
+const log = getLogger('jira-auth')
 
 async function ensureValidTokens() {
   const tokensStorage = getStorageItem('OAuthTokens')
@@ -35,7 +38,7 @@ async function ensureValidTokens() {
     await tokensStorage.setValue(refreshed)
     return refreshed
   } catch (error) {
-    console.error('Failed to refresh Jira tokens, clearing credentials', error)
+    log.error('Failed to refresh Jira tokens, clearing credentials', error)
     await Promise.all([
       tokensStorage.removeValue(),
       userInfoStorage.removeValue()

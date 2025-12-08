@@ -4,6 +4,7 @@ import { JiraTicket } from '@/types'
 import { mergeTicketsByKey } from '@/utils/jira/issues'
 import { concatPromises } from '@/utils/promise'
 import { sendMessage } from '~/lib/message'
+import { getLogger } from '~/utils/logger'
 
 import type { TicketService } from './'
 
@@ -27,6 +28,7 @@ export type TicketSuggestionsAPI = {
 export class TicketSuggestionService implements TicketSuggestionsAPI {
   private isRefreshing = false
   private lastSyncStorage = getStorageItem('LastSyncAt')
+  private log = getLogger('ticket-suggestions')
 
   constructor(
     private ticketService: TicketService,
@@ -60,7 +62,7 @@ export class TicketSuggestionService implements TicketSuggestionsAPI {
         fetchedAt: lastRefreshAt
       })
     } catch (error) {
-      console.error('TicketSuggestionService: refresh failed', error)
+      this.log.error('TicketSuggestionService: refresh failed', error)
     } finally {
       this.isRefreshing = false
     }

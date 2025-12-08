@@ -5,6 +5,8 @@ import { RxDBQueryBuilderPlugin } from 'rxdb/plugins/query-builder'
 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie'
 import { wrappedValidateZSchemaStorage } from 'rxdb/plugins/validate-z-schema'
 
+import { getLogger } from '~/utils/logger'
+
 import {
   IssueCollection,
   issueCollectionMethods
@@ -22,12 +24,13 @@ declare global {
 }
 
 let database: Database
+const log = getLogger('rxdb')
 
 export async function getDatabase(): Promise<Database> {
   if (database) return database
 
   if (import.meta.env.DEV) {
-    console.log('RxDB: Development mode enabled')
+    log.info('RxDB: Development mode enabled')
     await import('rxdb/plugins/dev-mode').then((module) =>
       addRxPlugin(module.RxDBDevModePlugin)
     )

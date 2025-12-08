@@ -10,51 +10,47 @@ import { registerSearchService } from '@/services/search-service'
 import { registerAuthService } from '~/services/auth-service'
 import { registerJiraService } from '~/services/jira-service'
 import { registerTicketService } from '~/services/ticket-service'
+import { getLogger } from '~/utils/logger'
 
 import { BackgroundAlarmsService } from './services/background-alarms'
 import { InstallationHandlerService } from './services/installation-handler'
 import { OmniboxHandlerService } from './services/omnibox-handler'
 
+const log = getLogger('background')
+
 export default defineBackground(() => {
-  console.log('🚀 Background script initializing...')
+  log.info('🚀 Background script initializing...')
 
-  try {
-    getDatabase()
-      .then((database) => {
-        console.log('✅ RxDB initialized successfully')
+  getDatabase()
+    .then((database) => {
+      log.info('✅ RxDB initialized successfully')
 
-        // Initialize proxy services
-        registerJiraService()
-        const ticketService = registerTicketService(database)
-        registerSearchService(database)
-        registerAuthService(database)
+      // Initialize proxy services
+      registerJiraService()
+      const ticketService = registerTicketService(database)
+      registerSearchService(database)
+      registerAuthService(database)
 
-        // Initialize alarms service
-        const alarmsService = new BackgroundAlarmsService(ticketService)
-        return Promise.all([alarmsService.initialize()])
-      })
-      .catch((error) => {
-        console.error('❌ RxDB initialization failed:', error)
-      })
+      // Initialize alarms service
+      const alarmsService = new BackgroundAlarmsService(ticketService)
+      return Promise.all([alarmsService.initialize()])
+    })
+    .catch((error) => {
+      log.error('❌ RxDB initialization failed:', error)
+    })
 
-    // Initialize other services
-    OmniboxHandlerService.initialize()
-    OmniboxHandlerService.setDefaultSuggestion(
-      'Search Jira tickets or enter ticket key (e.g., PROJ-123)'
-    )
+  // Initialize other services
+  OmniboxHandlerService.initialize()
+  OmniboxHandlerService.setDefaultSuggestion(
+    'Search Jira tickets or enter ticket key (e.g., PROJ-123)'
+  )
 
-    InstallationHandlerService.initialize()
+  InstallationHandlerService.initialize()
 
-    console.log('✅ Background script initialized successfully')
-    console.log('📊 Services status:')
-    console.log('  - Ticket Service: Registered via proxy service')
-    console.log('  - Ticket Collection: Messaging service active')
-    console.log('  - OAuth Background Service: Token refresh monitoring active')
-    console.log(
-      '  - Extension Version:',
-      InstallationHandlerService.getVersion()
-    )
-  } catch (error) {
-    console.error('❌ Background script initialization failed:', error)
-  }
+  log.info('✅ Background script initialized successfully')
+  log.info('📊 Services status:')
+  log.info('  - Ticket Service: Registered via proxy service')
+  log.info('  - Ticket Collection: Messaging service active')
+  log.info('  - OAuth Background Service: Token refresh monitoring active')
+  log.info('  - Extension Version:', InstallationHandlerService.getVersion())
 })

@@ -1,6 +1,7 @@
 import { Browser, browser } from '#imports'
 
 import { TicketService } from '@/services/ticket-service'
+import { getLogger } from '~/utils/logger'
 
 export interface AlarmConfig {
   name: string
@@ -11,6 +12,7 @@ export interface AlarmConfig {
 export class BackgroundAlarmsService {
   private alarms: AlarmConfig[] = []
   private readonly boundHandleAlarm = this.handleAlarm.bind(this)
+  private log = getLogger('background-alarms')
 
   constructor(private ticketService: TicketService) {
     this.setupAlarms()
@@ -38,7 +40,9 @@ export class BackgroundAlarmsService {
       await browser.alarms.create(alarm.name, {
         periodInMinutes: alarm.periodInMinutes
       })
-      console.info(`Created alarm: ${alarm.name} (${alarm.periodInMinutes}min)`)
+      this.log.info(
+        `Created alarm: ${alarm.name} (${alarm.periodInMinutes}min)`
+      )
     }
 
     // Run initial data refresh
@@ -48,7 +52,7 @@ export class BackgroundAlarmsService {
   private async handleAlarm(alarm: Browser.alarms.Alarm) {
     const alarmConfig = this.alarms.find((a) => a.name === alarm.name)
     if (!alarmConfig) {
-      console.warn(`Unknown alarm: ${alarm.name}`)
+      this.log.warn(`Unknown alarm: ${alarm.name}`)
       return
     }
 
@@ -56,15 +60,15 @@ export class BackgroundAlarmsService {
       // Check if authentication is configured
       const hasValidConfig = await this.ticketService.isConfigured()
       if (!hasValidConfig) {
-        console.info(`Skipping ${alarm.name} - authentication not configured`)
+        this.log.info(`Skipping ${alarm.name} - authentication not configured`)
         return
       }
 
-      console.info(`Running alarm: ${alarm.name}`)
+      this.log.info(`Running alarm: ${alarm.name}`)
       await alarmConfig.handler()
-      console.info(`Completed alarm: ${alarm.name}`)
+      this.log.info(`Completed alarm: ${alarm.name}`)
     } catch (error) {
-      console.error(`Error in alarm ${alarm.name}:`, error)
+      this.log.error(`Error in alarm ${alarm.name}:`, error)
     }
   }
 
@@ -75,17 +79,17 @@ export class BackgroundAlarmsService {
   private async runInitialRefresh() {
     const hasValidConfig = await this.ticketService.isConfigured()
     if (!hasValidConfig) {
-      console.info('Skipping initial refresh - authentication not configured')
+      this.log.info('Skipping initial refresh - authentication not configured')
       return
     }
 
-    console.info('Running initial data refresh...')
+    this.log.info('Running initial data refresh...')
 
     try {
       await Promise.all([this.refreshRecentTickets()])
-      console.info('Initial data refresh completed')
+      this.log.info('Initial data refresh completed')
     } catch (error) {
-      console.error('Error during initial refresh:', error)
+      this.log.error('Error during initial refresh:', error)
     }
   }
 

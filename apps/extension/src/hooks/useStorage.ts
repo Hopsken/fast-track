@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
 
 import { getStorageItem, StorageKey, StorageValue } from '@/lib/storage'
+import { getLogger } from '~/utils/logger'
+
+const log = getLogger('storage-hook')
 
 /**
  * React hook for accessing WXT storage with automatic updates
@@ -23,7 +26,7 @@ export function useStorage<T extends StorageKey>(
         setValue(storageValue)
       })
       .catch((error) => {
-        console.warn(
+        log.warn(
           `Failed to get storage value for key ${storageItem.key}:`,
           error
         )
@@ -40,7 +43,7 @@ export function useStorage<T extends StorageKey>(
     newValue: StorageValue<T> | ((prev: StorageValue<T>) => StorageValue<T>)
   ) => {
     if (!storageItem) {
-      console.warn(`Storage item not found for key: ${key}`)
+      log.warn(`Storage item not found for key: ${key}`)
       return
     }
 
@@ -53,7 +56,7 @@ export function useStorage<T extends StorageKey>(
       .setValue(finalValue)
       .then(() => setValue(finalValue))
       .catch((error) => {
-        console.error(`Failed to set storage value for key ${key}:`, error)
+        log.error(`Failed to set storage value for key ${key}:`, error)
       })
   }
 
@@ -89,7 +92,7 @@ export function useMultipleStorage<T extends StorageKey>(
             const value = await getStorageItem(key).getValue()
             initialValues[key] = value ?? getStorageItem(key).fallback
           } catch (error) {
-            console.warn(`Failed to get initial value for ${key}:`, error)
+            log.warn(`Failed to get initial value for ${key}:`, error)
             initialValues[key] = getStorageItem(key).fallback
           }
         })
@@ -127,7 +130,7 @@ export function useMultipleStorage<T extends StorageKey>(
       await Promise.all(updatePromises)
       setValues((prev) => ({ ...prev, ...updates }))
     } catch (error) {
-      console.error('Failed to update storage values:', error)
+      log.error('Failed to update storage values:', error)
     }
   }
 
