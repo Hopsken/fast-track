@@ -4,6 +4,7 @@
  * This service provides type-safe, cross-context access to ticket operations.
  * Functions are called from content scripts but executed in the background.
  */
+
 import { defineProxyService } from '@webext-core/proxy-service'
 import { UserDetails } from 'jira.js/version3/models/userDetails'
 import { uniqBy } from 'lodash-es'
@@ -12,11 +13,13 @@ import { sendMessage } from '@/lib/message'
 import { getStorageItem } from '@/lib/storage'
 import { Database } from '@/repository'
 import { JiraPriority, JiraTicket, JiraTransition } from '@/types'
+import { getCurrentUser } from '@/utils/currentUser'
 import {
   mapPriority,
   mapUserToAssignee,
   mergeTicketsByKey
 } from '@/utils/jira/issues'
+import { nextTick } from '@/utils/nextTick'
 import { concatPromises } from '@/utils/promise'
 import { getJiraApi, JiraAPI } from '~/lib/jira'
 
@@ -85,6 +88,26 @@ class TicketServiceImpl {
     })
   }
 
+  async getMyInProgressTickets(limit = 20): Promise<JiraTicket[]> {
+    return this.withJira(async (jira) => {
+      const user = await getCurrentUser()
+      if (!user.email) {
+        return []
+      }
+      const cachedTickets = await this.database.issues.findInProgress(
+        user.email
+      )
+
+      nextTick(async () => {
+        const tickets = await jira.issues.getMyUnresolvedIssues(limit)
+        await this.database.collections.issues.bulkUpsert(tickets)
+        sendMessage('onMyInProgressUpdated', { tickets })
+      })
+
+      return cachedTickets
+    })
+  }
+
   async searchTickets(query: string): Promise<JiraTicket[]> {
     const normalizedQuery = query.trim()
     if (!normalizedQuery) {
@@ -119,9 +142,10 @@ class TicketServiceImpl {
     return (await this.getJira()) != null
   }
 
-  private notifyTicketsUpdated(reason: string) {
+  private notifyTicketsUpdated(reason: string, tickets?: JiraTicket[]) {
     sendMessage('ticketsUpdated', {
       reason,
+      tickets,
       fetchedAt: Date.now()
     })
   }
