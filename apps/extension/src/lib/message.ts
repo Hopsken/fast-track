@@ -12,7 +12,7 @@ interface ProtocolMap {
   ticketsUpdated: (payload: {
     reason: string
     tickets?: JiraTicket[]
-    fetchedAt: number
+    fetchedAt: string
   }) => void
 
   onIssueSuggestionsUpdated: (payload: Partial<IssueSuggestion>) => void

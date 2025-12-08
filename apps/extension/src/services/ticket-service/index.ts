@@ -10,17 +10,11 @@ import { UserDetails } from 'jira.js/version3/models/userDetails'
 import { uniqBy } from 'lodash-es'
 
 import { sendMessage } from '@/lib/message'
-import { getStorageItem } from '@/lib/storage'
 import { Database } from '@/repository'
 import { JiraPriority, JiraTicket, JiraTransition } from '@/types'
 import { getCurrentUser } from '@/utils/currentUser'
-import {
-  mapPriority,
-  mapUserToAssignee,
-  mergeTicketsByKey
-} from '@/utils/jira/issues'
+import { mapPriority, mapUserToAssignee } from '@/utils/jira/issues'
 import { nextTick } from '@/utils/nextTick'
-import { concatPromises } from '@/utils/promise'
 import { getJiraApi, JiraAPI } from '~/lib/jira'
 
 import {
@@ -43,8 +37,6 @@ class TicketServiceImpl {
   private database: Database
   readonly suggestions: TicketSuggestionsAPI
 
-  private lastSyncStorage = getStorageItem('LastSyncAt')
-
   constructor(database: Database) {
     this.database = database
     this.suggestions = new TicketSuggestionService(this, database)
@@ -65,33 +57,6 @@ class TicketServiceImpl {
   ) {
     console.log('TicketService: refreshSuggestions', reason, options)
     return this.suggestions.refresh(reason, options)
-  }
-
-  /**
-   * Loads suggestions related to the current user
-   */
-  async loadSuggestions(force = false): Promise<JiraTicket[]> {
-    return this.withJira(async (jira) => {
-      const shouldSync = await this.shouldSync(force)
-      if (!shouldSync) {
-        return []
-      }
-
-      const results = await concatPromises([
-        jira.issues.getMyUnresolvedIssues(10),
-        jira.issues.getRecentHistoryIssues(20),
-        jira.issues.getMyRecentDoneIssues(10),
-        jira.issues.getMyWatchingIssues(10),
-        jira.issues.getMyActiveSprintTodoIssues(20)
-      ])
-
-      const uniqTickets = mergeTicketsByKey(results)
-
-      await this.database.collections.issues.bulkUpsert(uniqTickets)
-
-      this.lastSyncStorage.setValue(Date.now().toString())
-      return uniqTickets
-    })
   }
 
   async getIssueSuggestions(): Promise<IssueSuggestion> {
@@ -189,20 +154,6 @@ class TicketServiceImpl {
     })
   }
 
-  public async shouldSync(force = false) {
-    if (force) return true
-
-    const lastSyncAt = await this.lastSyncStorage.getValue()
-    if (!lastSyncAt || force) {
-      return true
-    }
-
-    const lastSyncDate = new Date(lastSyncAt)
-    const now = new Date()
-    const diff = now.getTime() - lastSyncDate.getTime()
-    return diff > 1000 * 60 // 1 min
-  }
-
   async isConfigured() {
     console.info('TicketService: isConfigured checked')
     return (await this.getJira()) != null
@@ -212,7 +163,7 @@ class TicketServiceImpl {
     sendMessage('ticketsUpdated', {
       reason,
       tickets,
-      fetchedAt: Date.now()
+      fetchedAt: new Date().toISOString()
     })
   }
 

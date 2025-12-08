@@ -1,5 +1,5 @@
-import { getJiraService } from './jira-service'
-import { getTicketService } from './ticket-service'
+import { getJiraService, type JiraService } from './jira-service'
+import { getTicketService, type TicketService } from './ticket-service'
 
-export const ticketService = getTicketService()
-export const jiraService = getJiraService()
+export const ticketService = getTicketService() as TicketService
+export const jiraService = getJiraService() as JiraService

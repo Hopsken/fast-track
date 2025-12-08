@@ -19,7 +19,10 @@ type StorageItems = {
   OAuthTokens: JiraOAuthConfig | null
   OAuthUserInfo: JiraUserInfo | null
   ApiKeyAuth: JiraApiKeyConfig | null
-  LastSyncAt: string | null
+  LastSyncAt: {
+    at: string
+    reason: string
+  } | null
   DevMode: boolean
 }
 

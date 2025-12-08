@@ -31,11 +31,6 @@ function App() {
   const { handleSearch, isSearching } = useTicketSearch()
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Initialize search orchestration
-  useEffect(() => {
-    ticketService.suggestions.refresh('startup')
-  }, [])
-
   const isSearchResultPage = activePage.path === '/'
 
   const onCommandInputChange = useMemoizedFn((value: string) => {

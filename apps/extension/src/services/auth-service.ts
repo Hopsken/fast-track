@@ -113,7 +113,7 @@ class AuthServiceImpl implements AuthService {
   private async primeSuggestionsAfterAuth() {
     const ticketService = getTicketService()
     try {
-      await ticketService.suggestions.onAuthSuccess()
+      await ticketService.suggestions.refresh('auth')
     } catch (error) {
       console.error(
         'AuthService: failed to prefetch suggestions after auth',

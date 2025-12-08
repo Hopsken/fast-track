@@ -1,5 +1,8 @@
+import { getStorageItem } from '@/lib/storage'
 import { Database } from '@/repository'
 import { JiraTicket } from '@/types'
+import { mergeTicketsByKey } from '@/utils/jira/issues'
+import { concatPromises } from '@/utils/promise'
 import { sendMessage } from '~/lib/message'
 
 import type { TicketService } from './'
@@ -14,88 +17,96 @@ export type TicketSuggestionsAPI = {
   refresh(
     reason: SuggestionRefreshReason,
     options?: SuggestionRefreshOptions
-  ): Promise<JiraTicket[]>
-  onAuthSuccess(): Promise<JiraTicket[]>
-  getCached(limit?: number): Promise<JiraTicket[]>
-  getLastRefreshMeta(): {
-    at: number | null
-    reason: SuggestionRefreshReason | null
-  }
+  ): Promise<void>
+  getLastRefreshMeta(): Promise<{
+    at: string
+    reason: SuggestionRefreshReason
+  } | null>
 }
 
 export class TicketSuggestionService implements TicketSuggestionsAPI {
   private isRefreshing = false
-  private lastRefreshAt: number | null = null
-  private lastReason: SuggestionRefreshReason | null = null
+  private lastSyncStorage = getStorageItem('LastSyncAt')
 
   constructor(
     private ticketService: TicketService,
     private database: Database
   ) {}
 
-  private async isConfigured() {
-    return this.ticketService.isConfigured()
-  }
-
-  refresh = async (
+  public refresh = async (
     reason: SuggestionRefreshReason,
     options: SuggestionRefreshOptions = {}
   ) => {
     const { force = false } = options
 
-    if (this.isRefreshing) {
-      console.info(
-        `TicketSuggestionService: Skip ${reason} refresh, another run is active`
-      )
-      return this.getCached()
-    }
-
-    const configured = await this.ticketService.isConfigured()
-    if (!configured) {
-      console.info(
-        `TicketSuggestionService: Skip ${reason} refresh, Jira not configured`
-      )
-      return this.getCached()
+    const shouldSync = await this.shouldSync(force)
+    if (!shouldSync || this.isRefreshing) {
+      return
     }
 
     this.isRefreshing = true
 
     try {
-      await this.ticketService.loadSuggestions(force)
-      this.lastRefreshAt = Date.now()
-      this.lastReason = reason
+      await this.loadSuggestions()
+
+      const lastRefreshAt = new Date().toISOString()
+      await this.lastSyncStorage.setValue({
+        at: lastRefreshAt.toString(),
+        reason
+      })
 
       sendMessage('ticketsUpdated', {
         reason,
-        fetchedAt: this.lastRefreshAt
+        fetchedAt: lastRefreshAt
       })
-
-      return this.getCached()
     } catch (error) {
       console.error('TicketSuggestionService: refresh failed', error)
-      return this.getCached()
     } finally {
       this.isRefreshing = false
     }
   }
 
-  onAuthSuccess() {
-    return this.refresh('auth', { force: true })
+  /**
+   * Loads suggestions related to the current user
+   */
+  private async loadSuggestions(): Promise<JiraTicket[]> {
+    return this.ticketService.withJira(async (jira) => {
+      const results = await concatPromises([
+        jira.issues.getMyUnresolvedIssues(10),
+        jira.issues.getRecentHistoryIssues(20),
+        jira.issues.getMyRecentDoneIssues(10),
+        jira.issues.getMyWatchingIssues(10),
+        jira.issues.getMyActiveSprintTodoIssues(20)
+      ])
+
+      const uniqTickets = mergeTicketsByKey(results)
+
+      await this.database.collections.issues.bulkUpsert(uniqTickets)
+
+      return uniqTickets
+    })
   }
 
-  getCached(limit = 30) {
-    const { issues } = this.database.collections
-    return issues
-      .find()
-      .sort({ isInProgress: 'desc', updated: 'desc' })
-      .limit(limit)
-      .exec()
+  private async shouldSync(force = false) {
+    if (force) return true
+
+    const lastSyncAt = await this.lastSyncStorage.getValue()
+    if (!lastSyncAt || force) {
+      return true
+    }
+
+    const lastSyncDate = new Date(lastSyncAt.at)
+    const now = new Date()
+    const diff = now.getTime() - lastSyncDate.getTime()
+    return diff > 1000 * 60 // 1 min
   }
 
-  getLastRefreshMeta() {
+  public async getLastRefreshMeta() {
+    const lastSyncAt = await this.lastSyncStorage.getValue()
+    if (!lastSyncAt) return null
     return {
-      at: this.lastRefreshAt,
-      reason: this.lastReason
+      at: lastSyncAt.at,
+      reason: lastSyncAt.reason as SuggestionRefreshReason
     }
   }
 }
