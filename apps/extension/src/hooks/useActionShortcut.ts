@@ -22,7 +22,6 @@ export function useActionShortcut(
   const keys = mapKeyboardShortcutToReactHotkeys(hotkeys)
   useHotkeys(keys, callback, {
     preventDefault: true,
-    enableOnFormTags: true,
-    useKey: true
+    enableOnFormTags: true
   })
 }
