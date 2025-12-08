@@ -6,11 +6,12 @@ import {
   useCommandState
 } from '@internal/ui/components/command'
 
-import { ActionUser } from '@/components/actions'
+import { Action, ActionUser } from '@/components/actions'
 import { useAutoCompleteUsers } from '@/hooks/useAutoComplete'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
 import { useMutationAssignIssue } from '@/hooks/useMutationAssignIssue'
 import { JiraTicket } from '@/types'
+import { AssigneeAvatar } from '~/components/ui/jira'
 
 export function TicketAssignMenu({ ticket }: { ticket: JiraTicket }) {
   const { data: editMeta, isLoading: isLoadingEditMeta } =
@@ -24,6 +25,14 @@ export function TicketAssignMenu({ ticket }: { ticket: JiraTicket }) {
     search
   )
   const { mutate: assignTicket } = useMutationAssignIssue()
+
+  const unassignAction = (
+    <Action
+      prefix={<AssigneeAvatar assignee={null} />}
+      title="No assignee"
+      onSelect={() => assignTicket({ ticket, assignee: null })}
+    />
+  )
 
   const isLoading = isLoadingUsers || isLoadingEditMeta
 
@@ -42,7 +51,10 @@ export function TicketAssignMenu({ ticket }: { ticket: JiraTicket }) {
   return (
     <CommandList>
       {!isLoading && <CommandEmpty>No matching users</CommandEmpty>}
-      <CommandGroup heading="Assign to...">{renderList()}</CommandGroup>
+      <CommandGroup heading="Assign to...">
+        {unassignAction}
+        {renderList()}
+      </CommandGroup>
     </CommandList>
   )
 }

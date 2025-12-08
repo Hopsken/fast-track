@@ -12,34 +12,42 @@ export function useMutationAssignIssue() {
   return useMutation({
     mutationFn: async (params: {
       ticket: JiraTicket
-      assignee: UserDetails
+      assignee: UserDetails | null
     }) => {
       await ticketService.assignTicket(params.ticket.key, params.assignee)
     },
     onMutate: ({ ticket, assignee }) => {
+      const isUnassign = !assignee
       const displayName =
-        assignee.displayName || assignee.name || assignee.emailAddress || 'User'
+        assignee?.displayName ||
+        assignee?.name ||
+        assignee?.emailAddress ||
+        'No assignee'
 
       const toast = showToast({
         style: 'loading',
-        title: 'Assigning...',
-        message: `${ticket.key} -> ${displayName}`
+        title: isUnassign ? 'Removing assignment...' : 'Assigning...',
+        message: isUnassign ? ticket.key : `${ticket.key} -> ${displayName}`
       })
 
-      return { toast, displayName }
+      return { toast, displayName, isUnassign }
     },
     onSuccess: (_, { ticket }, context) => {
-      const displayName = context?.displayName ?? 'User'
+      const displayName = context?.displayName ?? 'No assignee'
+      const isUnassign = context?.isUnassign
       context?.toast.update({
         style: 'success',
-        title: 'Assigned',
-        message: `${ticket.key} assigned to ${displayName}`
+        title: isUnassign ? 'Unassigned' : 'Assigned',
+        message: isUnassign
+          ? `${ticket.key} unassigned`
+          : `${ticket.key} assigned to ${displayName}`
       })
     },
     onError: (error, { ticket }, context) => {
+      const isUnassign = context?.isUnassign
       context?.toast.update({
         style: 'failure',
-        title: 'Assign failed',
+        title: isUnassign ? 'Unassign failed' : 'Assign failed',
         message: formatErrorMessage(error)
       })
     }
