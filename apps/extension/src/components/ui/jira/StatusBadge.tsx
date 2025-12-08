@@ -1,3 +1,6 @@
+import { Badge } from '@internal/ui/components/badge'
+
+import { cn } from '@/lib/utils'
 import type { JiraStatus } from '@/types/jira'
 
 interface StatusBadgeProps {
@@ -9,13 +12,7 @@ export function StatusBadge({ status, className = '' }: StatusBadgeProps) {
   const statusName = status?.name || 'Unknown'
   const statusColor = getStatusColor(status)
 
-  return (
-    <span
-      className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium text-white ${statusColor} ${className}`}
-      title={status?.description || statusName}>
-      {statusName}
-    </span>
-  )
+  return <Badge className={cn(statusColor, className)}>{statusName}</Badge>
 }
 
 function getStatusColor(status: JiraStatus): string {
@@ -24,13 +21,13 @@ function getStatusColor(status: JiraStatus): string {
 
   // Use Jira's native status categories first
   if (statusCategory === 'done') {
-    return 'bg-green-400'
+    return 'bg-green-500'
   }
   if (statusCategory === 'in_progress') {
-    return 'bg-blue-400'
+    return 'bg-blue-500'
   }
   if (statusCategory === 'todo') {
-    return 'bg-gray-400'
+    return 'bg-gray-500'
   }
 
   // Fallback to name-based detection
@@ -39,16 +36,16 @@ function getStatusColor(status: JiraStatus): string {
     statusName.includes('resolved') ||
     statusName.includes('closed')
   ) {
-    return 'bg-green-400'
+    return 'bg-green-500'
   }
   if (statusName.includes('progress') || statusName.includes('development')) {
-    return 'bg-blue-400'
+    return 'bg-blue-500'
   }
   if (statusName.includes('review') || statusName.includes('testing')) {
-    return 'bg-yellow-400'
+    return 'bg-yellow-500'
   }
   if (statusName.includes('blocked') || statusName.includes('impediment')) {
-    return 'bg-red-400'
+    return 'bg-red-500'
   }
-  return 'bg-gray-400'
+  return 'bg-gray-500'
 }

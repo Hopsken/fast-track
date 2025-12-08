@@ -111,7 +111,7 @@
   }
 
   [cmdk-list] {
-    height: 236px;
+    height: 280px;
     padding: 6px;
     overflow: auto;
     overscroll-behavior: contain;

@@ -85,7 +85,7 @@ function App() {
   }, [activePage.path])
 
   return (
-    <div className="linear w-lg">
+    <div className="linear w-xl">
       <Command loop shouldFilter>
         <div className="relative flex h-[52px] items-center gap-3 border-b border-gray-200 pl-5 pr-5">
           {previousPageButton}
