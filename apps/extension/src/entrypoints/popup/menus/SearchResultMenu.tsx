@@ -9,29 +9,24 @@ import {
 import { DevActionRefreshSuggestions } from '@/components/DevActionRefreshSuggestions'
 import { DevOnly } from '@/components/DevOnly'
 import { TicketItem, TicketList } from '@/components/tickets'
-import { useMyInProgressTickets } from '@/hooks/useMyInProgressTickets'
+import { useIssueSuggestions } from '@/hooks/useIssueSuggestions'
+import { IssueSuggestion } from '@/services/ticket-service'
 import { JiraTicket } from '@/types'
 import { openOptionsPage } from '@/utils'
-import { useSearchQuery, useSearchResults } from '~/stores/useTicketStore'
+import {
+  useIsSearching,
+  useSearchQuery,
+  useSearchResults
+} from '~/stores/useTicketStore'
 
 export function SearchResultMenu() {
   const searchQuery = useSearchQuery()
+  const isSearching = useIsSearching()
   const searchResults = useSearchResults()
 
   const shouldShowSuggestions = !searchQuery.trim()
 
-  const { data: myInProgressTickets = [], isLoading: isLoadingMyInProgress } =
-    useMyInProgressTickets({
-      enabled: shouldShowSuggestions
-    })
-
-  const otherTickets = useMemo(() => {
-    const inProgressKeys = new Set(
-      myInProgressTickets.map((ticket) => ticket.key)
-    )
-
-    return searchResults.filter((ticket) => !inProgressKeys.has(ticket.key))
-  }, [myInProgressTickets, searchResults])
+  const { data: issueSuggestions } = useIssueSuggestions()
 
   const handleOpenOptionsPage = () => {
     openOptionsPage()
@@ -41,13 +36,14 @@ export function SearchResultMenu() {
   return (
     <CommandList aria-label="Ticket search results">
       {shouldShowSuggestions ? (
-        <SuggestedTickets
-          inProgressTickets={myInProgressTickets}
-          otherTickets={otherTickets}
-          isLoadingInProgress={isLoadingMyInProgress}
-        />
+        <SuggestedTickets issues={issueSuggestions} />
       ) : (
-        <TicketList onOpenOptionsPage={handleOpenOptionsPage} />
+        <TicketList
+          searchQuery={searchQuery}
+          isSearching={isSearching}
+          tickets={searchResults}
+          onOpenOptionsPage={handleOpenOptionsPage}
+        />
       )}
 
       <DevOnly>
@@ -58,45 +54,15 @@ export function SearchResultMenu() {
 }
 
 interface SuggestedTicketsProps {
-  inProgressTickets: JiraTicket[]
-  otherTickets: JiraTicket[]
-  isLoadingInProgress?: boolean
+  issues?: IssueSuggestion
 }
 
-function SuggestedTickets({
-  inProgressTickets,
-  otherTickets,
-  isLoadingInProgress
-}: SuggestedTicketsProps) {
-  const hasTickets = inProgressTickets.length + otherTickets.length > 0
-
-  if (!hasTickets) {
-    return (
-      <CommandEmpty>
-        {isLoadingInProgress
-          ? 'Loading your in-progress issues...'
-          : 'Suggested issues will appear once we sync with Jira'}
-      </CommandEmpty>
-    )
-  }
-
+function SuggestedTickets({ issues }: SuggestedTicketsProps) {
   return (
     <>
-      {inProgressTickets.length ? (
+      {issues?.inProgress ? (
         <CommandGroup heading="In Progress">
-          {inProgressTickets.map((ticket) => (
-            <TicketItem key={ticket.key} ticket={ticket} />
-          ))}
-        </CommandGroup>
-      ) : null}
-
-      {inProgressTickets.length && otherTickets.length ? (
-        <CommandSeparator />
-      ) : null}
-
-      {otherTickets.length ? (
-        <CommandGroup heading="Recommend for you">
-          {otherTickets.map((ticket) => (
+          {issues.inProgress.map((ticket) => (
             <TicketItem key={ticket.key} ticket={ticket} />
           ))}
         </CommandGroup>

@@ -1,5 +1,6 @@
 import { defineExtensionMessaging } from '@webext-core/messaging'
 
+import { IssueSuggestion } from '@/services/ticket-service'
 import { JiraTicket } from '@/types'
 
 interface ProtocolMap {
@@ -14,7 +15,7 @@ interface ProtocolMap {
     fetchedAt: number
   }) => void
 
-  onMyInProgressUpdated: (payload: { tickets: JiraTicket[] }) => void
+  onIssueSuggestionsUpdated: (payload: Partial<IssueSuggestion>) => void
 }
 
 export const { sendMessage, onMessage } =

@@ -30,6 +30,10 @@ import {
   TicketSuggestionsAPI
 } from './ticket-suggestion-service'
 
+export type IssueSuggestion = {
+  inProgress: JiraTicket[]
+}
+
 /**
  * Ticket service implementation
  */
@@ -88,7 +92,14 @@ class TicketServiceImpl {
     })
   }
 
-  async getMyInProgressTickets(limit = 20): Promise<JiraTicket[]> {
+  async getIssueSuggestions(): Promise<IssueSuggestion> {
+    return this.withJira(async () => {
+      const inProgress = await this.getMyInProgressTickets()
+      return { inProgress }
+    })
+  }
+
+  private async getMyInProgressTickets(limit = 20): Promise<JiraTicket[]> {
     return this.withJira(async (jira) => {
       const user = await getCurrentUser()
       if (!user.email) {
@@ -101,7 +112,7 @@ class TicketServiceImpl {
       nextTick(async () => {
         const tickets = await jira.issues.getMyUnresolvedIssues(limit)
         await this.database.collections.issues.bulkUpsert(tickets)
-        sendMessage('onMyInProgressUpdated', { tickets })
+        sendMessage('onIssueSuggestionsUpdated', { inProgress: tickets })
       })
 
       return cachedTickets
@@ -197,7 +208,6 @@ class TicketServiceImpl {
   }
 
   async assignTicket(ticketKey: string, assignee: UserDetails | null) {
-    console.log('assignTicket', ticketKey, assignee)
     return this.updateTicketOptimistically(ticketKey, {
       reason: 'assign',
       buildOptimistic: (base) => ({
