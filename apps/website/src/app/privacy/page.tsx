@@ -1,6 +1,7 @@
+import { Metadata } from 'next'
 import Link from 'next/link'
 
-export const metadata = {
+export const metadata: Metadata = {
   description:
     'How Fast Track handles data, browser permissions, and Jira access.',
   title: 'Privacy Policy | Fast Track'
@@ -10,7 +11,7 @@ const sections = [
   {
     items: [
       'Jira content you search or open (issue keys, summaries, status).',
-      'Account identifiers needed for Atlassian OAuth.',
+      'Account identifiers needed for Atlassian authentication (email, username).',
       'Error and performance signals to keep the extension reliable.'
     ],
     title: 'Information we process'

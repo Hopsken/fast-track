@@ -1,9 +1,14 @@
+import { Chromium } from 'lucide-react'
+import { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 
-export const metadata = {
+import logoUrl from '../assets/logo.png'
+
+export const metadata: Metadata = {
   description:
     'Fast Track helps you search, open, and manage Jira issues without breaking flow.',
-  title: 'Fast Track | Jira, without the drag'
+  title: 'Fast Track | Unblocked Jira workflow'
 }
 
 const highlights = [
@@ -25,14 +30,14 @@ export default function Index() {
       <div className="relative mx-auto flex min-h-screen max-w-5xl flex-col px-6 pb-16 pt-20 sm:pt-28">
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/40">
-              FT
+            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded text-slate-950 shadow-lg">
+              <Image src={logoUrl} alt="Fast Track logo" />
             </div>
             <div>
               <p className="text-sm font-semibold text-emerald-700">
                 Fast Track
               </p>
-              <p className="text-xs text-slate-600">Jira, without the drag</p>
+              <p className="text-xs text-slate-600">Unblocked Jira workflow</p>
             </div>
           </div>
           <Link
@@ -58,9 +63,21 @@ export default function Index() {
             </div>
             <div className="flex flex-wrap items-center gap-4">
               <a
-                className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-md shadow-emerald-500/30 transition hover:-translate-y-0.5 hover:bg-emerald-400"
-                href="mailto:support@teamusement.com">
-                Request early access
+                className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-md shadow-emerald-500/30 transition hover:-translate-y-0.5 hover:bg-emerald-400"
+                href="https://chromewebstore.google.com/detail/jira-boost/cmlkcfgkffidbnpbjmlgplokcacfemhp"
+                target="_blank"
+                rel="noreferrer">
+                <svg
+                  role="img"
+                  viewBox="0 0 24 24"
+                  className="size-8"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    fill="currentColor"
+                    d="M0 1.637v19.09c0 .9.736 1.636 1.636 1.636h.131a10.4 10.4 0 0 1-.13-1.636 10.3 10.3 0 0 1 1.667-5.64l4.202 7.276h1.128A3.77 3.77 0 0 1 12 16.958a3.77 3.77 0 0 1 3.366 5.406h1.048a4.7 4.7 0 0 0-1.587-5.406h6.83a10.34 10.34 0 0 1 .577 5.406h.13c.9 0 1.636-.737 1.636-1.637V1.637Zm9.273 2.181h5.454a1.09 1.09 0 1 1 0 2.182H9.273a1.09 1.09 0 1 1 0-2.182M12 10.364a10.36 10.36 0 0 1 9.233 5.652H12a4.71 4.71 0 0 0-4.677 4.149L3.91 14.25A10.34 10.34 0 0 1 12 10.364"
+                  />
+                </svg>
+                <span>Add to Chrome</span>
               </a>
               <Link
                 href="/privacy"
