@@ -26,6 +26,17 @@ declare global {
 let database: Database
 const log = getLogger('rxdb')
 
+const buildCollections = async (database: Database) => {
+  await database.addCollections({
+    issues: {
+      schema: issueSchema,
+      methods: issueDocMethods,
+      autoMigrate: true,
+      statics: issueCollectionMethods
+    }
+  })
+}
+
 export async function getDatabase(): Promise<Database> {
   if (database) return database
 
@@ -53,15 +64,17 @@ export async function getDatabase(): Promise<Database> {
     closeDuplicates: true
   })
 
-  await database.addCollections({
-    issues: {
-      schema: issueSchema,
-      methods: issueDocMethods,
-      autoMigrate: true,
-      statics: issueCollectionMethods
-    }
-  })
+  await buildCollections(database)
 
   self.db = database
   return database
+}
+
+export async function resetDatabase() {
+  if (!database) return
+
+  await database.collections.issues.remove()
+
+  // Re-build collections after reset
+  await buildCollections(database)
 }

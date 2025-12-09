@@ -24,6 +24,7 @@ type StorageItems = {
     reason: string
   } | null
   DevMode: boolean
+  REACT_QUERY_OFFLINE_CACHE: unknown
 }
 
 export type StorageKey = keyof StorageItems
@@ -36,6 +37,8 @@ export type StorageValue<T extends StorageKey> = StorageItems[T]
 const STORAGE_DEFAULTS: StorageItems = {
   License: null,
   JiraHost: '',
+  // React Query cache
+  REACT_QUERY_OFFLINE_CACHE: null,
   AuthType: 'oauth',
   OAuthTokens: null,
   OAuthUserInfo: null,

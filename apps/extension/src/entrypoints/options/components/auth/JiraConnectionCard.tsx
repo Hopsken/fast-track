@@ -1,22 +1,20 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { LuPower } from 'react-icons/lu'
 
 import { JiraUserInfo } from '@/types'
 
 export interface JiraConnectionCardProps {
   user: JiraUserInfo
-  authMethod?: 'oauth' | 'apiKey'
   jiraHost?: string
   onDisconnect?: () => void
 }
 
 export const JiraConnectionCard: React.FC<JiraConnectionCardProps> = ({
   user,
-  authMethod,
   jiraHost,
   onDisconnect
 }) => {
-  const hostname = React.useMemo(() => {
+  const hostname = useMemo(() => {
     if (!jiraHost) return ''
     try {
       return new URL(jiraHost).hostname
@@ -73,13 +71,7 @@ export const JiraConnectionCard: React.FC<JiraConnectionCardProps> = ({
                 </div>
               ) : null}
             </div>
-            {authMethod ? (
-              <div className="rounded-full bg-blue-100 px-3 py-1">
-                <span className="text-sm font-medium text-blue-800">
-                  {authMethod === 'apiKey' ? 'API key' : 'OAuth'}
-                </span>
-              </div>
-            ) : null}
+
             <button
               onClick={onDisconnect}
               aria-label="Disconnect"

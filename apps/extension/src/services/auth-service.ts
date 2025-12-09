@@ -4,8 +4,8 @@ import { z } from 'zod'
 
 import { JiraAPI } from '@/lib/jira'
 import { AuthApi } from '@/lib/jira/auth-api'
-import { getStorageItem } from '@/lib/storage'
-import { Database } from '@/repository'
+import { getStorageItem, StorageKey } from '@/lib/storage'
+import { Database, resetDatabase } from '@/repository'
 import { JiraApiKeyConfig, ReceivedTokenPayload, JiraUserInfo } from '@/types'
 import { getTicketService } from '~/services/ticket-service'
 import { getLogger } from '~/utils/logger'
@@ -97,16 +97,15 @@ class AuthServiceImpl implements AuthService {
   }
 
   public async disconnect() {
-    const currentAuthType = await this.authTypeStorage.getValue()
-    const nextAuthType = currentAuthType === 'apiKey' ? 'apiKey' : 'oauth'
-
     await Promise.all([
       this.tokenStorage.removeValue(),
       this.apiKeyStorage.removeValue(),
       this.userInfoStorage.removeValue(),
-      this.authTypeStorage.setValue(nextAuthType),
-      this.jiraHostStorage.setValue(''),
-      this.database.collections.issues.remove()
+      this.jiraHostStorage.removeValue(),
+      getStorageItem('LastSyncAt').removeValue(),
+      // Clear React Query cache
+      getStorageItem('REACT_QUERY_OFFLINE_CACHE').removeValue(),
+      resetDatabase()
     ])
 
     return true

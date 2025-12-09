@@ -8,6 +8,8 @@ import { ReceivedTokenPayload } from '@/types'
 const log = loglevel.getLogger('OAuthCallbackContentScript')
 const allowedOrigins = ['https://teamusement.com', 'http://localhost:4000']
 
+loglevel.setDefaultLevel('debug')
+
 interface TokenEventData {
   source: 'page'
   tokenData: ReceivedTokenPayload
