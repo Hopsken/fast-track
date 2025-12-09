@@ -1,4 +1,14 @@
 import React, { useEffect, useState } from 'react'
+import { Button } from '@internal/ui/components/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@internal/ui/components/card'
+import { Input } from '@internal/ui/components/input'
+import { Label } from '@internal/ui/components/label'
 
 export interface JiraApiKeySetupProps {
   onConnect: (payload: { host: string; email: string; apiKey: string }) => void
@@ -34,82 +44,85 @@ export const JiraApiKeySetup: React.FC<JiraApiKeySetupProps> = ({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="rounded-lg border bg-white p-6 shadow-sm">
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">
-          Connect with API key
-        </h2>
-        <p className="text-sm text-gray-600">
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">Connect with API key</CardTitle>
+        <CardDescription>
           Use your Atlassian API token when OAuth is not available.
-        </p>
-      </div>
-
-      <div className="space-y-4">
-        <label className="block text-sm font-medium text-gray-700">
-          Jira site URL
-          <input
-            type="text"
-            name="host"
-            autoComplete="url"
-            value={host}
-            onChange={(event) => setHost(event.target.value)}
-            placeholder="https://your-domain.atlassian.net"
-            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-            required
-          />
-        </label>
-
-        <label className="block text-sm font-medium text-gray-700">
-          Jira account email
-          <input
-            type="email"
-            name="email"
-            autoComplete="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="you@company.com"
-            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-            required
-          />
-        </label>
-
-        <label className="block text-sm font-medium text-gray-700">
-          API token
-          <div className="mt-1 flex gap-2">
-            <input
-              type={showKey ? 'text' : 'password'}
-              name="apiKey"
-              autoComplete="off"
-              value={apiKey}
-              onChange={(event) => setApiKey(event.target.value)}
-              placeholder="Paste your Atlassian API token"
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="host">Jira site URL</Label>
+            <Input
+              id="host"
+              type="text"
+              name="host"
+              autoComplete="url"
+              value={host}
+              onChange={(event) => setHost(event.target.value)}
+              placeholder="https://your-domain.atlassian.net"
               required
             />
-            <button
-              type="button"
-              onClick={() => setShowKey((prev) => !prev)}
-              className="min-w-[100px] rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900">
-              {showKey ? 'Hide' : 'Show'}
-            </button>
           </div>
-          <p className="mt-1 text-xs text-gray-500">
-            Generate a token from your Atlassian account: Profile &gt; Security
-            &gt; Create and manage API tokens.
-          </p>
-        </label>
 
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+          <div className="space-y-2">
+            <Label htmlFor="email">Jira account email</Label>
+            <Input
+              id="email"
+              type="email"
+              name="email"
+              autoComplete="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="you@company.com"
+              required
+            />
+          </div>
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-          {isLoading ? 'Connecting...' : 'Save API key'}
-        </button>
-      </div>
-    </form>
+          <div className="space-y-2">
+            <Label htmlFor="apiKey">API token</Label>
+            <div className="flex gap-2">
+              <Input
+                id="apiKey"
+                type={showKey ? 'text' : 'password'}
+                name="apiKey"
+                autoComplete="off"
+                value={apiKey}
+                onChange={(event) => setApiKey(event.target.value)}
+                placeholder="Paste your Atlassian API token"
+                required
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowKey((prev) => !prev)}
+                className="min-w-[100px]">
+                {showKey ? 'Hide' : 'Show'}
+              </Button>
+            </div>
+            <p className="text-muted-foreground text-xs">
+              Generate a token from your Atlassian account: Account settings
+              &gt; Security &gt; Create and manage API tokens.
+            </p>
+            <p className="text-muted-foreground mt-2 text-xs">
+              Required scopes: Read &mdash; read:jira-user, read:jira-work.
+              Write &mdash; write:jira-work.
+            </p>
+          </div>
+
+          {error ? (
+            <p className="text-destructive text-sm" role="alert">
+              {error}
+            </p>
+          ) : null}
+
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Connecting...' : 'Connect'}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   )
 }

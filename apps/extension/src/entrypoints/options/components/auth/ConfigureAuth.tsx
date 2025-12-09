@@ -13,7 +13,7 @@ import { AuthType } from '@/types'
 import { logger } from '@/utils'
 
 import { JiraApiKeySetup } from './JiraApiKeySetup'
-import { JiraConnectionSetup } from './JiraConnectionSetup'
+import { JiraOAuthSetup } from './JiraOAuthSetup'
 
 export function ConfigureAuth() {
   const [authType, setAuthType] = useStorage('AuthType')
@@ -83,7 +83,7 @@ export function ConfigureAuth() {
       </TabsList>
 
       <TabsContent value="oauth">
-        <JiraConnectionSetup
+        <JiraOAuthSetup
           onConnect={handleConnect}
           isLoading={connectingMethod === 'oauth'}
         />
