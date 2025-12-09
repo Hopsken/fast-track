@@ -9,7 +9,7 @@ export interface Tab {
 
 export const tabs: Tab[] = [
   { id: 'general', label: 'General', icon: HiCog },
-  { id: 'license', label: 'License', icon: HiKey },
+  // { id: 'license', label: 'License', icon: HiKey },
   { id: 'about', label: 'About', icon: HiInformationCircle }
 ]
 
