@@ -185,13 +185,7 @@ class TicketServiceImpl {
     }
 
     const { issues } = this.database.collections
-    const existing = await issues
-      .findOne({
-        selector: {
-          key: ticketKey
-        }
-      })
-      .exec()
+    const existing = await issues.getByKey(ticketKey)
 
     const baseTicket = existing?.toMutableJSON()
 

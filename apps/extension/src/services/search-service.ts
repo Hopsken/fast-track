@@ -1,5 +1,4 @@
 import { defineProxyService } from '@webext-core/proxy-service'
-import { escapeRegExp } from 'lodash-es'
 import {
   BehaviorSubject,
   combineLatest,
@@ -18,7 +17,7 @@ import { rankTickets } from '~/utils/ticket-ranking'
 
 import { getTicketService } from './ticket-service'
 
-const DEFAULT_RESULT_LIMIT = 30
+const DEFAULT_RESULT_LIMIT = 10
 
 export interface SearchService {
   initialize(): Promise<void>
@@ -96,66 +95,13 @@ class SearchServiceImpl implements SearchService {
   }
 
   private async searchStoredTickets(query: string) {
-    const { issues } = this.database.collections
-
     if (!query) {
-      return this.getRecommendations()
-    }
-
-    const escaped = escapeRegExp(query)
-    const regexSelector = { $regex: escaped, $options: 'i' }
-
-    return issues
-      .find({
-        selector: {
-          $or: [
-            { summary: regexSelector },
-            { key: regexSelector },
-            { 'status.name': regexSelector },
-            { 'issueType.name': regexSelector },
-            { 'assignee.displayName': regexSelector },
-            { 'priority.name': regexSelector }
-          ]
-        }
-      })
-      .limit(DEFAULT_RESULT_LIMIT)
-      .exec()
-  }
-
-  private async getRecommendations() {
-    const { issues } = this.database.collections
-    const email = this.currentUserEmail
-
-    if (!email) {
       return []
     }
 
-    const assignedTickets = await issues
-      .find({
-        selector: {
-          'assignee.emailAddress': email
-        }
-      })
-      .sort({ isInProgress: 'desc', updated: 'desc' })
-      .limit(DEFAULT_RESULT_LIMIT)
-      .exec()
-
-    const remainingLimit = DEFAULT_RESULT_LIMIT - assignedTickets.length
-    if (remainingLimit <= 0) return assignedTickets
-
-    const otherTickets = await issues
-      .find({
-        selector: {
-          'assignee.emailAddress': {
-            $ne: email
-          }
-        }
-      })
-      .sort({ isInProgress: 'desc', updated: 'desc' })
-      .limit(remainingLimit)
-      .exec()
-
-    return [...assignedTickets, ...otherTickets]
+    return this.database.issues.fuzzySearch(query, {
+      limit: DEFAULT_RESULT_LIMIT
+    })
   }
 
   private setupUserWatcher() {

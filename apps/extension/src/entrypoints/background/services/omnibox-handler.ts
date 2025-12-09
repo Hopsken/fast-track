@@ -143,23 +143,9 @@ export class OmniboxHandlerService {
 
   private static async searchCachedTickets(query: string) {
     const database = await this.getDatabase()
-    const escaped = escapeRegExp(query)
-    const regexSelector = { $regex: escaped, $options: 'i' }
-
-    const tickets = await database.collections.issues
-      .find({
-        selector: {
-          $or: [
-            { key: regexSelector },
-            { summary: regexSelector },
-            { 'assignee.displayName': regexSelector },
-            { 'status.name': regexSelector },
-            { 'issueType.name': regexSelector }
-          ]
-        }
-      })
-      .limit(SEARCH_LIMIT)
-      .exec()
+    const tickets = await database.issues.fuzzySearch(query, {
+      limit: SEARCH_LIMIT
+    })
 
     return tickets
   }
