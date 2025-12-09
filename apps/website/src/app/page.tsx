@@ -31,7 +31,7 @@ export default function Index() {
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded text-slate-950 shadow-lg">
-              <Image src={logoUrl} alt="Fast Track logo" />
+              <Image src={logoUrl} alt="Fast Track logo" width={40} height={40} />
             </div>
             <div>
               <p className="text-sm font-semibold text-emerald-700">
