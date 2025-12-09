@@ -67,13 +67,7 @@ export function ErrorBoundary({
   }
 
   return (
-    <ReactErrorBoundary
-      FallbackComponent={fallback}
-      onError={handleError}
-      onReset={() => {
-        // Optional: Reset any global state or clear storage
-        log.info('🔄 Error boundary reset')
-      }}>
+    <ReactErrorBoundary FallbackComponent={fallback} onError={handleError}>
       {children}
     </ReactErrorBoundary>
   )

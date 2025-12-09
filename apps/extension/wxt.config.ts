@@ -19,7 +19,7 @@ export default defineConfig({
       'Quick search and access to your Jira tickets with enhanced board experience',
     host_permissions: ['https://*.atlassian.net/jira*'],
     omnibox: {
-      keyword: 'jira'
+      keyword: 'jj'
     },
     permissions: ['storage', 'tabs', 'alarms'],
     browser_specific_settings: {

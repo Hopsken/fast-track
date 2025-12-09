@@ -83,7 +83,6 @@ function initializeSecureOAuthCommunication(): void {
       }
 
       const { tokenData } = event.detail
-      log.debug('Processing token data:', tokenData)
 
       await authService.receiveTokens(tokenData)
 

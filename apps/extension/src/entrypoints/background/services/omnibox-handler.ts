@@ -2,23 +2,33 @@
  * Background service for omnibox (address bar) functionality
  */
 
-import { browser } from '#imports'
+import { Browser, browser } from '#imports'
+import { escape, escapeRegExp } from 'lodash-es'
 
+import { Database, getDatabase } from '@/repository'
+import { getTicketService } from '@/services/ticket-service'
+import { JiraTicket } from '@/types'
+import { isTicketKey } from '@/utils/jira/issues'
 import { getLogger } from '~/utils/logger'
-import { openJiraIssue } from '~/utils/open-jira-issue'
+import { openJiraIssue, openJiraSearch } from '~/utils/open-jira-issue'
+import { rankTickets } from '~/utils/ticket-ranking'
+
+const MAX_SUGGESTIONS = 5
+const MIN_QUERY_LENGTH = 2
+const SEARCH_LIMIT = 20
+
+const normalizeTicketKey = (value: string) => value.trim().toUpperCase()
 
 export class OmniboxHandlerService {
-  private static log = getLogger('omnibox-handler')
+  private static database: Database | null = null
+  private static latestRequestId = 0
+  private static log = getLogger('omnibox')
 
-  /**
-   * Initializes omnibox event listeners
-   */
   static initialize(): void {
     browser.omnibox.onInputEntered.addListener(
       this.handleOmniboxInput.bind(this)
     )
 
-    // Optional: Add input changed listener for suggestions
     if (browser.omnibox.onInputChanged) {
       browser.omnibox.onInputChanged.addListener(
         this.handleOmniboxInputChanged.bind(this)
@@ -29,56 +39,97 @@ export class OmniboxHandlerService {
   /**
    * Handles omnibox input when user presses Enter
    */
-  private static handleOmniboxInput(text: string): void {
-    this.log.info('🔍 Omnibox: User entered:', text)
+  private static async handleOmniboxInput(text: string): Promise<void> {
+    const query = text.trim()
+    if (!query) return
 
     try {
-      openJiraIssue(text)
+      if (isTicketKey(query)) {
+        await openJiraIssue(query)
+        return
+      }
+
+      await openJiraSearch(query)
     } catch (error) {
-      this.log.error('❌ Omnibox: Failed to open Jira issue:', error)
+      this.log.error('❌ Omnibox: Failed to handle input', error)
     }
   }
 
   /**
    * Handles omnibox input changes for providing suggestions
    */
-  private static handleOmniboxInputChanged(
+  private static async handleOmniboxInputChanged(
     text: string,
-    suggest: (suggestions: chrome.omnibox.SuggestResult[]) => void
-  ): void {
-    if (text.length < 2) {
+    suggest: (suggestions: Browser.omnibox.SuggestResult[]) => void
+  ): Promise<void> {
+    const query = text.trim()
+
+    if (query.length < MIN_QUERY_LENGTH) {
       suggest([])
       return
     }
 
-    const suggestions = this.generateSuggestions(text)
-    suggest(suggestions)
+    const requestId = ++this.latestRequestId
+
+    const emitSuggestions = (tickets: JiraTicket[]) => {
+      if (requestId !== this.latestRequestId) return
+      suggest(this.buildSuggestions(tickets, query))
+    }
+
+    let cachedTickets: JiraTicket[] = []
+    let remoteTickets: JiraTicket[] = []
+
+    const publish = () => emitSuggestions([...cachedTickets, ...remoteTickets])
+
+    this.searchCachedTickets(query)
+      .then((tickets) => {
+        cachedTickets = tickets
+        publish()
+      })
+      .catch((error) => {
+        this.log.error(
+          '❌ Omnibox: Failed to provide cached suggestions',
+          error
+        )
+      })
+
+    this.searchRemoteTickets(query)
+      .then((tickets) => {
+        remoteTickets = tickets
+        publish()
+      })
+      .catch((error) => {
+        this.log.error('❌ Omnibox: Remote suggestion failed', error)
+      })
   }
 
   /**
-   * Generates suggestions based on user input
+   * Builds suggestions from tickets plus direct key entry
    */
-  private static generateSuggestions(
+  private static buildSuggestions(
+    tickets: JiraTicket[],
     text: string
-  ): chrome.omnibox.SuggestResult[] {
-    const suggestions: chrome.omnibox.SuggestResult[] = []
+  ): Browser.omnibox.SuggestResult[] {
+    const normalized = text.trim()
+    const normalizedKey = normalizeTicketKey(normalized)
 
-    // Check if text looks like a ticket key (e.g., "PROJ-123")
-    const ticketKeyPattern = /^[A-Z]+-\d+$/i
-    if (ticketKeyPattern.test(text.trim())) {
-      suggestions.push({
-        content: text.trim().toUpperCase(),
-        description: `Open ticket: <match>${text.trim().toUpperCase()}</match>`
+    const rankedTickets = rankTickets(tickets, normalized, MAX_SUGGESTIONS)
+
+    const suggestions: Browser.omnibox.SuggestResult[] = rankedTickets.map(
+      (ticket) => this.toSuggestion(ticket)
+    )
+
+    if (
+      isTicketKey(normalized) &&
+      !rankedTickets.some((ticket) => ticket.key === normalizedKey)
+    ) {
+      suggestions.unshift({
+        content: normalizedKey,
+        description: `Open ticket: <match>${normalizedKey}</match>`
       })
     }
 
-    // Add search suggestion
-    suggestions.push({
-      content: `search:${text}`,
-      description: `Search for: <match>${text}</match>`
-    })
-
-    return suggestions.slice(0, 5) // Limit to 5 suggestions
+    return suggestions.slice(0, MAX_SUGGESTIONS)
   }
 
   /**
@@ -90,17 +141,51 @@ export class OmniboxHandlerService {
     }
   }
 
-  /**
-   * Updates omnibox suggestions based on recent tickets
-   */
-  static async updateSuggestionsFromRecentTickets(): Promise<void> {
-    // This could be called periodically to update suggestions
-    // based on recently viewed tickets from storage
-    try {
-      // Implementation would fetch recent tickets and update suggestions
-      this.log.info('📝 Omnibox: Updated suggestions from recent tickets')
-    } catch (error) {
-      this.log.error('❌ Omnibox: Failed to update suggestions:', error)
+  private static async searchCachedTickets(query: string) {
+    const database = await this.getDatabase()
+    const escaped = escapeRegExp(query)
+    const regexSelector = { $regex: escaped, $options: 'i' }
+
+    const tickets = await database.collections.issues
+      .find({
+        selector: {
+          $or: [
+            { key: regexSelector },
+            { summary: regexSelector },
+            { 'assignee.displayName': regexSelector },
+            { 'status.name': regexSelector },
+            { 'issueType.name': regexSelector }
+          ]
+        }
+      })
+      .limit(SEARCH_LIMIT)
+      .exec()
+
+    return tickets
+  }
+
+  private static async searchRemoteTickets(query: string) {
+    const ticketService = getTicketService()
+    const tickets = await ticketService.searchTickets(query)
+    return tickets
+  }
+
+  private static toSuggestion(
+    ticket: JiraTicket
+  ): Browser.omnibox.SuggestResult {
+    const key = escape(ticket.key)
+    const summary = escape(ticket.summary)
+
+    return {
+      content: ticket.key,
+      description: `<match>${key}</match> - <dim>${summary}</dim>`
     }
+  }
+
+  private static async getDatabase(): Promise<Database> {
+    if (!this.database) {
+      this.database = await getDatabase()
+    }
+    return this.database
   }
 }

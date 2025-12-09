@@ -6,6 +6,11 @@ import { JiraAssignee, JiraPriority, JiraStatus, JiraTicket } from '@/types'
 
 import { slugify } from '../string'
 
+const TICKET_KEY_PATTERN = /^[A-Z]+-\d+$/i
+
+export const isTicketKey = (value: string) =>
+  TICKET_KEY_PATTERN.test(value.trim())
+
 export function getIssueTitleLink(ticket: JiraTicket) {
   return `[${ticket.summary}](${ticket.url})`
 }

@@ -2,15 +2,28 @@ import { getStorageItem } from '@/lib/storage'
 
 import { openInNewTab, openOptionsPage } from './extension'
 
-export async function openJiraIssue(ticket: string) {
-  let jiraUrl = await getStorageItem('JiraHost').getValue()
-  if (!jiraUrl) {
+const normalizeJiraHost = async () => {
+  const jiraHost = await getStorageItem('JiraHost').getValue()
+  if (!jiraHost) {
     openOptionsPage()
-    return
+    return null
   }
 
-  if (jiraUrl.endsWith('/')) jiraUrl = jiraUrl.slice(0, -1)
+  return jiraHost.endsWith('/') ? jiraHost.slice(0, -1) : jiraHost
+}
 
-  const ticketUrl = `${jiraUrl}/browse/${ticket.trim()}`
+export async function openJiraIssue(ticket: string) {
+  const jiraHost = await normalizeJiraHost()
+  if (!jiraHost) return
+
+  const ticketUrl = `${jiraHost}/browse/${ticket.trim()}`
   openInNewTab(ticketUrl)
+}
+
+export async function openJiraSearch(query: string) {
+  const jiraHost = await normalizeJiraHost()
+  if (!jiraHost) return
+
+  const jql = encodeURIComponent(`text ~ "${query.trim()}"`)
+  openInNewTab(`${jiraHost}/issues/?jql=${jql}`)
 }

@@ -42,15 +42,11 @@ export default defineBackground(() => {
   // Initialize other services
   OmniboxHandlerService.initialize()
   OmniboxHandlerService.setDefaultSuggestion(
-    'Search Jira tickets or enter ticket key (e.g., PROJ-123)'
+    'Jump to a ticket key (PROJ-123) or search Jira'
   )
 
   InstallationHandlerService.initialize()
 
   log.info('✅ Background script initialized successfully')
-  log.info('📊 Services status:')
-  log.info('  - Ticket Service: Registered via proxy service')
-  log.info('  - Ticket Collection: Messaging service active')
-  log.info('  - OAuth Background Service: Token refresh monitoring active')
   log.info('  - Extension Version:', InstallationHandlerService.getVersion())
 })
