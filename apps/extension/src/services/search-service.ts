@@ -99,9 +99,11 @@ class SearchServiceImpl implements SearchService {
       return []
     }
 
-    return this.database.issues.fuzzySearch(query, {
-      limit: DEFAULT_RESULT_LIMIT
-    })
+    return this.database.issues
+      .fuzzySearch(query, {
+        limit: DEFAULT_RESULT_LIMIT
+      })
+      .then((docs) => docs.map((doc) => doc.toMutableJSON()))
   }
 
   private setupUserWatcher() {

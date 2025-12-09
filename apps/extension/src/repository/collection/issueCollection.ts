@@ -1,27 +1,27 @@
 import { escapeRegExp } from 'lodash-es'
-import { RxCollection, RxDocument } from 'rxdb'
+import { RxCollection } from 'rxdb'
 
 import { JiraTicket } from '@/types'
 
-import { IssueDocMethods } from '../schema/issueSchema'
+import { IssueDocMethods, IssueDocument } from '../schema/issueSchema'
 
 export type IssueCollectionMethods = {
-  getByKey(key: string): Promise<RxDocument<JiraTicket> | null>
+  getByKey(key: string): Promise<IssueDocument | null>
 
-  listAll(): Promise<JiraTicket[]>
+  listAll(): Promise<IssueDocument[]>
   findInProgress(
     emailAddress: string,
     options?: { limit?: number }
-  ): Promise<JiraTicket[]>
+  ): Promise<IssueDocument[]>
   findInOpenSprints(
     emailAddress: string,
     options?: { limit?: number }
-  ): Promise<JiraTicket[]>
-  findRecentlyViewed(options?: { limit?: number }): Promise<JiraTicket[]>
+  ): Promise<IssueDocument[]>
+  findRecentlyViewed(options?: { limit?: number }): Promise<IssueDocument[]>
   fuzzySearch(
     query: string,
     options?: { limit?: number }
-  ): Promise<JiraTicket[]>
+  ): Promise<IssueDocument[]>
 }
 
 export type IssueCollection = RxCollection<

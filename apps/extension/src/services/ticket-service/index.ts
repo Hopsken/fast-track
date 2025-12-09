@@ -91,7 +91,7 @@ class TicketServiceImpl {
         sendMessage('onIssueSuggestionsUpdated', { inProgress: tickets })
       })
 
-      return cachedTickets
+      return cachedTickets.map((i) => i.toMutableJSON())
     })
   }
 
@@ -115,7 +115,7 @@ class TicketServiceImpl {
         })
       })
 
-      return cachedTickets
+      return cachedTickets.map((i) => i.toMutableJSON())
     })
   }
 
@@ -137,7 +137,7 @@ class TicketServiceImpl {
         })
       })
 
-      return cachedTickets
+      return cachedTickets.map((i) => i.toMutableJSON())
     })
   }
 
