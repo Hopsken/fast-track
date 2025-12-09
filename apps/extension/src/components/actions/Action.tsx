@@ -3,7 +3,7 @@ import { CommandItem } from '@internal/ui/components/command'
 import { useMemoizedFn } from 'ahooks'
 import { LucideIcon } from 'lucide-react'
 
-import { KeyboardShortcut } from '@/lib/keyboard'
+import { KeyboardShortcutInput } from '@/lib/keyboard'
 
 import { useCommandNavigate, useCommandRouter } from '../CommandRouter'
 
@@ -14,7 +14,7 @@ export interface ActionProps {
   prefix?: ReactNode
   title: ReactNode
   onSelect?: () => void
-  shortcut?: KeyboardShortcut
+  shortcut?: KeyboardShortcutInput
   exitOnSelect?: boolean
 }
 

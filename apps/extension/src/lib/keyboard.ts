@@ -7,6 +7,8 @@ export type KeyboardShortcut = {
   key: KeyEquivalent
 }
 
+export type KeyboardShortcutInput = KeyboardShortcut | PlatformKeyboardShortcut
+
 export type KeyModifier = 'cmd' | 'ctrl' | 'opt' | 'shift' | 'alt' | 'windows'
 
 export type KeyEquivalent =
@@ -84,3 +86,32 @@ export type KeyEquivalent =
   | 'escape'
   | 'enter'
   | 'backspace'
+
+let cachedPlatform: PlatformOS | null = null
+
+export const detectPlatformOS = (): PlatformOS => {
+  if (cachedPlatform) {
+    return cachedPlatform
+  }
+
+  if (typeof navigator === 'undefined') {
+    cachedPlatform = 'macOS'
+    return cachedPlatform
+  }
+
+  const platform = navigator.userAgent || navigator.platform || 'macOS'
+
+  cachedPlatform = /win/i.test(platform) ? 'Windows' : 'macOS'
+  return cachedPlatform
+}
+
+export const resolvePlatformShortcut = (
+  shortcut: KeyboardShortcutInput,
+  platform: PlatformOS = detectPlatformOS()
+): KeyboardShortcut => {
+  if ('modifiers' in shortcut) {
+    return shortcut
+  }
+
+  return shortcut[platform]
+}

@@ -1,6 +1,11 @@
 import { Keys, useHotkeys } from 'react-hotkeys-hook'
 
-import { KeyboardShortcut, KeyModifier } from '@/lib/keyboard'
+import {
+  KeyboardShortcut,
+  KeyboardShortcutInput,
+  KeyModifier,
+  resolvePlatformShortcut
+} from '@/lib/keyboard'
 
 const mapModifierKey = (modifier: KeyModifier) => {
   if (modifier === 'cmd') {
@@ -16,10 +21,11 @@ const mapKeyboardShortcutToReactHotkeys = (
 }
 
 export function useActionShortcut(
-  hotkeys: KeyboardShortcut,
+  hotkeys: KeyboardShortcutInput,
   callback: () => void
 ) {
-  const keys = mapKeyboardShortcutToReactHotkeys(hotkeys)
+  const shortcut = resolvePlatformShortcut(hotkeys)
+  const keys = mapKeyboardShortcutToReactHotkeys(shortcut)
   useHotkeys(keys, callback, {
     preventDefault: true,
     enableOnFormTags: true

@@ -2,9 +2,37 @@ import { CommandShortcut } from '@internal/ui/components/command'
 import { Kbd, KbdGroup } from '@internal/ui/components/kbd'
 
 import { useActionShortcut } from '@/hooks/useActionShortcut'
-import { KeyboardShortcut, KeyModifier } from '@/lib/keyboard'
+import {
+  detectPlatformOS,
+  KeyboardShortcutInput,
+  KeyModifier,
+  PlatformOS,
+  resolvePlatformShortcut
+} from '@/lib/keyboard'
 
-const mapModifiers = (modifier: KeyModifier) => {
+const mapModifiers = (modifier: KeyModifier, platform: PlatformOS) =>
+  platform === 'Windows'
+    ? mapWindowsModifier(modifier)
+    : mapMacModifier(modifier)
+
+const mapWindowsModifier = (modifier: KeyModifier) => {
+  switch (modifier) {
+    case 'cmd':
+    case 'windows':
+      return '⊞'
+    case 'ctrl':
+      return 'Ctrl'
+    case 'shift':
+      return 'Shift'
+    case 'opt':
+    case 'alt':
+      return 'Alt'
+    default:
+      return modifier
+  }
+}
+
+const mapMacModifier = (modifier: KeyModifier) => {
   switch (modifier) {
     case 'ctrl':
       return '⌃'
@@ -26,18 +54,21 @@ export function ActionShortcut({
   shortcut,
   onSelect
 }: {
-  shortcut: KeyboardShortcut
+  shortcut: KeyboardShortcutInput
   onSelect: () => void
 }) {
-  useActionShortcut(shortcut, onSelect)
+  const platform = detectPlatformOS()
+  const resolvedShortcut = resolvePlatformShortcut(shortcut, platform)
+
+  useActionShortcut(resolvedShortcut, onSelect)
   return (
     <CommandShortcut>
       <KbdGroup>
-        {shortcut.modifiers.map((modifier) => (
-          <Kbd key={modifier}>{mapModifiers(modifier)}</Kbd>
+        {resolvedShortcut.modifiers.map((modifier) => (
+          <Kbd key={modifier}>{mapModifiers(modifier, platform)}</Kbd>
         ))}
       </KbdGroup>
-      <Kbd key={shortcut.key}>{shortcut.key}</Kbd>
+      <Kbd key={resolvedShortcut.key}>{resolvedShortcut.key}</Kbd>
     </CommandShortcut>
   )
 }
