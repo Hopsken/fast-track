@@ -6,7 +6,6 @@ import { TicketItem, TicketList } from '@/components/tickets'
 import { useIssueSuggestions } from '@/hooks/useIssueSuggestions'
 import { IssueSuggestion } from '@/services/ticket-service'
 import { JiraTicket } from '@/types'
-import { openOptionsPage } from '@/utils'
 import {
   useIsSearching,
   useSearchQuery,
@@ -22,11 +21,6 @@ export function SearchResultMenu() {
 
   const { data: issueSuggestions } = useIssueSuggestions()
 
-  const handleOpenOptionsPage = () => {
-    openOptionsPage()
-    window.close()
-  }
-
   return (
     <CommandList aria-label="Ticket search results">
       {shouldShowSuggestions ? (
@@ -36,7 +30,6 @@ export function SearchResultMenu() {
           searchQuery={searchQuery}
           isSearching={isSearching}
           tickets={searchResults}
-          onOpenOptionsPage={handleOpenOptionsPage}
         />
       )}
 

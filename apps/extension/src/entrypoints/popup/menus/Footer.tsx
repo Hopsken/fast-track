@@ -8,7 +8,9 @@ import {
   X
 } from 'lucide-react'
 
+import { openOptionsPage } from '@/utils'
 import { formatErrorMessage } from '@/utils/formatError'
+import logoPNG from '~/assets/logo.png'
 import {
   ToastStyle,
   useToastState,
@@ -90,7 +92,23 @@ export function Footer() {
     )
   }
 
-  if (!activeToast) return null
+  function renderFooter() {
+    return (
+      <button
+        onClick={() => openOptionsPage()}
+        className={cn(
+          'text-foreground group flex cursor-pointer items-center gap-2 text-xs'
+        )}>
+        <img
+          src={logoPNG}
+          alt="Fast Track"
+          className="size-4 rounded grayscale transition group-hover:grayscale-0"
+        />
+
+        <span className="flex-1 text-xs">Fast Track</span>
+      </button>
+    )
+  }
 
   return (
     <div
@@ -98,7 +116,7 @@ export function Footer() {
         'bg-linear-to-r border-t border-gray-200 px-4 py-2',
         activeToastContainerCls
       )}>
-      {renderToast()}
+      {activeToast ? renderToast() : renderFooter()}
     </div>
   )
 }

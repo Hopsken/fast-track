@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 import { Button } from '@internal/ui/components/button'
 import { Command, CommandInput } from '@internal/ui/components/command'
 import { useMemoizedFn } from 'ahooks'
@@ -11,8 +11,6 @@ import {
   useCommandRouter
 } from '@/components/CommandRouter'
 import { QueryClientProvider } from '@/components/QueryClientProvider'
-import { ticketService } from '@/services'
-import { showToast } from '@/stores/useToastStore'
 import { useTicketSearch } from '~/hooks/useTicketSearch'
 
 import {
@@ -23,12 +21,13 @@ import {
   TicketPriorityMenu,
   TicketStatusMenu
 } from './menus'
+import { EmptyAuthNotice } from './menus/EmptyAuthNotice'
 import { Footer } from './menus/Footer'
 
 function App() {
   const { activePage, activeSearch, history, setSearch, pop } =
     useCommandRouter()
-  const { handleSearch, isSearching } = useTicketSearch()
+  const { handleSearch, isSearching, isAuthConfigured } = useTicketSearch()
   const inputRef = useRef<HTMLInputElement>(null)
 
   const isSearchResultPage = activePage.path === '/'
@@ -96,7 +95,7 @@ function App() {
         </div>
 
         <CommandRoute path="/">
-          <SearchResultMenu />
+          {isAuthConfigured ? <SearchResultMenu /> : <EmptyAuthNotice />}
         </CommandRoute>
 
         <CommandRoute path="/actions">

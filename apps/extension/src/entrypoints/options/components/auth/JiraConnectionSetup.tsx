@@ -15,7 +15,7 @@ export const JiraConnectionSetup: React.FC<JiraConnectionSetupProps> = ({
   isLoading = false
 }) => {
   return (
-    <div className="rounded-lg border bg-gray-200 p-4">
+    <div className="rounded-lg border p-4">
       {/* Header */}
       <div className="mb-6 text-center">
         <h2 className="mb-2 text-xl font-semibold text-gray-900">
