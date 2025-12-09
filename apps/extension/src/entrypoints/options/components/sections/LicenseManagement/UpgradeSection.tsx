@@ -7,75 +7,70 @@ import { useLicense } from '~/hooks/useLicense'
 export function UpgradeSection() {
   return (
     <div className="space-y-6">
-      <FormField
-        size="lg"
-        title="Upgrade to Pro"
-        description="Unlock all premium features and support future development">
-        <div className="space-y-4">
+      <div className="space-y-4">
+        <div
+          className="rounded-lg border border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 p-6"
+          role="region"
+          aria-labelledby="upgrade-offer-title">
+          <h3
+            className="mb-2 text-lg font-semibold text-blue-900"
+            id="upgrade-offer-title">
+            🚀 Early Bird Special - Limited Time!
+          </h3>
+          <p className="mb-4 font-medium text-blue-700">
+            Lock in your lifetime discount now at $9.99
+          </p>
+
           <div
-            className="rounded-lg border border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 p-6"
-            role="region"
-            aria-labelledby="upgrade-offer-title">
-            <h3
-              className="mb-2 text-lg font-semibold text-blue-900"
-              id="upgrade-offer-title">
-              🚀 Early Bird Special - Limited Time!
-            </h3>
-            <p className="mb-4 font-medium text-blue-700">
-              Lock in your lifetime discount now at $9.99
-            </p>
-
-            <div
-              className="mb-4 space-y-2 text-sm text-blue-800"
-              role="list"
-              aria-label="Pro features included">
-              <div className="flex items-center gap-2" role="listitem">
-                <span className="text-green-600" aria-hidden="true">
-                  ✓
-                </span>
-                <span>Unlock all existing Pro features</span>
-              </div>
-              <div className="flex items-center gap-2" role="listitem">
-                <span className="text-green-600" aria-hidden="true">
-                  ✓
-                </span>
-                <span>All future Pro features included free</span>
-              </div>
-              <div className="flex items-center gap-2" role="listitem">
-                <span className="text-green-600" aria-hidden="true">
-                  ✓
-                </span>
-                <span>Works on up to 3 different browsers</span>
-              </div>
-              <div className="flex items-center gap-2" role="listitem">
-                <span className="text-green-600" aria-hidden="true">
-                  ✓
-                </span>
-                <span>
-                  Cross-browser compatibility (Chrome, Firefox, Edge, Brave)
-                </span>
-              </div>
-              <div className="flex items-center gap-2" role="listitem">
-                <span className="text-green-600" aria-hidden="true">
-                  ✓
-                </span>
-                <span>License survives extension reinstalls</span>
-              </div>
+            className="mb-4 space-y-2 text-sm text-blue-800"
+            role="list"
+            aria-label="Pro features included">
+            <div className="flex items-center gap-2" role="listitem">
+              <span className="text-green-600" aria-hidden="true">
+                ✓
+              </span>
+              <span>Unlock all existing Pro features</span>
             </div>
-
-            <a
-              href={LEMON_CHECKOUT_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block w-full rounded-lg bg-blue-600 px-6 py-3 text-center font-medium text-white transition-colors hover:bg-blue-700"
-              aria-label="Purchase Pro License for $9.99 - Opens in new tab">
-              Get Pro License - $9.99
-            </a>
+            <div className="flex items-center gap-2" role="listitem">
+              <span className="text-green-600" aria-hidden="true">
+                ✓
+              </span>
+              <span>All future Pro features included free</span>
+            </div>
+            <div className="flex items-center gap-2" role="listitem">
+              <span className="text-green-600" aria-hidden="true">
+                ✓
+              </span>
+              <span>Works on up to 3 different browsers</span>
+            </div>
+            <div className="flex items-center gap-2" role="listitem">
+              <span className="text-green-600" aria-hidden="true">
+                ✓
+              </span>
+              <span>
+                Cross-browser compatibility (Chrome, Firefox, Edge, Brave)
+              </span>
+            </div>
+            <div className="flex items-center gap-2" role="listitem">
+              <span className="text-green-600" aria-hidden="true">
+                ✓
+              </span>
+              <span>License survives extension reinstalls</span>
+            </div>
           </div>
 
-          <ActivateExistingLicense />
+          <a
+            href={LEMON_CHECKOUT_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block w-full rounded-lg bg-blue-600 px-6 py-3 text-center font-medium text-white transition-colors hover:bg-blue-700"
+            aria-label="Purchase Pro License for $9.99 - Opens in new tab">
+            Get Pro License - $9.99
+          </a>
         </div>
-      </FormField>
+
+        <ActivateExistingLicense />
+      </div>
     </div>
   )
 }

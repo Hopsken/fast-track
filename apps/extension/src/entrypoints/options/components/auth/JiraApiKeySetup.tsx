@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@internal/ui/components/button'
 import {
   Card,
@@ -7,8 +8,34 @@ import {
   CardHeader,
   CardTitle
 } from '@internal/ui/components/card'
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from '@internal/ui/components/form'
 import { Input } from '@internal/ui/components/input'
-import { Label } from '@internal/ui/components/label'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+
+const jiraApiKeySchema = z.object({
+  host: z
+    .string()
+    .trim()
+    .min(1, { message: 'Jira site URL is required' })
+    .pipe(z.url({ message: 'Enter a valid Jira site URL' })),
+  email: z
+    .string()
+    .trim()
+    .min(1, { message: 'Jira account email is required' })
+    .pipe(z.email({ message: 'Enter a valid email address' })),
+  apiKey: z.string().trim().min(1, { message: 'API token is required' })
+})
+
+type JiraApiKeyFormValues = z.infer<typeof jiraApiKeySchema>
 
 export interface JiraApiKeySetupProps {
   onConnect: (payload: { host: string; email: string; apiKey: string }) => void
@@ -23,24 +50,27 @@ export const JiraApiKeySetup: React.FC<JiraApiKeySetupProps> = ({
   defaultValues,
   error
 }) => {
-  const [host, setHost] = useState(defaultValues?.host ?? '')
-  const [email, setEmail] = useState(defaultValues?.email ?? '')
-  const [apiKey, setApiKey] = useState(defaultValues?.apiKey ?? '')
   const [showKey, setShowKey] = useState(false)
 
-  useEffect(() => {
-    setHost(defaultValues?.host ?? '')
-    setEmail(defaultValues?.email ?? '')
-    setApiKey(defaultValues?.apiKey ?? '')
-  }, [defaultValues])
+  const form = useForm<JiraApiKeyFormValues>({
+    resolver: zodResolver(jiraApiKeySchema),
+    defaultValues: {
+      host: defaultValues?.host ?? '',
+      email: defaultValues?.email ?? '',
+      apiKey: defaultValues?.apiKey ?? ''
+    }
+  })
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    onConnect({
-      host: host.trim(),
-      email: email.trim(),
-      apiKey: apiKey.trim()
+  useEffect(() => {
+    form.reset({
+      host: defaultValues?.host ?? '',
+      email: defaultValues?.email ?? '',
+      apiKey: defaultValues?.apiKey ?? ''
     })
+  }, [defaultValues, form])
+
+  const onSubmit = (values: JiraApiKeyFormValues) => {
+    onConnect(values)
   }
 
   return (
@@ -52,76 +82,93 @@ export const JiraApiKeySetup: React.FC<JiraApiKeySetupProps> = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="host">Jira site URL</Label>
-            <Input
-              id="host"
-              type="text"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
               name="host"
-              autoComplete="url"
-              value={host}
-              onChange={(event) => setHost(event.target.value)}
-              placeholder="https://your-domain.atlassian.net"
-              required
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Jira site URL</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      autoComplete="url"
+                      placeholder="https://your-domain.atlassian.net"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage className="text-xs" />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Jira account email</Label>
-            <Input
-              id="email"
-              type="email"
+            <FormField
+              control={form.control}
               name="email"
-              autoComplete="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="you@company.com"
-              required
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Jira account email</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      autoComplete="email"
+                      placeholder="you@company.com"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage className="text-xs" />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="apiKey">API token</Label>
-            <div className="flex gap-2">
-              <Input
-                id="apiKey"
-                type={showKey ? 'text' : 'password'}
-                name="apiKey"
-                autoComplete="off"
-                value={apiKey}
-                onChange={(event) => setApiKey(event.target.value)}
-                placeholder="Paste your Atlassian API token"
-                required
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowKey((prev) => !prev)}
-                className="min-w-[100px]">
-                {showKey ? 'Hide' : 'Show'}
-              </Button>
-            </div>
-            <p className="text-muted-foreground text-xs">
-              Generate a token from your Atlassian account: Account settings
-              &gt; Security &gt; Create and manage API tokens.
-            </p>
-            <p className="text-muted-foreground mt-2 text-xs">
-              Required scopes: Read &mdash; read:jira-user, read:jira-work.
-              Write &mdash; write:jira-work.
-            </p>
-          </div>
+            <FormField
+              control={form.control}
+              name="apiKey"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>API token</FormLabel>
+                  <FormControl>
+                    <div className="flex gap-2">
+                      <Input
+                        type={showKey ? 'text' : 'password'}
+                        autoComplete="off"
+                        placeholder="Paste your Atlassian API token"
+                        {...field}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowKey((prev) => !prev)}
+                        className="min-w-[100px]">
+                        {showKey ? 'Hide' : 'Show'}
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormDescription className="text-xs">
+                    Generate a token from your Atlassian account: Account
+                    settings &gt; Security &gt; Create and manage API tokens.
+                  </FormDescription>
+                  <p className="text-muted-foreground mt-2 text-xs">
+                    Required scopes: Read &mdash; read:jira-user,
+                    read:jira-work. Write &mdash; write:jira-work.
+                  </p>
+                  <FormMessage className="text-xs" />
+                </FormItem>
+              )}
+            />
 
-          {error ? (
-            <p className="text-destructive text-sm" role="alert">
-              {error}
-            </p>
-          ) : null}
+            {error ? (
+              <p className="text-destructive text-sm" role="alert">
+                {error}
+              </p>
+            ) : null}
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Connecting...' : 'Connect'}
-          </Button>
-        </form>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Connecting...' : 'Connect'}
+            </Button>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   )

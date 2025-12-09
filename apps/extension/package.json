@@ -17,6 +17,7 @@
     "test": "vitest run --project extension"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@internal/ui": "workspace:*",
     "@radix-ui/react-label": "^2.1.8",
     "@tailwindcss/vite": "^4.1.17",
@@ -38,6 +39,7 @@
     "react": "19.1.1",
     "react-dom": "19.1.1",
     "react-error-boundary": "^6.0.0",
+    "react-hook-form": "^7.68.0",
     "react-hotkeys-hook": "^5.2.1",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.9.6",
