@@ -28,8 +28,8 @@ const formFieldVariants = cva(
 
 export type FormFieldProps = {
   size?: 'sm' | 'lg'
-  title: string
-  description: string | ReactNode
+  title?: string
+  description?: string | ReactNode
   onClick?: () => void
   className?: string
 } & VariantProps<typeof formFieldVariants>
@@ -56,15 +56,20 @@ export function FormField(props: PropsWithChildren<FormFieldProps>) {
             : undefined
         }>
         <div className="flex flex-1 flex-col space-y-1">
-          <FormLabel className={size === 'sm' ? 'text-sm' : 'text-lg'}>
-            {title}
-          </FormLabel>
-          <FormDescription className={size === 'sm' ? 'text-xs' : 'text-base'}>
-            {description}
-          </FormDescription>
+          {title && (
+            <FormLabel className={size === 'sm' ? 'text-sm' : 'text-lg'}>
+              {title}
+            </FormLabel>
+          )}
+          {description && (
+            <FormDescription
+              className={size === 'sm' ? 'text-xs' : 'text-base'}>
+              {description}
+            </FormDescription>
+          )}
         </div>
-        <div className="flex flex-none items-start justify-center">
-          <FormControl>{children}</FormControl>
+        <div className="flex-2 flex items-start justify-center">
+          <FormControl className="w-full">{children}</FormControl>
         </div>
       </div>
     </FormItem>

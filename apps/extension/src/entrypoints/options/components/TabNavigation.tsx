@@ -1,5 +1,5 @@
 import { ComponentType } from 'react'
-import { HiCog, HiInformationCircle, HiKey } from 'react-icons/hi'
+import { Info, KeyRound, Settings } from 'lucide-react'
 
 export interface Tab {
   id: string
@@ -8,9 +8,9 @@ export interface Tab {
 }
 
 export const tabs: Tab[] = [
-  { id: 'general', label: 'General', icon: HiCog },
-  // { id: 'license', label: 'License', icon: HiKey },
-  { id: 'about', label: 'About', icon: HiInformationCircle }
+  { id: 'general', label: 'General', icon: Settings },
+  { id: 'license', label: 'License', icon: KeyRound },
+  { id: 'about', label: 'About', icon: Info }
 ]
 
 interface TabNavigationProps {

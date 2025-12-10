@@ -5,6 +5,7 @@ import {
   OptionsHeader,
   TabNavigation,
   GeneralTab,
+  LicenseTab,
   AboutTab
 } from './components'
 
@@ -24,6 +25,7 @@ function OptionsPage() {
 
           <div className="p-6">
             {activeTab === 'general' && <GeneralTab />}
+            {activeTab === 'license' && <LicenseTab />}
             {activeTab === 'about' && <AboutTab version={version} />}
           </div>
         </div>

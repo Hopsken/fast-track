@@ -1,6 +1,5 @@
 import { useState } from 'react'
 
-import { FormField } from '~/components/ui/forms'
 import { LEMON_CHECKOUT_LINK } from '~/constants'
 import { useLicense } from '~/hooks/useLicense'
 
@@ -29,33 +28,13 @@ export function UpgradeSection() {
               <span className="text-green-600" aria-hidden="true">
                 ✓
               </span>
-              <span>Unlock all existing Pro features</span>
+              <span>All future Pro features</span>
             </div>
             <div className="flex items-center gap-2" role="listitem">
               <span className="text-green-600" aria-hidden="true">
                 ✓
               </span>
-              <span>All future Pro features included free</span>
-            </div>
-            <div className="flex items-center gap-2" role="listitem">
-              <span className="text-green-600" aria-hidden="true">
-                ✓
-              </span>
-              <span>Works on up to 3 different browsers</span>
-            </div>
-            <div className="flex items-center gap-2" role="listitem">
-              <span className="text-green-600" aria-hidden="true">
-                ✓
-              </span>
-              <span>
-                Cross-browser compatibility (Chrome, Firefox, Edge, Brave)
-              </span>
-            </div>
-            <div className="flex items-center gap-2" role="listitem">
-              <span className="text-green-600" aria-hidden="true">
-                ✓
-              </span>
-              <span>License survives extension reinstalls</span>
+              <span>Support development</span>
             </div>
           </div>
 
@@ -100,9 +79,10 @@ function ActivateExistingLicense() {
         setIsExpanded(false)
         // License activated successfully
       }
-    } catch {
+    } catch (error) {
+      console.error('Error activating license:', error)
       setError(
-        'Something went wrong. Please try again later or contact hi@hopsken.com for help'
+        'Something went wrong. Please try again later or contact support@teamusement.com for help'
       )
     } finally {
       setIsLoading(false)

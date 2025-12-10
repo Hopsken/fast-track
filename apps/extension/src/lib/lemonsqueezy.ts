@@ -24,7 +24,9 @@ export async function activateLicense(key: string, instanceName: string) {
     activated: boolean
     error: string
   } & LicenseInfo
-  assertProduct(json.meta)
+  if (!json.error) {
+    assertProduct(json.meta)
+  }
   return json
 }
 
@@ -41,7 +43,9 @@ export async function validateLicense(key: string, instance: string) {
     valid: boolean
     error: string
   } & LicenseInfo
-  assertProduct(json.meta)
+  if (!json.error) {
+    assertProduct(json.meta)
+  }
   return json
 }
 

@@ -1,6 +1,6 @@
-// import { useStorage } from '@/hooks/useStorage'
+import { useStorage } from '@/hooks/useStorage'
 import logoUrl from '~/assets/logo.png'
-// import { ProBadge } from '~/components/ProBadge'
+import { ProBadge } from '~/components/ProBadge'
 
 interface OptionsHeaderProps {
   version: string
@@ -8,13 +8,13 @@ interface OptionsHeaderProps {
 }
 
 export function OptionsHeader({ version, onTabChange }: OptionsHeaderProps) {
-  // const [license] = useStorage('License')
+  const [license] = useStorage('License')
 
-  // const handleProBadgeClick = () => {
-  //   if (onTabChange) {
-  //     onTabChange('license')
-  //   }
-  // }
+  const handleProBadgeClick = () => {
+    if (onTabChange) {
+      onTabChange('license')
+    }
+  }
 
   return (
     <header className="mb-8 flex items-center justify-between">
@@ -23,11 +23,11 @@ export function OptionsHeader({ version, onTabChange }: OptionsHeaderProps) {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold text-gray-900">Fast Track</h1>
-            {/* <ProBadge
+            <ProBadge
               isPro={!!license?.instance || false}
               onClick={handleProBadgeClick}
               interactive={!!onTabChange}
-            /> */}
+            />
           </div>
           <p className="text-gray-600">v{version} Settings</p>
         </div>

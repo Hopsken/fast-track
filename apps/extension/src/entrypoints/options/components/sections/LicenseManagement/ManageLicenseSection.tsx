@@ -25,10 +25,7 @@ export function ManageLicenseSection() {
   }
 
   return (
-    <FormField
-      size="lg"
-      title="License Management"
-      description="Manage your current license activation">
+    <FormField size="lg" description="Manage your current license activation">
       <div className="space-y-4">
         <div
           className="rounded-lg border border-orange-200 bg-orange-50 p-4"

@@ -1,4 +1,3 @@
-import { storage } from '#imports'
 import { umami } from '@wxt-dev/analytics/providers/umami'
 import { defineAppConfig } from 'wxt/utils/define-app-config'
 
@@ -7,10 +6,7 @@ import { getStorageItem } from './lib/storage'
 export default defineAppConfig({
   analytics: {
     debug: true,
-    userId: storage.defineItem<string>('local:user-analytics-id', {
-      fallback: 'anonymous',
-      init: () => crypto.randomUUID()
-    }),
+    userId: getStorageItem('DeviceId'),
     enabled: getStorageItem('analytics-enabled'),
     providers: [
       umami({

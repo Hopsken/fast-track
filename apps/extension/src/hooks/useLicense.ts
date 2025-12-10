@@ -1,6 +1,7 @@
 import { useMemoizedFn } from 'ahooks'
 import { nanoid } from 'nanoid'
 
+import { getStorageItem } from '@/lib/storage'
 import {
   activateLicense,
   deactivateLicense,
@@ -27,7 +28,11 @@ export function useLicense() {
   })
 
   const activate = useMemoizedFn(async (key: string) => {
-    const { activated, error, ...info } = await activateLicense(key, nanoid())
+    const deviceId = await getStorageItem('DeviceId').getValue()
+    const { activated, error, ...info } = await activateLicense(
+      key,
+      deviceId || nanoid()
+    )
     if (activated) {
       setLicense({
         ...info,

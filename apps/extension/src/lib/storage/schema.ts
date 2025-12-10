@@ -26,6 +26,8 @@ type StorageItems = {
   DevMode: boolean
   REACT_QUERY_OFFLINE_CACHE: unknown
 
+  DeviceId: string
+
   // analytics
   'analytics-enabled': boolean
 }
@@ -48,6 +50,8 @@ const STORAGE_DEFAULTS: StorageItems = {
   ApiKeyAuth: null,
   LastSyncAt: null,
   DevMode: false,
+
+  DeviceId: '',
 
   // analytics
   'analytics-enabled': true
@@ -77,7 +81,8 @@ const storageItems: Record<
 > = Object.entries(STORAGE_DEFAULTS).reduce(
   (acc, [key, value]) => {
     acc[key as StorageKey] = storage.defineItem(`local:${key}`, {
-      fallback: value
+      fallback: value,
+      init: () => (key === 'DeviceId' ? crypto.randomUUID() : value)
     })
     return acc
   },

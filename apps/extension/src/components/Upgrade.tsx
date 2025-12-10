@@ -84,7 +84,7 @@ function ActivateKey() {
               })
               .catch(() => {
                 setError(
-                  'Something went wrong, please try again later or contact hi@hopsken.com for help'
+                  'Something went wrong, please try again later or contact support@teamusement.com for help'
                 )
               })
               .finally(() => setLoading(false))
