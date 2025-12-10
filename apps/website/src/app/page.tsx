@@ -1,4 +1,3 @@
-import { Chromium } from 'lucide-react'
 import { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -8,7 +7,7 @@ import logoUrl from '../assets/logo.png'
 export const metadata: Metadata = {
   description:
     'Fast Track helps you search, open, and manage Jira issues without breaking flow.',
-  title: 'Fast Track | Unblocked Jira workflow'
+  title: 'Fast Track | Accelerated Jira workflow'
 }
 
 const highlights = [
@@ -37,7 +36,9 @@ export default function Index() {
               <p className="text-sm font-semibold text-emerald-700">
                 Fast Track
               </p>
-              <p className="text-xs text-slate-600">Unblocked Jira workflow</p>
+              <p className="text-xs text-slate-600">
+                Accelerated Jira workflow
+              </p>
             </div>
           </div>
           <Link
