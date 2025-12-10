@@ -25,6 +25,7 @@ jobs:
     env:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+      WXT_UMAMI_WEBSITE_ID: ${{ vars.WXT_UMAMI_WEBSITE_ID }}
 
     steps:
       - name: Checkout code
