@@ -31,6 +31,7 @@ function App() {
   const { handleSearch, isSearching, isAuthConfigured } = useTicketSearch()
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const isCommentPage = activePage.path === '/ticket/comment'
   const isSearchResultPage = activePage.path === '/'
   const inputPlaceholder =
     activePage.path === '/ticket/comment'
@@ -73,6 +74,8 @@ function App() {
 
   // Focus input when active page changes
   useLayoutEffect(() => {
+    if (isCommentPage) return
+
     inputRef?.current?.focus()
     const rafId = window.requestAnimationFrame(() => {
       inputRef.current?.select()
@@ -81,23 +84,29 @@ function App() {
     return () => {
       window.cancelAnimationFrame(rafId)
     }
-  }, [activePage.path])
+  }, [activePage.path, isCommentPage])
 
   return (
     <div className="linear w-xl">
       <Command loop shouldFilter={!isSearchResultPage}>
-        <div className="relative flex h-[52px] items-center gap-3 border-b border-gray-200 pl-5 pr-5">
-          {previousPageButton}
-          <CommandInput
-            autoFocus
-            ref={inputRef}
-            value={activeSearch}
-            onValueChange={onCommandInputChange}
-            placeholder={inputPlaceholder}
-            aria-label="Search tickets"
-            aria-busy={isSearching}
-          />
-        </div>
+        {isCommentPage ? (
+          <div className="relative flex h-[52px] items-center gap-3 border-b border-gray-200 pl-5 pr-5">
+            {previousPageButton}
+          </div>
+        ) : (
+          <div className="relative flex h-[52px] items-center gap-3 border-b border-gray-200 pl-5 pr-5">
+            {previousPageButton}
+            <CommandInput
+              autoFocus
+              ref={inputRef}
+              value={activeSearch}
+              onValueChange={onCommandInputChange}
+              placeholder={inputPlaceholder}
+              aria-label="Search tickets"
+              aria-busy={isSearching}
+            />
+          </div>
+        )}
 
         <CommandRoute path="/">
           {isAuthConfigured ? <SearchResultMenu /> : <EmptyAuthNotice />}
