@@ -34,10 +34,9 @@ declare global {
  * Runs only on the OAuth callback page to handle secure token exchange
  */
 export default defineContentScript({
-  matches: [
-    'https://teamusement.com/auth/jira/callback*',
-    'http://localhost/*'
-  ],
+  matches: import.meta.env.DEV
+    ? ['https://teamusement.com/auth/jira/callback*', 'http://localhost/*']
+    : ['https://teamusement.com/auth/jira/callback*'],
   runAt: 'document_start',
   main() {
     log.debug('Loaded on callback page')
