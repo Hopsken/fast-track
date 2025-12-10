@@ -69,7 +69,8 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
             Windows: { modifiers: ['alt', 'shift'], key: 'p' }
           }}
         />
-        <Action
+        <ActionPush
+          target={() => ({ path: '/ticket/comment', state: ticket })}
           icon={MessageCircle}
           title="Add comment..."
           shortcut={{

@@ -18,6 +18,7 @@ import {
   SearchResultMenu,
   TicketActionsMenu,
   TicketAssignMenu,
+  TicketCommentMenu,
   TicketPriorityMenu,
   TicketStatusMenu
 } from './menus'
@@ -31,6 +32,10 @@ function App() {
   const inputRef = useRef<HTMLInputElement>(null)
 
   const isSearchResultPage = activePage.path === '/'
+  const inputPlaceholder =
+    activePage.path === '/ticket/comment'
+      ? 'Type a comment...'
+      : 'Search tickets...'
 
   const onCommandInputChange = useMemoizedFn((value: string) => {
     setSearch(value)
@@ -88,7 +93,7 @@ function App() {
             ref={inputRef}
             value={activeSearch}
             onValueChange={onCommandInputChange}
-            placeholder={'Search tickets...'}
+            placeholder={inputPlaceholder}
             aria-label="Search tickets"
             aria-busy={isSearching}
           />
@@ -112,6 +117,10 @@ function App() {
 
         <CommandRoute path="/ticket/priority">
           {(ticket) => <TicketPriorityMenu ticket={ticket} />}
+        </CommandRoute>
+
+        <CommandRoute path="/ticket/comment">
+          {(ticket) => <TicketCommentMenu ticket={ticket} />}
         </CommandRoute>
 
         <Footer />

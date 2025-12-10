@@ -6,6 +6,7 @@
 import { BaseClient, Config } from 'jira.js'
 import {
   IssueSearch,
+  IssueComments,
   Issues,
   Myself,
   IssuePriorities,
@@ -33,6 +34,7 @@ export class JiraClient extends BaseClient {
 
   // jira.js modules
   issues = new Issues(this)
+  issueComments = new IssueComments(this)
   issuePriorities = new IssuePriorities(this)
   issueSearch = new IssueSearch(this)
   myself = new Myself(this)

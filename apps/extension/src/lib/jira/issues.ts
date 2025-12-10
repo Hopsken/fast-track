@@ -104,6 +104,15 @@ export class JiraIssueService {
     return this.getIssue(issueKey)
   }
 
+  async addComment(issueKey: string, comment: string) {
+    await this.client.issueComments.addComment({
+      issueIdOrKey: issueKey,
+      comment
+    })
+
+    return this.getIssue(issueKey)
+  }
+
   /**
    * Fetches suggested issues from Jira Issue Picker API and returns full tickets
    * When query is omitted or empty, Jira returns personalized suggestions.

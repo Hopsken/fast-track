@@ -264,6 +264,25 @@ class TicketServiceImpl {
     })
   }
 
+  async addComment(ticket: JiraTicket, comment: string) {
+    const trimmedComment = comment.trim()
+    if (!trimmedComment) {
+      throw new Error('addComment: comment is required')
+    }
+
+    return this.updateTicketOptimistically(ticket.key, {
+      reason: 'comment',
+      buildOptimistic: (base) => ({
+        ...base,
+        updated: new Date().toISOString()
+      }),
+      perform: async (jira) => {
+        await jira.issues.addComment(ticket.key, trimmedComment)
+        return jira.issues.getIssue(ticket.key)
+      }
+    })
+  }
+
   public async withJira<T>(action: (jira: JiraAPI) => Promise<T>) {
     const jira = await this.getJira()
     if (!jira) {
