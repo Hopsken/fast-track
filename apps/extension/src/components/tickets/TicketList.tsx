@@ -35,6 +35,7 @@ export function TicketList({
         <TicketItem
           key={ticket.key}
           ticket={ticket}
+          source="search"
           searchQuery={searchQuery}
         />
       ))}

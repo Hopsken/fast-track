@@ -59,6 +59,7 @@ function SuggestedTickets({ issues }: SuggestedTicketsProps) {
             key={ticket.key}
             ticket={ticket}
             showAvatar={showAvatar}
+            source="suggestion"
           />
         ))}
       </CommandGroup>

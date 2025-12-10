@@ -26,6 +26,7 @@
     "@tanstack/react-query-persist-client": "^5.90.14",
     "@webext-core/messaging": "^2.3.0",
     "@webext-core/proxy-service": "^1.2.1",
+    "@wxt-dev/analytics": "^0.5.1",
     "ahooks": "^3.9.6",
     "cash-dom": "^8.1.5",
     "class-variance-authority": "^0.7.1",

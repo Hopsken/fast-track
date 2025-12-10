@@ -25,6 +25,9 @@ type StorageItems = {
   } | null
   DevMode: boolean
   REACT_QUERY_OFFLINE_CACHE: unknown
+
+  // analytics
+  'analytics-enabled': boolean
 }
 
 export type StorageKey = keyof StorageItems
@@ -44,7 +47,10 @@ const STORAGE_DEFAULTS: StorageItems = {
   OAuthUserInfo: null,
   ApiKeyAuth: null,
   LastSyncAt: null,
-  DevMode: false
+  DevMode: false,
+
+  // analytics
+  'analytics-enabled': true
 }
 
 // Enhanced storage key groups with logical organization

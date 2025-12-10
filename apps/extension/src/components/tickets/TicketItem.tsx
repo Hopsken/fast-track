@@ -1,6 +1,7 @@
 import { CommandItem } from '@internal/ui/components/command'
 import { useMemoizedFn } from 'ahooks'
 
+import { analytics } from '@/services/analytics'
 import { JiraTicket } from '@/types'
 import {
   IssueTypeIcon,
@@ -20,10 +21,13 @@ interface TicketItemProps {
   showAvatar?: boolean
   showPriority?: boolean
   showStatus?: boolean
+
+  source: 'search' | 'suggestion'
 }
 
 export function TicketItem({
   ticket,
+  source,
   searchQuery = '',
   showAvatar = true,
   showPriority = true,
@@ -33,6 +37,8 @@ export function TicketItem({
 
   const onSelect = useMemoizedFn(() => {
     navigate.push('/actions', ticket)
+
+    analytics.track('select-ticket', { source })
   })
 
   function renderPriority() {

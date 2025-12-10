@@ -14,6 +14,10 @@
       "env": ["NEXT_PUBLIC_API_URL"]
     },
 
+    "extension#build": {
+      "env": ["WXT_UMAMI_WEBSITE_ID"]
+    },
+
     "zip": {
       "dependsOn": ["^build"],
       "outputs": [".output/**"]

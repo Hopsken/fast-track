@@ -5,7 +5,11 @@ import packageJson from '../../package.json'
 
 export default defineConfig({
   srcDir: 'src',
-  modules: ['@wxt-dev/module-react', '@wxt-dev/auto-icons'],
+  modules: [
+    '@wxt-dev/module-react',
+    '@wxt-dev/auto-icons',
+    '@wxt-dev/analytics/module'
+  ],
   imports: false,
 
   vite: () => ({

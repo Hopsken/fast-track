@@ -157,7 +157,6 @@ class TicketServiceImpl {
   }
 
   async isConfigured() {
-    this.log.info('TicketService: isConfigured checked')
     return (await this.getJira()) != null
   }
 

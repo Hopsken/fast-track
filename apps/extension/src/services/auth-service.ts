@@ -10,6 +10,8 @@ import { JiraApiKeyConfig, ReceivedTokenPayload, JiraUserInfo } from '@/types'
 import { getTicketService } from '~/services/ticket-service'
 import { getLogger } from '~/utils/logger'
 
+import { analytics } from './analytics'
+
 export interface AuthService {
   receiveTokens(tokens: ReceivedTokenPayload): Promise<JiraUserInfo>
   connectWithApiKey(
@@ -60,6 +62,9 @@ class AuthServiceImpl implements AuthService {
     const userInfo = await jiraApi.getMyself()
 
     await this.userInfoStorage.setValue(userInfo)
+
+    analytics.track('connect_success', { method: 'oauth' })
+
     await this.primeSuggestionsAfterAuth()
 
     return userInfo
@@ -97,6 +102,8 @@ class AuthServiceImpl implements AuthService {
   }
 
   public async disconnect() {
+    analytics.track('disconnect')
+
     await Promise.all([
       this.tokenStorage.removeValue(),
       this.apiKeyStorage.removeValue(),

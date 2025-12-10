@@ -71,6 +71,9 @@ importers:
       '@webext-core/proxy-service':
         specifier: ^1.2.1
         version: 1.2.1(@webext-core/messaging@2.3.0)(webextension-polyfill@0.12.0)
+      '@wxt-dev/analytics':
+        specifier: ^0.5.1
+        version: 0.5.1(wxt@0.20.11(@types/node@24.3.0)(jiti@2.6.1)(less@4.1.3)(lightningcss@1.30.2)(rollup@4.53.3)(sass-embedded@1.92.1)(sass@1.92.1)(terser@5.44.0)(yaml@2.8.1))
       ahooks:
         specifier: ^3.9.6
         version: 3.9.6(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -2457,6 +2460,11 @@ packages:
     peerDependencies:
       '@webext-core/messaging': '>=1.3.1'
       webextension-polyfill: '>=0.10.0'
+
+  '@wxt-dev/analytics@0.5.1':
+    resolution: {integrity: sha512-X2Wcj0hNegY59rKR2Ne7j8M2PKRgEYTKCaSq9I5Ptgcct+rTah8P5znvSwILRH/Av8KM0uVyvE+0mPpyUxMZ+g==}
+    peerDependencies:
+      wxt: '>=0.20.0'
 
   '@wxt-dev/auto-icons@1.1.0':
     resolution: {integrity: sha512-lDFZjDbrY5gDaapUuUOYTPudE88oB3Z7rTdg0N7iq2WIWga1h0bhzCJDaqNqMvPN2DCYvHFfA0cnqA12vEJjiA==}
@@ -6010,6 +6018,10 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
+  ua-parser-js@1.0.41:
+    resolution: {integrity: sha512-LbBDqdIC5s8iROCUjMbW1f5dJQTEFB1+KO9ogbvlb3nm9n4YHa5p4KTvFPWvh2Hs8gZMBuiB1/8+pdfe/tDPug==}
+    hasBin: true
+
   ufo@1.6.1:
     resolution: {integrity: sha512-9a4/uxlTWJ4+a5i0ooc1rU7C7YOw3wT+UGqdeNNHWnOF9qcMBgLRS+4IYUqbczewFx4mLEig6gawh7X6mFlEkA==}
 
@@ -8384,6 +8396,12 @@ snapshots:
       '@webext-core/messaging': 2.3.0
       get-value: 3.0.1
       webextension-polyfill: 0.12.0
+
+  '@wxt-dev/analytics@0.5.1(wxt@0.20.11(@types/node@24.3.0)(jiti@2.6.1)(less@4.1.3)(lightningcss@1.30.2)(rollup@4.53.3)(sass-embedded@1.92.1)(sass@1.92.1)(terser@5.44.0)(yaml@2.8.1))':
+    dependencies:
+      '@wxt-dev/browser': 0.1.4
+      ua-parser-js: 1.0.41
+      wxt: 0.20.11(@types/node@24.3.0)(jiti@2.6.1)(less@4.1.3)(lightningcss@1.30.2)(rollup@4.53.3)(sass-embedded@1.92.1)(sass@1.92.1)(terser@5.44.0)(yaml@2.8.1)
 
   '@wxt-dev/auto-icons@1.1.0(wxt@0.20.11(@types/node@24.3.0)(jiti@2.6.1)(less@4.1.3)(lightningcss@1.30.2)(rollup@4.53.3)(sass-embedded@1.92.1)(sass@1.92.1)(terser@5.44.0)(yaml@2.8.1))':
     dependencies:
@@ -12137,6 +12155,8 @@ snapshots:
       - supports-color
 
   typescript@5.9.2: {}
+
+  ua-parser-js@1.0.41: {}
 
   ufo@1.6.1: {}
 
