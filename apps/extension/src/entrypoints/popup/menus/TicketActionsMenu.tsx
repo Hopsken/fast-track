@@ -69,14 +69,14 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
             Windows: { modifiers: ['alt', 'shift'], key: 'p' }
           }}
         />
-        <Action
+        {/* <Action
           icon={MessageCircle}
           title="Add comment..."
           shortcut={{
             macOS: { modifiers: ['cmd', 'shift'], key: 'e' },
             Windows: { modifiers: ['alt', 'shift'], key: 'e' }
           }}
-        />
+        /> */}
       </CommandGroup>
 
       <CommandSeparator />
