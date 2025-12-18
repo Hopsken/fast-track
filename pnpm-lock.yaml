@@ -153,6 +153,9 @@ importers:
       '@internal/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
+      '@playwright/test':
+        specifier: ^1.55.0
+        version: 1.55.0
       '@tanstack/eslint-plugin-query':
         specifier: ^5.91.2
         version: 5.91.2(eslint@9.34.0(jiti@2.6.1))(typescript@5.9.2)

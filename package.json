@@ -20,6 +20,7 @@
     "lint:fix": "turbo run lint:fix",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
+    "test:e2e": "pnpm --filter extension test:e2e",
     "test:coverage": "turbo run test -- --coverage",
     "prepare": "husky",
     "clean": "rimraf build",
