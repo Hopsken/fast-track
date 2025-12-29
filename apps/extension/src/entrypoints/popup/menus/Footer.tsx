@@ -105,7 +105,10 @@ export function Footer() {
           className="size-4 rounded grayscale transition group-hover:grayscale-0"
         />
 
-        <span className="flex-1 text-xs">Fast Track</span>
+        <span className="flex-1 text-xs">
+          <span className="group-hover:hidden">Fast Track</span>
+          <span className="hidden group-hover:block">Settings</span>
+        </span>
       </button>
     )
   }

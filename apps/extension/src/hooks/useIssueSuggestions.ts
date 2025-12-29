@@ -6,6 +6,7 @@ import { onMessage } from '@/lib/message'
 import { ticketService } from '@/services'
 import { IssueSuggestion } from '@/services/ticket-service'
 import { queryKeys } from '@/utils/queryKeys'
+import { days, minutes } from '@/utils/time'
 
 const mergeSuggestions = (
   prev?: IssueSuggestion,
@@ -45,6 +46,7 @@ export function useIssueSuggestions() {
       ticketService
         .getIssueSuggestions()
         .then((suggestions) => mergeSuggestions(undefined, suggestions)),
-    staleTime: Infinity
+    staleTime: minutes(2),
+    gcTime: days(2)
   })
 }
