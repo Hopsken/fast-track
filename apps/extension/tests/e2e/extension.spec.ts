@@ -30,8 +30,9 @@ test.describe('Fast Track extension', () => {
     try {
       const optionsPage = await openExtensionPage('options.html')
 
-      const generalTab = optionsPage.getByRole('tab', { name: 'General' })
-      await expect(generalTab).toHaveAttribute('data-state', 'active')
+      const generalTab = optionsPage.getByRole('button', { name: 'General' })
+      await expect(generalTab).toHaveClass(/border-blue-500/)
+      await expect(generalTab).toHaveClass(/text-blue-600/)
 
       const analyticsHeading = optionsPage.getByRole('heading', {
         name: 'Anonymous analytics'
