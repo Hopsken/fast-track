@@ -45,6 +45,6 @@ export function useIssueSuggestions() {
       ticketService
         .getIssueSuggestions()
         .then((suggestions) => mergeSuggestions(undefined, suggestions)),
-    staleTime: 1000 * 60
+    staleTime: Infinity
   })
 }

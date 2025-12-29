@@ -11,15 +11,6 @@ export function UpgradeSection() {
           className="rounded-lg border border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 p-6"
           role="region"
           aria-labelledby="upgrade-offer-title">
-          <h3
-            className="mb-2 text-lg font-semibold text-blue-900"
-            id="upgrade-offer-title">
-            🚀 Early Bird Special - Limited Time!
-          </h3>
-          <p className="mb-4 font-medium text-blue-700">
-            Lock in your lifetime discount now at $9.99
-          </p>
-
           <div
             className="mb-4 space-y-2 text-sm text-blue-800"
             role="list"
@@ -43,8 +34,8 @@ export function UpgradeSection() {
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block w-full rounded-lg bg-blue-600 px-6 py-3 text-center font-medium text-white transition-colors hover:bg-blue-700"
-            aria-label="Purchase Pro License for $9.99 - Opens in new tab">
-            Get Pro License - $9.99
+            aria-label="Purchase Pro License for $10 - Opens in new tab">
+            Get Pro License - $10
           </a>
         </div>
 
