@@ -9,6 +9,7 @@ import {
   Clipboard,
   GitBranch,
   Link2,
+  SquareArrowOutUpRight,
   MessageCircle,
   Route,
   UserPen,
@@ -16,7 +17,12 @@ import {
   UserRoundPlus
 } from 'lucide-react'
 
-import { Action, ActionCopyToClipboard, ActionPush } from '@/components/actions'
+import {
+  Action,
+  ActionCopyToClipboard,
+  ActionHyperLink,
+  ActionPush
+} from '@/components/actions'
 import { PrefetchProvider } from '@/components/PrefetchQuery'
 import { useCurrentUser } from '@/hooks/useCurrentUser'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
@@ -38,6 +44,16 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
   return (
     <CommandList>
       <CommandGroup heading={`${ticket.key} - ${ticket.summary}`}>
+        <ActionHyperLink
+          icon={SquareArrowOutUpRight}
+          url={ticket.url}
+          title="Open in Jira"
+          shortcut={{
+            macOS: { modifiers: ['cmd', 'shift'], key: 'o' },
+            Windows: { modifiers: ['alt', 'shift'], key: 'o' }
+          }}
+        />
+
         <ActionPush
           target={() => ({ path: '/ticket/assign', state: ticket })}
           icon={UserPen}
