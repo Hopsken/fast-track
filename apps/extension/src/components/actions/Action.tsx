@@ -1,15 +1,15 @@
 import { createElement, ReactNode, useCallback } from 'react'
 import { CommandItem } from '@internal/ui/components/command'
-import { useMemoizedFn } from 'ahooks'
 import { LucideIcon } from 'lucide-react'
 
 import { KeyboardShortcutInput } from '@/lib/keyboard'
 
-import { useCommandNavigate, useCommandRouter } from '../CommandRouter'
+import { useCommandNavigate } from '../CommandRouter'
 
 import { ActionShortcut } from './ActionShortcut'
 
 export interface ActionProps {
+  value: string
   icon?: LucideIcon
   prefix?: ReactNode
   title: ReactNode
@@ -19,6 +19,7 @@ export interface ActionProps {
 }
 
 export function Action({
+  value,
   icon,
   prefix,
   title,
@@ -36,7 +37,11 @@ export function Action({
   }, [exitOnSelect, onSelect, router])
 
   return (
-    <CommandItem tabIndex={0} role="button" onSelect={onSelectItem}>
+    <CommandItem
+      value={value}
+      tabIndex={0}
+      role="button"
+      onSelect={onSelectItem}>
       <span>{prefix ?? iconEl}</span>
 
       <div className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">

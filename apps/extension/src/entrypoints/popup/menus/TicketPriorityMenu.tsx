@@ -21,6 +21,7 @@ export function TicketPriorityMenu({ ticket }: { ticket: JiraTicket }) {
     return priorities?.map((priority) => (
       <Action
         key={priority.id || priority.name}
+        value={priority.name || priority.id || 'priority'}
         prefix={<PriorityIcon priority={priority} />}
         title={priority.name}
         onSelect={() => updatePriority({ ticket, priority })}

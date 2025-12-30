@@ -28,6 +28,7 @@ export function TicketAssignMenu({ ticket }: { ticket: JiraTicket }) {
 
   const unassignAction = (
     <Action
+      value="assignee-none"
       prefix={<AssigneeAvatar assignee={null} />}
       title="No assignee"
       onSelect={() => assignTicket({ ticket, assignee: null })}
@@ -39,13 +40,21 @@ export function TicketAssignMenu({ ticket }: { ticket: JiraTicket }) {
   function renderList() {
     if (isLoading) return <CommandLoading>Loading...</CommandLoading>
 
-    return users?.map((user) => (
-      <ActionUser
-        key={user.accountId || user.emailAddress || user.displayName}
-        user={user}
-        onSelect={() => assignTicket({ ticket, assignee: user })}
-      />
-    ))
+    return users?.map((user) => {
+      const identifier =
+        user.accountId || user.emailAddress || user.displayName || 'assignee'
+      const displayName =
+        user.displayName || user.name || user.emailAddress || 'Anonymous'
+
+      return (
+        <ActionUser
+          key={identifier}
+          value={`${displayName} ${identifier}`}
+          user={user}
+          onSelect={() => assignTicket({ ticket, assignee: user })}
+        />
+      )
+    })
   }
 
   return (

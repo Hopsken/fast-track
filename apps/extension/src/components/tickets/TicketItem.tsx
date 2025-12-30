@@ -53,6 +53,8 @@ export function TicketItem({
 
   return (
     <CommandItem
+      key={ticket.key}
+      value={ticket.key}
       tabIndex={0}
       role="button"
       onSelect={onSelect}

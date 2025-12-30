@@ -80,7 +80,10 @@ function App() {
 
   return (
     <div className="linear w-xl">
-      <Command loop shouldFilter={!isSearchResultPage}>
+      <Command
+        loop
+        shouldFilter={!isSearchResultPage}
+        onValueChange={console.log}>
         <div className="relative flex h-[52px] items-center gap-3 border-b border-gray-200 pl-5 pr-5">
           {previousPageButton}
           <CommandInput

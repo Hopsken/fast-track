@@ -10,7 +10,6 @@ import {
   GitBranch,
   Link2,
   SquareArrowOutUpRight,
-  MessageCircle,
   Route,
   UserPen,
   UserRoundMinus,
@@ -45,6 +44,7 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
     <CommandList>
       <CommandGroup heading={`${ticket.key} - ${ticket.summary}`}>
         <ActionHyperLink
+          value="open-in-jira"
           icon={SquareArrowOutUpRight}
           url={ticket.url}
           title="Open in Jira"
@@ -55,6 +55,7 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
         />
 
         <ActionPush
+          value="assign-to"
           target={() => ({ path: '/ticket/assign', state: ticket })}
           icon={UserPen}
           title="Assign to..."
@@ -67,6 +68,7 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
         <AssignOrUnassignMySelf ticket={ticket} />
 
         <ActionPush
+          value="change-status"
           target={() => ({ path: '/ticket/status', state: ticket })}
           icon={Route}
           title="Change status..."
@@ -77,6 +79,7 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
         />
 
         <ActionPush
+          value="change-priority"
           target={() => ({ path: '/ticket/priority', state: ticket })}
           icon={ChartNoAxesColumnIncreasing}
           title="Change priority..."
@@ -99,6 +102,7 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
 
       <CommandGroup heading="Misc">
         <ActionCopyToClipboard
+          value="copy-issue-key"
           icon={Clipboard}
           content={ticket.key}
           title="Copy issue key"
@@ -108,6 +112,7 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
           }}
         />
         <ActionCopyToClipboard
+          value="copy-issue-link"
           icon={Link2}
           content={ticket.url}
           title="Copy issue link"
@@ -117,6 +122,7 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
           }}
         />
         <ActionCopyToClipboard
+          value="copy-issue-title"
           icon={Clipboard}
           content={ticket.summary}
           title="Copy issue title"
@@ -126,6 +132,7 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
           }}
         />
         <ActionCopyToClipboard
+          value="copy-issue-key-and-title"
           icon={Clipboard}
           content={`${ticket.key}: ${ticket.summary}`}
           title="Copy issue key and title"
@@ -135,6 +142,7 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
           }}
         />
         <ActionCopyToClipboard
+          value="copy-issue-title-link"
           icon={Link2}
           content={formatted.issueTitleLink}
           title="Copy issue title as link"
@@ -144,6 +152,7 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
           }}
         />
         <ActionCopyToClipboard
+          value="copy-branch-name"
           icon={GitBranch}
           content={formatted.branchName}
           title="Copy git branch name"
@@ -169,6 +178,7 @@ function AssignOrUnassignMySelf({ ticket }: { ticket: JiraTicket }) {
 
   return isAssignedByMe ? (
     <Action
+      value="unassign-myself"
       icon={UserRoundMinus}
       title="Unassigned from me"
       onSelect={() => assignMyself({ ticket, assign: false })}
@@ -179,6 +189,7 @@ function AssignOrUnassignMySelf({ ticket }: { ticket: JiraTicket }) {
     />
   ) : (
     <Action
+      value="assign-myself"
       icon={UserRoundPlus}
       title="Assign to me"
       onSelect={() => assignMyself({ ticket, assign: true })}

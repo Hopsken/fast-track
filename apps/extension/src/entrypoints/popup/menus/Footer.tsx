@@ -107,7 +107,9 @@ export function Footer() {
 
         <span className="flex-1 text-xs">
           <span className="group-hover:hidden">Fast Track</span>
-          <span className="hidden group-hover:block">Settings</span>
+          <span className="hidden opacity-0 transition group-hover:block group-hover:opacity-100">
+            Settings
+          </span>
         </span>
       </button>
     )
