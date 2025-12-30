@@ -13,10 +13,16 @@ const mergeSuggestions = (
   const inProgress = next?.inProgress ?? prev?.inProgress ?? []
   const activeSprintTodo =
     next?.activeSprintTodo ?? prev?.activeSprintTodo ?? []
+  const viewHistory = next?.viewHistory ?? prev?.viewHistory ?? []
 
   return {
     inProgress,
-    activeSprintTodo: differenceBy(activeSprintTodo, inProgress, 'key')
+    activeSprintTodo: differenceBy(activeSprintTodo, inProgress, 'key'),
+    viewHistory: differenceBy(
+      viewHistory,
+      inProgress.concat(activeSprintTodo),
+      'key'
+    )
   }
 }
 

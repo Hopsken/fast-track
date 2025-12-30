@@ -18,6 +18,7 @@ import { getLogger } from '~/utils/logger'
 export type IssueSuggestion = {
   inProgress: JiraTicket[]
   activeSprintTodo: JiraTicket[]
+  viewHistory: JiraTicket[]
 }
 
 /**
@@ -36,14 +37,16 @@ class TicketServiceImpl {
   }
 
   async getIssueSuggestions(): Promise<IssueSuggestion> {
-    const [inProgress, activeSprintTodo] = await Promise.all([
+    const [inProgress, activeSprintTodo, viewHistory] = await Promise.all([
       this.getMyInProgressTickets(),
-      this.getMyActiveSprintTodoTickets()
+      this.getMyActiveSprintTodoTickets(),
+      this.getRecentHistoryTickets()
     ])
 
     return {
       inProgress,
-      activeSprintTodo
+      activeSprintTodo,
+      viewHistory
     }
   }
 
@@ -58,6 +61,12 @@ class TicketServiceImpl {
   ): Promise<JiraTicket[]> {
     return this.withJira(async (jira) => {
       return jira.issues.getMyActiveSprintTodoIssues(limit)
+    })
+  }
+
+  private async getRecentHistoryTickets(limit = 20): Promise<JiraTicket[]> {
+    return this.withJira(async (jira) => {
+      return jira.issues.getRecentHistoryIssues(limit)
     })
   }
 
