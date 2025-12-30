@@ -1,3 +1,5 @@
+import { showToast } from '@/stores/useToastStore'
+
 import { Action, ActionProps } from './Action'
 
 export interface ActionCopyToClipboardProps
@@ -14,6 +16,10 @@ export function ActionCopyToClipboard({
   const onSelect = () => {
     navigator.clipboard.writeText(content)
     onCopy?.()
+    showToast({
+      title: `Copied: ${content}`,
+      style: 'success'
+    })
   }
-  return <Action {...restProps} onSelect={onSelect} />
+  return <Action {...restProps} onSelect={onSelect} exitOnSelect={false} />
 }

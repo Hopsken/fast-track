@@ -12,12 +12,14 @@ export type RouteMap = Record<string, any>
 interface PageSnapshot<T extends RouteMap> {
   path: keyof T
   state: T[keyof T]
+  value: string
   search: string
 }
 
 interface CommandRouterState<T extends RouteMap> {
   history: PageSnapshot<T>[]
   setSearch: (search: string) => void
+  setValue: (value: string) => void
   push: <K extends keyof T>(
     path: K,
     ...args: T[K] extends void | undefined ? [state?: never] : [state: T[K]]
@@ -38,7 +40,8 @@ function createCommandRouterStore<T extends RouteMap>(
     path: defaultPage,
 
     state: undefined as T[keyof T],
-    search: ''
+    search: '',
+    value: ''
   }
 
   return createStore<CommandRouterState<T>>((set) => ({
@@ -56,10 +59,22 @@ function createCommandRouterStore<T extends RouteMap>(
       })
     },
 
+    setValue: (value) => {
+      set((curr) => {
+        if (curr.history.length === 0) return curr
+        const nextPages = [...curr.history]
+        const activePage = nextPages[nextPages.length - 1]!
+        activePage.value = value
+        return {
+          history: nextPages
+        }
+      })
+    },
+
     push: (path, ...args) => {
       const state = args[0] as T[keyof T]
       set((curr) => {
-        const nextPage: PageSnapshot<T> = { path, state, search: '' }
+        const nextPage: PageSnapshot<T> = { path, state, search: '', value: '' }
         return {
           ...curr,
           history: [...curr.history, nextPage]
@@ -91,14 +106,19 @@ export function useCommandRouter<T extends RouteMap>() {
 
   return useStore(
     store,
-    useShallow((state) => ({
-      activePage: state.history[state.history.length - 1]!,
-      activeSearch: state.history[state.history.length - 1]!.search,
-      history: state.history,
-      setSearch: state.setSearch,
-      push: state.push,
-      pop: state.pop
-    }))
+    useShallow((state) => {
+      const activePage = state.history[state.history.length - 1]!
+      return {
+        activePage,
+        activeSearch: activePage.search,
+        activeValue: activePage.value,
+        history: state.history,
+        setSearch: state.setSearch,
+        setValue: state.setValue,
+        push: state.push,
+        pop: state.pop
+      }
+    })
   )
 }
 

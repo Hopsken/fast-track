@@ -25,8 +25,15 @@ import { EmptyAuthNotice } from './menus/EmptyAuthNotice'
 import { Footer } from './menus/Footer'
 
 function App() {
-  const { activePage, activeSearch, history, setSearch, pop } =
-    useCommandRouter()
+  const {
+    activePage,
+    activeSearch,
+    activeValue,
+    history,
+    setSearch,
+    setValue,
+    pop
+  } = useCommandRouter()
   const { handleSearch, isSearching, isAuthConfigured } = useTicketSearch()
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -83,7 +90,8 @@ function App() {
       <Command
         loop
         shouldFilter={!isSearchResultPage}
-        onValueChange={console.log}>
+        value={activeValue}
+        onValueChange={setValue}>
         <div className="relative flex h-[52px] items-center gap-3 border-b border-gray-200 pl-5 pr-5">
           {previousPageButton}
           <CommandInput
