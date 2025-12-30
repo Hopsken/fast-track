@@ -1,7 +1,5 @@
 import { CommandGroup, CommandList } from '@internal/ui/components/command'
 
-import { DevActionRefreshSuggestions } from '@/components/DevActionRefreshSuggestions'
-import { DevOnly } from '@/components/DevOnly'
 import { TicketItem, TicketList } from '@/components/tickets'
 import { useIssueSuggestions } from '@/hooks/useIssueSuggestions'
 import { IssueSuggestion } from '@/services/ticket-service'
@@ -33,9 +31,6 @@ export function SearchResultMenu() {
         />
       )}
 
-      <DevOnly>
-        <DevActionRefreshSuggestions />
-      </DevOnly>
     </CommandList>
   )
 }
