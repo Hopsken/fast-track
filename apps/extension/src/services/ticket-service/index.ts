@@ -12,6 +12,7 @@ import { uniqBy } from 'lodash-es'
 import { sendMessage } from '@/lib/message'
 import { JiraPriority, JiraTicket, JiraTransition } from '@/types'
 import { mapPriority } from '@/utils/jira/issues'
+import { normalizeProjects } from '@/utils/ticket-search'
 import { getJiraApi, JiraAPI } from '~/lib/jira'
 import { getLogger } from '~/utils/logger'
 
@@ -70,14 +71,27 @@ class TicketServiceImpl {
     })
   }
 
-  async searchTickets(query: string): Promise<JiraTicket[]> {
+  async getFrequentProjects(): Promise<string[]> {
+    return this.withJira(async (jira) => {
+      const tickets = await jira.issues.getRecentHistoryIssues(20)
+      return normalizeProjects(tickets.map((ticket) => ticket.projectKey))
+    })
+  }
+
+  async searchTickets(
+    query: string,
+    options?: { projectKeys?: string[]; limit?: number }
+  ): Promise<JiraTicket[]> {
     const normalizedQuery = query.trim()
     if (!normalizedQuery) {
       return []
     }
 
     return this.withJira(async (jira) => {
-      const results = await jira.issues.searchIssuesByText(normalizedQuery)
+      const results = await jira.issues.searchIssuesByText(
+        normalizedQuery,
+        options
+      )
       return uniqBy(results, 'key')
     })
   }

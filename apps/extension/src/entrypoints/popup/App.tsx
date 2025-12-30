@@ -17,7 +17,6 @@ import { useIsCommandLoading } from '@/stores/useLoadingStore'
 
 import {
   CommandRoutes,
-  SearchResultMenu,
   TicketActionsMenu,
   TicketAssignMenu,
   TicketPriorityMenu,
@@ -25,6 +24,7 @@ import {
 } from './menus'
 import { EmptyAuthNotice } from './menus/EmptyAuthNotice'
 import { Footer } from './menus/Footer'
+import { TicketListMenu } from './menus/TicketListMenu'
 
 function App() {
   const {
@@ -112,7 +112,7 @@ function App() {
         <CommandRoute path="/">
           {() => {
             if (isAuthConfigured === null) return null
-            return isAuthConfigured ? <SearchResultMenu /> : <EmptyAuthNotice />
+            return isAuthConfigured ? <TicketListMenu /> : <EmptyAuthNotice />
           }}
         </CommandRoute>
 

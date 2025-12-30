@@ -1,66 +1,60 @@
-import { CommandGroup, CommandList } from '@internal/ui/components/command'
+import { useEffect, useState } from 'react'
+import { CommandItem, CommandList } from '@internal/ui/components/command'
+import { uniqBy } from 'lodash-es'
 
 import { ActionLoading } from '@/components/actions'
-import { TicketItem, TicketList } from '@/components/tickets'
-import { useIssueSuggestions } from '@/hooks/useIssueSuggestions'
+import { TicketList } from '@/components/tickets'
+import { useFrequentProjects } from '@/hooks/useFrequentProjects'
 import { useSearchQuery, useTicketSearch } from '@/hooks/useTicketSearch'
-import { IssueSuggestion } from '@/services/ticket-service'
-import { JiraTicket } from '@/types'
 
 export function SearchResultMenu() {
   const searchQuery = useSearchQuery()
-  const shouldShowSuggestions = !searchQuery.trim()
 
-  const { data: searchResults = [], isFetching: isSearching } =
-    useTicketSearch()
-  const { data: issueSuggestions, isLoading } = useIssueSuggestions()
+  const [showAllProjects, setShowAllProjects] = useState(false)
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setShowAllProjects(false)
+  }, [searchQuery])
+
+  const { data: frequentProjects = [] } = useFrequentProjects()
+
+  const useScopedProjects =
+    frequentProjects.length > 0 && searchQuery.trim().length > 0
+
+  const { data: scopedResults = [], isFetching: isScopedSearching } =
+    useTicketSearch({
+      enabled: useScopedProjects && !showAllProjects,
+      projectKeys: frequentProjects,
+      limit: 6
+    })
+
+  const { data: allResults = [], isFetching: isAllSearching } = useTicketSearch(
+    {
+      enabled: !useScopedProjects || showAllProjects,
+      limit: 10
+    }
+  )
+
+  const searchResults = uniqBy(scopedResults.concat(allResults), 'key')
+  const isSearching = isScopedSearching || isAllSearching
+
+  const shouldShowMore =
+    useScopedProjects && !showAllProjects && Boolean(searchQuery.trim())
 
   return (
     <CommandList aria-label="Ticket search results">
-      {shouldShowSuggestions ? (
-        <SuggestedTickets issues={issueSuggestions} />
-      ) : (
-        <TicketList
-          searchQuery={searchQuery}
-          isSearching={isSearching}
-          tickets={searchResults}
-        />
-      )}
-      <ActionLoading isLoading={isLoading || isSearching} />
+      <TicketList searchQuery={searchQuery} tickets={searchResults} />
+      {shouldShowMore ? (
+        <CommandItem
+          forceMount
+          value="show-all-projects"
+          onSelect={() => setShowAllProjects(true)}>
+          Show more results
+        </CommandItem>
+      ) : null}
+
+      <ActionLoading isLoading={isSearching} />
     </CommandList>
-  )
-}
-
-interface SuggestedTicketsProps {
-  issues?: IssueSuggestion
-}
-
-function SuggestedTickets({ issues }: SuggestedTicketsProps) {
-  function renderGroup(
-    heading: string,
-    tickets?: JiraTicket[],
-    showAvatar = true
-  ) {
-    if (!tickets?.length) return null
-
-    return (
-      <CommandGroup heading={heading}>
-        {tickets.map((ticket) => (
-          <TicketItem
-            key={ticket.key}
-            ticket={ticket}
-            showAvatar={showAvatar}
-            source="suggestion"
-          />
-        ))}
-      </CommandGroup>
-    )
-  }
-  return (
-    <>
-      {renderGroup('In Progress', issues?.inProgress, false)}
-      {renderGroup('Upcoming', issues?.activeSprintTodo, false)}
-      {renderGroup('Recommend for you', issues?.viewHistory)}
-    </>
   )
 }

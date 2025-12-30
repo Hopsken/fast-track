@@ -10,6 +10,7 @@ import { chunk, compact, flatMap, map } from 'lodash-es'
 import { IssueSource, JiraPriority, JiraTicket, JiraTransition } from '@/types'
 import { isNonNullable } from '@/utils/assert'
 import { mapPriority, mapTransition } from '@/utils/jira/issues'
+import { normalizeProjects } from '@/utils/ticket-search'
 import { getLogger } from '~/utils/logger'
 
 import { toISODateString } from '../date'
@@ -157,12 +158,15 @@ export class JiraIssueService {
 
   async searchIssuesByText(
     query: string,
-    maxResults = 30
+    options?: { limit?: number; projectKeys?: string[] }
   ): Promise<JiraTicket[]> {
     const trimmedQuery = query.trim()
     if (!trimmedQuery) {
       return []
     }
+
+    const maxResults = options?.limit ?? 30
+    const projectKeys = normalizeProjects(options?.projectKeys ?? [])
 
     const tokens = trimmedQuery.split(/\s+/).filter(Boolean)
 
@@ -189,7 +193,20 @@ export class JiraIssueService {
       tokens.forEach((token) => addFieldClauses(token))
     }
 
-    const jql = `${Array.from(clauses).join(' OR ')} ORDER BY updated DESC`
+    const searchClause = Array.from(clauses).join(' OR ')
+    const projectClause =
+      projectKeys.length > 0
+        ? `project in (${projectKeys
+            .map((key) => `"${escapeJqlValue(key)}"`)
+            .join(', ')})`
+        : ''
+
+    const jqlParts = [projectClause, searchClause]
+      .filter(Boolean)
+      .map((part) => `(${part})`)
+      .join(' AND ')
+
+    const jql = `${jqlParts} ORDER BY updated DESC`
     return this.searchIssuesUsingJql(jql, { limit: maxResults })
   }
 

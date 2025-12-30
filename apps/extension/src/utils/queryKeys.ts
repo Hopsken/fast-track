@@ -1,4 +1,11 @@
 import { JiraTicket } from '@/types'
+import { normalizeProjects } from '@/utils/ticket-search'
+
+export type TicketSearchKey = {
+  query: string
+  projects: string[]
+  limit: number
+}
 
 export const queryKeys = {
   issue: {
@@ -12,8 +19,19 @@ export const queryKeys = {
   },
   autoComplete: (url: string, query: string) => ['autoComplete', url, query],
   priorities: ['priorities'],
+  projects: {
+    frequent: ['projects', 'frequent'] as const
+  },
   tickets: {
     suggestions: ['tickets', 'suggestions'] as const,
-    search: (query: string) => ['tickets', 'search', query] as const
+    search: (params: TicketSearchKey) =>
+      [
+        'tickets',
+        'search',
+        {
+          ...params,
+          projects: normalizeProjects(params.projects)
+        }
+      ] as const
   }
 }
