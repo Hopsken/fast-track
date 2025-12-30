@@ -12,8 +12,8 @@ import {
   useCommandRouter
 } from '@/components/CommandRouter'
 import { QueryClientProvider } from '@/components/QueryClientProvider'
+import { useAuthConfigurationStatus } from '@/hooks/useAuthConfigurationStatus'
 import { useIsCommandLoading } from '@/stores/useLoadingStore'
-import { useTicketSearch } from '~/hooks/useTicketSearch'
 
 import {
   CommandRoutes,
@@ -36,7 +36,7 @@ function App() {
     setValue,
     pop
   } = useCommandRouter()
-  const { handleSearch, isAuthConfigured } = useTicketSearch()
+  const isAuthConfigured = useAuthConfigurationStatus()
   const inputRef = useRef<HTMLInputElement>(null)
   const isCommandLoading = useIsCommandLoading()
 
@@ -48,9 +48,6 @@ function App() {
 
   const onCommandInputChange = useMemoizedFn((value: string) => {
     setSearch(value)
-    if (isSearchResultPage) {
-      handleSearch(value)
-    }
   })
 
   const previousPageButton =
@@ -113,7 +110,10 @@ function App() {
         </div>
 
         <CommandRoute path="/">
-          {isAuthConfigured ? <SearchResultMenu /> : <EmptyAuthNotice />}
+          {() => {
+            if (isAuthConfigured === null) return null
+            return isAuthConfigured ? <SearchResultMenu /> : <EmptyAuthNotice />
+          }}
         </CommandRoute>
 
         <CommandRoute path="/actions">

@@ -2,6 +2,8 @@ import { uniqBy } from 'lodash-es'
 
 import { JiraTicket } from '@/types'
 
+import { isNonNullable } from './assert'
+
 const IN_PROGRESS_KEYS = ['indeterminate']
 const IN_PROGRESS_NAMES = ['in progress']
 
@@ -148,4 +150,23 @@ export const rankTickets = (
     .sort(sorter)
     .slice(0, limit)
     .map((item) => item.ticket)
+}
+
+export const filterTicketsByQuery = (tickets: JiraTicket[], query: string) => {
+  const normalizedQuery = normalize(query)
+  if (!normalizedQuery) return tickets
+
+  const tokens = normalizedQuery.split(/\s+/).filter(Boolean)
+  if (!tokens.length) return tickets
+
+  const matches = (ticket: JiraTicket) => {
+    const haystack = [ticket.key, ticket.summary, ticket.assignee?.displayName]
+      .filter(isNonNullable)
+      .map((value) => value.toLowerCase())
+      .join(' ')
+
+    return tokens.every((token) => haystack.includes(token))
+  }
+
+  return tickets.filter(matches)
 }

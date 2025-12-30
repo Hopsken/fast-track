@@ -3,21 +3,16 @@ import { CommandGroup, CommandList } from '@internal/ui/components/command'
 import { ActionLoading } from '@/components/actions'
 import { TicketItem, TicketList } from '@/components/tickets'
 import { useIssueSuggestions } from '@/hooks/useIssueSuggestions'
+import { useSearchQuery, useTicketSearch } from '@/hooks/useTicketSearch'
 import { IssueSuggestion } from '@/services/ticket-service'
 import { JiraTicket } from '@/types'
-import {
-  useIsSearching,
-  useSearchQuery,
-  useSearchResults
-} from '~/stores/useTicketStore'
 
 export function SearchResultMenu() {
   const searchQuery = useSearchQuery()
-  const isSearching = useIsSearching()
-  const searchResults = useSearchResults()
-
   const shouldShowSuggestions = !searchQuery.trim()
 
+  const { data: searchResults = [], isFetching: isSearching } =
+    useTicketSearch()
   const { data: issueSuggestions, isLoading } = useIssueSuggestions()
 
   return (

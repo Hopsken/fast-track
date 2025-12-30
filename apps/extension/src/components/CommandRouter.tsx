@@ -1,4 +1,5 @@
 import { createContext, ReactNode, useContext, useMemo } from 'react'
+import { last } from 'lodash-es'
 import { useStore, StoreApi } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
 import { createStore } from 'zustand/vanilla'
@@ -125,6 +126,11 @@ export function useCommandRouter<T extends RouteMap>() {
 export function useCommandRouterActivePage<T extends RouteMap>() {
   const store = useCommandRouterStore<T>()
   return useStore(store, (state) => state.history[state.history.length - 1]!)
+}
+
+export function useCommandSearch() {
+  const store = useCommandRouterStore()
+  return useStore(store, (state) => last(state.history)?.search ?? '')
 }
 
 export function useCommandNavigate<T extends RouteMap>() {

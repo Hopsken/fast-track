@@ -1,105 +1,53 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useMemoizedFn, useMount } from 'ahooks'
+import { useMemo } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useDebounce, useMemoizedFn } from 'ahooks'
+import { uniqBy } from 'lodash-es'
 
-import { onMessage } from '@/lib/message'
-import { mergeTickets } from '@/lib/ticket'
-import { getSearchService } from '@/services/search-service'
-import { getTicketService } from '@/services/ticket-service'
-import {
-  useSearchQuery,
-  useSearchResults,
-  useSearchError,
-  useIsSearching,
-  useSearchActions,
-  useTicketStore
-} from '~/stores/useTicketStore'
-import { getLogger } from '~/utils/logger'
+import { useCommandSearch } from '@/components/CommandRouter'
+import { ticketService } from '@/services'
+import { IssueSuggestion } from '@/services/ticket-service'
+import { JiraTicket } from '@/types'
+import { queryKeys } from '@/utils/queryKeys'
+import { filterTicketsByQuery, rankTickets } from '@/utils/ticket-ranking'
+import { minutes } from '@/utils/time'
 
-const NOT_CONNECTED_MESSAGE =
-  'Connect your Jira account in options to start searching.'
+export const useSearchQuery = () => useCommandSearch().trim()
 
-export function useTicketSearch() {
-  // Get state and actions from the store
+export const useTicketSearch = (enabled = true) => {
   const searchQuery = useSearchQuery()
-  const searchResults = useSearchResults()
-  const error = useSearchError()
-  const isSearching = useIsSearching()
-  const actions = useSearchActions()
-  const log = useMemo(() => getLogger('ticket-search'), [])
+  const queryClient = useQueryClient()
+  const debouncedQuery = useDebounce(searchQuery, { wait: 200 })
 
-  const [searchService] = useState(() => getSearchService())
-  const [isAuthConfigured, setIsAuthConfigured] = useState(true)
-
-  // Simple search handler - just updates query, RxJS orchestrator handles the rest
-  const handleSearch = useMemoizedFn((query: string) => {
-    // Update search query - orchestrator will handle the actual search
-    actions.setSearchQuery(query)
-    searchService.onSearchInput(query)
+  const getSuggestedTickets = useMemoizedFn((search: string) => {
+    const suggestions = queryClient.getQueryData<IssueSuggestion>(
+      queryKeys.tickets.suggestions
+    )
+    const allTickets = [
+      ...(suggestions?.inProgress ?? []),
+      ...(suggestions?.activeSprintTodo ?? []),
+      ...(suggestions?.viewHistory ?? [])
+    ]
+    return filterTicketsByQuery(allTickets, search)
   })
 
-  useMount(() => {
-    const unsubscribe = onMessage('onSearchResult', (payload) => {
-      const { tickets, search, error: searchError } = payload.data
-      const state = useTicketStore.getState()
-      // ignore search result if search doesn't match or user is selecting any ticket to avoid race conditions
-      if (state.searchQuery !== search) {
-        return
-      }
+  const placeholderData = useMemo(
+    () => getSuggestedTickets(debouncedQuery),
+    [debouncedQuery, getSuggestedTickets]
+  )
 
-      if (searchError) {
-        actions.setSearchResults(mergeTickets(state.searchResults, tickets))
-        actions.setSearchError(searchError)
-        return
-      }
-
-      actions.setSearchError(undefined)
-      actions.setSearchResults(tickets)
-    })
-
-    searchService.initialize()
-
-    return () => {
-      unsubscribe()
-    }
+  const searchTickets = useMemoizedFn(async (search: string) => {
+    const tickets = await ticketService.searchTickets(search)
+    const suggested = getSuggestedTickets(search)
+    const allTickets = uniqBy([...tickets, ...suggested], 'key')
+    return rankTickets(allTickets, search)
   })
 
-  useMount(() => {
-    const unsubscribe = onMessage('ticketsUpdated', async () => {
-      const currentQuery = useTicketStore.getState().searchQuery
-      await searchService.onSearchInput(currentQuery)
-    })
-
-    return () => {
-      unsubscribe()
-    }
+  return useQuery<JiraTicket[]>({
+    queryKey: queryKeys.tickets.search(debouncedQuery),
+    enabled: enabled && Boolean(debouncedQuery),
+    queryFn: async () => searchTickets(debouncedQuery),
+    staleTime: minutes(2),
+    gcTime: minutes(5),
+    placeholderData
   })
-
-  useEffect(() => {
-    const checkConnection = async () => {
-      try {
-        const configured = await getTicketService().isConfigured()
-        if (!configured) {
-          actions.setSearchError(NOT_CONNECTED_MESSAGE)
-          setIsAuthConfigured(false)
-        } else {
-          setIsAuthConfigured(true)
-          actions.setSearchError(undefined)
-        }
-      } catch (err) {
-        log.error('Failed to verify Jira connection', err)
-        actions.setSearchError('Unable to verify Jira connection.')
-      }
-    }
-
-    checkConnection()
-  }, [actions, log])
-
-  return {
-    searchQuery,
-    searchResults,
-    handleSearch,
-    error,
-    isSearching,
-    isAuthConfigured
-  }
 }
