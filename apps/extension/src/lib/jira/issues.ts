@@ -5,11 +5,11 @@
 
 import type { Issue } from 'jira.js/version3/models/issue'
 import type { IssuePickerSuggestions } from 'jira.js/version3/models/issuePickerSuggestions'
-import type { IssueTransition } from 'jira.js/version3/models/issueTransition'
 import { chunk, compact, flatMap, map } from 'lodash-es'
 
-import { IssueSource, JiraPriority, JiraTicket } from '@/types'
-import { mapPriority } from '@/utils/jira/issues'
+import { IssueSource, JiraPriority, JiraTicket, JiraTransition } from '@/types'
+import { isNonNullable } from '@/utils/assert'
+import { mapPriority, mapTransition } from '@/utils/jira/issues'
 import { getLogger } from '~/utils/logger'
 
 import { toISODateString } from '../date'
@@ -75,13 +75,15 @@ export class JiraIssueService {
       .filter((priority): priority is JiraPriority => !!priority.id)
   }
 
-  async getIssueTransitions(issue: JiraTicket): Promise<IssueTransition[]> {
+  async getIssueTransitions(issue: JiraTicket): Promise<JiraTransition[]> {
     const transitions = await this.client.issues.getTransitions({
       issueIdOrKey: issue.key,
       sortByOpsBarAndStatus: true
     })
 
-    return transitions.transitions ?? []
+    return (
+      transitions.transitions?.map(mapTransition).filter(isNonNullable) ?? []
+    )
   }
 
   async transitionIssue(issueKey: string, transitionId: string) {
@@ -335,6 +337,7 @@ export class JiraIssueService {
         description: issue.fields?.issuetype?.description || ''
       },
       status: {
+        id: issue.fields?.status?.id || '',
         name: issue.fields?.status?.name || '',
         description: issue.fields?.status?.description || '',
         statusCategory: {

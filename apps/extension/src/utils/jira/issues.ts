@@ -1,8 +1,15 @@
-import { Priority } from 'jira.js/version3/models/priority'
-import { StatusDetails } from 'jira.js/version3/models/statusDetails'
-import { UserDetails } from 'jira.js/version3/models/userDetails'
+import type { IssueTransition } from 'jira.js/version3/models/issueTransition'
+import type { Priority } from 'jira.js/version3/models/priority'
+import type { StatusDetails } from 'jira.js/version3/models/statusDetails'
+import type { UserDetails } from 'jira.js/version3/models/userDetails'
 
-import { JiraAssignee, JiraPriority, JiraStatus, JiraTicket } from '@/types'
+import {
+  JiraAssignee,
+  JiraPriority,
+  JiraStatus,
+  JiraTicket,
+  JiraTransition
+} from '@/types'
 
 import { slugify } from '../string'
 
@@ -66,6 +73,7 @@ export function mapUserToAssignee(user: UserDetails): JiraAssignee {
 
 export function mapStatus(status: StatusDetails | undefined): JiraStatus {
   return {
+    id: status?.id || '',
     name: status?.name || '',
     description: status?.description || '',
     statusCategory: {
@@ -83,5 +91,17 @@ export function mapPriority(
     id: priority?.id,
     name: priority?.name || '',
     iconUrl: priority?.iconUrl || ''
+  }
+}
+
+export function mapTransition(
+  transition: IssueTransition
+): JiraTransition | null {
+  if (!transition.id) return null
+
+  return {
+    id: transition.id,
+    name: transition.name || transition.to?.name || transition.id,
+    to: mapStatus(transition.to)
   }
 }

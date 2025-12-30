@@ -11,6 +11,7 @@ export interface JiraStatusCategory {
 }
 
 export interface JiraStatus {
+  id: string
   name: string
   description: string
   statusCategory: JiraStatusCategory

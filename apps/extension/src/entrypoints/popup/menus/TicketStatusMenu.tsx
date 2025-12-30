@@ -30,25 +30,29 @@ export function TicketStatusMenu({ ticket }: { ticket: JiraTicket }) {
   function renderList() {
     if (isLoading) return <CommandLoading>Loading...</CommandLoading>
 
-    return transitions?.map((transition) => {
-      const title = formattedTitle(transition)
-      const value = `${transition.id || ''} ${title}`.trim()
+    if (!transitions) return null
 
-      return (
-        <Action
-          key={transition.id}
-          value={value}
-          title={title}
-          onSelect={() => transitionIssue({ ticket, transition })}
-        />
-      )
-    })
+    return transitions
+      .filter((transition) => transition.to.id !== ticket.status.id)
+      .map((transition) => {
+        const title = formattedTitle(transition)
+        const value = `${transition.id || ''} ${title}`.trim()
+
+        return (
+          <Action
+            key={transition.id}
+            value={value}
+            title={title}
+            onSelect={() => transitionIssue({ ticket, transition })}
+          />
+        )
+      })
   }
 
   return (
     <CommandList>
-      {!isLoading && <CommandEmpty>No available transitions</CommandEmpty>}
       <CommandGroup heading="Change status...">{renderList()}</CommandGroup>
+      {!isLoading && <CommandEmpty>No available transitions</CommandEmpty>}
     </CommandList>
   )
 }

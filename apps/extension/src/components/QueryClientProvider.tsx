@@ -2,8 +2,8 @@ import { browser } from '#imports'
 import { PropsWithChildren } from 'react'
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
 import { QueryClient } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import {
-  PersistQueryClientOptions,
   PersistQueryClientProvider,
   PersistQueryClientProviderProps
 } from '@tanstack/react-query-persist-client'
@@ -40,5 +40,7 @@ export const QueryClientProvider = ({ children }: PropsWithChildren) => (
     client={queryClient}
     persistOptions={persistOptions}>
     {children}
+
+    <ReactQueryDevtools />
   </PersistQueryClientProvider>
 )

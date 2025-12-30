@@ -1,22 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
-import { IssueTransition } from 'jira.js/version3/models/issueTransition'
 
 import { usePrefetchOptionsIfApplicable } from '@/components/PrefetchQuery'
 import { jiraService } from '@/services'
-import { JiraTicket, JiraTransition } from '@/types'
-import { isNonNullable } from '@/utils/assert'
-import { mapStatus } from '@/utils/jira/issues'
+import { JiraTicket } from '@/types'
 import { queryKeys } from '@/utils/queryKeys'
-
-function mapTransition(transition: IssueTransition): JiraTransition | null {
-  if (!transition.id) return null
-
-  return {
-    id: transition.id,
-    name: transition.name || transition.to?.name || transition.id,
-    to: mapStatus(transition.to)
-  }
-}
 
 export function useIssueTransitions(issue: JiraTicket) {
   const queryOptions = usePrefetchOptionsIfApplicable()
@@ -30,9 +17,7 @@ export function useIssueTransitions(issue: JiraTicket) {
         issue
       )
 
-      const transitions = Array.isArray(result) ? result : []
-
-      return transitions.map(mapTransition).filter(isNonNullable)
+      return result ?? []
     }
   })
 }
