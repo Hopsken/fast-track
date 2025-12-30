@@ -30,7 +30,7 @@ export function useMutationUpdatePriority() {
         message: `${ticket.key} set to ${priorityName}`
       })
     },
-    onError: (error, { ticket }, context) => {
+    onError: (error, _, context) => {
       context?.toast.update({
         style: 'failure',
         title: 'Priority update failed',

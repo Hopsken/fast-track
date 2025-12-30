@@ -106,6 +106,7 @@ export function useMultipleStorage<T extends StorageKey>(
     // Set up watchers
     const unwatchFunctions = keys.map((key) => {
       return getStorageItem(key).watch((newValue) => {
+        // eslint-disable-next-line sonarjs/no-nested-functions
         setValues((prev) => ({
           ...prev,
           [key]: newValue ?? getStorageItem(key).fallback

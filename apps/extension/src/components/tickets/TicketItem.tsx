@@ -39,7 +39,7 @@ export function TicketItem({
   const onSelect = useMemoizedFn(() => {
     navigate.push('/actions', ticket)
 
-    void projectService.recordProjectClick(ticket.projectKey)
+    projectService.recordProjectClick(ticket.projectKey)
 
     analytics.track('select-ticket', { source })
   })

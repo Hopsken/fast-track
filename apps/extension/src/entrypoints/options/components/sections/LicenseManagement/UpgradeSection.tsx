@@ -71,6 +71,7 @@ function ActivateExistingLicense() {
         // License activated successfully
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error activating license:', error)
       setError(
         'Something went wrong. Please try again later or contact support@teamusement.com for help'

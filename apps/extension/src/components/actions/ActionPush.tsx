@@ -1,10 +1,6 @@
 import { useCallback } from 'react'
 
-import {
-  RouteMap,
-  useCommandNavigate,
-  useCommandRouter
-} from '../CommandRouter'
+import { RouteMap, useCommandNavigate } from '../CommandRouter'
 
 import { Action, ActionProps } from './Action'
 

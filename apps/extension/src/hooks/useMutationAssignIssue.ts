@@ -43,7 +43,7 @@ export function useMutationAssignIssue() {
           : `${ticket.key} assigned to ${displayName}`
       })
     },
-    onError: (error, { ticket }, context) => {
+    onError: (error, _, context) => {
       const isUnassign = context?.isUnassign
       context?.toast.update({
         style: 'failure',
@@ -83,7 +83,7 @@ export function useMutationAssignMyself() {
         message: ticket.key
       })
     },
-    onError: (error, { ticket }, context) => {
+    onError: (error, _, context) => {
       context?.toast.update({
         style: 'failure',
         title: 'Assignment failed',

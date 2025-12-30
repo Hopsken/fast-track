@@ -36,7 +36,7 @@ export function useMutationTransitionIssue() {
         queryKey: queryKeys.issue.transitions(ticket)
       })
     },
-    onError: (error, { ticket }, context) => {
+    onError: (error, _, context) => {
       context?.toast.update({
         style: 'failure',
         title: 'Status update failed',

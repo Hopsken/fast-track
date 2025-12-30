@@ -45,16 +45,14 @@ export function FormField(props: PropsWithChildren<FormFieldProps>) {
   } = props
 
   const variant = onClick ? 'clickable' : 'default'
+  const descriptionText =
+    typeof description === 'string' ? description : 'Interactive field'
 
   return (
     <FormItem>
       <div
         className={cn(formFieldVariants({ size, variant }), className)}
-        aria-label={
-          onClick
-            ? `${title}. ${typeof description === 'string' ? description : 'Interactive field'}`
-            : undefined
-        }>
+        aria-label={onClick ? `${title}. ${descriptionText}` : undefined}>
         <div className="flex flex-1 flex-col space-y-1">
           {title && (
             <FormLabel className={size === 'sm' ? 'text-sm' : 'text-lg'}>

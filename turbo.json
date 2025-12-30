@@ -1,6 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": [],
+  "globalEnv": ["NODE_ENV"],
   "tasks": {
     "dev": { "cache": false, "persistent": true },
 
@@ -11,11 +11,11 @@
     },
 
     "website#build": {
-      "env": ["NEXT_PUBLIC_API_URL"]
+      "env": ["NEXT_PUBLIC_API_URL", "JIRA_CLIENT_ID"]
     },
 
     "extension#build": {
-      "env": ["WXT_UMAMI_WEBSITE_ID"]
+      "env": ["WXT_UMAMI_WEBSITE_ID", "DEV"]
     },
 
     "zip": {

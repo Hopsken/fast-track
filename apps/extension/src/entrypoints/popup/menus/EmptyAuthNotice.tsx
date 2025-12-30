@@ -1,5 +1,5 @@
 import { Button } from '@internal/ui/components/button'
-import { CommandEmpty, CommandList } from '@internal/ui/components/command'
+import { CommandList } from '@internal/ui/components/command'
 import {
   Empty,
   EmptyContent,

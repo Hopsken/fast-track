@@ -47,6 +47,7 @@ export default function ExtensionCommunicator({
     try {
       tokenDataSchema.parse(tokenData)
     } catch {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCommunicationStatus('error')
       setErrorMessage('Invalid token data structure')
       return

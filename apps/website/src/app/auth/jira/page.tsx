@@ -15,6 +15,7 @@ function JiraAuthContent() {
     const extensionId = searchParams.get('extension_id')
 
     if (!extensionId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setError('Extension ID is required for OAuth authentication')
       return
     }
