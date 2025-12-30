@@ -10,20 +10,11 @@ import { UserDetails } from 'jira.js/version3/models/userDetails'
 import { uniqBy } from 'lodash-es'
 
 import { sendMessage } from '@/lib/message'
-import { Database } from '@/repository'
 import { JiraPriority, JiraTicket, JiraTransition } from '@/types'
 import { getCurrentUser } from '@/utils/currentUser'
-import { mapPriority, mapUserToAssignee } from '@/utils/jira/issues'
-import { nextTick } from '@/utils/nextTick'
+import { mapPriority } from '@/utils/jira/issues'
 import { getJiraApi, JiraAPI } from '~/lib/jira'
 import { getLogger } from '~/utils/logger'
-
-import {
-  SuggestionRefreshOptions,
-  SuggestionRefreshReason,
-  TicketSuggestionService,
-  TicketSuggestionsAPI
-} from './ticket-suggestion-service'
 
 export type IssueSuggestion = {
   inProgress: JiraTicket[]
@@ -35,14 +26,7 @@ export type IssueSuggestion = {
  * Ticket service implementation
  */
 class TicketServiceImpl {
-  private database: Database
-  readonly suggestions: TicketSuggestionsAPI
   private log = getLogger('ticket-service')
-
-  constructor(database: Database) {
-    this.database = database
-    this.suggestions = new TicketSuggestionService(this, database)
-  }
 
   private async getJira(): Promise<JiraAPI | null> {
     try {
@@ -51,14 +35,6 @@ class TicketServiceImpl {
       this.log.error('TicketService: failed to initialize Jira client', error)
       return null
     }
-  }
-
-  async refreshSuggestions(
-    reason: SuggestionRefreshReason,
-    options?: SuggestionRefreshOptions
-  ) {
-    this.log.info('TicketService: refreshSuggestions', reason, options)
-    return this.suggestions.refresh(reason, options)
   }
 
   async getIssueSuggestions(): Promise<IssueSuggestion> {
@@ -81,17 +57,9 @@ class TicketServiceImpl {
       if (!user.email) {
         return []
       }
-      const cachedTickets = await this.database.issues.findInProgress(
-        user.email
-      )
-
-      nextTick(async () => {
-        const tickets = await jira.issues.getMyUnresolvedIssues(limit)
-        await this.database.collections.issues.bulkUpsert(tickets)
-        sendMessage('onIssueSuggestionsUpdated', { inProgress: tickets })
-      })
-
-      return cachedTickets.map((i) => i.toMutableJSON())
+      const tickets = await jira.issues.getMyUnresolvedIssues(limit)
+      sendMessage('onIssueSuggestionsUpdated', { inProgress: tickets })
+      return tickets
     })
   }
 
@@ -105,17 +73,11 @@ class TicketServiceImpl {
         return []
       }
 
-      const cachedTickets = await this.database.issues.findInOpenSprints(email)
-
-      nextTick(async () => {
-        const tickets = await jira.issues.getMyActiveSprintTodoIssues(limit)
-        await this.database.collections.issues.bulkUpsert(tickets)
-        sendMessage('onIssueSuggestionsUpdated', {
-          activeSprintTodo: tickets
-        })
+      const tickets = await jira.issues.getMyActiveSprintTodoIssues(limit)
+      sendMessage('onIssueSuggestionsUpdated', {
+        activeSprintTodo: tickets
       })
-
-      return cachedTickets.map((i) => i.toMutableJSON())
+      return tickets
     })
   }
 
@@ -127,17 +89,11 @@ class TicketServiceImpl {
         return []
       }
 
-      const cachedTickets = await this.database.issues.findRecentlyViewed()
-
-      nextTick(async () => {
-        const tickets = await jira.issues.getRecentHistoryIssues(limit)
-        await this.database.collections.issues.bulkUpsert(tickets)
-        sendMessage('onIssueSuggestionsUpdated', {
-          viewHistory: tickets
-        })
+      const tickets = await jira.issues.getRecentHistoryIssues(limit)
+      sendMessage('onIssueSuggestionsUpdated', {
+        viewHistory: tickets
       })
-
-      return cachedTickets.map((i) => i.toMutableJSON())
+      return tickets
     })
   }
 
@@ -172,7 +128,6 @@ class TicketServiceImpl {
     ticketKey: string,
     options: {
       reason: string
-      buildOptimistic: (base: JiraTicket) => JiraTicket
       perform: (jira: JiraAPI) => Promise<JiraTicket | null>
     }
   ): Promise<JiraTicket | null> {
@@ -183,27 +138,13 @@ class TicketServiceImpl {
       )
     }
 
-    const { issues } = this.database.collections
-    const existing = await issues.getByKey(ticketKey)
-
-    const baseTicket = existing?.toMutableJSON()
-
-    if (baseTicket) {
-      const optimisticTicket = options.buildOptimistic(baseTicket)
-      await issues.upsert(optimisticTicket)
-    }
-
     try {
       const refreshed = await options.perform(jira)
       if (refreshed) {
-        await issues.upsert(refreshed)
         this.notifyTicketsUpdated(options.reason)
       }
       return refreshed
     } catch (error) {
-      if (baseTicket) {
-        await issues.upsert(baseTicket)
-      }
       throw error
     }
   }
@@ -211,10 +152,6 @@ class TicketServiceImpl {
   async assignTicket(ticketKey: string, assignee: UserDetails | null) {
     return this.updateTicketOptimistically(ticketKey, {
       reason: 'assign',
-      buildOptimistic: (base) => ({
-        ...base,
-        assignee: assignee ? mapUserToAssignee(assignee) : null
-      }),
       perform: async (jira) => {
         this.log.info('assignTicket', ticketKey, assignee?.accountId ?? null)
         await jira.issues.assignIssue(ticketKey, assignee?.accountId ?? null)
@@ -226,10 +163,6 @@ class TicketServiceImpl {
   async transitionTicket(ticket: JiraTicket, transition: JiraTransition) {
     return this.updateTicketOptimistically(ticket.key, {
       reason: 'transition',
-      buildOptimistic: (base) => ({
-        ...base,
-        status: transition.to
-      }),
       perform: async (jira) => {
         const refreshed = await jira.issues.transitionIssue(
           ticket.key,
@@ -249,10 +182,6 @@ class TicketServiceImpl {
 
     return this.updateTicketOptimistically(ticket.key, {
       reason: 'priority',
-      buildOptimistic: (base) => ({
-        ...base,
-        priority: normalizedPriority
-      }),
       perform: async (jira) => {
         const refreshed = await jira.issues.updateIssuePriority(
           ticket.key,
@@ -284,5 +213,5 @@ export type TicketService = InstanceType<typeof TicketServiceImpl>
  */
 export const [registerTicketService, getTicketService] = defineProxyService<
   TicketService,
-  [Database]
->('TicketService', (database: Database) => new TicketServiceImpl(database))
+  []
+>('TicketService', () => new TicketServiceImpl())

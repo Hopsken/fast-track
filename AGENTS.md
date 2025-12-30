@@ -17,7 +17,7 @@
 ## Tech Stack & Architecture
 
 - Frontend: React 19 + TypeScript with strict mode; Tailwind/DaisyUI referenced in docs.
-- Build/runtime: WXT + Vite; WebExt proxy services for messaging; Jira integration via `jira.js`; reactive flows with RxJS; state via Zustand slices; data cached in typed storage/RxDB (persistent IndexedDB preferred).
+- Build/runtime: WXT + Vite; WebExt proxy services for messaging; Jira integration via `jira.js`; reactive flows with RxJS; state via Zustand slices; data cached in typed storage and React Query (persistent IndexedDB preferred).
 - Runtime roles: Background (`apps/extension/src/entrypoints/background/`) coordinates omnibox/install, registers proxy services, and fronts RxDB; content scripts (`*.content.ts`) use `PageObserver` for Jira SPA changes; popup/options are React UIs with dumb components and hook/service logic.
 
 ## Key Commands (run at repo root)
@@ -37,9 +37,9 @@
 
 ## Architecture Overview
 
-- Search: RxJS orchestration with debounce/cancel; merges Jira API results with cached RxDB/storage data; keep UI dumb and hook/service-driven.
+- Search: RxJS orchestration with debounce/cancel; merges Jira API results with React Query caches; keep UI dumb and hook/service-driven.
 - State: Lightweight Zustand slices; selectors optimized (e.g., `useShallow`).
-- Storage: Typed storage schemas; secure token handling; no sensitive values in logs.
+- Storage: Typed storage schemas; secure token handling; no sensitive values in logs. Use React Query caching instead of RxDB.
 - Content scripts: Lightweight DOM observers and effects; re-apply on SPA route changes via `PageObserver`.
 
 ## Testing Guidelines

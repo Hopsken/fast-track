@@ -122,9 +122,6 @@ importers:
       react-router-dom:
         specifier: ^7.9.6
         version: 7.9.6(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
-      rxdb:
-        specifier: ^16.21.0
-        version: 16.21.0(rxjs@7.8.2)
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2
@@ -5350,12 +5347,6 @@ packages:
 
   run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
-
-  rxdb@16.21.0:
-    resolution: {integrity: sha512-rcRDLTcCSBIW9AwKyl/8L65NBH6JtsumnOeM+iB8qSg/qXeX39FGmac2+FC+hCNwTt6yW28m2chQuQpPMij4eA==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      rxjs: ^7.8.0
 
   rxjs@7.8.2:
     resolution: {integrity: sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA==}
@@ -11398,54 +11389,6 @@ snapshots:
   run-parallel@1.2.0:
     dependencies:
       queue-microtask: 1.2.3
-
-  rxdb@16.21.0(rxjs@7.8.2):
-    dependencies:
-      '@babel/runtime': 7.28.4
-      '@types/clone': 2.1.4
-      '@types/cors': 2.8.19
-      '@types/express': 5.0.5
-      '@types/simple-peer': 9.11.9
-      '@types/ws': 8.18.1
-      ajv: 8.17.1
-      ajv-formats: 3.0.1(ajv@8.17.1)
-      array-push-at-sort-position: 4.0.1
-      as-typed: 1.3.2
-      broadcast-channel: 7.2.0
-      crypto-js: 4.2.0
-      custom-idle-queue: 4.1.0
-      dexie: 4.0.10
-      event-reduce-js: 5.2.7
-      firebase: 11.10.0
-      get-graphql-from-jsonschema: 8.1.0
-      graphql: 16.12.0
-      graphql-ws: 5.16.2(graphql@16.12.0)
-      is-my-json-valid: 2.20.6
-      isomorphic-ws: 5.0.0(ws@8.18.3)
-      js-base64: 3.7.8
-      jsonschema-key-compression: 1.7.0
-      mingo: 6.5.6
-      mongodb: 6.20.0
-      nats: 2.29.3
-      oblivious-set: 1.4.0
-      reconnecting-websocket: 4.4.0
-      rxjs: 7.8.2
-      simple-peer: 9.11.1
-      util: 0.12.5
-      ws: 8.18.3
-      z-schema: 6.0.2
-    transitivePeerDependencies:
-      - '@aws-sdk/credential-providers'
-      - '@mongodb-js/zstd'
-      - '@react-native-async-storage/async-storage'
-      - bufferutil
-      - gcp-metadata
-      - kerberos
-      - mongodb-client-encryption
-      - snappy
-      - socks
-      - supports-color
-      - utf-8-validate
 
   rxjs@7.8.2:
     dependencies:

@@ -44,7 +44,6 @@
     "react-hook-form": "^7.68.0",
     "react-hotkeys-hook": "^5.2.1",
     "react-router-dom": "^7.9.6",
-    "rxdb": "^16.21.0",
     "rxjs": "^7.8.2",
     "tailwind-merge": "^3.4.0",
     "wxt": "^0.20.11",
