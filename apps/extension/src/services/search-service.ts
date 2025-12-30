@@ -9,15 +9,11 @@ import {
 } from 'rxjs'
 
 import { sendMessage } from '@/lib/message'
-import { fromStorage$ } from '@/lib/storage'
-import { Database } from '@/repository'
 import { JiraTicket } from '@/types'
 import { getLogger } from '~/utils/logger'
 import { rankTickets } from '~/utils/ticket-ranking'
 
 import { getTicketService } from './ticket-service'
-
-const DEFAULT_RESULT_LIMIT = 10
 
 export interface SearchService {
   initialize(): Promise<void>
@@ -27,11 +23,9 @@ export interface SearchService {
 class SearchServiceImpl implements SearchService {
   private search$ = new BehaviorSubject<string>('')
   private ready$ = new BehaviorSubject<boolean>(false)
-  private currentUserEmail: string | null = null
   private log = getLogger('search-service')
 
-  constructor(private database: Database) {
-    this.setupUserWatcher()
+  constructor() {
     this.setupSearchListener()
   }
 
@@ -58,14 +52,10 @@ class SearchServiceImpl implements SearchService {
 
   private async handleSearch(query: string) {
     const normalizedQuery = query.trim()
-    const cachedTickets = await this.searchStoredTickets(normalizedQuery)
-    const rankedCached = normalizedQuery
-      ? rankTickets(cachedTickets, normalizedQuery)
-      : cachedTickets
-
-    this.emitResults(query, rankedCached)
-
-    if (!normalizedQuery) return
+    if (!normalizedQuery) {
+      this.emitResults(query, [])
+      return
+    }
 
     try {
       const ticketService = getTicketService()
@@ -74,15 +64,10 @@ class SearchServiceImpl implements SearchService {
         return
       }
 
-      const combinedTickets = rankTickets(
-        [...cachedTickets, ...remoteTickets],
-        normalizedQuery
-      )
-
-      this.emitResults(query, combinedTickets)
+      this.emitResults(query, rankTickets(remoteTickets, normalizedQuery))
     } catch (error) {
       this.log.error('SearchService: remote search failed', error)
-      this.emitResults(query, rankedCached, 'Search failed. Please reconnect.')
+      this.emitResults(query, [], 'Search failed. Please reconnect.')
     }
   }
 
@@ -93,29 +78,9 @@ class SearchServiceImpl implements SearchService {
       error
     })
   }
-
-  private async searchStoredTickets(query: string) {
-    if (!query) {
-      return []
-    }
-
-    return this.database.issues
-      .fuzzySearch(query, {
-        limit: DEFAULT_RESULT_LIMIT
-      })
-      .then((docs) => docs.map((doc) => doc.toMutableJSON()))
-  }
-
-  private setupUserWatcher() {
-    fromStorage$('OAuthUserInfo').subscribe((userInfo) => {
-      this.currentUserEmail = userInfo?.email
-        ? userInfo.email.trim().toLowerCase()
-        : null
-    })
-  }
 }
 
 export const [registerSearchService, getSearchService] = defineProxyService<
   SearchService,
-  [Database]
->('SearchService', (database: Database) => new SearchServiceImpl(database))
+  []
+>('SearchService', () => new SearchServiceImpl())

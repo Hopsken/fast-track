@@ -5,7 +5,6 @@ import { z } from 'zod'
 import { JiraAPI } from '@/lib/jira'
 import { AuthApi } from '@/lib/jira/auth-api'
 import { getStorageItem, StorageKey } from '@/lib/storage'
-import { Database, resetDatabase } from '@/repository'
 import { JiraApiKeyConfig, ReceivedTokenPayload, JiraUserInfo } from '@/types'
 import { getTicketService } from '~/services/ticket-service'
 import { getLogger } from '~/utils/logger'
@@ -41,8 +40,6 @@ class AuthServiceImpl implements AuthService {
   private jiraHostStorage = getStorageItem('JiraHost')
   private authApi = new AuthApi()
   private log = getLogger('auth-service')
-
-  constructor(private database: Database) {}
 
   public async receiveTokens(
     tokens: ReceivedTokenPayload
@@ -111,8 +108,7 @@ class AuthServiceImpl implements AuthService {
       this.jiraHostStorage.removeValue(),
       getStorageItem('LastSyncAt').removeValue(),
       // Clear React Query cache
-      getStorageItem('REACT_QUERY_OFFLINE_CACHE').removeValue(),
-      resetDatabase()
+      getStorageItem('REACT_QUERY_OFFLINE_CACHE').removeValue()
     ])
 
     return true
@@ -158,5 +154,5 @@ class AuthServiceImpl implements AuthService {
 
 export const [registerAuthService, getAuthService] = defineProxyService<
   AuthService,
-  [Database]
->('AuthService', (database: Database) => new AuthServiceImpl(database))
+  []
+>('AuthService', () => new AuthServiceImpl())

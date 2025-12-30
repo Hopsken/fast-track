@@ -3,9 +3,8 @@
  */
 
 import { Browser, browser } from '#imports'
-import { escape, escapeRegExp } from 'lodash-es'
+import { escape } from 'lodash-es'
 
-import { Database, getDatabase } from '@/repository'
 import { getTicketService } from '@/services/ticket-service'
 import { JiraTicket } from '@/types'
 import { isTicketKey } from '@/utils/jira/issues'
@@ -15,12 +14,9 @@ import { rankTickets } from '~/utils/ticket-ranking'
 
 const MAX_SUGGESTIONS = 5
 const MIN_QUERY_LENGTH = 2
-const SEARCH_LIMIT = 20
-
 const normalizeTicketKey = (value: string) => value.trim().toUpperCase()
 
 export class OmniboxHandlerService {
-  private static database: Database | null = null
   private static latestRequestId = 0
   private static log = getLogger('omnibox')
 
@@ -76,27 +72,9 @@ export class OmniboxHandlerService {
       suggest(this.buildSuggestions(tickets, query))
     }
 
-    let cachedTickets: JiraTicket[] = []
-    let remoteTickets: JiraTicket[] = []
-
-    const publish = () => emitSuggestions([...cachedTickets, ...remoteTickets])
-
-    this.searchCachedTickets(query)
-      .then((tickets) => {
-        cachedTickets = tickets
-        publish()
-      })
-      .catch((error) => {
-        this.log.error(
-          '❌ Omnibox: Failed to provide cached suggestions',
-          error
-        )
-      })
-
     this.searchRemoteTickets(query)
       .then((tickets) => {
-        remoteTickets = tickets
-        publish()
+        emitSuggestions(tickets)
       })
       .catch((error) => {
         this.log.error('❌ Omnibox: Remote suggestion failed', error)
@@ -141,15 +119,6 @@ export class OmniboxHandlerService {
     }
   }
 
-  private static async searchCachedTickets(query: string) {
-    const database = await this.getDatabase()
-    const tickets = await database.issues.fuzzySearch(query, {
-      limit: SEARCH_LIMIT
-    })
-
-    return tickets
-  }
-
   private static async searchRemoteTickets(query: string) {
     const ticketService = getTicketService()
     const tickets = await ticketService.searchTickets(query)
@@ -166,12 +135,5 @@ export class OmniboxHandlerService {
       content: ticket.key,
       description: `<match>${key}</match> - <dim>${summary}</dim>`
     }
-  }
-
-  private static async getDatabase(): Promise<Database> {
-    if (!this.database) {
-      this.database = await getDatabase()
-    }
-    return this.database
   }
 }

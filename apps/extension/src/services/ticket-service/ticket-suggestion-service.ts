@@ -1,5 +1,4 @@
 import { getStorageItem } from '@/lib/storage'
-import { Database } from '@/repository'
 import { JiraTicket } from '@/types'
 import { mergeTicketsByKey } from '@/utils/jira/issues'
 import { concatPromises } from '@/utils/promise'
@@ -30,10 +29,7 @@ export class TicketSuggestionService implements TicketSuggestionsAPI {
   private lastSyncStorage = getStorageItem('LastSyncAt')
   private log = getLogger('ticket-suggestions')
 
-  constructor(
-    private ticketService: TicketService,
-    private database: Database
-  ) {}
+  constructor(private ticketService: TicketService) {}
 
   public refresh = async (
     reason: SuggestionRefreshReason,
@@ -81,11 +77,7 @@ export class TicketSuggestionService implements TicketSuggestionsAPI {
         jira.issues.getMyActiveSprintTodoIssues(20)
       ])
 
-      const uniqTickets = mergeTicketsByKey(results)
-
-      await this.database.collections.issues.bulkUpsert(uniqTickets)
-
-      return uniqTickets
+      return mergeTicketsByKey(results)
     })
   }
 

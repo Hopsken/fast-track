@@ -5,7 +5,6 @@
 
 import { defineBackground } from '#imports'
 
-import { getDatabase } from '@/repository'
 import { registerSearchService } from '@/services/search-service'
 import { registerAuthService } from '~/services/auth-service'
 import { registerJiraService } from '~/services/jira-service'
@@ -21,23 +20,17 @@ const log = getLogger('background')
 export default defineBackground(() => {
   log.info('🚀 Background script initializing...')
 
-  getDatabase()
-    .then((database) => {
-      log.info('✅ RxDB initialized successfully')
+  // Initialize proxy services
+  registerJiraService()
+  const ticketService = registerTicketService()
+  registerSearchService()
+  registerAuthService()
 
-      // Initialize proxy services
-      registerJiraService()
-      const ticketService = registerTicketService(database)
-      registerSearchService(database)
-      registerAuthService(database)
-
-      // Initialize alarms service
-      const alarmsService = new BackgroundAlarmsService(ticketService)
-      return Promise.all([alarmsService.initialize()])
-    })
-    .catch((error) => {
-      log.error('❌ RxDB initialization failed:', error)
-    })
+  // Initialize alarms service
+  const alarmsService = new BackgroundAlarmsService(ticketService)
+  alarmsService.initialize().catch((error) => {
+    log.error('❌ Background alarms initialization failed:', error)
+  })
 
   // Initialize other services
   OmniboxHandlerService.initialize()
