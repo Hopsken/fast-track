@@ -1,6 +1,7 @@
 import { CommandItem } from '@internal/ui/components/command'
 import { useMemoizedFn } from 'ahooks'
 
+import { projectService } from '@/services'
 import { analytics } from '@/services/analytics'
 import { JiraTicket } from '@/types'
 import {
@@ -37,6 +38,8 @@ export function TicketItem({
 
   const onSelect = useMemoizedFn(() => {
     navigate.push('/actions', ticket)
+
+    void projectService.recordProjectClick(ticket.projectKey)
 
     analytics.track('select-ticket', { source })
   })

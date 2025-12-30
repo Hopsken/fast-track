@@ -26,6 +26,13 @@ type StorageItems = {
 
   // analytics
   'analytics-enabled': boolean
+  ProjectClicks: Record<
+    string,
+    {
+      count: number
+      lastSelected: string
+    }
+  >
 }
 
 export type StorageKey = keyof StorageItems
@@ -49,7 +56,8 @@ const STORAGE_DEFAULTS: StorageItems = {
   DeviceId: '',
 
   // analytics
-  'analytics-enabled': true
+  'analytics-enabled': true,
+  ProjectClicks: {}
 }
 
 // Enhanced storage key groups with logical organization

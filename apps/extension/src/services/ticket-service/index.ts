@@ -12,7 +12,6 @@ import { uniqBy } from 'lodash-es'
 import { sendMessage } from '@/lib/message'
 import { JiraPriority, JiraTicket, JiraTransition } from '@/types'
 import { mapPriority } from '@/utils/jira/issues'
-import { normalizeProjects } from '@/utils/ticket-search'
 import { getJiraApi, JiraAPI } from '~/lib/jira'
 import { getLogger } from '~/utils/logger'
 
@@ -68,13 +67,6 @@ class TicketServiceImpl {
   private async getRecentHistoryTickets(limit = 20): Promise<JiraTicket[]> {
     return this.withJira(async (jira) => {
       return jira.issues.getRecentHistoryIssues(limit)
-    })
-  }
-
-  async getFrequentProjects(): Promise<string[]> {
-    return this.withJira(async (jira) => {
-      const tickets = await jira.issues.getRecentHistoryIssues(20)
-      return normalizeProjects(tickets.map((ticket) => ticket.projectKey))
     })
   }
 

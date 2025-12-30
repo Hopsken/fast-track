@@ -7,6 +7,7 @@ import { defineBackground } from '#imports'
 
 import { registerAuthService } from '~/services/auth-service'
 import { registerJiraService } from '~/services/jira-service'
+import { registerProjectService } from '~/services/project-service'
 import { registerTicketService } from '~/services/ticket-service'
 import { getLogger } from '~/utils/logger'
 
@@ -21,6 +22,7 @@ export default defineBackground(() => {
   // Initialize proxy services
   registerJiraService()
   registerTicketService()
+  registerProjectService()
   registerAuthService()
 
   // Initialize alarms service

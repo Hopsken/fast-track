@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { CommandItem, CommandList } from '@internal/ui/components/command'
 import { uniqBy } from 'lodash-es'
 
@@ -36,7 +36,9 @@ export function SearchResultMenu() {
     }
   )
 
-  const searchResults = uniqBy(scopedResults.concat(allResults), 'key')
+  const searchResults = useMemo(() => {
+    return uniqBy(scopedResults.concat(allResults), 'key')
+  }, [scopedResults, allResults])
   const isSearching = isScopedSearching || isAllSearching
 
   const shouldShowMore =

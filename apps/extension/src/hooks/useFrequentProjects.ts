@@ -1,16 +1,22 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { ticketService } from '@/services'
+import { projectService } from '@/services'
+import { IssueSuggestion } from '@/services/ticket-service'
 import { queryKeys } from '@/utils/queryKeys'
-import { days } from '@/utils/time'
+import { minutes } from '@/utils/time'
 
 export function useFrequentProjects() {
+  const queryClient = useQueryClient()
+
   return useQuery<string[]>({
     queryKey: queryKeys.projects.frequent,
     queryFn: () => {
-      return ticketService.getFrequentProjects()
+      const suggestions = queryClient.getQueryData<IssueSuggestion>(
+        queryKeys.tickets.suggestions
+      )
+      return projectService.getFrequentProjects(suggestions)
     },
-    staleTime: days(1),
-    gcTime: days(2)
+    staleTime: minutes(1),
+    gcTime: minutes(5)
   })
 }
