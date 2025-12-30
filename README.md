@@ -100,7 +100,7 @@ The easiest way to deploy your Plasmo extension is to use the built-in [bpp](htt
 
 ## TODO
 
-- [ ] Re-implement search history feature using RxDB for persistence and better UX
+- [ ] Re-implement search history feature using browser storage + React Query
 - [ ] Enhance OAuth flow error handling and user feedback
 - [ ] Implement comprehensive test coverage for authentication components
 
