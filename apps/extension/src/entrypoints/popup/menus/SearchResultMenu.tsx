@@ -30,7 +30,6 @@ export function SearchResultMenu() {
           tickets={searchResults}
         />
       )}
-
     </CommandList>
   )
 }
@@ -64,7 +63,6 @@ function SuggestedTickets({ issues }: SuggestedTicketsProps) {
     <>
       {renderGroup('In Progress', issues?.inProgress, false)}
       {renderGroup('Upcoming', issues?.activeSprintTodo, false)}
-      {renderGroup('Recommend for you', issues?.viewHistory)}
     </>
   )
 }

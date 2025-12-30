@@ -11,7 +11,6 @@ import { uniqBy } from 'lodash-es'
 
 import { sendMessage } from '@/lib/message'
 import { JiraPriority, JiraTicket, JiraTransition } from '@/types'
-import { getCurrentUser } from '@/utils/currentUser'
 import { mapPriority } from '@/utils/jira/issues'
 import { getJiraApi, JiraAPI } from '~/lib/jira'
 import { getLogger } from '~/utils/logger'
@@ -19,7 +18,6 @@ import { getLogger } from '~/utils/logger'
 export type IssueSuggestion = {
   inProgress: JiraTicket[]
   activeSprintTodo: JiraTicket[]
-  viewHistory: JiraTicket[]
 }
 
 /**
@@ -38,28 +36,20 @@ class TicketServiceImpl {
   }
 
   async getIssueSuggestions(): Promise<IssueSuggestion> {
-    const [inProgress, activeSprintTodo, viewHistory] = await Promise.all([
+    const [inProgress, activeSprintTodo] = await Promise.all([
       this.getMyInProgressTickets(),
-      this.getMyActiveSprintTodoTickets(),
-      this.getRecentHistoryTickets()
+      this.getMyActiveSprintTodoTickets()
     ])
 
     return {
       inProgress,
-      activeSprintTodo,
-      viewHistory
+      activeSprintTodo
     }
   }
 
   private async getMyInProgressTickets(limit = 20): Promise<JiraTicket[]> {
     return this.withJira(async (jira) => {
-      const user = await getCurrentUser()
-      if (!user.email) {
-        return []
-      }
-      const tickets = await jira.issues.getMyUnresolvedIssues(limit)
-      sendMessage('onIssueSuggestionsUpdated', { inProgress: tickets })
-      return tickets
+      return jira.issues.getMyUnresolvedIssues(limit)
     })
   }
 
@@ -67,33 +57,7 @@ class TicketServiceImpl {
     limit = 20
   ): Promise<JiraTicket[]> {
     return this.withJira(async (jira) => {
-      const user = await getCurrentUser()
-      const email = user.email?.trim()
-      if (!email) {
-        return []
-      }
-
-      const tickets = await jira.issues.getMyActiveSprintTodoIssues(limit)
-      sendMessage('onIssueSuggestionsUpdated', {
-        activeSprintTodo: tickets
-      })
-      return tickets
-    })
-  }
-
-  private async getRecentHistoryTickets(limit = 20): Promise<JiraTicket[]> {
-    return this.withJira(async (jira) => {
-      const user = await getCurrentUser()
-      const email = user.email?.trim()
-      if (!email) {
-        return []
-      }
-
-      const tickets = await jira.issues.getRecentHistoryIssues(limit)
-      sendMessage('onIssueSuggestionsUpdated', {
-        viewHistory: tickets
-      })
-      return tickets
+      return jira.issues.getMyActiveSprintTodoIssues(limit)
     })
   }
 
@@ -105,9 +69,6 @@ class TicketServiceImpl {
 
     return this.withJira(async (jira) => {
       const results = await jira.issues.searchIssuesByText(normalizedQuery)
-      // skip cache search tickets for now since it contains a lot of noise tickets
-      // await this.database.collections.issues.bulkUpsert(uniqTickets)
-      // TODO: add user select tickets to cache
       return uniqBy(results, 'key')
     })
   }
@@ -138,15 +99,11 @@ class TicketServiceImpl {
       )
     }
 
-    try {
-      const refreshed = await options.perform(jira)
-      if (refreshed) {
-        this.notifyTicketsUpdated(options.reason)
-      }
-      return refreshed
-    } catch (error) {
-      throw error
+    const refreshed = await options.perform(jira)
+    if (refreshed) {
+      this.notifyTicketsUpdated(options.reason)
     }
+    return refreshed
   }
 
   async assignTicket(ticketKey: string, assignee: UserDetails | null) {
