@@ -1,4 +1,4 @@
-import { HiLockClosed } from 'react-icons/hi2'
+import { Lock } from 'lucide-react'
 
 interface ProBadgeProps {
   isPro: boolean
@@ -22,7 +22,7 @@ export function ProBadge({
   const content = (
     <>
       <span>Pro</span>
-      {!isPro && <HiLockClosed className="h-3 w-3" />}
+      {!isPro && <Lock className="h-3 w-3" />}
     </>
   )
 

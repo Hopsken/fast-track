@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { HiOutlineCog6Tooth, HiArrowTopRightOnSquare } from 'react-icons/hi2'
+import { ArrowUpRightFromSquare, Settings } from 'lucide-react'
 
 import { getLogger } from '~/utils/logger'
 import {
@@ -38,7 +38,7 @@ export function ShortcutManagement() {
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="mb-2 flex items-center gap-2">
-            <HiOutlineCog6Tooth className="h-4 w-4 text-gray-500" />
+            <Settings className="h-4 w-4 text-gray-500" />
             <h3 className="text-sm font-medium text-gray-900">
               Keyboard Shortcut
             </h3>
@@ -67,7 +67,7 @@ export function ShortcutManagement() {
           className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm transition-colors duration-200 hover:border-gray-400 hover:bg-gray-50"
           title="Open Chrome's shortcuts settings">
           <span>Customize</span>
-          <HiArrowTopRightOnSquare className="h-3 w-3" />
+          <ArrowUpRightFromSquare className="h-3 w-3" />
         </button>
       </div>
 

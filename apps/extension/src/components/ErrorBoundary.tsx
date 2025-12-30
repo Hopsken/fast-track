@@ -1,6 +1,6 @@
 import { ErrorInfo, ReactNode, ComponentType } from 'react'
+import { AlertCircle, RefreshCw } from 'lucide-react'
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
-import { HiExclamationCircle, HiRefresh } from 'react-icons/hi'
 
 import { getLogger } from '~/utils/logger'
 
@@ -15,7 +15,7 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
   return (
     <div className="flex flex-col items-center justify-center rounded-lg border border-red-200 bg-red-50 p-4">
       <div className="mb-3 flex items-center">
-        <HiExclamationCircle className="mr-2 h-6 w-6 text-red-500" />
+        <AlertCircle className="mr-2 h-6 w-6 text-red-500" />
         <h2 className="text-lg font-semibold text-red-700">
           Something went wrong
         </h2>
@@ -28,7 +28,7 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
       <button
         onClick={resetErrorBoundary}
         className="flex items-center rounded-md bg-red-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-red-700">
-        <HiRefresh className="mr-2 h-4 w-4" />
+        <RefreshCw className="mr-2 h-4 w-4" />
         Try again
       </button>
 
