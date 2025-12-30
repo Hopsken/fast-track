@@ -6,7 +6,7 @@ import {
   useCommandState
 } from '@internal/ui/components/command'
 
-import { Action, ActionUser } from '@/components/actions'
+import { Action, ActionLoading, ActionUser } from '@/components/actions'
 import { useAutoCompleteUsers } from '@/hooks/useAutoComplete'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
 import { useMutationAssignIssue } from '@/hooks/useMutationAssignIssue'
@@ -59,11 +59,12 @@ export function TicketAssignMenu({ ticket }: { ticket: JiraTicket }) {
 
   return (
     <CommandList>
-      {!isLoading && <CommandEmpty>No matching users</CommandEmpty>}
+      <ActionLoading isLoading={isLoading} />
       <CommandGroup heading="Assign to...">
         {unassignAction}
         {renderList()}
       </CommandGroup>
+      {!isLoading && <CommandEmpty>No matching users</CommandEmpty>}
     </CommandList>
   )
 }

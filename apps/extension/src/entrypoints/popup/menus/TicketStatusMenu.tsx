@@ -5,7 +5,7 @@ import {
   CommandLoading
 } from '@internal/ui/components/command'
 
-import { Action } from '@/components/actions'
+import { Action, ActionLoading } from '@/components/actions'
 import { useIssueTransitions } from '@/hooks/useIssueTransitions'
 import { useMutationTransitionIssue } from '@/hooks/useMutationTransitionIssue'
 import { JiraTicket, JiraTransition } from '@/types'
@@ -51,6 +51,7 @@ export function TicketStatusMenu({ ticket }: { ticket: JiraTicket }) {
 
   return (
     <CommandList>
+      <ActionLoading isLoading={isLoading} />
       <CommandGroup heading="Change status...">{renderList()}</CommandGroup>
       {!isLoading && <CommandEmpty>No available transitions</CommandEmpty>}
     </CommandList>

@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef } from 'react'
 import { Button } from '@internal/ui/components/button'
 import { Command, CommandInput } from '@internal/ui/components/command'
+import { cn } from '@internal/ui/lib/utils'
 import { useMemoizedFn } from 'ahooks'
 import { ArrowLeft } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
@@ -11,6 +12,7 @@ import {
   useCommandRouter
 } from '@/components/CommandRouter'
 import { QueryClientProvider } from '@/components/QueryClientProvider'
+import { useIsCommandLoading } from '@/stores/useLoadingStore'
 import { useTicketSearch } from '~/hooks/useTicketSearch'
 
 import {
@@ -34,10 +36,15 @@ function App() {
     setValue,
     pop
   } = useCommandRouter()
-  const { handleSearch, isSearching, isAuthConfigured } = useTicketSearch()
+  const { handleSearch, isAuthConfigured } = useTicketSearch()
   const inputRef = useRef<HTMLInputElement>(null)
+  const isCommandLoading = useIsCommandLoading()
 
   const isSearchResultPage = activePage.path === '/'
+  const inputContainerClassName = cn(
+    'relative flex h-[52px] items-center gap-3 pl-5 pr-5 border-b-2 border-gray-200',
+    isCommandLoading && 'command-input-loading'
+  )
 
   const onCommandInputChange = useMemoizedFn((value: string) => {
     setSearch(value)
@@ -92,7 +99,7 @@ function App() {
         shouldFilter={!isSearchResultPage}
         value={activeValue}
         onValueChange={setValue}>
-        <div className="relative flex h-[52px] items-center gap-3 border-b border-gray-200 pl-5 pr-5">
+        <div className={inputContainerClassName}>
           {previousPageButton}
           <CommandInput
             autoFocus
@@ -101,7 +108,7 @@ function App() {
             onValueChange={onCommandInputChange}
             placeholder={'Search tickets...'}
             aria-label="Search tickets"
-            aria-busy={isSearching}
+            aria-busy={isCommandLoading}
           />
         </div>
 

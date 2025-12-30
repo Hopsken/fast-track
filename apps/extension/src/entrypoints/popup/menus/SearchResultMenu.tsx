@@ -1,5 +1,6 @@
 import { CommandGroup, CommandList } from '@internal/ui/components/command'
 
+import { ActionLoading } from '@/components/actions'
 import { TicketItem, TicketList } from '@/components/tickets'
 import { useIssueSuggestions } from '@/hooks/useIssueSuggestions'
 import { IssueSuggestion } from '@/services/ticket-service'
@@ -17,7 +18,7 @@ export function SearchResultMenu() {
 
   const shouldShowSuggestions = !searchQuery.trim()
 
-  const { data: issueSuggestions } = useIssueSuggestions()
+  const { data: issueSuggestions, isLoading } = useIssueSuggestions()
 
   return (
     <CommandList aria-label="Ticket search results">
@@ -30,6 +31,7 @@ export function SearchResultMenu() {
           tickets={searchResults}
         />
       )}
+      <ActionLoading isLoading={isLoading || isSearching} />
     </CommandList>
   )
 }

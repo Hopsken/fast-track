@@ -23,3 +23,30 @@
   text-shadow: 0 1px oklch(0% 0 0 / var(--glass-text-shadow-opacity, 5%));
   border: none;
 }
+
+.command-input-loading {
+  border-bottom: 2px dotted transparent !important;
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  background-image:
+    linear-gradient(to right, rgb(255 255 255), rgb(255 255 255)),
+    conic-gradient(
+      from var(--command-border-angle),
+      #fd8261 0deg 120deg,
+      #86bafc 120deg 240deg,
+      #af6ef1 240deg 360deg /* #399953 270deg 360deg */
+    );
+  animation: command-border-spin 3s linear infinite;
+}
+
+@property --command-border-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes command-border-spin {
+  to {
+    --command-border-angle: -360deg;
+  }
+}

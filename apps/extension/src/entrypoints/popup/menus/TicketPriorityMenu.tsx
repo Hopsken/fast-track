@@ -5,7 +5,7 @@ import {
   CommandLoading
 } from '@internal/ui/components/command'
 
-import { Action } from '@/components/actions'
+import { Action, ActionLoading } from '@/components/actions'
 import { useIssuePriorities } from '@/hooks/useIssuePriorities'
 import { useMutationUpdatePriority } from '@/hooks/useMutationUpdatePriority'
 import { JiraTicket } from '@/types'
@@ -31,8 +31,9 @@ export function TicketPriorityMenu({ ticket }: { ticket: JiraTicket }) {
 
   return (
     <CommandList>
-      {!isLoading && <CommandEmpty>No priorities</CommandEmpty>}
       <CommandGroup heading="Change priority...">{renderList()}</CommandGroup>
+      <ActionLoading isLoading={isLoading} />
+      {!isLoading && <CommandEmpty>No priorities</CommandEmpty>}
     </CommandList>
   )
 }
