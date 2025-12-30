@@ -22,6 +22,7 @@ export const useTicketStore = create<TicketStore>()(
 export const useSearchQuery = () => useTicketStore((state) => state.searchQuery)
 export const useSearchResults = () =>
   useTicketStore((state) => state.searchResults)
+export const useSearchScope = () => useTicketStore((state) => state.searchScope)
 export const useSearchError = () => useTicketStore((state) => state.error)
 export const useIsSearching = () =>
   useTicketStore((state) => state.searchState === 'searching')
@@ -31,6 +32,7 @@ export const useSearchActions = () =>
   useTicketStore(
     useShallow((state) => ({
       setSearchQuery: state.setSearchQuery,
+      setSearchScope: state.setSearchScope,
       setSearchResults: state.setSearchResults,
       setSearchError: state.setSearchError,
       setSearching: state.setSearching,

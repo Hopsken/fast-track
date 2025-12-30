@@ -1,6 +1,6 @@
 import { CommandGroup, CommandList } from '@internal/ui/components/command'
 
-import { ActionLoading } from '@/components/actions'
+import { Action, ActionLoading } from '@/components/actions'
 import { TicketItem, TicketList } from '@/components/tickets'
 import { useIssueSuggestions } from '@/hooks/useIssueSuggestions'
 import { IssueSuggestion } from '@/services/ticket-service'
@@ -8,15 +8,23 @@ import { JiraTicket } from '@/types'
 import {
   useIsSearching,
   useSearchQuery,
-  useSearchResults
+  useSearchResults,
+  useSearchScope
 } from '~/stores/useTicketStore'
 
-export function SearchResultMenu() {
+interface SearchResultMenuProps {
+  onShowMore: () => void
+}
+
+export function SearchResultMenu({ onShowMore }: SearchResultMenuProps) {
   const searchQuery = useSearchQuery()
   const isSearching = useIsSearching()
   const searchResults = useSearchResults()
+  const searchScope = useSearchScope()
 
   const shouldShowSuggestions = !searchQuery.trim()
+  const shouldShowMore =
+    !!searchQuery.trim() && searchScope === 'frequent' && !isSearching
 
   const { data: issueSuggestions, isLoading } = useIssueSuggestions()
 
@@ -25,11 +33,21 @@ export function SearchResultMenu() {
       {shouldShowSuggestions ? (
         <SuggestedTickets issues={issueSuggestions} />
       ) : (
-        <TicketList
-          searchQuery={searchQuery}
-          isSearching={isSearching}
-          tickets={searchResults}
-        />
+        <>
+          <TicketList
+            searchQuery={searchQuery}
+            isSearching={isSearching}
+            tickets={searchResults}
+          />
+          {shouldShowMore && (
+            <Action
+              value="show-more-results"
+              title="Show more results from all projects"
+              onSelect={onShowMore}
+              exitOnSelect={false}
+            />
+          )}
+        </>
       )}
       <ActionLoading isLoading={isLoading || isSearching} />
     </CommandList>

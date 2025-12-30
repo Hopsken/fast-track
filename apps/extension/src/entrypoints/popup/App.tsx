@@ -36,7 +36,7 @@ function App() {
     setValue,
     pop
   } = useCommandRouter()
-  const { handleSearch, isAuthConfigured } = useTicketSearch()
+  const { handleSearch, handleShowMore, isAuthConfigured } = useTicketSearch()
   const inputRef = useRef<HTMLInputElement>(null)
   const isCommandLoading = useIsCommandLoading()
 
@@ -113,7 +113,11 @@ function App() {
         </div>
 
         <CommandRoute path="/">
-          {isAuthConfigured ? <SearchResultMenu /> : <EmptyAuthNotice />}
+          {isAuthConfigured ? (
+            <SearchResultMenu onShowMore={handleShowMore} />
+          ) : (
+            <EmptyAuthNotice />
+          )}
         </CommandRoute>
 
         <CommandRoute path="/actions">

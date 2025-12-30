@@ -1,10 +1,12 @@
 import { defineExtensionMessaging } from '@webext-core/messaging'
 
-import { JiraTicket } from '@/types'
+import type { SearchScope } from '@/stores/slices/createSearchSlice'
+import type { JiraTicket } from '@/types'
 
 interface ProtocolMap {
   onSearchResult: (payload: {
     search: string
+    scope: SearchScope
     tickets: JiraTicket[]
     error?: string
   }) => void

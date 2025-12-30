@@ -70,16 +70,46 @@ class TicketServiceImpl {
     })
   }
 
-  async searchTickets(query: string): Promise<JiraTicket[]> {
+  async searchTickets(
+    query: string,
+    options?: {
+      limit?: number
+      projectKeys?: string[]
+    }
+  ): Promise<JiraTicket[]> {
     const normalizedQuery = query.trim()
     if (!normalizedQuery) {
       return []
     }
 
     return this.withJira(async (jira) => {
-      const results = await jira.issues.searchIssuesByText(normalizedQuery)
+      const results = await jira.issues.searchIssuesByText(normalizedQuery, {
+        maxResults: options?.limit,
+        projectKeys: options?.projectKeys
+      })
       return uniqBy(results, 'key')
     })
+  }
+
+  async getFrequentProjectKeys(limit = 3): Promise<string[]> {
+    const historyTickets = await this.getRecentHistoryTickets(50)
+    if (!historyTickets.length) {
+      return []
+    }
+
+    const projectCounts = historyTickets.reduce((acc, ticket) => {
+      if (!ticket.projectKey) {
+        return acc
+      }
+
+      acc.set(ticket.projectKey, (acc.get(ticket.projectKey) ?? 0) + 1)
+      return acc
+    }, new Map<string, number>())
+
+    return Array.from(projectCounts.entries())
+      .sort(([, countA], [, countB]) => countB - countA)
+      .slice(0, limit)
+      .map(([projectKey]) => projectKey)
   }
 
   async isConfigured() {

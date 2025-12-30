@@ -13,6 +13,8 @@ export const queryKeys = {
   autoComplete: (url: string, query: string) => ['autoComplete', url, query],
   priorities: ['priorities'],
   tickets: {
-    suggestions: ['tickets', 'suggestions'] as const
+    suggestions: ['tickets', 'suggestions'] as const,
+    search: (query: string, scope: 'frequent' | 'all') =>
+      ['tickets', 'search', scope, query] as const
   }
 }

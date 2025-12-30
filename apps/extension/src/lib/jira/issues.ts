@@ -157,13 +157,17 @@ export class JiraIssueService {
 
   async searchIssuesByText(
     query: string,
-    maxResults = 30
+    options?: {
+      maxResults?: number
+      projectKeys?: string[]
+    }
   ): Promise<JiraTicket[]> {
     const trimmedQuery = query.trim()
     if (!trimmedQuery) {
       return []
     }
 
+    const { maxResults = 30, projectKeys = [] } = options ?? {}
     const tokens = trimmedQuery.split(/\s+/).filter(Boolean)
 
     const clauses = new Set<string>()
@@ -189,7 +193,19 @@ export class JiraIssueService {
       tokens.forEach((token) => addFieldClauses(token))
     }
 
-    const jql = `${Array.from(clauses).join(' OR ')} ORDER BY updated DESC`
+    const searchClause = `(${Array.from(clauses).join(' OR ')})`
+    const projectClause =
+      projectKeys.length > 0
+        ? `project in (${projectKeys
+            .map((key) => `"${escapeJqlValue(key)}"`)
+            .join(', ')})`
+        : ''
+
+    const jql = [searchClause, projectClause]
+      .filter(Boolean)
+      .join(' AND ')
+      .concat(' ORDER BY updated DESC')
+
     return this.searchIssuesUsingJql(jql, { limit: maxResults })
   }
 
