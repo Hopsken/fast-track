@@ -4,11 +4,8 @@ import { z } from 'zod'
 
 import { JiraAPI } from '@/lib/jira'
 import { AuthApi } from '@/lib/jira/auth-api'
-import { getStorageItem, StorageKey } from '@/lib/storage'
+import { getStorageItem } from '@/lib/storage'
 import { JiraApiKeyConfig, ReceivedTokenPayload, JiraUserInfo } from '@/types'
-import { getTicketService } from '~/services/ticket-service'
-import { getLogger } from '~/utils/logger'
-
 import { analytics } from './analytics'
 
 export interface AuthService {
@@ -39,7 +36,6 @@ class AuthServiceImpl implements AuthService {
   private authTypeStorage = getStorageItem('AuthType')
   private jiraHostStorage = getStorageItem('JiraHost')
   private authApi = new AuthApi()
-  private log = getLogger('auth-service')
 
   public async receiveTokens(
     tokens: ReceivedTokenPayload
@@ -61,8 +57,6 @@ class AuthServiceImpl implements AuthService {
     await this.userInfoStorage.setValue(userInfo)
 
     analytics.track('connect_success', { method: 'oauth' })
-
-    await this.primeSuggestionsAfterAuth()
 
     return userInfo
   }
@@ -89,8 +83,6 @@ class AuthServiceImpl implements AuthService {
       this.userInfoStorage.setValue(userInfo)
     ])
 
-    await this.primeSuggestionsAfterAuth()
-
     return userInfo
   }
 
@@ -106,24 +98,11 @@ class AuthServiceImpl implements AuthService {
       this.apiKeyStorage.removeValue(),
       this.userInfoStorage.removeValue(),
       this.jiraHostStorage.removeValue(),
-      getStorageItem('LastSyncAt').removeValue(),
       // Clear React Query cache
       getStorageItem('REACT_QUERY_OFFLINE_CACHE').removeValue()
     ])
 
     return true
-  }
-
-  private async primeSuggestionsAfterAuth() {
-    const ticketService = getTicketService()
-    try {
-      await ticketService.suggestions.refresh('auth')
-    } catch (error) {
-      this.log.error(
-        'AuthService: failed to prefetch suggestions after auth',
-        error
-      )
-    }
   }
 
   /**

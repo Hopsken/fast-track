@@ -18,9 +18,7 @@ export function DevActionRefreshSuggestions() {
         style: 'loading',
         title: 'Refreshing suggestions...'
       })
-      await getTicketService().refreshSuggestions('manual', {
-        force: true
-      })
+      await getTicketService().getIssueSuggestions()
       toast.update({
         style: 'success',
         title: 'Suggestions refreshed'

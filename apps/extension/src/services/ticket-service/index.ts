@@ -16,13 +16,6 @@ import { mapPriority } from '@/utils/jira/issues'
 import { getJiraApi, JiraAPI } from '~/lib/jira'
 import { getLogger } from '~/utils/logger'
 
-import {
-  SuggestionRefreshOptions,
-  SuggestionRefreshReason,
-  TicketSuggestionService,
-  TicketSuggestionsAPI
-} from './ticket-suggestion-service'
-
 export type IssueSuggestion = {
   inProgress: JiraTicket[]
   activeSprintTodo: JiraTicket[]
@@ -33,12 +26,7 @@ export type IssueSuggestion = {
  * Ticket service implementation
  */
 class TicketServiceImpl {
-  readonly suggestions: TicketSuggestionsAPI
   private log = getLogger('ticket-service')
-
-  constructor() {
-    this.suggestions = new TicketSuggestionService(this)
-  }
 
   private async getJira(): Promise<JiraAPI | null> {
     try {
@@ -47,14 +35,6 @@ class TicketServiceImpl {
       this.log.error('TicketService: failed to initialize Jira client', error)
       return null
     }
-  }
-
-  async refreshSuggestions(
-    reason: SuggestionRefreshReason,
-    options?: SuggestionRefreshOptions
-  ) {
-    this.log.info('TicketService: refreshSuggestions', reason, options)
-    return this.suggestions.refresh(reason, options)
   }
 
   async getIssueSuggestions(): Promise<IssueSuggestion> {

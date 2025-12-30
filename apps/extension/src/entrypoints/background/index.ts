@@ -11,7 +11,6 @@ import { registerJiraService } from '~/services/jira-service'
 import { registerTicketService } from '~/services/ticket-service'
 import { getLogger } from '~/utils/logger'
 
-import { BackgroundAlarmsService } from './services/background-alarms'
 import { InstallationHandlerService } from './services/installation-handler'
 import { OmniboxHandlerService } from './services/omnibox-handler'
 
@@ -22,15 +21,11 @@ export default defineBackground(() => {
 
   // Initialize proxy services
   registerJiraService()
-  const ticketService = registerTicketService()
+  registerTicketService()
   registerSearchService()
   registerAuthService()
 
   // Initialize alarms service
-  const alarmsService = new BackgroundAlarmsService(ticketService)
-  alarmsService.initialize().catch((error) => {
-    log.error('❌ Background alarms initialization failed:', error)
-  })
 
   // Initialize other services
   OmniboxHandlerService.initialize()

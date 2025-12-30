@@ -19,10 +19,6 @@ type StorageItems = {
   OAuthTokens: JiraOAuthConfig | null
   OAuthUserInfo: JiraUserInfo | null
   ApiKeyAuth: JiraApiKeyConfig | null
-  LastSyncAt: {
-    at: string
-    reason: string
-  } | null
   DevMode: boolean
   REACT_QUERY_OFFLINE_CACHE: unknown
 
@@ -48,7 +44,6 @@ const STORAGE_DEFAULTS: StorageItems = {
   OAuthTokens: null,
   OAuthUserInfo: null,
   ApiKeyAuth: null,
-  LastSyncAt: null,
   DevMode: false,
 
   DeviceId: '',
