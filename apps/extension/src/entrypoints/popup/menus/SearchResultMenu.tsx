@@ -44,7 +44,11 @@ export function SearchResultMenu() {
 
   return (
     <CommandList aria-label="Ticket search results">
-      <TicketList searchQuery={searchQuery} tickets={searchResults} />
+      <TicketList
+        searchQuery={searchQuery}
+        tickets={searchResults}
+        showEmptyNotice={!shouldShowMore}
+      />
       {shouldShowMore ? (
         <CommandItem
           forceMount
