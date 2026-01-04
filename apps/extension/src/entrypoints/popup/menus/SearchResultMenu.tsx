@@ -6,8 +6,12 @@ import { ActionLoading } from '@/components/actions'
 import { TicketList } from '@/components/tickets'
 import { useFrequentProjects } from '@/hooks/useFrequentProjects'
 import { useSearchQuery, useTicketSearch } from '@/hooks/useTicketSearch'
+import { IssueSuggestion } from '@/services/ticket-service'
+import { filterTicketsByQuery } from '@/utils/ticket-ranking'
 
-export function SearchResultMenu() {
+export function SearchResultMenu(props: { suggestions?: IssueSuggestion }) {
+  const { suggestions } = props
+
   const searchQuery = useSearchQuery()
 
   const [showAllProjects, setShowAllProjects] = useState(false)
@@ -16,6 +20,17 @@ export function SearchResultMenu() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setShowAllProjects(false)
   }, [searchQuery])
+
+  const filteredSuggestions = useMemo(() => {
+    if (!suggestions) return []
+
+    const allTickets = [
+      ...(suggestions?.inProgress ?? []),
+      ...(suggestions?.activeSprintTodo ?? []),
+      ...(suggestions?.viewHistory ?? [])
+    ]
+    return filterTicketsByQuery(allTickets, searchQuery)
+  }, [suggestions, searchQuery])
 
   const { data: frequentProjects = [] } = useFrequentProjects()
 
@@ -37,8 +52,11 @@ export function SearchResultMenu() {
   )
 
   const searchResults = useMemo(() => {
-    return uniqBy(scopedResults.concat(allResults), 'key')
-  }, [scopedResults, allResults])
+    return uniqBy(
+      [...filteredSuggestions, ...scopedResults, ...allResults],
+      'key'
+    )
+  }, [filteredSuggestions, scopedResults, allResults])
   const isSearching = isScopedSearching || isAllSearching
 
   const shouldShowMore =

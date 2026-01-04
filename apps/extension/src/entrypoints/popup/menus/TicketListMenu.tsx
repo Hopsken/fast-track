@@ -20,7 +20,7 @@ export function TicketListMenu() {
       {shouldShowSuggestions ? (
         <SuggestedTickets issues={issueSuggestions} />
       ) : (
-        <SearchResultMenu />
+        <SearchResultMenu suggestions={issueSuggestions} />
       )}
       <ActionLoading isLoading={isLoading} />
     </CommandList>
