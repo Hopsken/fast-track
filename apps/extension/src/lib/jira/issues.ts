@@ -172,21 +172,32 @@ export class JiraIssueService {
     const tokens = trimmedQuery.split(/\s+/).filter(Boolean)
 
     const clauses = new Set<string>()
-    const addFieldClauses = (value: string) => {
-      const escapedValue = normalizeJqlValue(value)
+    const exactKeyClauses = new Set<string>()
 
+    tokens.forEach((token) => {
+      const escapedValue = normalizeJqlValue(token)
       clauses.add(`summary ~ "${escapedValue}*"`)
       clauses.add(`summary ~ "*${escapedValue}"`)
-    }
 
-    tokens.forEach((token) => addFieldClauses(token))
+      if (/^\d+$/.test(token)) {
+        clauses.add(`issuekey ~ "-${token}"`)
+      }
+    })
 
     const keyLike = isTicketKey(trimmedQuery)
     if (keyLike) {
-      clauses.add(`issuekey = "${trimmedQuery.toUpperCase()}"`)
+      exactKeyClauses.add(`issuekey = "${trimmedQuery.toUpperCase()}"`)
     }
 
-    const searchClause = Array.from(clauses).join(' OR ')
+    // (summary ~ ... OR issuekey ~ ...)
+    const scopedJql =
+      clauses.size > 0 ? `(${Array.from(clauses).join(' OR ')})` : ''
+
+    const exactKeyJql =
+      exactKeyClauses.size > 0
+        ? `(${Array.from(exactKeyClauses).join(' OR ')})`
+        : ''
+
     const projectClause =
       projectKeys.length > 0
         ? `project in (${projectKeys
@@ -194,10 +205,14 @@ export class JiraIssueService {
             .join(', ')})`
         : ''
 
-    const jqlParts = [projectClause, searchClause]
+    // (project IN (...) AND (summary ~ ... OR issuekey ~ ...)) OR (issuekey = ...)
+    const textSearchPart = [projectClause, scopedJql]
       .filter(Boolean)
-      .map((part) => `(${part})`)
       .join(' AND ')
+
+    const jqlParts = [textSearchPart ? `(${textSearchPart})` : '', exactKeyJql]
+      .filter(Boolean)
+      .join(' OR ')
 
     const jql = `${jqlParts} ORDER BY updated DESC`
     return this.searchIssuesUsingJql(jql, { limit: maxResults })
