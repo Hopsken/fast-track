@@ -217,10 +217,7 @@ export class JiraIssueService {
       .filter(Boolean)
       .join(' AND ')
 
-    const jqlParts = [
-      textSearchPart ? `(${textSearchPart})` : '',
-      exactKeyJql
-    ]
+    const jqlParts = [textSearchPart ? `(${textSearchPart})` : '', exactKeyJql]
       .filter(Boolean)
       .join(' OR ')
 
