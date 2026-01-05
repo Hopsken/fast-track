@@ -20,7 +20,7 @@
     },
 
     "zip": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["build"],
       "outputs": [".output/**"]
     },
 
