@@ -9,7 +9,7 @@ import { chunk, compact, flatMap, map } from 'lodash-es'
 
 import { IssueSource, JiraPriority, JiraTicket, JiraTransition } from '@/types'
 import { isNonNullable } from '@/utils/assert'
-import { mapPriority, mapTransition } from '@/utils/jira/issues'
+import { isTicketKey, mapPriority, mapTransition } from '@/utils/jira/issues'
 import { normalizeProjects } from '@/utils/ticket-search'
 import { getLogger } from '~/utils/logger'
 
@@ -31,7 +31,8 @@ const issueFields = [
   'lastViewed'
 ]
 
-const escapeJqlValue = (value: string) => value.replace(/["\\]/g, '\\$&')
+// remove double quotes and backslashes from JQL value
+const normalizeJqlValue = (value: string) => value.replace(/["\\]/g, '')
 const log = getLogger('jira-issues')
 
 /**
@@ -172,32 +173,24 @@ export class JiraIssueService {
 
     const clauses = new Set<string>()
     const addFieldClauses = (value: string) => {
-      const escapedValue = escapeJqlValue(value)
+      const escapedValue = normalizeJqlValue(value)
 
-      clauses.add(`summary ~ "${escapedValue}"`)
-      clauses.add(`assignee = "${escapedValue}"`)
-      // TODO: following fields are too vague to filter, may contain irrelevant issues, add until we can limit search to projects
-      // clauses.add(`status ~ "${escapedValue}"`)
-      // clauses.add(`issuetype ~ "${escapedValue}"`)
-      // clauses.add(`priority ~ "${escapedValue}"`)
+      clauses.add(`summary ~ "${escapedValue}*"`)
+      clauses.add(`summary ~ "*${escapedValue}"`)
     }
 
-    const keyLike = /^[A-Za-z][A-Za-z0-9]+-\d+$/.test(trimmedQuery)
+    tokens.forEach((token) => addFieldClauses(token))
+
+    const keyLike = isTicketKey(trimmedQuery)
     if (keyLike) {
       clauses.add(`issuekey = "${trimmedQuery.toUpperCase()}"`)
-    }
-
-    addFieldClauses(trimmedQuery)
-
-    if (tokens.length > 1) {
-      tokens.forEach((token) => addFieldClauses(token))
     }
 
     const searchClause = Array.from(clauses).join(' OR ')
     const projectClause =
       projectKeys.length > 0
         ? `project in (${projectKeys
-            .map((key) => `"${escapeJqlValue(key)}"`)
+            .map((key) => `"${normalizeJqlValue(key)}"`)
             .join(', ')})`
         : ''
 

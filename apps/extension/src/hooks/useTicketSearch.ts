@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useDebounce, useMemoizedFn } from 'ahooks'
 
 import { useCommandSearch } from '@/components/CommandRouter'
@@ -20,7 +20,11 @@ export const useSearchQuery = () => useCommandSearch().trim()
 
 export const useTicketSearch = (options: TicketSearchOptions = {}) => {
   const searchQuery = useSearchQuery()
-  const debouncedQuery = useDebounce(searchQuery, { wait: 200 })
+  const debouncedQuery = useDebounce(searchQuery, {
+    wait: 300,
+    leading: false,
+    trailing: true
+  })
 
   const projects = useMemo(
     () => normalizeProjects(options.projectKeys ?? []),
