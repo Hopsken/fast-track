@@ -29,12 +29,11 @@ describe('JiraIssueService searchIssuesByText', () => {
 
     await service.searchIssuesByText('123', { projectKeys: ['PROJ'] })
 
-    // Expected JQL: (project in ("PROJ") AND ((summary ~ "123*" OR summary ~ "*123") OR (issuekey ~ "-123")))
-
+    // Expected JQL: (project in ("PROJ") AND (summary ~ "123*" OR summary ~ "*123" OR issuekey ~ "-123"))
     expect(searchSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         jql: expect.stringMatching(
-          /\(project in \("PROJ"\) AND \(\(summary ~ "123\*" OR summary ~ "\*123"\) OR \(issuekey ~ "-123"\)\)\)/
+          /\(project in \("PROJ"\) AND \(summary ~ "123\*" OR summary ~ "\*123" OR issuekey ~ "-123"\)\)/
         )
       })
     )
@@ -83,7 +82,7 @@ describe('JiraIssueService searchIssuesByText', () => {
     expect(jql).toContain('issuekey ~ "-123"')
 
     expect(jql).toMatch(
-      /\(project in \("PROJ"\) AND \(\(summary ~ .* OR \(issuekey ~ "-123"\)\)\)/
+      /\(project in \("PROJ"\) AND \(summary ~ .* OR issuekey ~ "-123"\)\)/
     )
   })
 

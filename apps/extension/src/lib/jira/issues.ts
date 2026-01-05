@@ -171,17 +171,16 @@ export class JiraIssueService {
 
     const tokens = trimmedQuery.split(/\s+/).filter(Boolean)
 
-    const summaryClauses = new Set<string>()
-    const numericClauses = new Set<string>()
+    const clauses = new Set<string>()
     const exactKeyClauses = new Set<string>()
 
     tokens.forEach((token) => {
       const escapedValue = normalizeJqlValue(token)
-      summaryClauses.add(`summary ~ "${escapedValue}*"`)
-      summaryClauses.add(`summary ~ "*${escapedValue}"`)
+      clauses.add(`summary ~ "${escapedValue}*"`)
+      clauses.add(`summary ~ "*${escapedValue}"`)
 
       if (/^\d+$/.test(token)) {
-        numericClauses.add(`issuekey ~ "-${token}"`)
+        clauses.add(`issuekey ~ "-${token}"`)
       }
     })
 
@@ -190,14 +189,10 @@ export class JiraIssueService {
       exactKeyClauses.add(`issuekey = "${trimmedQuery.toUpperCase()}"`)
     }
 
-    const summaryJql =
-      summaryClauses.size > 0
-        ? `(${Array.from(summaryClauses).join(' OR ')})`
-        : ''
-    const numericJql =
-      numericClauses.size > 0
-        ? `(${Array.from(numericClauses).join(' OR ')})`
-        : ''
+    // (summary ~ ... OR issuekey ~ ...)
+    const scopedJql =
+      clauses.size > 0 ? `(${Array.from(clauses).join(' OR ')})` : ''
+
     const exactKeyJql =
       exactKeyClauses.size > 0
         ? `(${Array.from(exactKeyClauses).join(' OR ')})`
@@ -211,9 +206,7 @@ export class JiraIssueService {
         : ''
 
     // (project IN (...) AND (summary ~ ... OR issuekey ~ ...)) OR (issuekey = ...)
-    const scopedJql = [summaryJql, numericJql].filter(Boolean).join(' OR ')
-
-    const textSearchPart = [projectClause, scopedJql ? `(${scopedJql})` : '']
+    const textSearchPart = [projectClause, scopedJql]
       .filter(Boolean)
       .join(' AND ')
 
