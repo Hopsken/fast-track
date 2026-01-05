@@ -40,8 +40,10 @@ describe('JiraIssueService searchIssuesByText', () => {
 
     // Expected JQL: ((project in ("PROJ") AND (summary ...)) OR (issuekey = "PROJ-123"))
 
-    const callArgs = searchSpy.mock.calls[0][0];
-    const jql = callArgs.jql;
+    expect(searchSpy).toHaveBeenCalled()
+    const callArgs = searchSpy.mock.calls[0]?.[0]
+    // @ts-expect-error - jql exists on the argument
+    const jql = callArgs?.jql
 
     expect(jql).toContain('project in ("PROJ")')
     expect(jql).toContain('issuekey = "PROJ-123"')
@@ -56,8 +58,10 @@ describe('JiraIssueService searchIssuesByText', () => {
 
     await service.searchIssuesByText('foo 123', { projectKeys: ['PROJ'] })
 
-    const callArgs = searchSpy.mock.calls[0][0];
-    const jql = callArgs.jql;
+    expect(searchSpy).toHaveBeenCalled()
+    const callArgs = searchSpy.mock.calls[0]?.[0]
+    // @ts-expect-error - jql exists on the argument
+    const jql = callArgs?.jql
 
     // Structure: (project IN (...) AND ((summary ...) OR (numeric ...)))
 
@@ -75,8 +79,10 @@ describe('JiraIssueService searchIssuesByText', () => {
 
     await service.searchIssuesByText('123', { projectKeys: [] })
 
-    const callArgs = searchSpy.mock.calls[0][0];
-    const jql = callArgs.jql;
+    expect(searchSpy).toHaveBeenCalled()
+    const callArgs = searchSpy.mock.calls[0]?.[0]
+    // @ts-expect-error - jql exists on the argument
+    const jql = callArgs?.jql
 
     // Structure: ((summary ~ ... OR issuekey ~ ...))
     expect(jql).not.toContain('project in')
