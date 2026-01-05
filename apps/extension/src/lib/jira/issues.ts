@@ -171,26 +171,31 @@ export class JiraIssueService {
 
     const tokens = trimmedQuery.split(/\s+/).filter(Boolean)
 
-    const clauses = new Set<string>()
-    const addFieldClauses = (value: string) => {
-      const escapedValue = normalizeJqlValue(value)
+    const summaryClauses = new Set<string>()
+    const keyClauses = new Set<string>()
 
-      clauses.add(`summary ~ "${escapedValue}*"`)
-      clauses.add(`summary ~ "*${escapedValue}"`)
-    }
+    tokens.forEach((token) => {
+      const escapedValue = normalizeJqlValue(token)
+      summaryClauses.add(`summary ~ "${escapedValue}*"`)
+      summaryClauses.add(`summary ~ "*${escapedValue}"`)
 
-    tokens.forEach((token) => addFieldClauses(token))
+      if (/^\d+$/.test(token)) {
+        keyClauses.add(`issuekey ~ "-${token}"`)
+      }
+    })
 
     const keyLike = isTicketKey(trimmedQuery)
     if (keyLike) {
-      clauses.add(`issuekey = "${trimmedQuery.toUpperCase()}"`)
+      keyClauses.add(`issuekey = "${trimmedQuery.toUpperCase()}"`)
     }
 
-    if (/^\d+$/.test(trimmedQuery)) {
-      clauses.add(`issuekey ~ "-${trimmedQuery}"`)
-    }
+    const summaryJql =
+      summaryClauses.size > 0
+        ? `(${Array.from(summaryClauses).join(' OR ')})`
+        : ''
+    const keyJql =
+      keyClauses.size > 0 ? `(${Array.from(keyClauses).join(' OR ')})` : ''
 
-    const searchClause = Array.from(clauses).join(' OR ')
     const projectClause =
       projectKeys.length > 0
         ? `project in (${projectKeys
@@ -198,10 +203,17 @@ export class JiraIssueService {
             .join(', ')})`
         : ''
 
-    const jqlParts = [projectClause, searchClause]
+    // (project IN (...) AND summary ~ ...) OR (key ~ ...)
+    const textSearchPart = [projectClause, summaryJql]
       .filter(Boolean)
-      .map((part) => `(${part})`)
       .join(' AND ')
+
+    const jqlParts = [
+      textSearchPart ? `(${textSearchPart})` : '',
+      keyJql
+    ]
+      .filter(Boolean)
+      .join(' OR ')
 
     const jql = `${jqlParts} ORDER BY updated DESC`
     return this.searchIssuesUsingJql(jql, { limit: maxResults })
