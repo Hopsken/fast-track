@@ -172,7 +172,8 @@ export class JiraIssueService {
     const tokens = trimmedQuery.split(/\s+/).filter(Boolean)
 
     const summaryClauses = new Set<string>()
-    const keyClauses = new Set<string>()
+    const numericClauses = new Set<string>()
+    const exactKeyClauses = new Set<string>()
 
     tokens.forEach((token) => {
       const escapedValue = normalizeJqlValue(token)
@@ -180,21 +181,27 @@ export class JiraIssueService {
       summaryClauses.add(`summary ~ "*${escapedValue}"`)
 
       if (/^\d+$/.test(token)) {
-        keyClauses.add(`issuekey ~ "-${token}"`)
+        numericClauses.add(`issuekey ~ "-${token}"`)
       }
     })
 
     const keyLike = isTicketKey(trimmedQuery)
     if (keyLike) {
-      keyClauses.add(`issuekey = "${trimmedQuery.toUpperCase()}"`)
+      exactKeyClauses.add(`issuekey = "${trimmedQuery.toUpperCase()}"`)
     }
 
     const summaryJql =
       summaryClauses.size > 0
         ? `(${Array.from(summaryClauses).join(' OR ')})`
         : ''
-    const keyJql =
-      keyClauses.size > 0 ? `(${Array.from(keyClauses).join(' OR ')})` : ''
+    const numericJql =
+      numericClauses.size > 0
+        ? `(${Array.from(numericClauses).join(' OR ')})`
+        : ''
+    const exactKeyJql =
+      exactKeyClauses.size > 0
+        ? `(${Array.from(exactKeyClauses).join(' OR ')})`
+        : ''
 
     const projectClause =
       projectKeys.length > 0
@@ -203,14 +210,16 @@ export class JiraIssueService {
             .join(', ')})`
         : ''
 
-    // (project IN (...) AND summary ~ ...) OR (key ~ ...)
-    const textSearchPart = [projectClause, summaryJql]
+    // (project IN (...) AND (summary ~ ... OR issuekey ~ ...)) OR (issuekey = ...)
+    const scopedJql = [summaryJql, numericJql].filter(Boolean).join(' OR ')
+
+    const textSearchPart = [projectClause, scopedJql ? `(${scopedJql})` : '']
       .filter(Boolean)
       .join(' AND ')
 
     const jqlParts = [
       textSearchPart ? `(${textSearchPart})` : '',
-      keyJql
+      exactKeyJql
     ]
       .filter(Boolean)
       .join(' OR ')
