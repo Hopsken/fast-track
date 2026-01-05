@@ -186,6 +186,10 @@ export class JiraIssueService {
       clauses.add(`issuekey = "${trimmedQuery.toUpperCase()}"`)
     }
 
+    if (/^\d+$/.test(trimmedQuery)) {
+      clauses.add(`issuekey ~ "-${trimmedQuery}"`)
+    }
+
     const searchClause = Array.from(clauses).join(' OR ')
     const projectClause =
       projectKeys.length > 0
