@@ -3,8 +3,10 @@ import {
   CommandGroup,
   CommandItem,
   CommandList,
-  CommandSeparator
+  CommandSeparator,
+  CommandShortcut
 } from '@internal/ui/components/command'
+import { Kbd } from '@internal/ui/components/kbd'
 import { useMemoizedFn } from 'ahooks'
 import {
   ChartNoAxesColumnIncreasing,
@@ -16,9 +18,9 @@ import {
   UserRoundMinus,
   UserRoundPlus
 } from 'lucide-react'
+import { isHotkeyPressed } from 'react-hotkeys-hook'
 
 import { Action, ActionCopyToClipboard, ActionPush } from '@/components/actions'
-import { ActionShortcut } from '@/components/actions/ActionShortcut'
 import { useCommandNavigate } from '@/components/CommandRouter'
 import { PrefetchProvider } from '@/components/PrefetchQuery'
 import { TicketBasicFields } from '@/components/tickets'
@@ -31,6 +33,7 @@ import { useMutationAssignMyself } from '@/hooks/useMutationAssignIssue'
 import { useTicketDetails } from '@/hooks/useTicketDetails'
 import { JiraTicket } from '@/types'
 import { generateBranchName, getIssueTitleLink } from '@/utils/jira/issues'
+import { openJiraIssue } from '@/utils/open-jira-issue'
 
 export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
   // prefetch ticket details
@@ -38,7 +41,13 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
 
   const { push } = useCommandNavigate<CommandRoutes>()
 
-  const onSelect = useMemoizedFn(() => push('/ticket/details', ticket))
+  const onSelect = useMemoizedFn(() => {
+    if (isHotkeyPressed('alt')) {
+      openJiraIssue(ticket.key)
+    } else {
+      push('/ticket/details', ticket)
+    }
+  })
 
   const formatted = useMemo(
     () => ({
@@ -53,10 +62,9 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
       <CommandGroup>
         <CommandItem value={ticket.key} onSelect={onSelect} className="mb-1">
           <TicketBasicFields ticket={ticket} />
-          <ActionShortcut
-            shortcut={{ modifiers: [], key: 'enter' }}
-            onSelect={onSelect}
-          />
+          <CommandShortcut>
+            <Kbd key={'enter'}>⏎</Kbd>
+          </CommandShortcut>
         </CommandItem>
       </CommandGroup>
 
