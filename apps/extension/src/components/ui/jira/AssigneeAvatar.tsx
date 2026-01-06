@@ -49,8 +49,13 @@ export function AssigneeAvatar({
   }
 
   const displayName = assignee.displayName || assignee.emailAddress || 'Unknown'
+  const avatarUrl =
+    typeof assignee.avatarUrls === 'string'
+      ? assignee.avatarUrls
+      : assignee.avatarUrls?.['48x48'] ||
+        Object.values(assignee.avatarUrls || {})[0]
 
-  if (!assignee.avatarUrls || imageError) {
+  if (!avatarUrl || imageError) {
     // Generate a consistent background color based on the user's name
     const colorIndex = displayName.charCodeAt(0) % 6
     const colors = [
@@ -78,7 +83,7 @@ export function AssigneeAvatar({
     <div className={className}>
       <img
         alt={`Avatar for ${displayName}`}
-        src={assignee.avatarUrls}
+        src={avatarUrl}
         className="rounded-full"
         style={{ width: size, height: size }}
         onError={handleImageError}

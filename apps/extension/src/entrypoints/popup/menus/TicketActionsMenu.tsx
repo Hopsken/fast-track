@@ -9,29 +9,27 @@ import {
   Clipboard,
   GitBranch,
   Link2,
-  SquareArrowOutUpRight,
   Route,
   UserPen,
   UserRoundMinus,
   UserRoundPlus
 } from 'lucide-react'
 
-import {
-  Action,
-  ActionCopyToClipboard,
-  ActionHyperLink,
-  ActionPush
-} from '@/components/actions'
+import { Action, ActionCopyToClipboard, ActionPush } from '@/components/actions'
+import { TicketHeaderAction } from '@/components/actions/tickets/TicketHeaderAction'
 import { PrefetchProvider } from '@/components/PrefetchQuery'
 import { useCurrentUser } from '@/hooks/useCurrentUser'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
 import { useIssuePriorities } from '@/hooks/useIssuePriorities'
 import { useIssueTransitions } from '@/hooks/useIssueTransitions'
 import { useMutationAssignMyself } from '@/hooks/useMutationAssignIssue'
+import { useTicketDetails } from '@/hooks/useTicketDetails'
 import { JiraTicket } from '@/types'
 import { generateBranchName, getIssueTitleLink } from '@/utils/jira/issues'
 
 export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
+  const { data: issueDetail } = useTicketDetails(ticket.key)
+
   const formatted = useMemo(
     () => ({
       branchName: generateBranchName(ticket),
@@ -42,18 +40,15 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
 
   return (
     <CommandList>
-      <CommandGroup heading={`${ticket.key} - ${ticket.summary}`}>
-        <ActionHyperLink
-          value="open-in-jira"
-          icon={SquareArrowOutUpRight}
-          url={ticket.url}
-          title="Open in Jira"
-          shortcut={{
-            macOS: { modifiers: ['cmd', 'shift'], key: 'o' },
-            Windows: { modifiers: ['alt', 'shift'], key: 'o' }
-          }}
-        />
+      <TicketHeaderAction
+        ticket={ticket}
+        issueDetail={issueDetail}
+        onSelect={() => window.open(ticket.url, '_blank')}
+      />
 
+      <CommandSeparator />
+
+      <CommandGroup heading="General">
         <ActionPush
           value="assign-to"
           target={() => ({ path: '/ticket/assign', state: ticket })}
@@ -88,14 +83,6 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
             Windows: { modifiers: ['alt', 'shift'], key: 'p' }
           }}
         />
-        {/* <Action
-          icon={MessageCircle}
-          title="Add comment..."
-          shortcut={{
-            macOS: { modifiers: ['cmd', 'shift'], key: 'e' },
-            Windows: { modifiers: ['alt', 'shift'], key: 'e' }
-          }}
-        /> */}
       </CommandGroup>
 
       <CommandSeparator />

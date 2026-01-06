@@ -6,6 +6,7 @@ import { useMemoizedFn } from 'ahooks'
 import { ArrowLeft } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
 
+import { TicketDescriptionFull } from '@/components/actions/tickets/TicketDescriptionFull'
 import {
   CommandRoute,
   CommandRouter,
@@ -130,6 +131,10 @@ function App() {
 
         <CommandRoute path="/ticket/priority">
           {(ticket) => <TicketPriorityMenu ticket={ticket} />}
+        </CommandRoute>
+
+        <CommandRoute path="/ticket/description">
+          {({ issueKey }) => <TicketDescriptionFull issueKey={issueKey} />}
         </CommandRoute>
 
         <Footer />

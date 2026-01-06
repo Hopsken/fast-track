@@ -10,7 +10,7 @@ import { UserDetails } from 'jira.js/version3/models/userDetails'
 import { uniqBy } from 'lodash-es'
 
 import { sendMessage } from '@/lib/message'
-import { JiraPriority, JiraTicket, JiraTransition } from '@/types'
+import { JiraPriority, JiraTicket, JiraTransition, IssueDetail } from '@/types'
 import { mapPriority } from '@/utils/jira/issues'
 import { getJiraApi, JiraAPI } from '~/lib/jira'
 import { getLogger } from '~/utils/logger'
@@ -85,6 +85,12 @@ class TicketServiceImpl {
         options
       )
       return uniqBy(results, 'key')
+    })
+  }
+
+  async getTicketDetails(ticketKey: string): Promise<IssueDetail | null> {
+    return this.withJira(async (jira) => {
+      return jira.issues.getIssueDetail(ticketKey)
     })
   }
 

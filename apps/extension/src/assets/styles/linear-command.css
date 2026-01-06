@@ -68,7 +68,7 @@
     content-visibility: auto;
 
     cursor: pointer;
-    height: 44px;
+    min-height: 44px;
     display: flex;
     align-items: center;
     gap: 8px;

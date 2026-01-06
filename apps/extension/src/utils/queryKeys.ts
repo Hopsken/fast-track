@@ -24,6 +24,7 @@ export const queryKeys = {
   },
   tickets: {
     suggestions: ['tickets', 'suggestions'] as const,
+    detail: (issueKey: string) => ['tickets', 'detail', issueKey] as const,
     search: (params: TicketSearchKey) =>
       [
         'tickets',

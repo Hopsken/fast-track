@@ -13,6 +13,7 @@ export interface ActionProps {
   icon?: LucideIcon
   prefix?: ReactNode
   title: ReactNode
+  right?: ReactNode
   onSelect?: () => void
   shortcut?: KeyboardShortcutInput
   exitOnSelect?: boolean
@@ -23,6 +24,7 @@ export function Action({
   icon,
   prefix,
   title,
+  right,
   onSelect,
   shortcut,
   exitOnSelect = true
@@ -47,6 +49,8 @@ export function Action({
       <div className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
         {title}
       </div>
+
+      {right}
 
       {shortcut && (
         <ActionShortcut shortcut={shortcut} onSelect={onSelectItem} />
