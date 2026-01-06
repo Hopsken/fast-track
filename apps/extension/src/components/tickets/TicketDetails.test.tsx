@@ -1,10 +1,12 @@
 import React from 'react'
 import { Command } from '@internal/ui/components/command'
+import { UseQueryResult } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useCommandNavigate } from '@/components/CommandRouter'
 import { useTicketDetails } from '@/hooks/useTicketDetails'
+import { IssueDetail, JiraTicket } from '@/types'
 
 import { TicketDetails } from './TicketDetails'
 
@@ -28,20 +30,24 @@ describe('TicketDetails', () => {
   })
 
   it('renders content', async () => {
+    const mockTicket = {
+      summary: 'Ticket Summary',
+      key: 'T-1',
+      issueType: { name: 'Bug' },
+      status: { name: 'Done', statusCategory: { colorName: 'green' } }
+    } as unknown as JiraTicket
+
     vi.mocked(useTicketDetails).mockReturnValue({
       isLoading: false,
       data: {
-        summary: 'Ticket Summary',
-        key: 'T-1',
-        issueType: { name: 'Bug' },
-        status: { name: 'Done', statusCategory: { colorName: 'green' } },
+        ...mockTicket,
         description: '<p>Full Description Content</p>'
       }
-    } as any)
+    } as unknown as UseQueryResult<IssueDetail>)
 
     render(
       <Command>
-        <TicketDetails issueKey="1" />
+        <TicketDetails ticket={mockTicket} />
       </Command>
     )
 

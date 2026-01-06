@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useMemoizedFn } from 'ahooks'
 
 import { RouteMap, useCommandNavigate } from '../CommandRouter'
 
@@ -15,10 +15,10 @@ export function ActionPush<T extends RouteMap = RouteMap>({
 }: ActionPushProps<T>) {
   const { push } = useCommandNavigate()
 
-  const onSelect = useCallback(() => {
+  const onSelect = useMemoizedFn(() => {
     const { path, state } = target()
     push(String(path), state)
-  }, [target, push])
+  })
 
   return <Action {...restProps} exitOnSelect={false} onSelect={onSelect} />
 }

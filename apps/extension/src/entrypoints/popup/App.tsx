@@ -133,8 +133,8 @@ function App() {
           {(ticket) => <TicketPriorityMenu ticket={ticket} />}
         </CommandRoute>
 
-        <CommandRoute path="/ticket/description">
-          {({ issueKey }) => <TicketDetails issueKey={issueKey} />}
+        <CommandRoute path="/ticket/details">
+          {(ticket) => <TicketDetails ticket={ticket} />}
         </CommandRoute>
 
         <Footer />

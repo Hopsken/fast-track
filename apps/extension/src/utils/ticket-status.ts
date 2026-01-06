@@ -2,16 +2,16 @@ import { JiraStatus } from '@/types'
 
 export function getStatusColor(status: JiraStatus): string {
   const statusName = status?.name?.toLowerCase() || ''
-  const statusCategory = status?.statusCategory?.name?.toLowerCase() || ''
+  const statusCategoryKey = status?.statusCategory?.key?.toLowerCase() || ''
 
   // Use Jira's native status categories first
-  if (statusCategory === 'done') {
+  if (statusCategoryKey === 'done') {
     return 'text-green-500'
   }
-  if (statusCategory === 'in_progress') {
+  if (statusCategoryKey === 'indeterminate') {
     return 'text-blue-500'
   }
-  if (statusCategory === 'todo') {
+  if (statusCategoryKey === 'new') {
     return 'text-gray-500'
   }
 
@@ -37,16 +37,16 @@ export function getStatusColor(status: JiraStatus): string {
 
 export function getStatusDotColor(status: JiraStatus) {
   const statusName = status?.name?.toLowerCase() || ''
-  const statusCategory = status?.statusCategory?.name?.toLowerCase() || ''
+  const statusCategoryKey = status?.statusCategory?.key?.toLowerCase() || ''
 
   // Use Jira's native status categories first
-  if (statusCategory === 'done') {
+  if (statusCategoryKey === 'done') {
     return 'bg-green-500'
   }
-  if (statusCategory === 'in_progress') {
+  if (statusCategoryKey === 'indeterminate') {
     return 'bg-blue-500'
   }
-  if (statusCategory === 'todo') {
+  if (statusCategoryKey === 'new') {
     return 'bg-gray-500'
   }
 

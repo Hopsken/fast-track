@@ -6,7 +6,7 @@ export type CommandRoutes = {
   '/ticket/assign': JiraTicket
   '/ticket/status': JiraTicket
   '/ticket/priority': JiraTicket
-  '/ticket/description': { issueKey: string }
+  '/ticket/details': JiraTicket
 }
 
 export { SearchResultMenu } from './SearchResultMenu'

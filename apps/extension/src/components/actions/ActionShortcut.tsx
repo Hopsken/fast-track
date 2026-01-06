@@ -50,6 +50,14 @@ const mapMacModifier = (modifier: KeyModifier) => {
   }
 }
 
+const keyReplacements = {
+  enter: '⏎'
+} as const
+
+const mapKey = (key: string): string => {
+  return keyReplacements[key as keyof typeof keyReplacements] || key
+}
+
 export function ActionShortcut({
   shortcut,
   onSelect
@@ -68,7 +76,7 @@ export function ActionShortcut({
           <Kbd key={modifier}>{mapModifiers(modifier, platform)}</Kbd>
         ))}
       </KbdGroup>
-      <Kbd key={resolvedShortcut.key}>{resolvedShortcut.key}</Kbd>
+      <Kbd key={resolvedShortcut.key}>{mapKey(resolvedShortcut.key)}</Kbd>
     </CommandShortcut>
   )
 }

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 
 import { Action, ActionCopyToClipboard, ActionPush } from '@/components/actions'
+import { ActionShortcut } from '@/components/actions/ActionShortcut'
 import { useCommandNavigate } from '@/components/CommandRouter'
 import { PrefetchProvider } from '@/components/PrefetchQuery'
 import { TicketBasicFields } from '@/components/tickets'
@@ -32,12 +33,12 @@ import { JiraTicket } from '@/types'
 import { generateBranchName, getIssueTitleLink } from '@/utils/jira/issues'
 
 export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
-  const { data: issueDetail } = useTicketDetails(ticket.key)
+  // prefetch ticket details
+  useTicketDetails(ticket)
+
   const { push } = useCommandNavigate<CommandRoutes>()
 
-  const onSelect = useMemoizedFn(() =>
-    push('/ticket/description', { issueKey: ticket.key })
-  )
+  const onSelect = useMemoizedFn(() => push('/ticket/details', ticket))
 
   const formatted = useMemo(
     () => ({
@@ -51,7 +52,11 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
     <CommandList>
       <CommandGroup>
         <CommandItem value={ticket.key} onSelect={onSelect} className="mb-1">
-          <TicketBasicFields ticket={ticket} issueDetail={issueDetail} />
+          <TicketBasicFields ticket={ticket} />
+          <ActionShortcut
+            shortcut={{ modifiers: [], key: 'enter' }}
+            onSelect={onSelect}
+          />
         </CommandItem>
       </CommandGroup>
 
