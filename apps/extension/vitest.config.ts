@@ -1,18 +1,14 @@
 import path from 'node:path'
 
-import { WxtVitest } from 'wxt/testing'
 import { defineProject } from 'vitest/config'
+import { WxtVitest } from 'wxt/testing'
 
 export default defineProject({
   plugins: [WxtVitest()],
   resolve: {
     alias: {
       '~': path.resolve(__dirname, 'src'),
-      '@': path.resolve(__dirname, 'src'),
-      '@/services/analytics': path.resolve(
-        __dirname,
-        'src/test/mocks/analytics.ts'
-      )
+      '@': path.resolve(__dirname, 'src')
     }
   },
   test: {
