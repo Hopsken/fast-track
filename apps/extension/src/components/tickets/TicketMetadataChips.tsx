@@ -52,7 +52,7 @@ export function TicketMetadataChips({
       {labels.length > 0 && (
         <div className="ml-1 flex items-center gap-1">
           <Tag className="text-muted-foreground h-3.5 w-3.5 opacity-70" />
-          {labels.slice(0, 1).map((label) => (
+          {labels.slice(0, 3).map((label) => (
             <Badge
               key={label}
               variant="outline"
@@ -60,9 +60,9 @@ export function TicketMetadataChips({
               {label}
             </Badge>
           ))}
-          {labels.length > 1 && (
+          {labels.length > 3 && (
             <span className="text-muted-foreground text-[10px]">
-              +{labels.length - 1}
+              +{labels.length - 3}
             </span>
           )}
         </div>

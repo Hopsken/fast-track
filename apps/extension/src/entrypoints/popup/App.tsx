@@ -6,13 +6,13 @@ import { useMemoizedFn } from 'ahooks'
 import { ArrowLeft } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
 
-import { TicketDescriptionFull } from '@/components/actions/tickets/TicketDescriptionFull'
 import {
   CommandRoute,
   CommandRouter,
   useCommandRouter
 } from '@/components/CommandRouter'
 import { QueryClientProvider } from '@/components/QueryClientProvider'
+import { TicketDetails } from '@/components/tickets'
 import { useAuthConfigurationStatus } from '@/hooks/useAuthConfigurationStatus'
 import { useIsCommandLoading } from '@/stores/useLoadingStore'
 
@@ -134,7 +134,7 @@ function App() {
         </CommandRoute>
 
         <CommandRoute path="/ticket/description">
-          {({ issueKey }) => <TicketDescriptionFull issueKey={issueKey} />}
+          {({ issueKey }) => <TicketDetails issueKey={issueKey} />}
         </CommandRoute>
 
         <Footer />

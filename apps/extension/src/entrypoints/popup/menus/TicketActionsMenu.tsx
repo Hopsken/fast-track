@@ -1,9 +1,11 @@
 import { useMemo } from 'react'
 import {
   CommandGroup,
+  CommandItem,
   CommandList,
   CommandSeparator
 } from '@internal/ui/components/command'
+import { useMemoizedFn } from 'ahooks'
 import {
   ChartNoAxesColumnIncreasing,
   Clipboard,
@@ -16,8 +18,10 @@ import {
 } from 'lucide-react'
 
 import { Action, ActionCopyToClipboard, ActionPush } from '@/components/actions'
-import { TicketHeaderAction } from '@/components/actions/tickets/TicketHeaderAction'
+import { useCommandNavigate } from '@/components/CommandRouter'
 import { PrefetchProvider } from '@/components/PrefetchQuery'
+import { TicketBasicFields } from '@/components/tickets'
+import { CommandRoutes } from '@/entrypoints/popup/menus'
 import { useCurrentUser } from '@/hooks/useCurrentUser'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
 import { useIssuePriorities } from '@/hooks/useIssuePriorities'
@@ -29,6 +33,11 @@ import { generateBranchName, getIssueTitleLink } from '@/utils/jira/issues'
 
 export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
   const { data: issueDetail } = useTicketDetails(ticket.key)
+  const { push } = useCommandNavigate<CommandRoutes>()
+
+  const onSelect = useMemoizedFn(() =>
+    push('/ticket/description', { issueKey: ticket.key })
+  )
 
   const formatted = useMemo(
     () => ({
@@ -40,12 +49,10 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
 
   return (
     <CommandList>
-      <CommandGroup className="mb-1">
-        <TicketHeaderAction
-          ticket={ticket}
-          issueDetail={issueDetail}
-          onSelect={() => window.open(ticket.url, '_blank')}
-        />
+      <CommandGroup>
+        <CommandItem value={ticket.key} onSelect={onSelect} className="mb-1">
+          <TicketBasicFields ticket={ticket} issueDetail={issueDetail} />
+        </CommandItem>
       </CommandGroup>
 
       <CommandSeparator />

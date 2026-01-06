@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useCommandNavigate } from '@/components/CommandRouter'
 import { useTicketDetails } from '@/hooks/useTicketDetails'
 
-import { TicketDescriptionFull } from './TicketDescriptionFull'
+import { TicketDetails } from './TicketDetails'
 
 vi.mock('@/hooks/useTicketDetails')
 vi.mock('@/components/CommandRouter')
@@ -21,7 +21,7 @@ vi.mock('@/utils/jira-images', () => ({
     .mockImplementation((html) => Promise.resolve(html))
 }))
 
-describe('TicketDescriptionFull', () => {
+describe('TicketDetails', () => {
   beforeEach(() => {
     vi.resetAllMocks()
     vi.mocked(useCommandNavigate).mockReturnValue({ pop: vi.fn() } as any)
@@ -30,17 +30,24 @@ describe('TicketDescriptionFull', () => {
   it('renders content', async () => {
     vi.mocked(useTicketDetails).mockReturnValue({
       isLoading: false,
-      data: { description: '<p>Full Content</p>' }
+      data: {
+        summary: 'Ticket Summary',
+        key: 'T-1',
+        issueType: { name: 'Bug' },
+        status: { name: 'Done', statusCategory: { colorName: 'green' } },
+        description: '<p>Full Description Content</p>'
+      }
     } as any)
 
     render(
       <Command>
-        <TicketDescriptionFull issueKey="1" />
+        <TicketDetails issueKey="1" />
       </Command>
     )
 
     await waitFor(() => {
-      expect(screen.getByText('Full Content')).toBeDefined()
+      expect(screen.getByText('Full Description Content')).toBeDefined()
+      expect(screen.getByText('Ticket Summary')).toBeDefined()
     })
   })
 })

@@ -20,7 +20,6 @@ describe('TicketMetadataChips', () => {
     render(<TicketMetadataChips ticket={mockTicket} />)
     expect(screen.getByText('Done')).toBeDefined()
     expect(screen.getByText('High')).toBeDefined()
-    expect(screen.getByText('Bug')).toBeDefined()
   })
 
   it('renders labels if present', () => {

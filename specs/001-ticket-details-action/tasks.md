@@ -36,9 +36,9 @@
 - [x] T009 [US1] Create unit tests for `TicketHeaderAction` in `apps/extension/src/components/actions/tickets/TicketHeaderAction.test.tsx`
 - [x] T010 [US1] Create unit tests for `TicketDescriptionAction` in `apps/extension/src/components/actions/tickets/TicketDescriptionAction.test.tsx`
 - [x] T011 [US1] Update `apps/extension/src/entrypoints/popup/menus/TicketActionsMenu.tsx` to use `useTicketDetails` for asynchronously fetching extended data (labels, full description) without blocking initial render
-- [x] T010 [US1] Create `TicketDescriptionFull.tsx` in `apps/extension/src/components/actions/tickets/` (refactored from `IssueDescription.tsx`) to display full rich text
-- [x] T011 [US1] Create unit tests for `TicketDescriptionFull` in `apps/extension/src/components/actions/tickets/TicketDescriptionFull.test.tsx`
-- [x] T012 [US1] Register `'/ticket/description'` route in `apps/extension/src/entrypoints/popup/App.tsx` rendering `TicketDescriptionFull`
+- [x] T010 [US1] Create `TicketDetails.tsx` in `apps/extension/src/components/actions/tickets/` (refactored from `IssueDescription.tsx`) to display full rich text
+- [x] T011 [US1] Create unit tests for `TicketDetails` in `apps/extension/src/components/actions/tickets/TicketDetails.test.tsx`
+- [x] T012 [US1] Register `'/ticket/description'` route in `apps/extension/src/entrypoints/popup/App.tsx` rendering `TicketDetails`
 - [x] T013 [US1] Connect "Show full description" action in `TicketDescriptionAction` (or `TicketActionsMenu`) to push `'/ticket/description'` route
 
 ## Phase 4: Cleanup
@@ -49,7 +49,7 @@
 - [x] T015 Remove `apps/extension/src/components/actions/tickets/IssueDetail.test.tsx`
 - [x] T016 Remove `apps/extension/src/components/actions/tickets/IssueMetadata.tsx` (replaced by Chips)
 - [x] T017 Remove `apps/extension/src/components/actions/tickets/ChildIssuesList.tsx` (not in current scope)
-- [x] T018 Remove `apps/extension/src/components/actions/tickets/IssueDescription.tsx` (replaced by TicketDescriptionFull)
+- [x] T018 Remove `apps/extension/src/components/actions/tickets/IssueDescription.tsx` (replaced by TicketDetails)
 
 ## Phase 5: Polish & Quality
 
