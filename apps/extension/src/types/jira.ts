@@ -26,7 +26,7 @@ export interface JiraTransition {
 export interface JiraAssignee {
   displayName: string
   emailAddress: string
-  avatarUrls: string
+  avatarUrls: string | Record<string, string>
 }
 
 export interface JiraPriority {
@@ -54,4 +54,32 @@ export interface JiraTicket {
   lastViewed: string | null
   created: string
   updated: string
+}
+
+export interface IssueDetail extends JiraTicket {
+  description: string
+  reporter?: JiraAssignee
+  labels: string[]
+  components: Array<{ id: string; name: string }>
+  parent?: {
+    key: string
+    summary: string
+  }
+  subtasks?: Array<{
+    id: string
+    key: string
+    summary: string
+    fields: {
+      status: { name: string }
+      priority: { name: string; iconUrl?: string }
+      issuetype: { iconUrl?: string }
+    }
+  }>
+  dueDate?: string
+  // Extra project info not in JiraTicket
+  project: {
+    key: string
+    name: string
+    avatarUrl?: string
+  }
 }

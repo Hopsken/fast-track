@@ -7,7 +7,13 @@ import type { Issue } from 'jira.js/version3/models/issue'
 import type { IssuePickerSuggestions } from 'jira.js/version3/models/issuePickerSuggestions'
 import { chunk, compact, flatMap, map } from 'lodash-es'
 
-import { IssueSource, JiraPriority, JiraTicket, JiraTransition } from '@/types'
+import {
+  IssueSource,
+  IssueDetail,
+  JiraPriority,
+  JiraTicket,
+  JiraTransition
+} from '@/types'
 import { isNonNullable } from '@/utils/assert'
 import { isTicketKey, mapPriority, mapTransition } from '@/utils/jira/issues'
 import { normalizeProjects } from '@/utils/ticket-search'
@@ -393,6 +399,92 @@ export class JiraIssueService {
         ? toISODateString(issue.fields.created)
         : '',
       updated: issue.fields.updated ? toISODateString(issue.fields.updated) : ''
+    }
+  }
+
+  /**
+   * Fetches a single issue with full details for detail view
+   */
+  async getIssueDetail(issueKey: string): Promise<IssueDetail | null> {
+    try {
+      log.info(`🎫 JiraAPI: Fetching issue detail ${issueKey}`)
+
+      const issue = await this.client.issues.getIssue({
+        issueIdOrKey: issueKey,
+        fields: [
+          'summary',
+          'description',
+          'status',
+          'priority',
+          'issuetype',
+          'project',
+          'assignee',
+          'reporter',
+          'labels',
+          'components',
+          'parent',
+          'subtasks',
+          'duedate'
+        ],
+        expand: 'renderedFields'
+      })
+
+      log.info(`✅ JiraAPI: Successfully fetched issue detail ${issueKey}`)
+      return this.convertToIssueDetail(issue)
+    } catch (error) {
+      log.error(`❌ JiraAPI: Failed to fetch issue detail ${issueKey}:`, error)
+      return null
+    }
+  }
+
+  private convertToIssueDetail(issue: Issue): IssueDetail {
+    const ticket = this.convertToTicket(issue)
+
+    const description =
+      (issue.renderedFields as any)?.description ??
+      issue.fields?.description ??
+      ''
+
+    return {
+      ...ticket,
+      description: typeof description === 'string' ? description : '',
+      reporter: issue.fields?.reporter
+        ? {
+            displayName: issue.fields.reporter.displayName ?? '',
+            emailAddress: issue.fields.reporter.emailAddress ?? '',
+            avatarUrls: issue.fields.reporter.avatarUrls?.['48x48'] ?? ''
+          }
+        : undefined,
+      labels: issue.fields?.labels ?? [],
+      components: (issue.fields?.components ?? []).map((c) => ({
+        id: c.id ?? '',
+        name: c.name ?? ''
+      })),
+      parent: issue.fields?.parent
+        ? {
+            key: issue.fields.parent.key ?? '',
+            summary: issue.fields.parent.fields?.summary ?? ''
+          }
+        : undefined,
+      subtasks: (issue.fields?.subtasks ?? []).map((t) => ({
+        id: t.id ?? '',
+        key: t.key ?? '',
+        summary: t.fields?.summary ?? '',
+        fields: {
+          status: { name: t.fields?.status?.name ?? '' },
+          priority: {
+            name: t.fields?.priority?.name ?? '',
+            iconUrl: t.fields?.priority?.iconUrl
+          },
+          issuetype: { iconUrl: t.fields?.issuetype?.iconUrl }
+        }
+      })),
+      dueDate: issue.fields?.duedate ?? undefined,
+      project: {
+        key: issue.fields?.project?.key ?? '',
+        name: issue.fields?.project?.name ?? '',
+        avatarUrl: issue.fields?.project?.avatarUrls?.['48x48']
+      }
     }
   }
 

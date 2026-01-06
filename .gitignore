@@ -56,6 +56,10 @@ web-ext.config.ts
 # serena
 .serena
 
-
+# gemini
+.gemini
+.gemini-clipboard
+!.gemini/commands
+!.gemini/settings.json
 
 *.tsbuildinfo

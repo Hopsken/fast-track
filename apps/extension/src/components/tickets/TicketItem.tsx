@@ -2,7 +2,7 @@ import { CommandItem } from '@internal/ui/components/command'
 import { useMemoizedFn } from 'ahooks'
 
 import { projectService } from '@/services'
-import { analytics } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
 import { JiraTicket } from '@/types'
 import {
   IssueTypeIcon,
@@ -41,7 +41,7 @@ export function TicketItem({
 
     projectService.recordProjectClick(ticket.projectKey)
 
-    analytics.track('select-ticket', { source })
+    trackEvent('select-ticket', { source })
   })
 
   function renderPriority() {

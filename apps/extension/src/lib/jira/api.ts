@@ -59,6 +59,10 @@ export class JiraAPI {
     }
   }
 
+  public getAuthHeaders(): HeadersInit {
+    return this.buildAuthorizationHeader(this.client.getConfig())
+  }
+
   private buildAuthorizationHeader(config: JiraApiConfig): HeadersInit {
     if (config.type === 'oauth') {
       return {

@@ -1,8 +1,10 @@
 import path from 'node:path'
 
 import { defineProject } from 'vitest/config'
+import { WxtVitest } from 'wxt/testing'
 
 export default defineProject({
+  plugins: [WxtVitest()],
   resolve: {
     alias: {
       '~': path.resolve(__dirname, 'src'),
@@ -11,13 +13,14 @@ export default defineProject({
   },
   test: {
     name: 'extension',
-    environment: 'jsdom',
+    environment: 'happy-dom',
     globals: true,
-    include: ['src/**/*.{test,spec}.{ts,tsx}']
-    // server: {
-    //   deps: {
-    //     inline: ['lodash-es']
-    //   }
-    // }
+    setupFiles: ['./src/test/setup.ts'],
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    server: {
+      deps: {
+        inline: ['dompurify']
+      }
+    }
   }
 })
