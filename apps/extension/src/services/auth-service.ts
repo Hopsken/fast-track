@@ -7,7 +7,7 @@ import { AuthApi } from '@/lib/jira/auth-api'
 import { getStorageItem } from '@/lib/storage'
 import { JiraApiKeyConfig, ReceivedTokenPayload, JiraUserInfo } from '@/types'
 
-import { analytics } from './analytics'
+import { trackEvent } from './analytics'
 
 export interface AuthService {
   receiveTokens(tokens: ReceivedTokenPayload): Promise<JiraUserInfo>
@@ -57,7 +57,7 @@ class AuthServiceImpl implements AuthService {
 
     await this.userInfoStorage.setValue(userInfo)
 
-    analytics.track('connect_success', { method: 'oauth' })
+    trackEvent('connect_success', { method: 'oauth' })
 
     return userInfo
   }
@@ -92,7 +92,7 @@ class AuthServiceImpl implements AuthService {
   }
 
   public async disconnect() {
-    analytics.track('disconnect')
+    trackEvent('disconnect')
 
     await Promise.all([
       this.tokenStorage.removeValue(),

@@ -9,7 +9,7 @@ import { useMemoizedFn } from 'ahooks'
 
 import { useStorage } from '@/hooks'
 import { authService } from '@/services'
-import { analytics } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
 import { AuthType } from '@/types'
 import { logger } from '@/utils'
 
@@ -34,7 +34,7 @@ export function ConfigureAuth() {
   )
 
   const handleConnect = useMemoizedFn(async () => {
-    analytics.track('connect_attempt', { method: 'oauth' })
+    trackEvent('connect_attempt', { method: 'oauth' })
 
     setConnectingMethod('oauth')
     setError(null)
@@ -52,7 +52,7 @@ export function ConfigureAuth() {
 
   const handleApiKeyConnect = useCallback(
     async (payload: { host: string; email: string; apiKey: string }) => {
-      analytics.track('connect_attempt', { method: 'apiKey' })
+      trackEvent('connect_attempt', { method: 'apiKey' })
 
       setConnectingMethod('apiKey')
       setError(null)
@@ -60,7 +60,7 @@ export function ConfigureAuth() {
       try {
         await authService.connectWithApiKey(payload)
         setAuthType('apiKey')
-        analytics.track('connect_success', { method: 'apiKey' })
+        trackEvent('connect_success', { method: 'apiKey' })
       } catch (err) {
         logger.error('Error connecting with API key:', err)
         setError(
