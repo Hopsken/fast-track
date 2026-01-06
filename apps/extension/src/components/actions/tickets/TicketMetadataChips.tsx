@@ -1,7 +1,9 @@
 import { Badge } from '@internal/ui/components/badge'
 import { ArrowUpCircle, Tag } from 'lucide-react'
 
+import { AssigneeAvatar } from '@/components/ui'
 import { IssueDetail, JiraTicket } from '@/types'
+import { getStatusDotColor } from '@/utils/ticket-status'
 
 export function TicketMetadataChips({
   ticket
@@ -11,24 +13,18 @@ export function TicketMetadataChips({
   const labels = (ticket as IssueDetail).labels || []
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2 text-xs">
       {/* Status */}
-      <Badge
-        variant="outline"
-        className="flex h-6 items-center gap-1.5 px-2 py-0.5 font-normal">
+      <Badge variant="outline">
         <div
-          className={`h-2 w-2 rounded-full ${getStatusDotColor(
-            ticket.status.statusCategory.colorName
-          )}`}
+          className={`h-2 w-2 rounded-full ${getStatusDotColor(ticket.status)}`}
         />
         {ticket.status.name}
       </Badge>
 
       {/* Priority */}
       {ticket.priority && (
-        <Badge
-          variant="secondary"
-          className="bg-accent/50 flex h-6 items-center gap-1.5 px-2 py-0.5 font-normal">
+        <Badge variant="outline">
           {ticket.priority.iconUrl ? (
             <img
               src={ticket.priority.iconUrl}
@@ -42,11 +38,21 @@ export function TicketMetadataChips({
         </Badge>
       )}
 
+      {ticket.assignee && (
+        // <Badge variant={'outline'}>
+        <AssigneeAvatar
+          size="1.2rem"
+          className="rounded-full border"
+          assignee={ticket.assignee}
+        />
+        // </Badge>
+      )}
+
       {/* Labels */}
       {labels.length > 0 && (
         <div className="ml-1 flex items-center gap-1">
           <Tag className="text-muted-foreground h-3.5 w-3.5 opacity-70" />
-          {labels.slice(0, 3).map((label) => (
+          {labels.slice(0, 1).map((label) => (
             <Badge
               key={label}
               variant="outline"
@@ -54,28 +60,13 @@ export function TicketMetadataChips({
               {label}
             </Badge>
           ))}
-          {labels.length > 3 && (
+          {labels.length > 1 && (
             <span className="text-muted-foreground text-[10px]">
-              +{labels.length - 3}
+              +{labels.length - 1}
             </span>
           )}
         </div>
       )}
     </div>
   )
-}
-
-function getStatusDotColor(colorName?: string) {
-  switch (colorName) {
-    case 'blue-gray':
-      return 'bg-slate-400'
-    case 'yellow':
-      return 'bg-amber-400'
-    case 'green':
-      return 'bg-emerald-400'
-    case 'red':
-      return 'bg-rose-400'
-    default:
-      return 'bg-slate-400'
-  }
 }
