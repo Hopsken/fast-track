@@ -1,5 +1,5 @@
 import { Badge } from '@internal/ui/components/badge'
-import { AlertCircle, ArrowUpCircle, Tag } from 'lucide-react'
+import { ArrowUpCircle, Tag } from 'lucide-react'
 
 import { IssueDetail, JiraTicket } from '@/types'
 
@@ -11,7 +11,7 @@ export function TicketMetadataChips({
   const labels = (ticket as IssueDetail).labels || []
 
   return (
-    <div className="mb-2 flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       {/* Status */}
       <Badge
         variant="outline"
@@ -41,22 +41,6 @@ export function TicketMetadataChips({
           {ticket.priority.name}
         </Badge>
       )}
-
-      {/* Type */}
-      <Badge
-        variant="secondary"
-        className="bg-accent/50 flex h-6 items-center gap-1.5 px-2 py-0.5 font-normal">
-        {ticket.issueType.iconUrl ? (
-          <img
-            src={ticket.issueType.iconUrl}
-            className="h-3.5 w-3.5"
-            alt={ticket.issueType.name}
-          />
-        ) : (
-          <AlertCircle className="h-3.5 w-3.5" />
-        )}
-        {ticket.issueType.name}
-      </Badge>
 
       {/* Labels */}
       {labels.length > 0 && (

@@ -43,7 +43,7 @@ function App() {
 
   const isSearchResultPage = activePage.path === '/'
   const inputContainerClassName = cn(
-    'relative flex h-[52px] items-center gap-3 pl-5 pr-5 border-b-2 border-gray-200',
+    'relative flex h-[52px] items-center gap-3 pl-4 pr-4 border-b-2 border-gray-200',
     isCommandLoading && 'command-input-loading'
   )
 

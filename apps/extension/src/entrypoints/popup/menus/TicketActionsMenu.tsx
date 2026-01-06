@@ -40,11 +40,13 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
 
   return (
     <CommandList>
-      <TicketHeaderAction
-        ticket={ticket}
-        issueDetail={issueDetail}
-        onSelect={() => window.open(ticket.url, '_blank')}
-      />
+      <CommandGroup className="mb-1">
+        <TicketHeaderAction
+          ticket={ticket}
+          issueDetail={issueDetail}
+          onSelect={() => window.open(ticket.url, '_blank')}
+        />
+      </CommandGroup>
 
       <CommandSeparator />
 

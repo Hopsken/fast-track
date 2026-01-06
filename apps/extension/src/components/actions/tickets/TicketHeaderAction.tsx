@@ -28,10 +28,8 @@ export function TicketHeaderAction({
           <IssueTypeIcon issueType={ticket.issueType} />
 
           <div className="inline-flex min-w-0 flex-1">
-            <span className="line-clamp-2 font-semibold leading-tight">
-              {ticket.summary}
-            </span>
-            <span className="text-muted-foreground ml-2 whitespace-nowrap font-mono text-xs opacity-70">
+            <span className="line-clamp-2 leading-tight">{ticket.summary}</span>
+            <span className="text-muted-foreground ml-2 whitespace-nowrap">
               {ticket.key}
             </span>
           </div>

@@ -15,14 +15,6 @@ vi.mock('@/services', () => ({
     getTicketDetails: vi.fn()
   }
 }))
-vi.mock('@/services/analytics', () => ({
-  analytics: {
-    track: vi.fn(),
-    identify: vi.fn(),
-    page: vi.fn(),
-    reset: vi.fn()
-  }
-}))
 vi.mock('@/utils/jira-images', () => ({
   processHtmlContent: vi
     .fn()

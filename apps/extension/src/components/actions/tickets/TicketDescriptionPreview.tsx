@@ -1,4 +1,4 @@
-import { Button } from '@internal/ui/components/button'
+// eslint-disable-next-line import-x/no-named-as-default
 import DOMPurify from 'dompurify'
 
 export function TicketDescriptionPreview({ html }: { html?: string }) {
