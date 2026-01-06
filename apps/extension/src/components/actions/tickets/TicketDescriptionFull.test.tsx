@@ -10,6 +10,19 @@ import { TicketDescriptionFull } from './TicketDescriptionFull'
 
 vi.mock('@/hooks/useTicketDetails')
 vi.mock('@/components/CommandRouter')
+vi.mock('@/services', () => ({
+  ticketService: {
+    getTicketDetails: vi.fn()
+  }
+}))
+vi.mock('@/services/analytics', () => ({
+  analytics: {
+    track: vi.fn(),
+    identify: vi.fn(),
+    page: vi.fn(),
+    reset: vi.fn()
+  }
+}))
 vi.mock('@/utils/jira-images', () => ({
   processHtmlContent: vi
     .fn()

@@ -4,7 +4,9 @@ import DOMPurify from 'dompurify'
 export function TicketDescriptionPreview({ html }: { html?: string }) {
   if (!html) return null
 
-  const textContent = DOMPurify.sanitize(html, { ALLOWED_TAGS: [] }).trim()
+  const textContent = (
+    DOMPurify.sanitize(html, { RETURN_DOM: true }) as unknown as HTMLElement
+  ).textContent?.trim()
 
   if (!textContent) return null
 
