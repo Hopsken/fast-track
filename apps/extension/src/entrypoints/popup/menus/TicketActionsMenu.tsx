@@ -30,6 +30,7 @@ import { useIssueTransitions } from '@/hooks/useIssueTransitions'
 import { useMutationAssignMyself } from '@/hooks/useMutationAssignIssue'
 import { useTicketDetails } from '@/hooks/useTicketDetails'
 import { useCurrentUser } from '@/stores/useCurrentUser'
+import { useUserPreferences } from '@/stores/useUserPreferences'
 import { JiraTicket } from '@/types'
 import { generateBranchName, getIssueTitleLink } from '@/utils/jira/issues'
 import { openJiraIssue } from '@/utils/open-jira-issue'
@@ -44,6 +45,7 @@ export const TicketActionsMenu = memo(function TicketActionsMenu({
   const ticket = ticketDetails || initialTicket
 
   const isOptionKeyPressed = useIsOptionKeyPressed()
+  const [preferences] = useUserPreferences()
 
   const { push } = useCommandNavigate<CommandRoutes>()
 
@@ -57,11 +59,13 @@ export const TicketActionsMenu = memo(function TicketActionsMenu({
 
   const formatted = useMemo(
     () => ({
-      branchName: generateBranchName(ticket),
+      branchName: generateBranchName(ticket, preferences.branchNameFormat),
       issueTitleLink: getIssueTitleLink(ticket)
     }),
-    [ticket]
+    [preferences.branchNameFormat, ticket]
   )
+
+  console.log({ formatted })
 
   return (
     <CommandList>

@@ -27,3 +27,7 @@ export interface JiraUserInfo {
   name: string
   avatarUrl?: string
 }
+
+export interface UserPreferences {
+  branchNameFormat: string
+}
