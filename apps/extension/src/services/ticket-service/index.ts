@@ -83,7 +83,7 @@ class TicketServiceImpl {
     })
   }
 
-  private async getRecentHistoryTickets(limit = 20): Promise<JiraTicket[]> {
+  private async getRecentHistoryTickets(limit = 7): Promise<JiraTicket[]> {
     return this.withJira(async (jira) => {
       return jira.issues.getRecentHistoryIssues(limit)
     })

@@ -31,7 +31,7 @@ export const useTicketSearch = (options: TicketSearchOptions = {}) => {
     [options.projectKeys]
   )
   const limit = options.limit ?? (projects.length > 0 ? 6 : 10)
-  const enabled = (options.enabled ?? true) && Boolean(debouncedQuery)
+  const enabled = (options.enabled ?? true) && debouncedQuery.length > 1
 
   const searchTickets = useMemoizedFn(async (search: string) => {
     const tickets = await ticketService.searchTickets(search, {
