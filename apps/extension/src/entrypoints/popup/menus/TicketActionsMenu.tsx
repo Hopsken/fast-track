@@ -15,22 +15,22 @@ import {
   Link2,
   Route,
   UserPen,
-  UserRoundMinus,
   UserRoundPlus
 } from 'lucide-react'
 import { isHotkeyPressed } from 'react-hotkeys-hook'
 
+import { AssigneeAvatar } from '@/components'
 import { Action, ActionCopyToClipboard, ActionPush } from '@/components/actions'
 import { useCommandNavigate } from '@/components/CommandRouter'
 import { PrefetchProvider } from '@/components/PrefetchQuery'
 import { TicketBasicFields } from '@/components/tickets'
 import { CommandRoutes } from '@/entrypoints/popup/menus'
-import { useCurrentUser } from '@/hooks/useCurrentUser'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
 import { useIssuePriorities } from '@/hooks/useIssuePriorities'
 import { useIssueTransitions } from '@/hooks/useIssueTransitions'
 import { useMutationAssignMyself } from '@/hooks/useMutationAssignIssue'
 import { useTicketDetails } from '@/hooks/useTicketDetails'
+import { useCurrentUser } from '@/stores/useCurrentUser'
 import { JiraTicket } from '@/types'
 import { generateBranchName, getIssueTitleLink } from '@/utils/jira/issues'
 import { openJiraIssue } from '@/utils/open-jira-issue'
@@ -188,7 +188,7 @@ function AssignOrUnassignMySelf({ ticket }: { ticket: JiraTicket }) {
   return isAssignedByMe ? (
     <Action
       value="unassign-myself"
-      icon={UserRoundMinus}
+      prefix={<AssigneeAvatar size="1rem" assignee={ticket.assignee} />}
       title="Unassigned from me"
       onSelect={() => assignMyself({ ticket, assign: false })}
       shortcut={{

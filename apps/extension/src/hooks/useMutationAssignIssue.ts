@@ -2,11 +2,10 @@ import { useMutation } from '@tanstack/react-query'
 import { UserDetails } from 'jira.js/version3/models/userDetails'
 
 import { ticketService } from '@/services'
+import { useCurrentUser } from '@/stores/useCurrentUser'
 import { JiraTicket } from '@/types'
 import { showToast } from '~/stores/useToastStore'
 import { formatErrorMessage } from '~/utils/formatError'
-
-import { useCurrentUser } from './useCurrentUser'
 
 export function useMutationAssignIssue() {
   return useMutation({
