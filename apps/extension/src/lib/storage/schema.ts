@@ -55,7 +55,8 @@ const STORAGE_DEFAULTS: StorageItems = {
   ApiKeyAuth: null,
   DevMode: false,
   UserPreferences: {
-    branchNameFormat: '{key}-{summary}'
+    branchNameFormat: '{key}-{summary}',
+    autoCopyBranchNameOnTransition: false
   },
 
   DeviceId: '',

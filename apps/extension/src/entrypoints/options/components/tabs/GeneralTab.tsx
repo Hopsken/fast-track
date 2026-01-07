@@ -90,6 +90,36 @@ export function GeneralTab() {
               </p>
             </div>
           </div>
+          <div className="rounded-lg border border-gray-200 p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-sm font-medium text-gray-900">
+                  Auto-copy branch name on In Progress
+                </h3>
+                <p className="mt-1 text-sm text-gray-600">
+                  Automatically copy the git branch name when moving a ticket
+                  from pending to in progress.
+                </p>
+              </div>
+
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-2 focus:ring-indigo-500"
+                  checked={preferences.autoCopyBranchNameOnTransition}
+                  onChange={(event) =>
+                    setPreference(
+                      'autoCopyBranchNameOnTransition',
+                      event.target.checked
+                    )
+                  }
+                />
+                <span className="text-sm text-gray-700">
+                  {preferences.autoCopyBranchNameOnTransition ? 'On' : 'Off'}
+                </span>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
 

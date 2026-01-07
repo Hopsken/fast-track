@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { ticketService } from '@/services'
 import { JiraTicket, JiraTransition } from '@/types'
+import { generateBranchName } from '@/utils/jira/issues'
 import { queryKeys } from '@/utils/queryKeys'
 import {
   invalidateTicketCaches,
@@ -9,10 +10,12 @@ import {
   updateTicketCaches
 } from '@/utils/ticket-cache'
 import { showToast } from '~/stores/useToastStore'
+import { useUserPreferences } from '~/stores/useUserPreferences'
 import { formatErrorMessage } from '~/utils/formatError'
 
 export function useMutationTransitionIssue() {
   const queryClient = useQueryClient()
+  const [preferences] = useUserPreferences()
   return useMutation({
     mutationFn: async (params: {
       ticket: JiraTicket
@@ -42,12 +45,29 @@ export function useMutationTransitionIssue() {
 
       return { toast, nextStatus, snapshot }
     },
-    onSuccess: (_, { ticket }, context) => {
+    onSuccess: async (_, { ticket, transition }, context) => {
       const nextStatus = context?.nextStatus || 'Status'
+      const isPending =
+        ticket.status?.statusCategory?.key?.toLowerCase() === 'new'
+      const isInProgress =
+        transition.to.statusCategory?.key?.toLowerCase() === 'indeterminate'
+      const shouldCopyBranchName =
+        preferences.autoCopyBranchNameOnTransition && isPending && isInProgress
+      let message = `${ticket.key} to ${nextStatus}`
+
+      if (shouldCopyBranchName) {
+        const branchName = generateBranchName(
+          ticket,
+          preferences.branchNameFormat
+        )
+        await navigator.clipboard.writeText(branchName)
+        message = `${ticket.key} to ${nextStatus} (branch name copied)`
+      }
+
       context?.toast.update({
         style: 'success',
         title: 'Status updated',
-        message: `${ticket.key} to ${nextStatus}`
+        message
       })
       queryClient.invalidateQueries({
         queryKey: queryKeys.issue.transitions(ticket)
