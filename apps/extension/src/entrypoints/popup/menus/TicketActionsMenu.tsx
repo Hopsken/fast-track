@@ -45,7 +45,7 @@ export const TicketActionsMenu = memo(function TicketActionsMenu({
   const ticket = ticketDetails || initialTicket
 
   const isOptionKeyPressed = useIsOptionKeyPressed()
-  const { preferences } = useUserPreferences()
+  const [preferences] = useUserPreferences()
 
   const { push } = useCommandNavigate<CommandRoutes>()
 
@@ -64,6 +64,8 @@ export const TicketActionsMenu = memo(function TicketActionsMenu({
     }),
     [preferences.branchNameFormat, ticket]
   )
+
+  console.log({ formatted })
 
   return (
     <CommandList>

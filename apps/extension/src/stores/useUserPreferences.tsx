@@ -1,15 +1,15 @@
 import { createContext, PropsWithChildren, useContext, useMemo } from 'react'
+import { useMemoizedFn } from 'ahooks'
 
 import { useStorage } from '~/hooks'
 import type { UserPreferences } from '~/types'
 
-type UserPreferencesContextValue = {
-  preferences: UserPreferences
-  setPreference: <K extends keyof UserPreferences>(
-    key: K,
-    value: UserPreferences[K]
-  ) => void
-}
+type SetPreference = <K extends keyof UserPreferences>(
+  key: K,
+  value: UserPreferences[K]
+) => void
+
+type UserPreferencesContextValue = [UserPreferences, SetPreference]
 
 const UserPreferencesContext =
   createContext<UserPreferencesContextValue | null>(null)
@@ -17,24 +17,16 @@ const UserPreferencesContext =
 export function UserPreferencesProvider({ children }: PropsWithChildren) {
   const [preferences, setPreferences] = useStorage('UserPreferences')
 
-  const setPreference: UserPreferencesContextValue['setPreference'] = <
-    K extends keyof UserPreferences
-  >(
-    key: K,
-    value: UserPreferences[K]
-  ) => {
+  const setPreference: SetPreference = useMemoizedFn((key, value) => {
     setPreferences((prev) => ({
       ...prev,
       [key]: value
     }))
-  }
+  })
 
-  const value = useMemo(
-    () => ({
-      preferences,
-      setPreference
-    }),
-    [preferences]
+  const value = useMemo<UserPreferencesContextValue>(
+    () => [preferences, setPreference],
+    [preferences, setPreference]
   )
 
   return (

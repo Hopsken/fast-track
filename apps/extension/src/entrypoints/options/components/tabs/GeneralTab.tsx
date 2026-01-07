@@ -1,6 +1,8 @@
 import { ChangeEvent, useCallback } from 'react'
 import { Input } from '@internal/ui/components/input'
 
+import { JiraTicket } from '@/types'
+import { generateBranchName } from '@/utils/jira/issues'
 import { useStorage } from '~/hooks'
 import { authService } from '~/services'
 import { useUserPreferences } from '~/stores/useUserPreferences'
@@ -11,7 +13,7 @@ import { ShortcutManagement } from '../sections/QuickAccess/ShortcutManagement'
 export function GeneralTab() {
   const [userInfo] = useStorage('OAuthUserInfo')
   const [jiraHost] = useStorage('JiraHost')
-  const { preferences, setPreference } = useUserPreferences()
+  const [preferences, setPreference] = useUserPreferences()
   const [analyticsEnabled, setAnalyticsEnabled] =
     useStorage('analytics-enabled')
 
@@ -52,7 +54,7 @@ export function GeneralTab() {
       </div>
 
       <div>
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">Git</h2>
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">Workflow</h2>
         <div className="space-y-6">
           <div className="rounded-lg border border-gray-200 p-4">
             <div className="space-y-2">
@@ -61,8 +63,13 @@ export function GeneralTab() {
                 htmlFor="branch-name-format">
                 Branch name format
               </label>
+              <p className="text-xs text-gray-500">
+                Copy a git branch name for issues using the{' '}
+                {'Copy git branch name'} action. Formats:{' '}
+                {`{key}, {summary}, {summaryShort}`}.
+              </p>
               <Input
-                id="branch-name-format"
+                name="branch-name-format"
                 type="text"
                 value={preferences.branchNameFormat}
                 onChange={(event) =>
@@ -71,8 +78,15 @@ export function GeneralTab() {
                 placeholder="{key}-{summary}"
               />
               <p className="text-xs text-gray-500">
-                Use {'{key}'} for the issue key and {'{summary}'} for the
-                summary.
+                Preview:{' '}
+                {generateBranchName(
+                  {
+                    key: 'JIRA-123',
+                    summary: 'Big feature'
+                  } as JiraTicket,
+                  preferences.branchNameFormat
+                )}
+                .
               </p>
             </div>
           </div>

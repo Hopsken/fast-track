@@ -27,8 +27,8 @@ export function generateBranchName(
   nameFormat?: string
 ): string {
   const issueKey = issue.key
-  const issueSummary = issue.summary.toLowerCase()
-  const issueSummaryShort = issueSummary.split(' ').slice(0, 5).join(' ')
+  const issueSummary = issue.summary
+  const issueSummaryShort = issueSummary.split(' ').slice(0, 5).join('-')
 
   if (!nameFormat?.trim()) {
     nameFormat = '{key}-{summary}'
@@ -39,11 +39,7 @@ export function generateBranchName(
   return nameFormat
     .replace('{key}', issueKey)
     .replace('{summary}', slugify(issueSummary))
-    .replace('{issueKey}', issueKey)
-    .replace('{issueSummary}', slugify(issueSummary))
-    .replace('{issueSummaryShort}', slugify(issueSummaryShort))
-    .replace('{issueType}', issue.issueType.name)
-    .replace('{projectKey}', issue.projectKey || '')
+    .replace('{summaryShort}', slugify(issueSummaryShort))
 }
 
 export function mergeTicketsByKey(tickets: JiraTicket[]) {
