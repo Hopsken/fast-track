@@ -57,7 +57,7 @@ web-ext.config.ts
 .serena
 
 # gemini
-.gemini
+.gemini/*
 .gemini-clipboard
 !.gemini/commands
 !.gemini/settings.json
