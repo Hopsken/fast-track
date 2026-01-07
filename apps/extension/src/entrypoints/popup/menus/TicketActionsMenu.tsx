@@ -1,12 +1,10 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import {
   CommandGroup,
   CommandItem,
   CommandList,
-  CommandSeparator,
-  CommandShortcut
+  CommandSeparator
 } from '@internal/ui/components/command'
-import { Kbd } from '@internal/ui/components/kbd'
 import { useMemoizedFn } from 'ahooks'
 import {
   ChartNoAxesColumnIncreasing,
@@ -17,14 +15,15 @@ import {
   UserPen,
   UserRoundPlus
 } from 'lucide-react'
-import { isHotkeyPressed } from 'react-hotkeys-hook'
 
 import { AssigneeAvatar } from '@/components'
 import { Action, ActionCopyToClipboard, ActionPush } from '@/components/actions'
+import { ActionShortcut } from '@/components/actions/ActionShortcut'
 import { useCommandNavigate } from '@/components/CommandRouter'
 import { PrefetchProvider } from '@/components/PrefetchQuery'
 import { TicketBasicFields } from '@/components/tickets'
 import { CommandRoutes } from '@/entrypoints/popup/menus'
+import { useIsOptionKeyPressed } from '@/hooks/useIsOptionKeyPressed'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
 import { useIssuePriorities } from '@/hooks/useIssuePriorities'
 import { useIssueTransitions } from '@/hooks/useIssueTransitions'
@@ -35,14 +34,20 @@ import { JiraTicket } from '@/types'
 import { generateBranchName, getIssueTitleLink } from '@/utils/jira/issues'
 import { openJiraIssue } from '@/utils/open-jira-issue'
 
-export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
+export const TicketActionsMenu = memo(function TicketActionsMenu({
+  ticket
+}: {
+  ticket: JiraTicket
+}) {
   // prefetch ticket details
   useTicketDetails(ticket)
+
+  const isOptionKeyPressed = useIsOptionKeyPressed()
 
   const { push } = useCommandNavigate<CommandRoutes>()
 
   const onSelect = useMemoizedFn(() => {
-    if (isHotkeyPressed('alt')) {
+    if (isOptionKeyPressed) {
       openJiraIssue(ticket.key)
     } else {
       push('/ticket/details', ticket)
@@ -62,9 +67,12 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
       <CommandGroup>
         <CommandItem value={ticket.key} onSelect={onSelect} className="mb-1">
           <TicketBasicFields ticket={ticket} />
-          <CommandShortcut>
-            <Kbd key={'enter'}>⏎</Kbd>
-          </CommandShortcut>
+          <ActionShortcut
+            shortcut={{
+              modifiers: isOptionKeyPressed ? ['alt'] : [],
+              key: 'enter'
+            }}
+          />
         </CommandItem>
       </CommandGroup>
 
@@ -177,7 +185,7 @@ export function TicketActionsMenu({ ticket }: { ticket: JiraTicket }) {
       </PrefetchProvider>
     </CommandList>
   )
-}
+})
 
 function AssignOrUnassignMySelf({ ticket }: { ticket: JiraTicket }) {
   const userInfo = useCurrentUser()

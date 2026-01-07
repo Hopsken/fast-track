@@ -1,5 +1,6 @@
 import { CommandShortcut } from '@internal/ui/components/command'
 import { Kbd, KbdGroup } from '@internal/ui/components/kbd'
+import { noop } from 'lodash-es'
 
 import { useActionShortcut } from '@/hooks/useActionShortcut'
 import {
@@ -63,12 +64,12 @@ export function ActionShortcut({
   onSelect
 }: {
   shortcut: KeyboardShortcutInput
-  onSelect: () => void
+  onSelect?: () => void
 }) {
   const platform = detectPlatformOS()
   const resolvedShortcut = resolvePlatformShortcut(shortcut, platform)
 
-  useActionShortcut(resolvedShortcut, onSelect)
+  useActionShortcut(resolvedShortcut, onSelect ? onSelect : noop, !!onSelect)
   return (
     <CommandShortcut>
       <KbdGroup>

@@ -22,12 +22,14 @@ const mapKeyboardShortcutToReactHotkeys = (
 
 export function useActionShortcut(
   hotkeys: KeyboardShortcutInput,
-  callback: () => void
+  callback: () => void,
+  enabled = true
 ) {
   const shortcut = resolvePlatformShortcut(hotkeys)
   const keys = mapKeyboardShortcutToReactHotkeys(shortcut)
   useHotkeys(keys, callback, {
     preventDefault: true,
-    enableOnFormTags: true
+    enableOnFormTags: true,
+    enabled
   })
 }
