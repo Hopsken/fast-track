@@ -32,23 +32,6 @@ export function useMutationTransitionIssue() {
       })
 
       const nextStatus = transition.to.name || transition.name || 'Status'
-      const isPending =
-        ticket.status?.statusCategory?.key?.toLowerCase() === 'new'
-      const isInProgress =
-        transition.to.statusCategory?.key?.toLowerCase() === 'indeterminate'
-      const shouldCopyBranchName =
-        preferences.autoCopyBranchNameOnTransition && isPending && isInProgress
-      let didCopyBranchName = false
-
-      if (shouldCopyBranchName) {
-        const branchName = generateBranchName(
-          ticket,
-          preferences.branchNameFormat
-        )
-        await navigator.clipboard.writeText(branchName)
-        didCopyBranchName = true
-      }
-
       const toast = showToast({
         style: 'loading',
         title: 'Updating status...',
@@ -60,13 +43,24 @@ export function useMutationTransitionIssue() {
         isInProgress: transition.to.statusCategory?.key === 'indeterminate'
       })
 
-      return { toast, nextStatus, snapshot, didCopyBranchName }
+      return { toast, nextStatus, snapshot }
     },
-    onSuccess: (_, { ticket }, context) => {
+    onSuccess: async (_, { ticket, transition }, context) => {
       const nextStatus = context?.nextStatus || 'Status'
+      const isPending =
+        ticket.status?.statusCategory?.key?.toLowerCase() === 'new'
+      const isInProgress =
+        transition.to.statusCategory?.key?.toLowerCase() === 'indeterminate'
+      const shouldCopyBranchName =
+        preferences.autoCopyBranchNameOnTransition && isPending && isInProgress
       let message = `${ticket.key} to ${nextStatus}`
 
-      if (context?.didCopyBranchName) {
+      if (shouldCopyBranchName) {
+        const branchName = generateBranchName(
+          ticket,
+          preferences.branchNameFormat
+        )
+        await navigator.clipboard.writeText(branchName)
         message = `${ticket.key} to ${nextStatus} (branch name copied)`
       }
 

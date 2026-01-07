@@ -1,5 +1,7 @@
 import { ChangeEvent, useCallback } from 'react'
 import { Input } from '@internal/ui/components/input'
+import { Label } from '@internal/ui/components/label'
+import { Switch } from '@internal/ui/components/switch'
 
 import { JiraTicket } from '@/types'
 import { generateBranchName } from '@/utils/jira/issues'
@@ -102,22 +104,20 @@ export function GeneralTab() {
                 </p>
               </div>
 
-              <label className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-2 focus:ring-indigo-500"
+              <div className="flex items-center gap-3">
+                <Switch
+                  id="auto-copy-branch-name"
                   checked={preferences.autoCopyBranchNameOnTransition}
-                  onChange={(event) =>
-                    setPreference(
-                      'autoCopyBranchNameOnTransition',
-                      event.target.checked
-                    )
+                  onCheckedChange={(checked) =>
+                    setPreference('autoCopyBranchNameOnTransition', checked)
                   }
                 />
-                <span className="text-sm text-gray-700">
+                <Label
+                  htmlFor="auto-copy-branch-name"
+                  className="text-gray-700">
                   {preferences.autoCopyBranchNameOnTransition ? 'On' : 'Off'}
-                </span>
-              </label>
+                </Label>
+              </div>
             </div>
           </div>
         </div>
