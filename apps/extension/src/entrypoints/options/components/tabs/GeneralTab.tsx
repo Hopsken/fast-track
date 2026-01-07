@@ -28,8 +28,8 @@ export function GeneralTab() {
   }, [])
 
   const handleAnalyticsChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      setAnalyticsEnabled(event.target.checked)
+    (checked: boolean) => {
+      setAnalyticsEnabled(checked)
     },
     [setAnalyticsEnabled]
   )
@@ -138,17 +138,16 @@ export function GeneralTab() {
                 </p>
               </div>
 
-              <label className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-2 focus:ring-indigo-500"
+              <div className="flex items-center gap-3">
+                <Switch
+                  id="analytics-enabled"
                   checked={analyticsEnabled}
-                  onChange={handleAnalyticsChange}
+                  onCheckedChange={handleAnalyticsChange}
                 />
-                <span className="text-sm text-gray-700">
+                <Label htmlFor="analytics-enabled" className="text-gray-700">
                   {analyticsEnabled ? 'On' : 'Off'}
-                </span>
-              </label>
+                </Label>
+              </div>
             </div>
 
             <p className="mt-3 text-xs text-gray-500">
