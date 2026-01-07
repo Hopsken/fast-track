@@ -20,6 +20,7 @@ export function ActionCopyToClipboard({
       title: `Copied: ${content}`,
       style: 'success'
     })
+    window.close()
   }
   return <Action {...restProps} onSelect={onSelect} exitOnSelect={false} />
 }
