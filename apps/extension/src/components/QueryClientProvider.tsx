@@ -32,7 +32,8 @@ const asyncStoragePersister = createAsyncStoragePersister({
 
 const persistOptions: PersistQueryClientProviderProps['persistOptions'] = {
   persister: asyncStoragePersister,
-  maxAge: days(2)
+  maxAge: days(2),
+  buster: 'v1'
 }
 
 export const QueryClientProvider = ({ children }: PropsWithChildren) => (

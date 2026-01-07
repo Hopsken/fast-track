@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CommandItem, CommandList } from '@internal/ui/components/command'
-import { uniqBy } from 'lodash-es'
+import { compact, uniqBy } from 'lodash-es'
 
 import { ActionLoading } from '@/components/actions'
 import { TicketList } from '@/components/tickets'
@@ -25,11 +25,12 @@ export function SearchResultMenu(props: { suggestions?: IssueSuggestion }) {
     if (!suggestions) return []
 
     const allTickets = [
-      ...(suggestions?.inProgress ?? []),
-      ...(suggestions?.activeSprintTodo ?? []),
-      ...(suggestions?.viewHistory ?? [])
-    ]
-    return filterTicketsByQuery(allTickets, searchQuery)
+      ...suggestions.inProgress,
+      ...suggestions.todo,
+      ...suggestions.related
+    ].map((ticketKey) => suggestions.tickets[ticketKey])
+
+    return filterTicketsByQuery(compact(allTickets), searchQuery)
   }, [suggestions, searchQuery])
 
   const { data: frequentProjects = [] } = useFrequentProjects()

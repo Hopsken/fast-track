@@ -35,12 +35,13 @@ import { generateBranchName, getIssueTitleLink } from '@/utils/jira/issues'
 import { openJiraIssue } from '@/utils/open-jira-issue'
 
 export const TicketActionsMenu = memo(function TicketActionsMenu({
-  ticket
+  ticket: initialTicket
 }: {
   ticket: JiraTicket
 }) {
   // prefetch ticket details
-  useTicketDetails(ticket)
+  const { data: ticketDetails } = useTicketDetails(initialTicket)
+  const ticket = ticketDetails || initialTicket
 
   const isOptionKeyPressed = useIsOptionKeyPressed()
 

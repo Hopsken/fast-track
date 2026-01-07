@@ -7,7 +7,7 @@
 
 import { defineProxyService } from '@webext-core/proxy-service'
 import { UserDetails } from 'jira.js/version3/models/userDetails'
-import { uniqBy } from 'lodash-es'
+import { difference, keyBy, uniqBy } from 'lodash-es'
 
 import { sendMessage } from '@/lib/message'
 import { JiraPriority, JiraTicket, JiraTransition, IssueDetail } from '@/types'
@@ -16,9 +16,10 @@ import { getJiraApi, JiraAPI } from '~/lib/jira'
 import { getLogger } from '~/utils/logger'
 
 export type IssueSuggestion = {
-  inProgress: JiraTicket[]
-  activeSprintTodo: JiraTicket[]
-  viewHistory: JiraTicket[]
+  tickets: Record<string, JiraTicket>
+  inProgress: string[]
+  todo: string[]
+  related: string[]
 }
 
 /**
@@ -37,16 +38,34 @@ class TicketServiceImpl {
   }
 
   async getIssueSuggestions(): Promise<IssueSuggestion> {
-    const [inProgress, activeSprintTodo, viewHistory] = await Promise.all([
+    const [inProgressTickets, todoTickets, relatedTickets] = await Promise.all([
       this.getMyInProgressTickets(),
       this.getMyActiveSprintTodoTickets(),
       this.getRecentHistoryTickets()
     ])
 
-    return {
+    const inProgress = inProgressTickets.map((ticket) => ticket.key)
+    const todo = difference(
+      todoTickets.map((ticket) => ticket.key),
+      inProgress
+    )
+    const related = difference(
+      relatedTickets.map((ticket) => ticket.key),
       inProgress,
-      activeSprintTodo,
-      viewHistory
+      todo
+    )
+
+    return {
+      tickets: keyBy(
+        uniqBy(
+          [...inProgressTickets, ...todoTickets, ...relatedTickets],
+          'key'
+        ),
+        'key'
+      ),
+      inProgress,
+      todo,
+      related
     }
   }
 
@@ -64,7 +83,7 @@ class TicketServiceImpl {
     })
   }
 
-  private async getRecentHistoryTickets(limit = 20): Promise<JiraTicket[]> {
+  private async getRecentHistoryTickets(limit = 7): Promise<JiraTicket[]> {
     return this.withJira(async (jira) => {
       return jira.issues.getRecentHistoryIssues(limit)
     })

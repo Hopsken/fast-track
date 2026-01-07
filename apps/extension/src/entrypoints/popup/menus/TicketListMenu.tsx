@@ -1,4 +1,5 @@
 import { CommandGroup, CommandList } from '@internal/ui/components/command'
+import { compact } from 'lodash-es'
 
 import { ActionLoading } from '@/components/actions'
 import { TicketItem } from '@/components/tickets'
@@ -32,6 +33,9 @@ interface SuggestedTicketsProps {
 }
 
 function SuggestedTickets({ issues }: SuggestedTicketsProps) {
+  const getTickets = (keys?: string[]) =>
+    compact(keys?.map((ticketKey) => issues?.tickets[ticketKey])) ?? []
+
   function renderGroup(
     heading: string,
     tickets?: JiraTicket[],
@@ -54,9 +58,9 @@ function SuggestedTickets({ issues }: SuggestedTicketsProps) {
   }
   return (
     <>
-      {renderGroup('In Progress', issues?.inProgress, false)}
-      {renderGroup('Upcoming', issues?.activeSprintTodo, false)}
-      {renderGroup('Recommend for you', issues?.viewHistory)}
+      {renderGroup('In Progress', getTickets(issues?.inProgress), false)}
+      {renderGroup('Upcoming', getTickets(issues?.todo), false)}
+      {renderGroup('Recommend for you', getTickets(issues?.related))}
     </>
   )
 }
