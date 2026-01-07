@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import log from 'loglevel'
 
 import { ticketService } from '@/services'
-import { JiraTicket, JiraTransition } from '@/types'
+import { JiraTicket, JiraTransition, UserPreferences } from '@/types'
 import { generateBranchName } from '@/utils/jira/issues'
 import { queryKeys } from '@/utils/queryKeys'
 import {
@@ -32,10 +33,31 @@ export function useMutationTransitionIssue() {
       })
 
       const nextStatus = transition.to.name || transition.name || 'Status'
+      let message = `${ticket.key} -> ${nextStatus}`
+
+      const willCopyBranchName = shouldCopyBranchName(
+        preferences,
+        ticket,
+        transition
+      )
+
+      if (willCopyBranchName) {
+        const branchName = generateBranchName(
+          ticket,
+          preferences.branchNameFormat
+        )
+        try {
+          await navigator.clipboard.writeText(branchName)
+          message = `${ticket.key} to ${nextStatus} (branch name copied)`
+        } catch (error) {
+          log.error('Failed to copy branch name to clipboard', error)
+        }
+      }
+
       const toast = showToast({
         style: 'loading',
         title: 'Updating status...',
-        message: `${ticket.key} -> ${nextStatus}`
+        message
       })
 
       const snapshot = updateTicketCaches(queryClient, ticket.key, {
@@ -45,24 +67,9 @@ export function useMutationTransitionIssue() {
 
       return { toast, nextStatus, snapshot }
     },
-    onSuccess: async (_, { ticket, transition }, context) => {
+    onSuccess: async (_, { ticket }, context) => {
       const nextStatus = context?.nextStatus || 'Status'
-      const isPending =
-        ticket.status?.statusCategory?.key?.toLowerCase() === 'new'
-      const isInProgress =
-        transition.to.statusCategory?.key?.toLowerCase() === 'indeterminate'
-      const shouldCopyBranchName =
-        preferences.autoCopyBranchNameOnTransition && isPending && isInProgress
-      let message = `${ticket.key} to ${nextStatus}`
-
-      if (shouldCopyBranchName) {
-        const branchName = generateBranchName(
-          ticket,
-          preferences.branchNameFormat
-        )
-        await navigator.clipboard.writeText(branchName)
-        message = `${ticket.key} to ${nextStatus} (branch name copied)`
-      }
+      const message = `${ticket.key} to ${nextStatus}`
 
       context?.toast.update({
         style: 'success',
@@ -83,4 +90,16 @@ export function useMutationTransitionIssue() {
       })
     }
   })
+}
+
+function shouldCopyBranchName(
+  preferences: UserPreferences,
+  ticket: JiraTicket,
+  transition: JiraTransition
+) {
+  return (
+    preferences.autoCopyBranchNameOnTransition &&
+    ticket.status?.statusCategory?.key?.toLowerCase() === 'new' &&
+    transition.to.statusCategory?.key?.toLowerCase() === 'indeterminate'
+  )
 }
