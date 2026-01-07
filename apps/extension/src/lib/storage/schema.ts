@@ -9,7 +9,8 @@ import type {
   JiraApiKeyConfig,
   JiraOAuthConfig,
   JiraUserInfo,
-  LicenseInfo
+  LicenseInfo,
+  UserPreferences
 } from '~/types'
 
 type StorageItems = {
@@ -21,6 +22,7 @@ type StorageItems = {
   ApiKeyAuth: JiraApiKeyConfig | null
   DevMode: boolean
   REACT_QUERY_OFFLINE_CACHE: unknown
+  UserPreferences: UserPreferences
 
   DeviceId: string
 
@@ -52,6 +54,9 @@ const STORAGE_DEFAULTS: StorageItems = {
   OAuthUserInfo: null,
   ApiKeyAuth: null,
   DevMode: false,
+  UserPreferences: {
+    branchNameFormat: '{key}-{summary}'
+  },
 
   DeviceId: '',
 

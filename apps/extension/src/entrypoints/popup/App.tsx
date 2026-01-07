@@ -16,6 +16,7 @@ import { TicketDetails } from '@/components/tickets'
 import { useAuthConfigurationStatus } from '@/hooks/useAuthConfigurationStatus'
 import { UserContextProvider } from '@/stores/useCurrentUser'
 import { useIsCommandLoading } from '@/stores/useLoadingStore'
+import { UserPreferencesProvider } from '@/stores/useUserPreferences'
 
 import {
   CommandRoutes,
@@ -148,9 +149,11 @@ function AppWithProviders() {
   return (
     <QueryClientProvider>
       <UserContextProvider>
-        <CommandRouter<CommandRoutes> defaultPage="/">
-          <App />
-        </CommandRouter>
+        <UserPreferencesProvider>
+          <CommandRouter<CommandRoutes> defaultPage="/">
+            <App />
+          </CommandRouter>
+        </UserPreferencesProvider>
       </UserContextProvider>
     </QueryClientProvider>
   )
