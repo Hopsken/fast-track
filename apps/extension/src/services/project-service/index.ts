@@ -1,5 +1,5 @@
 import { defineProxyService } from '@webext-core/proxy-service'
-import { countBy, flatMap, orderBy } from 'lodash-es'
+import { compact, countBy, flatMap, orderBy } from 'lodash-es'
 
 import { getStorageItem } from '@/lib/storage'
 import { IssueSuggestion } from '@/services/ticket-service'
@@ -31,15 +31,19 @@ const pruneClicks = (clicks: ProjectClicks) => {
   return Object.fromEntries(entries)
 }
 
-const collectSuggestionProjects = (suggestions?: IssueSuggestion) =>
-  flatMap(
-    [
-      suggestions?.inProgress ?? [],
-      suggestions?.activeSprintTodo ?? [],
-      suggestions?.viewHistory ?? []
-    ],
-    (tickets) => tickets.map((ticket) => ticket.projectKey)
+const collectSuggestionProjects = (suggestions?: IssueSuggestion) => {
+  if (!suggestions) return []
+
+  return compact(
+    flatMap(
+      [suggestions.inProgress, suggestions.todo, suggestions.related],
+      (ticketKeys) =>
+        ticketKeys.map(
+          (ticketKey) => suggestions.tickets[ticketKey]?.projectKey
+        )
+    )
   )
+}
 
 class ProjectServiceImpl {
   private scoreProjects(suggestionProjects: string[], clicks: ProjectClicks) {
