@@ -266,17 +266,14 @@ function MergeRequestsActions({ ticket }: { ticket: JiraTicket }) {
         <ActionPush
           value="open-merge-requests"
           icon={GitPullRequest}
-          title="Open merge request..."
+          title="Open merge requests..."
           shortcut={{
             macOS: { modifiers: ['cmd', 'shift'], key: 'g' },
             Windows: { modifiers: ['alt', 'shift'], key: 'g' }
           }}
           target={() => ({
             path: '/ticket/merge-requests',
-            state: {
-              ticket,
-              mergeRequests: mergeRequests ?? []
-            }
+            state: ticket
           })}
         />
       )}

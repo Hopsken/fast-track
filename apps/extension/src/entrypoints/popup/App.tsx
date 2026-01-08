@@ -129,7 +129,7 @@ function App() {
         </CommandRoute>
 
         <CommandRoute path="/ticket/merge-requests">
-          {(state) => <TicketMergeRequestsMenu {...state} />}
+          {(ticket) => <TicketMergeRequestsMenu ticket={ticket} />}
         </CommandRoute>
 
         <CommandRoute path="/ticket/status">

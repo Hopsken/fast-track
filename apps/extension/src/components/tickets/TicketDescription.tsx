@@ -1,9 +1,9 @@
-// eslint-disable-next-line import-x/no-named-as-default
+import { useMemo } from '#imports'
 import DOMPurify from 'dompurify'
 
 export function TicketDescription({ html }: { html?: string }) {
   // TODO: support images
-  const cleanHtml = DOMPurify.sanitize(html || '')
+  const cleanHtml = useMemo(() => DOMPurify.sanitize(html || ''), [html])
 
   if (!cleanHtml) {
     return (
