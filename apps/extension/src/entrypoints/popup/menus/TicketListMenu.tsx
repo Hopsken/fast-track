@@ -36,30 +36,21 @@ function SuggestedTickets({ issues }: SuggestedTicketsProps) {
   const getTickets = (keys?: string[]) =>
     compact(keys?.map((ticketKey) => issues?.tickets[ticketKey])) ?? []
 
-  function renderGroup(
-    heading: string,
-    tickets?: JiraTicket[],
-    showAvatar = true
-  ) {
+  function renderGroup(heading: string, tickets?: JiraTicket[]) {
     if (!tickets?.length) return null
 
     return (
       <CommandGroup heading={heading}>
         {tickets.map((ticket) => (
-          <TicketItem
-            key={ticket.key}
-            ticket={ticket}
-            showAvatar={showAvatar}
-            source="suggestion"
-          />
+          <TicketItem key={ticket.key} ticket={ticket} source="suggestion" />
         ))}
       </CommandGroup>
     )
   }
   return (
     <>
-      {renderGroup('In Progress', getTickets(issues?.inProgress), false)}
-      {renderGroup('Upcoming', getTickets(issues?.todo), false)}
+      {renderGroup('In Progress', getTickets(issues?.inProgress))}
+      {renderGroup('Upcoming', getTickets(issues?.todo))}
       {renderGroup('Recommend for you', getTickets(issues?.related))}
     </>
   )
