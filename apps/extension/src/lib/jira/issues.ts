@@ -459,7 +459,8 @@ export class JiraIssueService {
     const ticket = this.convertToTicket(issue)
 
     const description =
-      (issue.renderedFields as any)?.description ??
+      (issue.renderedFields as unknown as Record<string, string>)
+        ?.description ??
       issue.fields?.description ??
       ''
 

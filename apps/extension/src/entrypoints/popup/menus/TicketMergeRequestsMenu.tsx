@@ -6,28 +6,35 @@ import {
 import { Github, Gitlab, GitPullRequest } from 'lucide-react'
 
 import { Action } from '@/components/actions'
+import { useIssueMergeRequests } from '@/hooks/useIssueMergeRequests'
 import { JiraMergeRequest, JiraTicket } from '@/types'
 import { openInNewTab } from '@/utils/extension'
 
 type MergeRequestState = {
-  mergeRequests: JiraMergeRequest[]
   ticket: JiraTicket
 }
 
-export function TicketMergeRequestsMenu({
-  mergeRequests,
-  ticket
-}: MergeRequestState) {
-  const getProviderIcon = (provider: JiraMergeRequest['provider']) => {
-    if (provider === 'gitlab') return Gitlab
-    if (provider === 'github') return Github
-    return GitPullRequest
-  }
+export const getProviderIcon = (provider: JiraMergeRequest['provider']) => {
+  if (provider === 'gitlab') return Gitlab
+  if (provider === 'github') return Github
+  return GitPullRequest
+}
+
+export const getProviderOpenTitle = (
+  provider: JiraMergeRequest['provider']
+) => {
+  if (provider === 'gitlab') return 'Go to merge request'
+  if (provider === 'github') return 'Go to pull request'
+  return 'Merge request'
+}
+
+export function TicketMergeRequestsMenu({ ticket }: MergeRequestState) {
+  const { data: mergeRequests, isLoading } = useIssueMergeRequests(ticket)
 
   return (
     <CommandList>
       <CommandGroup heading={`${ticket.key} merge requests`}>
-        {mergeRequests.map((mergeRequest) => (
+        {mergeRequests?.map((mergeRequest) => (
           <Action
             key={mergeRequest.id}
             value={mergeRequest.title}
@@ -37,9 +44,7 @@ export function TicketMergeRequestsMenu({
           />
         ))}
       </CommandGroup>
-      {mergeRequests.length === 0 && (
-        <CommandEmpty>No merge requests</CommandEmpty>
-      )}
+      {!isLoading && <CommandEmpty>No merge requests</CommandEmpty>}
     </CommandList>
   )
 }

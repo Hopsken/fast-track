@@ -42,6 +42,11 @@ import { JiraTicket } from '@/types'
 import { generateBranchName, getIssueTitleLink } from '@/utils/jira/issues'
 import { openJiraIssue } from '@/utils/open-jira-issue'
 
+import {
+  getProviderIcon,
+  getProviderOpenTitle
+} from './TicketMergeRequestsMenu'
+
 export const TicketActionsMenu = memo(function TicketActionsMenu({
   ticket: initialTicket
 }: {
@@ -50,7 +55,6 @@ export const TicketActionsMenu = memo(function TicketActionsMenu({
   // prefetch ticket details
   const { data: ticketDetails } = useTicketDetails(initialTicket)
   const ticket = ticketDetails || initialTicket
-  const { data: mergeRequests } = useIssueMergeRequests(ticket)
 
   const isOptionKeyPressed = useIsOptionKeyPressed()
   const [preferences] = useUserPreferences()
@@ -73,14 +77,6 @@ export const TicketActionsMenu = memo(function TicketActionsMenu({
     [preferences.branchNameFormat, ticket]
   )
 
-  const newestMergeRequest = useMemo(() => {
-    if (!mergeRequests?.length) return null
-    return mergeRequests.reduce((latest, current) =>
-      current.lastUpdatedAt > latest.lastUpdatedAt ? current : latest
-    )
-  }, [mergeRequests])
-  const hasMultipleMergeRequests = (mergeRequests?.length ?? 0) > 1
-
   return (
     <CommandList>
       <CommandGroup>
@@ -93,6 +89,8 @@ export const TicketActionsMenu = memo(function TicketActionsMenu({
             }}
           />
         </CommandItem>
+
+        <MergeRequestsActions ticket={ticket} />
       </CommandGroup>
 
       <CommandSeparator />
@@ -137,28 +135,6 @@ export const TicketActionsMenu = memo(function TicketActionsMenu({
       <CommandSeparator />
 
       <CommandGroup heading="Misc">
-        {newestMergeRequest && !hasMultipleMergeRequests && (
-          <ActionHyperLink
-            value="open-merge-request"
-            icon={GitPullRequest}
-            url={newestMergeRequest.url}
-            title="Open merge request"
-          />
-        )}
-        {hasMultipleMergeRequests && (
-          <ActionPush
-            value="open-merge-requests"
-            icon={GitPullRequest}
-            title="Open merge request..."
-            target={() => ({
-              path: '/ticket/merge-requests',
-              state: {
-                ticket,
-                mergeRequests: mergeRequests ?? []
-              }
-            })}
-          />
-        )}
         <ActionCopyToClipboard
           value="copy-issue-key"
           icon={Clipboard}
@@ -210,7 +186,7 @@ export const TicketActionsMenu = memo(function TicketActionsMenu({
           }}
         />
         <ActionCopyToClipboard
-          value="copy-branch-name"
+          value="copy-git-branch-name"
           icon={GitBranch}
           content={formatted.branchName}
           title="Copy git branch name"
@@ -265,4 +241,45 @@ function PrefetchActions({ ticket }: { ticket: JiraTicket }) {
   useIssueTransitions(ticket)
 
   return null
+}
+
+function MergeRequestsActions({ ticket }: { ticket: JiraTicket }) {
+  const { data: mergeRequests } = useIssueMergeRequests(ticket)
+  const [newestMergeRequest] = mergeRequests || []
+  const hasMultipleMergeRequests = (mergeRequests?.length ?? 0) > 1
+
+  return (
+    <>
+      {newestMergeRequest && !hasMultipleMergeRequests && (
+        <ActionHyperLink
+          value="open-merge-request"
+          icon={getProviderIcon(newestMergeRequest.provider)}
+          url={newestMergeRequest.url}
+          title={getProviderOpenTitle(newestMergeRequest.provider)}
+          shortcut={{
+            macOS: { modifiers: ['cmd', 'shift'], key: 'g' },
+            Windows: { modifiers: ['alt', 'shift'], key: 'g' }
+          }}
+        />
+      )}
+      {hasMultipleMergeRequests && (
+        <ActionPush
+          value="open-merge-requests"
+          icon={GitPullRequest}
+          title="Open merge request..."
+          shortcut={{
+            macOS: { modifiers: ['cmd', 'shift'], key: 'g' },
+            Windows: { modifiers: ['alt', 'shift'], key: 'g' }
+          }}
+          target={() => ({
+            path: '/ticket/merge-requests',
+            state: {
+              ticket,
+              mergeRequests: mergeRequests ?? []
+            }
+          })}
+        />
+      )}
+    </>
+  )
 }

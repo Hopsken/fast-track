@@ -39,7 +39,6 @@ export interface JiraMergeRequest {
   id: string
   title: string
   url: string
-  lastUpdatedAt: number
   provider: 'github' | 'gitlab'
 }
 
