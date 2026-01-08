@@ -4,6 +4,7 @@
 
 import { browser } from '#imports'
 
+import { migrateLegacyAuthState } from '~/lib/storage'
 import { openOptionsPage } from '~/utils/extension'
 import { getLogger } from '~/utils/logger'
 
@@ -110,6 +111,10 @@ export class InstallationHandlerService {
       // if (this.compareVersions(previousVersion, '2.0.0') < 0) {
       //   await this.migrateToV2()
       // }
+      const didMigrateAuth = await migrateLegacyAuthState()
+      if (didMigrateAuth) {
+        this.log.info('✅ Migrated legacy auth storage to unified auth state')
+      }
 
       this.log.info('✅ Migration completed successfully')
     } catch (error) {

@@ -13,11 +13,19 @@ import {
   Projects,
   ServerInfo
 } from 'jira.js/version3'
-import { catchError, of, skipWhile, Subscription, switchMap, timer } from 'rxjs'
+import {
+  catchError,
+  map,
+  of,
+  skipWhile,
+  Subscription,
+  switchMap,
+  timer
+} from 'rxjs'
 
 import { getLogger } from '~/utils/logger'
 
-import { fromStorage$, getStorageItem } from '../storage'
+import { fromStorage$, getStorageItem, updateAuthState } from '../storage'
 
 import { AuthApi } from './auth-api'
 import type { JiraApiConfig } from './types'
@@ -93,8 +101,9 @@ export class JiraClient extends BaseClient {
    * Refresh OAuth token and update client if needed
    */
   private setupAutoRefreshTokenSubscription() {
-    return fromStorage$('OAuthTokens')
+    return fromStorage$('AuthState')
       .pipe(
+        map((state) => state.oauth),
         skipWhile((tokens) => !tokens),
         switchMap((tokens) => {
           log.info('Received OAuth tokens update')
@@ -112,7 +121,10 @@ export class JiraClient extends BaseClient {
             switchMap(() => this.authApi.refreshToken(tokens)),
             catchError((error) => {
               log.error('Failed to refresh Jira tokens', error)
-              getStorageItem('OAuthTokens').removeValue()
+              void updateAuthState((state) => ({
+                ...state,
+                oauth: null
+              }))
               getStorageItem('OAuthUserInfo').removeValue()
               return of<null>(null)
             })
@@ -122,7 +134,11 @@ export class JiraClient extends BaseClient {
       .subscribe((newTokens) => {
         if (newTokens) {
           // Persist refreshed tokens so future refreshes are correctly scheduled
-          getStorageItem('OAuthTokens').setValue(newTokens)
+          void updateAuthState((state) => ({
+            ...state,
+            type: 'oauth',
+            oauth: newTokens
+          }))
           this.updateClientConfig(newTokens)
         }
       })

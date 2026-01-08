@@ -1,5 +1,11 @@
 export type AuthType = 'oauth' | 'apiKey'
 
+export interface AuthState {
+  type: AuthType
+  oauth: JiraOAuthConfig | null
+  apiKey: JiraApiKeyConfig | null
+}
+
 export interface JiraOAuthConfig {
   type: 'oauth'
   host: string

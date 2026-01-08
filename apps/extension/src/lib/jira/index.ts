@@ -1,6 +1,6 @@
 import { getLogger } from '~/utils/logger'
 
-import { getStorageItem } from '../storage'
+import { getStorageItem, updateAuthState } from '../storage'
 
 import { JiraAPI } from './api'
 import { AuthApi } from './auth-api'
@@ -15,9 +15,10 @@ const TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000
 const log = getLogger('jira-auth')
 
 async function ensureValidTokens() {
-  const tokensStorage = getStorageItem('OAuthTokens')
   const userInfoStorage = getStorageItem('OAuthUserInfo')
-  const tokens = await tokensStorage.getValue()
+  const authStateItem = getStorageItem('AuthState')
+  const authState = await authStateItem.getValue()
+  const tokens = authState.oauth
 
   if (!tokens) return null
 
@@ -35,12 +36,19 @@ async function ensureValidTokens() {
   try {
     const authApi = new AuthApi()
     const refreshed = await authApi.refreshToken(tokens)
-    await tokensStorage.setValue(refreshed)
+    await authStateItem.setValue({
+      ...authState,
+      type: 'oauth',
+      oauth: refreshed
+    })
     return refreshed
   } catch (error) {
     log.error('Failed to refresh Jira tokens, clearing credentials', error)
     await Promise.all([
-      tokensStorage.removeValue(),
+      updateAuthState((state) => ({
+        ...state,
+        oauth: null
+      })),
       userInfoStorage.removeValue()
     ])
     return null
@@ -52,10 +60,10 @@ async function ensureValidTokens() {
  * Respects user's preferred authentication method, with smart fallback
  */
 export async function getJiraApi() {
-  const authType = await getStorageItem('AuthType').getValue()
+  const authState = await getStorageItem('AuthState').getValue()
 
-  if (authType === 'apiKey') {
-    const apiKeyConfig = await getStorageItem('ApiKeyAuth').getValue()
+  if (authState.type === 'apiKey') {
+    const apiKeyConfig = authState.apiKey
     if (!apiKeyConfig) return null
 
     const signature = `apiKey:${apiKeyConfig.host}:${apiKeyConfig.email}:${apiKeyConfig.apiKey}`

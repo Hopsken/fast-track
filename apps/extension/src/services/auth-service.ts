@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { JiraAPI } from '@/lib/jira'
 import { AuthApi } from '@/lib/jira/auth-api'
-import { getStorageItem } from '@/lib/storage'
+import { clearAuthState, getStorageItem } from '@/lib/storage'
 import { JiraApiKeyConfig, ReceivedTokenPayload, JiraUserInfo } from '@/types'
 
 import { trackEvent } from './analytics'
@@ -31,10 +31,8 @@ const apiKeySchema = z.object({
 })
 
 class AuthServiceImpl implements AuthService {
-  private tokenStorage = getStorageItem('OAuthTokens')
-  private apiKeyStorage = getStorageItem('ApiKeyAuth')
+  private authStateStorage = getStorageItem('AuthState')
   private userInfoStorage = getStorageItem('OAuthUserInfo')
-  private authTypeStorage = getStorageItem('AuthType')
   private jiraHostStorage = getStorageItem('JiraHost')
   private authApi = new AuthApi()
 
@@ -46,10 +44,12 @@ class AuthServiceImpl implements AuthService {
     const oauthConfig =
       await this.authApi.getOAuthConfigFromAccessToken(parsedTokens)
     await Promise.all([
-      this.tokenStorage.setValue(oauthConfig),
-      this.authTypeStorage.setValue('oauth'),
-      this.jiraHostStorage.setValue(oauthConfig.host),
-      this.apiKeyStorage.removeValue()
+      this.authStateStorage.setValue({
+        type: 'oauth',
+        oauth: oauthConfig,
+        apiKey: null
+      }),
+      this.jiraHostStorage.setValue(oauthConfig.host)
     ])
 
     const jiraApi = new JiraAPI(oauthConfig)
@@ -77,9 +77,11 @@ class AuthServiceImpl implements AuthService {
     const userInfo = await jiraApi.getMyself()
 
     await Promise.all([
-      this.apiKeyStorage.setValue(apiKeyConfig),
-      this.authTypeStorage.setValue('apiKey'),
-      this.tokenStorage.removeValue(),
+      this.authStateStorage.setValue({
+        type: 'apiKey',
+        oauth: null,
+        apiKey: apiKeyConfig
+      }),
       this.jiraHostStorage.setValue(normalizedHost),
       this.userInfoStorage.setValue(userInfo)
     ])
@@ -95,8 +97,7 @@ class AuthServiceImpl implements AuthService {
     trackEvent('disconnect')
 
     await Promise.all([
-      this.tokenStorage.removeValue(),
-      this.apiKeyStorage.removeValue(),
+      clearAuthState(),
       this.userInfoStorage.removeValue(),
       this.jiraHostStorage.removeValue(),
       // Clear React Query cache
