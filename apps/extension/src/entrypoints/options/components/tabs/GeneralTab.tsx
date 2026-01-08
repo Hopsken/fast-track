@@ -96,11 +96,11 @@ export function GeneralTab() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h3 className="text-sm font-medium text-gray-900">
-                  Auto-copy branch name on In Progress
+                  On move to In Progress, copy git branch name
                 </h3>
                 <p className="mt-1 text-sm text-gray-600">
                   Automatically copy the git branch name when moving a ticket
-                  from pending to in progress.
+                  from To Do to In Progress.
                 </p>
               </div>
 
@@ -124,7 +124,7 @@ export function GeneralTab() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h3 className="text-sm font-medium text-gray-900">
-                  Auto-assign unassigned tickets on In Progress
+                  On move to In Progress, assign to yourself
                 </h3>
                 <p className="mt-1 text-sm text-gray-600">
                   Automatically assign yourself when moving an unassigned ticket
