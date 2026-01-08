@@ -37,7 +37,15 @@ export function useMutationTransitionIssue() {
           params.transition
         )
       if (shouldAutoAssign && currentUser) {
-        await ticketService.assignTicket(params.ticket.key, currentUser)
+        try {
+          await ticketService.assignTicket(params.ticket.key, currentUser)
+        } catch (error) {
+          showToast({
+            style: 'failure',
+            title: 'Failed to assign ticket',
+            message: formatErrorMessage(error)
+          })
+        }
       }
     },
     onMutate: async ({ ticket, transition }) => {
