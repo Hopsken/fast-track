@@ -17,11 +17,6 @@ vi.mock('@/services', () => ({
     getTicketDetails: vi.fn()
   }
 }))
-vi.mock('@/utils/jira-images', () => ({
-  processHtmlContent: vi
-    .fn()
-    .mockImplementation((html) => Promise.resolve(html))
-}))
 
 describe('TicketDetails', () => {
   beforeEach(() => {

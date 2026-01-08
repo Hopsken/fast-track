@@ -3,6 +3,8 @@
  * Provides a unified interface by orchestrating specialized services
  */
 
+import { RequestConfig } from 'jira.js'
+
 import { JiraUserInfo } from '@/types'
 
 import { JiraClient } from './client'
@@ -35,40 +37,9 @@ export class JiraAPI {
     }
   }
 
-  public async autoComplete<T>(
-    url: string,
-    params: Record<string, string>
-  ): Promise<T> {
-    const updatedUrl = new URL(url)
-    Object.entries(params).forEach(([key, value]) => {
-      updatedUrl.searchParams.set(key, value)
-    })
-
-    const response = await (this.client as any).sendRequest({
-      url: updatedUrl.toString(),
-      method: 'GET'
-    })
-
-    return (response?.data ?? response) as T
-  }
-
-  public async request<T>(
-    url: string,
-    options?: { method?: string; responseType?: 'blob' | 'json' }
-  ): Promise<T> {
-    const response = await (this.client as any).sendRequest({
-      url,
-      method: options?.method ?? 'GET'
-    })
-
-    if (response instanceof Response) {
-      if (options?.responseType === 'blob') {
-        return (await response.blob()) as T
-      }
-      return (await response.json()) as T
-    }
-
-    return (response?.data ?? response) as T
+  public async request<T>(config: RequestConfig): Promise<T> {
+    // @ts-expect-error - mistyped arg
+    return this.client.sendRequest<T>(config)
   }
 
   getConfig(): JiraApiConfig {

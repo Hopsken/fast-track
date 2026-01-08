@@ -1,22 +1,9 @@
-import { useRequest } from 'ahooks'
 // eslint-disable-next-line import-x/no-named-as-default
 import DOMPurify from 'dompurify'
 
-import { processHtmlContent } from '@/utils/jira-images'
-
 export function TicketDescription({ html }: { html?: string }) {
-  const { data: processedHtml } = useRequest(
-    async () => {
-      if (!html) return ''
-      return processHtmlContent(html)
-    },
-    {
-      refreshDeps: [html],
-      ready: !!html
-    }
-  )
-
-  const cleanHtml = DOMPurify.sanitize(processedHtml || html || '')
+  // TODO: support images
+  const cleanHtml = DOMPurify.sanitize(html || '')
 
   if (!cleanHtml) {
     return (
