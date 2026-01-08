@@ -267,6 +267,15 @@ export class JiraIssueService {
     )
   }
 
+  async getMySuggestedIssues(limit = 50): Promise<JiraTicket[]> {
+    const jql = [
+      'assignee = currentUser()',
+      '(statusCategory = "In Progress" OR sprint in openSprints())'
+    ].join(' AND ')
+
+    return this.searchIssuesUsingJql(`${jql} ORDER BY updated DESC`, { limit })
+  }
+
   async getMyActiveSprintTodoIssues(limit = 20): Promise<JiraTicket[]> {
     const jql = [
       'sprint in openSprints()',

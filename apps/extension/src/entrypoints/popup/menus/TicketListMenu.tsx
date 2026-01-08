@@ -51,7 +51,8 @@ function SuggestedTickets({ issues }: SuggestedTicketsProps) {
     <>
       {renderGroup('In Progress', getTickets(issues?.inProgress))}
       {renderGroup('Upcoming', getTickets(issues?.todo))}
-      {renderGroup('Recommend for you', getTickets(issues?.related))}
+      {renderGroup('Done', getTickets(issues?.done))}
+      {renderGroup('Recommend for you', getTickets(issues?.recommend))}
     </>
   )
 }

@@ -27,7 +27,8 @@ export function SearchResultMenu(props: { suggestions?: IssueSuggestion }) {
     const allTickets = [
       ...suggestions.inProgress,
       ...suggestions.todo,
-      ...suggestions.related
+      ...suggestions.done,
+      ...suggestions.recommend
     ].map((ticketKey) => suggestions.tickets[ticketKey])
 
     return filterTicketsByQuery(compact(allTickets), searchQuery)
