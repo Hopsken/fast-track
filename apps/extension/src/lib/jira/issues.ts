@@ -8,14 +8,16 @@ import type { IssuePickerSuggestions } from 'jira.js/version3/models/issuePicker
 import { chunk, compact, flatMap, map } from 'lodash-es'
 
 import {
-  IssueSource,
   IssueDetail,
+  IssueSource,
+  JiraMergeRequest,
   JiraPriority,
   JiraTicket,
   JiraTransition
 } from '@/types'
 import { isNonNullable } from '@/utils/assert'
 import { isTicketKey, mapPriority, mapTransition } from '@/utils/jira/issues'
+import { extractMergeRequestsFromRemoteLinks } from '@/utils/jira/merge-requests'
 import { normalizeProjects } from '@/utils/ticket-search'
 import { getLogger } from '~/utils/logger'
 
@@ -437,11 +439,28 @@ export class JiraIssueService {
     }
   }
 
+  async getIssueMergeRequests(issueKey: string): Promise<JiraMergeRequest[]> {
+    try {
+      const links = await this.client.issueRemoteLinks.getRemoteIssueLinks({
+        issueIdOrKey: issueKey
+      })
+
+      return extractMergeRequestsFromRemoteLinks(links ?? [])
+    } catch (error) {
+      log.error(
+        `❌ JiraAPI: Failed to fetch remote links for ${issueKey}:`,
+        error
+      )
+      return []
+    }
+  }
+
   private convertToIssueDetail(issue: Issue): IssueDetail {
     const ticket = this.convertToTicket(issue)
 
     const description =
-      (issue.renderedFields as any)?.description ??
+      (issue.renderedFields as unknown as Record<string, string>)
+        ?.description ??
       issue.fields?.description ??
       ''
 

@@ -5,10 +5,11 @@
 
 import { BaseClient, Config } from 'jira.js'
 import {
+  IssuePriorities,
+  IssueRemoteLinks,
   IssueSearch,
   Issues,
   Myself,
-  IssuePriorities,
   Projects,
   ServerInfo
 } from 'jira.js/version3'
@@ -34,6 +35,7 @@ export class JiraClient extends BaseClient {
   // jira.js modules
   issues = new Issues(this)
   issuePriorities = new IssuePriorities(this)
+  issueRemoteLinks = new IssueRemoteLinks(this)
   issueSearch = new IssueSearch(this)
   myself = new Myself(this)
   projects = new Projects(this)

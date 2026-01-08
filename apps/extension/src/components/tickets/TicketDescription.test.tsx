@@ -4,12 +4,6 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { TicketDescription } from './TicketDescription'
 
-vi.mock('@/utils/jira-images', () => ({
-  processHtmlContent: vi
-    .fn()
-    .mockImplementation((html) => Promise.resolve(html))
-}))
-
 describe('TicketDescription', () => {
   it('renders content', async () => {
     const html = '<p>Description Content</p>'

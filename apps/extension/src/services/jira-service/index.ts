@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { defineProxyService } from '@webext-core/proxy-service'
+import { RequestConfig } from 'jira.js'
 
 import { JiraAPI, getJiraApi } from '@/lib/jira'
 
@@ -63,13 +64,10 @@ class JiraServiceImpl {
     }, methodPath)
   }
 
-  public async autoComplete<T>(
-    url: string,
-    params: Record<string, string>
-  ): Promise<T> {
+  public async sendRequest<T>(config: RequestConfig): Promise<T> {
     return this.withJira(async (jira) => {
-      return jira.autoComplete(url, params)
-    }, url)
+      return jira.request<T>(config)
+    }, 'sendRequest')
   }
 
   async withJira<T>(

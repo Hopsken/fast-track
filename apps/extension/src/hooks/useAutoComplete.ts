@@ -11,7 +11,11 @@ export function useAutoCompleteQuery<T>(url: string, query: string) {
     staleTime: 1000 * 60,
     queryFn: async () => {
       const jiraService = getJiraService()
-      const result = await jiraService.autoComplete<T>(url, { query })
+      const result = await jiraService.sendRequest<T>({
+        url,
+        method: 'GET',
+        params: { query }
+      })
       return result
     },
     enabled: z.url().safeParse(url).success

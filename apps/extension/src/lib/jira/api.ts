@@ -3,6 +3,8 @@
  * Provides a unified interface by orchestrating specialized services
  */
 
+import { RequestConfig } from 'jira.js'
+
 import { JiraUserInfo } from '@/types'
 
 import { JiraClient } from './client'
@@ -35,52 +37,9 @@ export class JiraAPI {
     }
   }
 
-  public async autoComplete<T>(
-    url: string,
-    params: Record<string, string>
-  ): Promise<T> {
-    const headers = this.buildAuthorizationHeader(this.client.getConfig())
-
-    const updatedUrl = new URL(url)
-    Object.entries(params).forEach(([key, value]) => {
-      updatedUrl.searchParams.set(key, value)
-    })
-
-    const response = await fetch(updatedUrl, {
-      method: 'GET',
-      headers
-    })
-
-    if (response.ok) {
-      return response.json() as T
-    } else {
-      const result = await response.json()
-      throw new Error(JSON.stringify(result))
-    }
-  }
-
-  public getAuthHeaders(): HeadersInit {
-    return this.buildAuthorizationHeader(this.client.getConfig())
-  }
-
-  private buildAuthorizationHeader(config: JiraApiConfig): HeadersInit {
-    if (config.type === 'oauth') {
-      return {
-        Accept: 'application/json',
-        Authorization: `Bearer ${config.access_token}`
-      }
-    }
-
-    if (config.type === 'apiKey') {
-      return {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        // eslint-disable-next-line sonarjs/no-nested-template-literals
-        Authorization: `Basic ${btoa(`${config.email}:${config.apiKey}`)}`
-      }
-    }
-
-    throw new Error(`Unsupported authentication type: ${config}`)
+  public async request<T>(config: RequestConfig): Promise<T> {
+    // @ts-expect-error - mistyped arg
+    return this.client.sendRequest<T>(config)
   }
 
   getConfig(): JiraApiConfig {

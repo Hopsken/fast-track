@@ -10,6 +10,7 @@ import {
   ChartNoAxesColumnIncreasing,
   Clipboard,
   GitBranch,
+  GitPullRequest,
   Link2,
   Route,
   UserPen,
@@ -17,7 +18,12 @@ import {
 } from 'lucide-react'
 
 import { AssigneeAvatar } from '@/components'
-import { Action, ActionCopyToClipboard, ActionPush } from '@/components/actions'
+import {
+  Action,
+  ActionCopyToClipboard,
+  ActionHyperLink,
+  ActionPush
+} from '@/components/actions'
 import { ActionShortcut } from '@/components/actions/ActionShortcut'
 import { useCommandNavigate } from '@/components/CommandRouter'
 import { PrefetchProvider } from '@/components/PrefetchQuery'
@@ -25,6 +31,7 @@ import { TicketBasicFields } from '@/components/tickets'
 import { CommandRoutes } from '@/entrypoints/popup/menus'
 import { useIsOptionKeyPressed } from '@/hooks/useIsOptionKeyPressed'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
+import { useIssueMergeRequests } from '@/hooks/useIssueMergeRequests'
 import { useIssuePriorities } from '@/hooks/useIssuePriorities'
 import { useIssueTransitions } from '@/hooks/useIssueTransitions'
 import { useMutationAssignMyself } from '@/hooks/useMutationAssignIssue'
@@ -34,6 +41,11 @@ import { useUserPreferences } from '@/stores/useUserPreferences'
 import { JiraTicket } from '@/types'
 import { generateBranchName, getIssueTitleLink } from '@/utils/jira/issues'
 import { openJiraIssue } from '@/utils/open-jira-issue'
+
+import {
+  getProviderIcon,
+  getProviderOpenTitle
+} from './TicketMergeRequestsMenu'
 
 export const TicketActionsMenu = memo(function TicketActionsMenu({
   ticket: initialTicket
@@ -65,8 +77,6 @@ export const TicketActionsMenu = memo(function TicketActionsMenu({
     [preferences.branchNameFormat, ticket]
   )
 
-  console.log({ formatted })
-
   return (
     <CommandList>
       <CommandGroup>
@@ -79,6 +89,8 @@ export const TicketActionsMenu = memo(function TicketActionsMenu({
             }}
           />
         </CommandItem>
+
+        <MergeRequestsActions ticket={ticket} />
       </CommandGroup>
 
       <CommandSeparator />
@@ -174,7 +186,7 @@ export const TicketActionsMenu = memo(function TicketActionsMenu({
           }}
         />
         <ActionCopyToClipboard
-          value="copy-branch-name"
+          value="copy-git-branch-name"
           icon={GitBranch}
           content={formatted.branchName}
           title="Copy git branch name"
@@ -229,4 +241,42 @@ function PrefetchActions({ ticket }: { ticket: JiraTicket }) {
   useIssueTransitions(ticket)
 
   return null
+}
+
+function MergeRequestsActions({ ticket }: { ticket: JiraTicket }) {
+  const { data: mergeRequests } = useIssueMergeRequests(ticket)
+  const [newestMergeRequest] = mergeRequests || []
+  const hasMultipleMergeRequests = (mergeRequests?.length ?? 0) > 1
+
+  return (
+    <>
+      {newestMergeRequest && !hasMultipleMergeRequests && (
+        <ActionHyperLink
+          value="open-merge-request"
+          icon={getProviderIcon(newestMergeRequest.provider)}
+          url={newestMergeRequest.url}
+          title={getProviderOpenTitle(newestMergeRequest.provider)}
+          shortcut={{
+            macOS: { modifiers: ['cmd', 'shift'], key: 'g' },
+            Windows: { modifiers: ['alt', 'shift'], key: 'g' }
+          }}
+        />
+      )}
+      {hasMultipleMergeRequests && (
+        <ActionPush
+          value="open-merge-requests"
+          icon={GitPullRequest}
+          title="Open merge requests..."
+          shortcut={{
+            macOS: { modifiers: ['cmd', 'shift'], key: 'g' },
+            Windows: { modifiers: ['alt', 'shift'], key: 'g' }
+          }}
+          target={() => ({
+            path: '/ticket/merge-requests',
+            state: ticket
+          })}
+        />
+      )}
+    </>
+  )
 }

@@ -10,6 +10,8 @@ export type TicketSearchKey = {
 export const queryKeys = {
   issue: {
     editMeta: (issue: JiraTicket) => ['issue', issue.key, 'editMeta'],
+    mergeRequests: (issue: JiraTicket) =>
+      ['issue', issue.key, 'mergeRequests'] as const,
     transitions: (issue: JiraTicket) => [
       'issue',
       issue.key,

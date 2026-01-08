@@ -35,6 +35,13 @@ export interface JiraPriority {
   iconUrl: string
 }
 
+export interface JiraMergeRequest {
+  id: string
+  title: string
+  url: string
+  provider: 'github' | 'gitlab'
+}
+
 export type IssueSource = 'history' | 'sprint' | 'sniff' | 'picker' | 'watching'
 
 export interface JiraTicket {
