@@ -79,6 +79,7 @@ export const TicketActionsMenu = memo(function TicketActionsMenu({
       current.lastUpdatedAt > latest.lastUpdatedAt ? current : latest
     )
   }, [mergeRequests])
+  const hasMultipleMergeRequests = (mergeRequests?.length ?? 0) > 1
 
   return (
     <CommandList>
@@ -136,12 +137,26 @@ export const TicketActionsMenu = memo(function TicketActionsMenu({
       <CommandSeparator />
 
       <CommandGroup heading="Misc">
-        {newestMergeRequest && (
+        {newestMergeRequest && !hasMultipleMergeRequests && (
           <ActionHyperLink
             value="open-merge-request"
             icon={GitPullRequest}
             url={newestMergeRequest.url}
             title="Open merge request"
+          />
+        )}
+        {hasMultipleMergeRequests && (
+          <ActionPush
+            value="open-merge-requests"
+            icon={GitPullRequest}
+            title="Open merge request..."
+            target={() => ({
+              path: '/ticket/merge-requests',
+              state: {
+                ticket,
+                mergeRequests: mergeRequests ?? []
+              }
+            })}
           />
         )}
         <ActionCopyToClipboard

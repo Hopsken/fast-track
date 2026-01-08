@@ -22,6 +22,7 @@ import {
   CommandRoutes,
   TicketActionsMenu,
   TicketAssignMenu,
+  TicketMergeRequestsMenu,
   TicketPriorityMenu,
   TicketStatusMenu
 } from './menus'
@@ -125,6 +126,10 @@ function App() {
 
         <CommandRoute path="/ticket/assign">
           {(ticket) => <TicketAssignMenu ticket={ticket} />}
+        </CommandRoute>
+
+        <CommandRoute path="/ticket/merge-requests">
+          {(state) => <TicketMergeRequestsMenu {...state} />}
         </CommandRoute>
 
         <CommandRoute path="/ticket/status">
