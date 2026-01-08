@@ -17,6 +17,7 @@ import {
 } from '@/types'
 import { isNonNullable } from '@/utils/assert'
 import { isTicketKey, mapPriority, mapTransition } from '@/utils/jira/issues'
+import { extractMergeRequestsFromRemoteLinks } from '@/utils/jira/merge-requests'
 import { normalizeProjects } from '@/utils/ticket-search'
 import { getLogger } from '~/utils/logger'
 
@@ -444,13 +445,7 @@ export class JiraIssueService {
         issueIdOrKey: issueKey
       })
 
-      const mergeRequests = (links ?? [])
-        .map((link) => this.toMergeRequest(link))
-        .filter(isNonNullable)
-
-      return mergeRequests.sort(
-        (left, right) => right.lastUpdatedAt - left.lastUpdatedAt
-      )
+      return extractMergeRequestsFromRemoteLinks(links ?? [])
     } catch (error) {
       log.error(
         `❌ JiraAPI: Failed to fetch remote links for ${issueKey}:`,
@@ -458,68 +453,6 @@ export class JiraIssueService {
       )
       return []
     }
-  }
-
-  private toMergeRequest(link: JiraRemoteLink): JiraMergeRequest | null {
-    const url = link.object?.url
-    if (!url) return null
-
-    const provider = this.getMergeRequestProvider(url)
-    if (!provider || !this.isMergeRequestLink(link, url)) return null
-
-    return {
-      id: String(link.id ?? link.globalId ?? url),
-      title: link.object?.title ?? link.object?.summary ?? 'Merge request',
-      url,
-      lastUpdatedAt: this.getRemoteLinkUpdatedAt(link),
-      provider
-    }
-  }
-
-  private isMergeRequestLink(link: JiraRemoteLink, url: string): boolean {
-    const normalizedUrl = url.toLowerCase()
-    const title = link.object?.title?.toLowerCase() ?? ''
-
-    if (normalizedUrl.includes('github')) {
-      return normalizedUrl.includes('/pull/') || title.includes('pull request')
-    }
-
-    if (normalizedUrl.includes('gitlab')) {
-      return (
-        normalizedUrl.includes('/merge_requests/') ||
-        title.includes('merge request')
-      )
-    }
-
-    return false
-  }
-
-  private getMergeRequestProvider(
-    url: string
-  ): JiraMergeRequest['provider'] | null {
-    const normalizedUrl = url.toLowerCase()
-    if (normalizedUrl.includes('github')) return 'github'
-    if (normalizedUrl.includes('gitlab')) return 'gitlab'
-    return null
-  }
-
-  private getRemoteLinkUpdatedAt(link: JiraRemoteLink): number {
-    const updatedValue = link.updated ?? link.created
-
-    if (typeof updatedValue === 'number') {
-      return updatedValue
-    }
-
-    if (typeof updatedValue === 'string') {
-      const parsed = Date.parse(updatedValue)
-      return Number.isNaN(parsed) ? 0 : parsed
-    }
-
-    if (typeof link.id === 'number') {
-      return link.id
-    }
-
-    return 0
   }
 
   private convertToIssueDetail(issue: Issue): IssueDetail {
@@ -592,16 +525,4 @@ export class JiraIssueService {
   getRateLimitDelay(): number {
     return this.rateLimitDelay
   }
-}
-
-type JiraRemoteLink = {
-  id?: number | string
-  globalId?: string
-  object?: {
-    title?: string
-    summary?: string
-    url?: string
-  }
-  updated?: string | number
-  created?: string | number
 }
