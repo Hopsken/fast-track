@@ -31,4 +31,5 @@ export interface JiraUserInfo {
 export interface UserPreferences {
   branchNameFormat: string
   autoCopyBranchNameOnTransition: boolean
+  autoAssignOnInProgress: boolean
 }

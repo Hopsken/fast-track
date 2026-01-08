@@ -1,7 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import log from 'loglevel'
 
+import {
+  mapCurrentUserToAssignee,
+  shouldAutoAssignOnTransition
+} from '@/lib/tickets/auto-assign'
 import { ticketService } from '@/services'
+import { useCurrentUser } from '@/stores/useCurrentUser'
 import { JiraTicket, JiraTransition, UserPreferences } from '@/types'
 import { generateBranchName } from '@/utils/jira/issues'
 import { queryKeys } from '@/utils/queryKeys'
@@ -17,12 +22,23 @@ import { formatErrorMessage } from '~/utils/formatError'
 export function useMutationTransitionIssue() {
   const queryClient = useQueryClient()
   const [preferences] = useUserPreferences()
+  const currentUser = useCurrentUser()
   return useMutation({
     mutationFn: async (params: {
       ticket: JiraTicket
       transition: JiraTransition
     }) => {
       await ticketService.transitionTicket(params.ticket, params.transition)
+      const shouldAutoAssign =
+        !!currentUser &&
+        shouldAutoAssignOnTransition(
+          preferences,
+          params.ticket,
+          params.transition
+        )
+      if (shouldAutoAssign && currentUser) {
+        await ticketService.assignTicket(params.ticket.key, currentUser)
+      }
     },
     onMutate: async ({ ticket, transition }) => {
       await queryClient.cancelQueries({
@@ -40,6 +56,9 @@ export function useMutationTransitionIssue() {
         ticket,
         transition
       )
+      const willAutoAssign =
+        !!currentUser &&
+        shouldAutoAssignOnTransition(preferences, ticket, transition)
 
       if (willCopyBranchName) {
         const branchName = generateBranchName(
@@ -54,6 +73,10 @@ export function useMutationTransitionIssue() {
         }
       }
 
+      if (willAutoAssign) {
+        message = `${ticket.key} to ${nextStatus} (assigning to you)`
+      }
+
       const toast = showToast({
         style: 'loading',
         title: 'Updating status...',
@@ -62,7 +85,11 @@ export function useMutationTransitionIssue() {
 
       const snapshot = updateTicketCaches(queryClient, ticket.key, {
         status: transition.to,
-        isInProgress: transition.to.statusCategory?.key === 'indeterminate'
+        isInProgress: transition.to.statusCategory?.key === 'indeterminate',
+        assignee:
+          willAutoAssign && currentUser
+            ? mapCurrentUserToAssignee(currentUser)
+            : ticket.assignee
       })
 
       return { toast, nextStatus, snapshot }

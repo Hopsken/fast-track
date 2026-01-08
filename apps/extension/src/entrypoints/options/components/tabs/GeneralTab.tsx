@@ -120,6 +120,34 @@ export function GeneralTab() {
               </div>
             </div>
           </div>
+          <div className="rounded-lg border border-gray-200 p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-sm font-medium text-gray-900">
+                  Auto-assign unassigned tickets on In Progress
+                </h3>
+                <p className="mt-1 text-sm text-gray-600">
+                  Automatically assign yourself when moving an unassigned ticket
+                  from To Do to In Progress.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Switch
+                  id="auto-assign-on-in-progress"
+                  checked={preferences.autoAssignOnInProgress}
+                  onCheckedChange={(checked) =>
+                    setPreference('autoAssignOnInProgress', checked)
+                  }
+                />
+                <Label
+                  htmlFor="auto-assign-on-in-progress"
+                  className="text-gray-700">
+                  {preferences.autoAssignOnInProgress ? 'On' : 'Off'}
+                </Label>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
