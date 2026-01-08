@@ -56,7 +56,8 @@ const STORAGE_DEFAULTS: StorageItems = {
   DevMode: false,
   UserPreferences: {
     branchNameFormat: '{key}-{summary}',
-    autoCopyBranchNameOnTransition: false
+    autoCopyBranchNameOnTransition: false,
+    autoAssignOnInProgress: false
   },
 
   DeviceId: '',
