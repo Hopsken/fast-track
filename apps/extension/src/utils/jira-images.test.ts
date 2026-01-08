@@ -9,38 +9,35 @@ vi.mock('@/lib/jira')
 describe('jira-images', () => {
   beforeEach(() => {
     vi.resetAllMocks()
-    global.fetch = vi.fn()
     global.URL.createObjectURL = vi.fn().mockReturnValue('blob:test')
   })
 
   describe('getAuthenticatedImage', () => {
-    it('fetches image with auth headers', async () => {
+    it('fetches image with jira client request', async () => {
       const mockApi = {
-        getAuthHeaders: vi
+        getConfig: vi
           .fn()
-          .mockReturnValue({ Authorization: 'Bearer token' }),
-        getConfig: vi.fn().mockReturnValue({ type: 'oauth', instance_id: 'id' })
+          .mockReturnValue({ type: 'oauth', instance_id: 'id' }),
+        request: vi.fn().mockResolvedValue(new Blob(['']))
       }
       vi.mocked(getJiraApi).mockResolvedValue(mockApi as any)
-      vi.mocked(fetch).mockResolvedValue({
-        ok: true,
-        blob: vi.fn().mockResolvedValue(new Blob(['']))
-      } as any)
 
       const result = await getAuthenticatedImage(
         'https://example.com/image.png'
       )
 
       expect(result).toBe('blob:test')
-      expect(fetch).toHaveBeenCalledWith('https://example.com/image.png', {
-        method: 'GET',
-        headers: { Authorization: 'Bearer token' }
-      })
+      expect(mockApi.request).toHaveBeenCalledWith(
+        'https://example.com/image.png',
+        { responseType: 'blob' }
+      )
     })
 
     it('handles errors gracefully', async () => {
-      vi.mocked(getJiraApi).mockResolvedValue({} as any)
-      vi.mocked(fetch).mockRejectedValue(new Error('Network error'))
+      vi.mocked(getJiraApi).mockResolvedValue({
+        request: vi.fn().mockRejectedValue(new Error('Network error')),
+        getConfig: vi.fn().mockReturnValue({ type: 'oauth', instance_id: 'id' })
+      } as any)
 
       const result = await getAuthenticatedImage('url')
 
@@ -51,16 +48,12 @@ describe('jira-images', () => {
   describe('processHtmlContent', () => {
     it('replaces src with blob url for jira images', async () => {
       const mockApi = {
-        getAuthHeaders: vi.fn().mockReturnValue({}),
+        request: vi.fn().mockResolvedValue(new Blob([''])),
         getConfig: vi
           .fn()
           .mockReturnValue({ type: 'apiKey', host: 'https://jira.com' })
       }
       vi.mocked(getJiraApi).mockResolvedValue(mockApi as any)
-      vi.mocked(fetch).mockResolvedValue({
-        ok: true,
-        blob: vi.fn().mockResolvedValue(new Blob(['']))
-      } as any)
 
       const html = '<img src="https://jira.com/image.png" />'
       const result = await processHtmlContent(html)

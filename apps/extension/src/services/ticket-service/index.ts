@@ -10,7 +10,13 @@ import { UserDetails } from 'jira.js/version3/models/userDetails'
 import { difference, keyBy, uniqBy } from 'lodash-es'
 
 import { sendMessage } from '@/lib/message'
-import { JiraPriority, JiraTicket, JiraTransition, IssueDetail } from '@/types'
+import {
+  IssueDetail,
+  JiraMergeRequest,
+  JiraPriority,
+  JiraTicket,
+  JiraTransition
+} from '@/types'
 import { mapPriority } from '@/utils/jira/issues'
 import { getJiraApi, JiraAPI } from '~/lib/jira'
 import { getLogger } from '~/utils/logger'
@@ -110,6 +116,12 @@ class TicketServiceImpl {
   async getTicketDetails(ticketKey: string): Promise<IssueDetail | null> {
     return this.withJira(async (jira) => {
       return jira.issues.getIssueDetail(ticketKey)
+    })
+  }
+
+  async getIssueMergeRequests(issueKey: string): Promise<JiraMergeRequest[]> {
+    return this.withJira(async (jira) => {
+      return jira.issues.getIssueMergeRequests(issueKey)
     })
   }
 

@@ -14,7 +14,6 @@ export async function getAuthenticatedImage(
     const api = await getJiraApi()
     if (!api) throw new Error('Jira API not initialized')
 
-    const headers = api.getAuthHeaders()
     const config = api.getConfig()
 
     let fullUrl = url
@@ -29,15 +28,7 @@ export async function getAuthenticatedImage(
       fullUrl = `${baseUrl}${url}`
     }
 
-    const response = await fetch(fullUrl, {
-      method: 'GET',
-      headers
-    })
-
-    if (!response.ok)
-      throw new Error(`Failed to fetch image: ${response.statusText}`)
-
-    const blob = await response.blob()
+    const blob = await api.request<Blob>(fullUrl, { responseType: 'blob' })
     return URL.createObjectURL(blob)
   } catch (error) {
     log.warn('Failed to load authenticated image:', error)

@@ -10,6 +10,7 @@ import {
   ChartNoAxesColumnIncreasing,
   Clipboard,
   GitBranch,
+  GitPullRequest,
   Link2,
   Route,
   UserPen,
@@ -17,7 +18,12 @@ import {
 } from 'lucide-react'
 
 import { AssigneeAvatar } from '@/components'
-import { Action, ActionCopyToClipboard, ActionPush } from '@/components/actions'
+import {
+  Action,
+  ActionCopyToClipboard,
+  ActionHyperLink,
+  ActionPush
+} from '@/components/actions'
 import { ActionShortcut } from '@/components/actions/ActionShortcut'
 import { useCommandNavigate } from '@/components/CommandRouter'
 import { PrefetchProvider } from '@/components/PrefetchQuery'
@@ -25,6 +31,7 @@ import { TicketBasicFields } from '@/components/tickets'
 import { CommandRoutes } from '@/entrypoints/popup/menus'
 import { useIsOptionKeyPressed } from '@/hooks/useIsOptionKeyPressed'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
+import { useIssueMergeRequests } from '@/hooks/useIssueMergeRequests'
 import { useIssuePriorities } from '@/hooks/useIssuePriorities'
 import { useIssueTransitions } from '@/hooks/useIssueTransitions'
 import { useMutationAssignMyself } from '@/hooks/useMutationAssignIssue'
@@ -43,6 +50,7 @@ export const TicketActionsMenu = memo(function TicketActionsMenu({
   // prefetch ticket details
   const { data: ticketDetails } = useTicketDetails(initialTicket)
   const ticket = ticketDetails || initialTicket
+  const { data: mergeRequests } = useIssueMergeRequests(ticket)
 
   const isOptionKeyPressed = useIsOptionKeyPressed()
   const [preferences] = useUserPreferences()
@@ -65,7 +73,12 @@ export const TicketActionsMenu = memo(function TicketActionsMenu({
     [preferences.branchNameFormat, ticket]
   )
 
-  console.log({ formatted })
+  const newestMergeRequest = useMemo(() => {
+    if (!mergeRequests?.length) return null
+    return mergeRequests.reduce((latest, current) =>
+      current.lastUpdatedAt > latest.lastUpdatedAt ? current : latest
+    )
+  }, [mergeRequests])
 
   return (
     <CommandList>
@@ -123,6 +136,14 @@ export const TicketActionsMenu = memo(function TicketActionsMenu({
       <CommandSeparator />
 
       <CommandGroup heading="Misc">
+        {newestMergeRequest && (
+          <ActionHyperLink
+            value="open-merge-request"
+            icon={GitPullRequest}
+            url={newestMergeRequest.url}
+            title="Open merge request"
+          />
+        )}
         <ActionCopyToClipboard
           value="copy-issue-key"
           icon={Clipboard}
