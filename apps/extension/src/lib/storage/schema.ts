@@ -72,7 +72,7 @@ const STORAGE_DEFINITIONS: {
   },
 
   DeviceId: {
-    area: 'local',
+    area: 'sync',
     fallback: '',
     init: () => crypto.randomUUID()
   },
