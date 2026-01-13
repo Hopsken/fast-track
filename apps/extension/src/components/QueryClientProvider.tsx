@@ -30,10 +30,12 @@ const asyncStoragePersister = createAsyncStoragePersister({
   }
 })
 
+const queryClientBuster = `${import.meta.env.MODE}-${browser.runtime.getManifest().version}`
+
 const persistOptions: PersistQueryClientProviderProps['persistOptions'] = {
   persister: asyncStoragePersister,
   maxAge: days(2),
-  buster: 'v1'
+  buster: queryClientBuster
 }
 
 export const QueryClientProvider = ({ children }: PropsWithChildren) => (
