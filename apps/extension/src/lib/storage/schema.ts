@@ -44,27 +44,42 @@ export type StorageValue<T extends StorageKey> = StorageItems[T]
 /**
  * Default values for storage items
  */
-const STORAGE_DEFAULTS: StorageItems = {
-  License: null,
-  JiraHost: '',
+type StorageDefinition<T> = {
+  area: 'local' | 'sync'
+  fallback: T
+  init?: () => T
+}
+
+const STORAGE_DEFINITIONS: {
+  [K in StorageKey]: StorageDefinition<StorageItems[K]>
+} = {
+  License: { area: 'sync', fallback: null },
+  JiraHost: { area: 'local', fallback: '' },
   // React Query cache
-  REACT_QUERY_OFFLINE_CACHE: null,
-  AuthType: 'oauth',
-  OAuthTokens: null,
-  OAuthUserInfo: null,
-  ApiKeyAuth: null,
-  DevMode: false,
+  REACT_QUERY_OFFLINE_CACHE: { area: 'local', fallback: null },
+  AuthType: { area: 'local', fallback: 'oauth' },
+  OAuthTokens: { area: 'local', fallback: null },
+  OAuthUserInfo: { area: 'local', fallback: null },
+  ApiKeyAuth: { area: 'local', fallback: null },
+  DevMode: { area: 'local', fallback: false },
   UserPreferences: {
-    branchNameFormat: '{key}-{summary}',
-    autoCopyBranchNameOnTransition: false,
-    autoAssignOnInProgress: false
+    area: 'sync',
+    fallback: {
+      branchNameFormat: '{key}-{summary}',
+      autoCopyBranchNameOnTransition: false,
+      autoAssignOnInProgress: false
+    }
   },
 
-  DeviceId: '',
+  DeviceId: {
+    area: 'local',
+    fallback: '',
+    init: () => crypto.randomUUID()
+  },
 
   // analytics
-  'analytics-enabled': true,
-  ProjectClicks: {}
+  'analytics-enabled': { area: 'local', fallback: true },
+  ProjectClicks: { area: 'local', fallback: {} }
 }
 
 // Enhanced storage key groups with logical organization
@@ -88,11 +103,11 @@ export const STORAGE_GROUPS = {
 const storageItems: Record<
   StorageKey,
   WxtStorageItem<StorageValue<StorageKey>, Record<string, unknown>>
-> = Object.entries(STORAGE_DEFAULTS).reduce(
-  (acc, [key, value]) => {
-    acc[key as StorageKey] = storage.defineItem(`local:${key}`, {
-      fallback: value,
-      init: () => (key === 'DeviceId' ? crypto.randomUUID() : value)
+> = Object.entries(STORAGE_DEFINITIONS).reduce(
+  (acc, [key, definition]) => {
+    acc[key as StorageKey] = storage.defineItem(`${definition.area}:${key}`, {
+      fallback: definition.fallback,
+      init: definition.init
     })
     return acc
   },
