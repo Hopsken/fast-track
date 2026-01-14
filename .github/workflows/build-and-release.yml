@@ -75,11 +75,8 @@ jobs:
       - name: Quality checkout
         run: pnpm exec turbo run typecheck lint test
 
-      - name: Create zip artifacts
-        run: pnpm run zip
-
       - name: Run extension e2e tests
-        run: pnpm test:e2e
+        run: pnpm run build && pnpm test:e2e
 
       - name: Upload Playwright report artifact
         uses: actions/upload-artifact@v4
@@ -88,6 +85,9 @@ jobs:
           name: playwright-report
           path: apps/extension/playwright-report/
           retention-days: 30
+
+      - name: Create zip artifacts
+        run: pnpm run zip
 
       - name: Upload Chrome extension artifact
         uses: actions/upload-artifact@v4
