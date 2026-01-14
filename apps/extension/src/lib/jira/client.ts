@@ -15,6 +15,7 @@ import {
 } from 'jira.js/version3'
 import { catchError, of, skipWhile, Subscription, switchMap, timer } from 'rxjs'
 
+import { AuthCredentials, JiraOAuthConfig } from '~/types'
 import { getLogger } from '~/utils/logger'
 
 import { fromStorage$, getStorageItem } from '../storage'
@@ -23,6 +24,24 @@ import { AuthApi } from './auth-api'
 import type { JiraApiConfig } from './types'
 
 const log = getLogger('jira-client')
+
+/**
+ * Build a JiraOAuthConfig from AuthCredentials
+ */
+function buildOAuthConfig(
+  credentials: AuthCredentials
+): JiraOAuthConfig | null {
+  if (credentials.type !== 'oauth' || !credentials.oauth) return null
+
+  return {
+    type: 'oauth',
+    host: credentials.host,
+    instance_id: credentials.oauth.instance_id,
+    access_token: credentials.oauth.access_token,
+    refresh_token: credentials.oauth.refresh_token,
+    expires_at: credentials.oauth.expires_at
+  }
+}
 
 /**
  * Base Jira client with authentication and jira.js module access
@@ -93,14 +112,16 @@ export class JiraClient extends BaseClient {
    * Refresh OAuth token and update client if needed
    */
   private setupAutoRefreshTokenSubscription() {
-    return fromStorage$('OAuthTokens')
+    return fromStorage$('AuthCredentials')
       .pipe(
-        skipWhile((tokens) => !tokens),
-        switchMap((tokens) => {
-          log.info('Received OAuth tokens update')
-          if (!tokens) throw new Error('No tokens found')
+        skipWhile((creds) => !creds || creds.type !== 'oauth' || !creds.oauth),
+        switchMap((credentials) => {
+          log.info('Received AuthCredentials update')
+          if (!credentials || !credentials.oauth) {
+            throw new Error('No OAuth credentials found')
+          }
 
-          const expiresAtMs = new Date(tokens.expires_at).getTime()
+          const expiresAtMs = new Date(credentials.oauth.expires_at).getTime()
 
           // Schedule refresh 5 minutes before token expires
           // if less than 5 min, refresh immediately
@@ -108,12 +129,15 @@ export class JiraClient extends BaseClient {
             expiresAtMs - Date.now() - 5 * 60 * 1000,
             0
           )
+
+          const oauthConfig = buildOAuthConfig(credentials)
+          if (!oauthConfig) throw new Error('Failed to build OAuth config')
+
           return timer(refreshDelay).pipe(
-            switchMap(() => this.authApi.refreshToken(tokens)),
+            switchMap(() => this.authApi.refreshToken(oauthConfig)),
             catchError((error) => {
               log.error('Failed to refresh Jira tokens', error)
-              getStorageItem('OAuthTokens').removeValue()
-              getStorageItem('OAuthUserInfo').removeValue()
+              getStorageItem('AuthCredentials').removeValue()
               return of<null>(null)
             })
           )
@@ -122,7 +146,22 @@ export class JiraClient extends BaseClient {
       .subscribe((newTokens) => {
         if (newTokens) {
           // Persist refreshed tokens so future refreshes are correctly scheduled
-          getStorageItem('OAuthTokens').setValue(newTokens)
+          getStorageItem('AuthCredentials')
+            .getValue()
+            .then((credentials) => {
+              if (credentials) {
+                const updatedCredentials: AuthCredentials = {
+                  ...credentials,
+                  oauth: {
+                    instance_id: newTokens.instance_id,
+                    access_token: newTokens.access_token,
+                    refresh_token: newTokens.refresh_token,
+                    expires_at: newTokens.expires_at
+                  }
+                }
+                getStorageItem('AuthCredentials').setValue(updatedCredentials)
+              }
+            })
           this.updateClientConfig(newTokens)
         }
       })

@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import {
   Tabs,
   TabsContent,
@@ -17,8 +17,8 @@ import { JiraApiKeySetup } from './JiraApiKeySetup'
 import { JiraOAuthSetup } from './JiraOAuthSetup'
 
 export function ConfigureAuth() {
-  const [authType, setAuthType] = useStorage('AuthType')
-  const [apiKeyAuth] = useStorage('ApiKeyAuth')
+  const [credentials, setCredentials] = useStorage('AuthCredentials')
+  const authType = useMemo(() => credentials?.type ?? 'oauth', [credentials])
 
   const [error, setError] = useState<string | null>(null)
   const [connectingMethod, setConnectingMethod] = useState<AuthType | null>(
@@ -28,9 +28,15 @@ export function ConfigureAuth() {
   const handleSelectAuthType = useCallback(
     (next: string) => {
       setError(null)
-      setAuthType(next as AuthType)
+      // Update auth type in credentials if they exist, otherwise just track selection
+      if (credentials) {
+        setCredentials({
+          ...credentials,
+          type: next as AuthType
+        })
+      }
     },
-    [setAuthType]
+    [credentials, setCredentials]
   )
 
   const handleConnect = useMemoizedFn(async () => {
@@ -40,7 +46,6 @@ export function ConfigureAuth() {
     setError(null)
 
     try {
-      setAuthType('oauth')
       const nextUrl = await authService.connect()
       window.open(nextUrl, '_blank')
     } catch (error) {
@@ -59,7 +64,6 @@ export function ConfigureAuth() {
 
       try {
         await authService.connectWithApiKey(payload)
-        setAuthType('apiKey')
         trackEvent('connect_success', { method: 'apiKey' })
       } catch (err) {
         logger.error('Error connecting with API key:', err)
@@ -72,14 +76,14 @@ export function ConfigureAuth() {
         setConnectingMethod(null)
       }
     },
-    [setAuthType]
+    []
   )
 
-  const apiKeyDefaults = apiKeyAuth
+  const apiKeyDefaults = credentials?.apiKey
     ? {
-        host: apiKeyAuth.host,
-        email: apiKeyAuth.email,
-        apiKey: apiKeyAuth.apiKey
+        host: credentials.host,
+        email: credentials.apiKey.email,
+        apiKey: credentials.apiKey.apiKey
       }
     : undefined
 

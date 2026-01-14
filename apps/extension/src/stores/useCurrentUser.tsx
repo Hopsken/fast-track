@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react'
+import { createContext, useContext, useMemo } from 'react'
 
 import { useStorage } from '@/hooks'
 import { JiraUserInfo } from '@/types'
@@ -14,7 +14,8 @@ export function UserContextProvider({
 }: {
   children: React.ReactNode
 }) {
-  const [userInfo] = useStorage('OAuthUserInfo')
+  const [credentials] = useStorage('AuthCredentials')
+  const userInfo = useMemo(() => credentials?.userInfo ?? null, [credentials])
 
   return (
     <UserContext.Provider value={{ userInfo }}>{children}</UserContext.Provider>
