@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   Tabs,
   TabsContent,
@@ -17,21 +17,27 @@ import { JiraApiKeySetup } from './JiraApiKeySetup'
 import { JiraOAuthSetup } from './JiraOAuthSetup'
 
 export function ConfigureAuth() {
-  const [authType, setAuthType] = useStorage('AuthType')
-  const [apiKeyAuth] = useStorage('ApiKeyAuth')
+  const [credentials] = useStorage('AuthCredentials')
+
+  // Track selected tab locally - initialized from credentials if available
+  const [selectedAuthType, setSelectedAuthType] = useState<AuthType>('oauth')
+
+  // Sync tab selection when credentials load asynchronously
+  useEffect(() => {
+    if (credentials?.type) {
+      setSelectedAuthType(credentials.type)
+    }
+  }, [credentials?.type])
 
   const [error, setError] = useState<string | null>(null)
   const [connectingMethod, setConnectingMethod] = useState<AuthType | null>(
     null
   )
 
-  const handleSelectAuthType = useCallback(
-    (next: string) => {
-      setError(null)
-      setAuthType(next as AuthType)
-    },
-    [setAuthType]
-  )
+  const handleSelectAuthType = useCallback((next: string) => {
+    setError(null)
+    setSelectedAuthType(next as AuthType)
+  }, [])
 
   const handleConnect = useMemoizedFn(async () => {
     trackEvent('connect_attempt', { method: 'oauth' })
@@ -40,11 +46,15 @@ export function ConfigureAuth() {
     setError(null)
 
     try {
-      setAuthType('oauth')
       const nextUrl = await authService.connect()
       window.open(nextUrl, '_blank')
-    } catch (error) {
-      logger.error('Error connecting to Jira:', error)
+    } catch (err) {
+      logger.error('Error connecting to Jira:', err)
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Failed to initiate OAuth connection. Please try again.'
+      )
     } finally {
       setConnectingMethod(null)
     }
@@ -59,7 +69,6 @@ export function ConfigureAuth() {
 
       try {
         await authService.connectWithApiKey(payload)
-        setAuthType('apiKey')
         trackEvent('connect_success', { method: 'apiKey' })
       } catch (err) {
         logger.error('Error connecting with API key:', err)
@@ -72,19 +81,19 @@ export function ConfigureAuth() {
         setConnectingMethod(null)
       }
     },
-    [setAuthType]
+    []
   )
 
-  const apiKeyDefaults = apiKeyAuth
+  const apiKeyDefaults = credentials?.apiKey
     ? {
-        host: apiKeyAuth.host,
-        email: apiKeyAuth.email,
-        apiKey: apiKeyAuth.apiKey
+        host: credentials.host,
+        email: credentials.apiKey.email,
+        apiKey: credentials.apiKey.apiKey
       }
     : undefined
 
   return (
-    <Tabs value={authType} onValueChange={handleSelectAuthType}>
+    <Tabs value={selectedAuthType} onValueChange={handleSelectAuthType}>
       <TabsList className="w-full">
         <TabsTrigger value={'oauth'}>Sign in with Atlassian</TabsTrigger>
         <TabsTrigger value="apiKey">API key</TabsTrigger>
@@ -94,6 +103,7 @@ export function ConfigureAuth() {
         <JiraOAuthSetup
           onConnect={handleConnect}
           isLoading={connectingMethod === 'oauth'}
+          error={selectedAuthType === 'oauth' ? error : null}
         />
       </TabsContent>
 
@@ -101,7 +111,7 @@ export function ConfigureAuth() {
         <JiraApiKeySetup
           onConnect={handleApiKeyConnect}
           isLoading={connectingMethod === 'apiKey'}
-          error={error}
+          error={selectedAuthType === 'apiKey' ? error : null}
           defaultValues={apiKeyDefaults}
         />
       </TabsContent>

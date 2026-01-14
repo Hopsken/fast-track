@@ -19,6 +19,9 @@ const log = getLogger('background')
 export default defineBackground(() => {
   log.info('🚀 Background script initializing...')
 
+  // Note: Storage migrations are handled automatically by WXT's built-in
+  // versioning system when the extension updates. See schema.ts for details.
+
   // Initialize proxy services
   registerJiraService()
   registerTicketService()

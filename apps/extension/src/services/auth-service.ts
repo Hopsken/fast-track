@@ -5,7 +5,13 @@ import { z } from 'zod'
 import { JiraAPI } from '@/lib/jira'
 import { AuthApi } from '@/lib/jira/auth-api'
 import { getStorageItem } from '@/lib/storage'
-import { JiraApiKeyConfig, ReceivedTokenPayload, JiraUserInfo } from '@/types'
+import {
+  AuthCredentials,
+  JiraApiKeyConfig,
+  JiraOAuthConfig,
+  ReceivedTokenPayload,
+  JiraUserInfo
+} from '@/types'
 
 import { trackEvent } from './analytics'
 
@@ -16,6 +22,7 @@ export interface AuthService {
   ): Promise<JiraUserInfo>
   connect(): Promise<string>
   disconnect(): Promise<boolean>
+  getCredentials(): Promise<AuthCredentials | null>
 }
 
 const tokenSchema = z.object({
@@ -31,12 +38,12 @@ const apiKeySchema = z.object({
 })
 
 class AuthServiceImpl implements AuthService {
-  private tokenStorage = getStorageItem('OAuthTokens')
-  private apiKeyStorage = getStorageItem('ApiKeyAuth')
-  private userInfoStorage = getStorageItem('OAuthUserInfo')
-  private authTypeStorage = getStorageItem('AuthType')
-  private jiraHostStorage = getStorageItem('JiraHost')
+  private credentialsStorage = getStorageItem('AuthCredentials')
   private authApi = new AuthApi()
+
+  public async getCredentials(): Promise<AuthCredentials | null> {
+    return this.credentialsStorage.getValue()
+  }
 
   public async receiveTokens(
     tokens: ReceivedTokenPayload
@@ -45,17 +52,35 @@ class AuthServiceImpl implements AuthService {
 
     const oauthConfig =
       await this.authApi.getOAuthConfigFromAccessToken(parsedTokens)
-    await Promise.all([
-      this.tokenStorage.setValue(oauthConfig),
-      this.authTypeStorage.setValue('oauth'),
-      this.jiraHostStorage.setValue(oauthConfig.host),
-      this.apiKeyStorage.removeValue()
-    ])
 
-    const jiraApi = new JiraAPI(oauthConfig)
+    // Build full OAuth config for JiraAPI
+    const fullOAuthConfig: JiraOAuthConfig = {
+      type: 'oauth',
+      host: oauthConfig.host,
+      instance_id: oauthConfig.instance_id,
+      access_token: oauthConfig.access_token,
+      refresh_token: oauthConfig.refresh_token,
+      expires_at: oauthConfig.expires_at
+    }
+
+    const jiraApi = new JiraAPI(fullOAuthConfig)
     const userInfo = await jiraApi.getMyself()
 
-    await this.userInfoStorage.setValue(userInfo)
+    // Store consolidated credentials
+    const credentials: AuthCredentials = {
+      type: 'oauth',
+      host: oauthConfig.host,
+      userInfo,
+      oauth: {
+        instance_id: oauthConfig.instance_id,
+        access_token: oauthConfig.access_token,
+        refresh_token: oauthConfig.refresh_token,
+        expires_at: oauthConfig.expires_at
+      },
+      apiKey: null
+    }
+
+    await this.credentialsStorage.setValue(credentials)
 
     trackEvent('connect_success', { method: 'oauth' })
 
@@ -67,6 +92,7 @@ class AuthServiceImpl implements AuthService {
   ): Promise<JiraUserInfo> {
     const parsedCredentials = apiKeySchema.parse(credentials)
     const normalizedHost = this.normalizeHost(parsedCredentials.host)
+
     const apiKeyConfig: JiraApiKeyConfig = {
       ...parsedCredentials,
       host: normalizedHost,
@@ -76,13 +102,21 @@ class AuthServiceImpl implements AuthService {
     const jiraApi = new JiraAPI(apiKeyConfig)
     const userInfo = await jiraApi.getMyself()
 
-    await Promise.all([
-      this.apiKeyStorage.setValue(apiKeyConfig),
-      this.authTypeStorage.setValue('apiKey'),
-      this.tokenStorage.removeValue(),
-      this.jiraHostStorage.setValue(normalizedHost),
-      this.userInfoStorage.setValue(userInfo)
-    ])
+    // Store consolidated credentials
+    const authCredentials: AuthCredentials = {
+      type: 'apiKey',
+      host: normalizedHost,
+      userInfo,
+      oauth: null,
+      apiKey: {
+        email: parsedCredentials.email,
+        apiKey: parsedCredentials.apiKey
+      }
+    }
+
+    await this.credentialsStorage.setValue(authCredentials)
+
+    trackEvent('connect_success', { method: 'apiKey' })
 
     return userInfo
   }
@@ -95,10 +129,7 @@ class AuthServiceImpl implements AuthService {
     trackEvent('disconnect')
 
     await Promise.all([
-      this.tokenStorage.removeValue(),
-      this.apiKeyStorage.removeValue(),
-      this.userInfoStorage.removeValue(),
-      this.jiraHostStorage.removeValue(),
+      this.credentialsStorage.removeValue(),
       // Clear React Query cache
       getStorageItem('REACT_QUERY_OFFLINE_CACHE').removeValue()
     ])

@@ -28,6 +28,31 @@ export interface JiraUserInfo {
   avatarUrl?: string
 }
 
+/**
+ * Consolidated authentication credentials storage
+ * This unifies all auth-related data into a single storage key
+ */
+export interface AuthCredentials {
+  /** The authentication method being used */
+  type: AuthType
+  /** The Jira host URL (e.g., https://company.atlassian.net) */
+  host: string
+  /** User information from Jira */
+  userInfo: JiraUserInfo | null
+  /** OAuth tokens (when type is 'oauth') */
+  oauth: {
+    instance_id: string
+    access_token: string
+    refresh_token: string
+    expires_at: string
+  } | null
+  /** API key credentials (when type is 'apiKey') */
+  apiKey: {
+    email: string
+    apiKey: string
+  } | null
+}
+
 export interface UserPreferences {
   branchNameFormat: string
   autoCopyBranchNameOnTransition: boolean

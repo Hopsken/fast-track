@@ -1,4 +1,4 @@
-import { ChangeEvent, useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { Input } from '@internal/ui/components/input'
 import { Label } from '@internal/ui/components/label'
 import { Switch } from '@internal/ui/components/switch'
@@ -13,8 +13,10 @@ import { ConfigureAuth, JiraConnectionCard } from '../auth'
 import { ShortcutManagement } from '../sections/QuickAccess/ShortcutManagement'
 
 export function GeneralTab() {
-  const [userInfo] = useStorage('OAuthUserInfo')
-  const [jiraHost] = useStorage('JiraHost')
+  const [credentials] = useStorage('AuthCredentials')
+  const userInfo = useMemo(() => credentials?.userInfo ?? null, [credentials])
+  const jiraHost = useMemo(() => credentials?.host ?? '', [credentials])
+
   const [preferences, setPreference] = useUserPreferences()
   const [analyticsEnabled, setAnalyticsEnabled] =
     useStorage('analytics-enabled')
