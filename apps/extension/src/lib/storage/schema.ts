@@ -170,15 +170,18 @@ export const STORAGE_GROUPS = {
 /**
  * AuthCredentials storage item with versioning and migration
  * Uses WXT's built-in migration system
+ *
+ * Note: WXT storage defaults to version 1, so we use version 2 to ensure
+ * the migration runs for existing users upgrading from legacy storage keys.
  */
 const authCredentialsItem = storage.defineItem<AuthCredentials | null>(
   'local:AuthCredentials',
   {
     fallback: null,
-    version: 1,
+    version: 2,
     migrations: {
-      // Migration from v0 (legacy scattered keys) to v1 (consolidated)
-      1: migrateFromLegacyAuthKeys
+      // Migration from v1 (legacy scattered keys) to v2 (consolidated)
+      2: migrateFromLegacyAuthKeys
     },
     onMigrationComplete: (value, version) => {
       log.info(`AuthCredentials migrated to version ${version}`, {
