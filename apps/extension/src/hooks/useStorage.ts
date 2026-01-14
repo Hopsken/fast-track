@@ -17,7 +17,6 @@ export function useStorage<T extends StorageKey>(
   ) => void
 ] {
   const [storageItem] = useState(getStorageItem(key))
-  console.log({ storageItem })
   const [value, setValue] = useState<StorageValue<T>>(storageItem.fallback)
 
   useEffect(() => {
