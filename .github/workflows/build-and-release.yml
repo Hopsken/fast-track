@@ -73,10 +73,18 @@ jobs:
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
       - name: Quality checkout
-        run: pnpm exec turbo run typecheck lint test --affected
+        run: pnpm exec turbo run typecheck lint test
 
       - name: Run extension e2e tests
-        run: xvfb-run -a pnpm test:e2e
+        run: pnpm test:e2e
+
+      - name: Upload Playwright report artifact
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: apps/extension/playwright-report/
+          retention-days: 30
 
       - name: Create zip artifacts
         run: pnpm run zip

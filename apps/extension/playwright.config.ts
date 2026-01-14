@@ -12,11 +12,12 @@ export default defineConfig({
     timeout: 15_000
   },
   retries: process.env.CI ? 2 : 0,
+  reporter: 'html',
   // Run tests serially to avoid browser context conflicts
   workers: 1,
   use: {
-    headless: false,
-    viewport: { width: 1280, height: 720 },
+    headless: true,
+    // viewport: { width: 1280, height: 720 },
     // Add trace on first retry for debugging
     trace: 'on-first-retry'
   },
