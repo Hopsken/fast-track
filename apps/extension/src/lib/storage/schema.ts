@@ -60,6 +60,16 @@ async function migrateFromLegacyAuthKeys(): Promise<AuthCredentials | null> {
       return null
     }
 
+    // Warn about type/data mismatches
+    if (authType === 'oauth' && !oauthTokens) {
+      log.warn('authType is oauth but no tokens found, data may be corrupted')
+    }
+    if (authType === 'apiKey' && !apiKeyAuth) {
+      log.warn(
+        'authType is apiKey but no API key config found, data may be corrupted'
+      )
+    }
+
     // Determine the host - prefer from the active auth method
     let host = jiraHost || ''
     if (authType === 'oauth' && oauthTokens?.host) {
@@ -87,6 +97,26 @@ async function migrateFromLegacyAuthKeys(): Promise<AuthCredentials | null> {
             apiKey: apiKeyAuth.apiKey
           }
         : null
+    }
+
+    // Validate credentials before cleanup - ensure we have usable auth data
+    const hasValidOAuth =
+      credentials.type === 'oauth' && credentials.oauth && credentials.host
+    const hasValidApiKey =
+      credentials.type === 'apiKey' && credentials.apiKey && credentials.host
+
+    if (!hasValidOAuth && !hasValidApiKey) {
+      log.error(
+        'Migration produced invalid credentials: missing required data',
+        {
+          type: credentials.type,
+          hasHost: !!credentials.host,
+          hasOAuth: !!credentials.oauth,
+          hasApiKey: !!credentials.apiKey
+        }
+      )
+      // Don't clean up legacy keys - user can try again or manually fix
+      return null
     }
 
     log.info('Migration completed successfully', {

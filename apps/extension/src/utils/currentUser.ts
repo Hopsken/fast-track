@@ -1,12 +1,12 @@
 import { getStorageItem } from '@/lib/storage'
 import { JiraUserInfo } from '@/types'
 
-let userInfo: JiraUserInfo | null = null
-
+/**
+ * Get the current user from AuthCredentials
+ * Note: This always fetches fresh from storage to avoid stale cache issues
+ * after logout/re-authentication
+ */
 export async function getCurrentUser(): Promise<JiraUserInfo | null> {
-  if (userInfo) return userInfo
-
   const credentials = await getStorageItem('AuthCredentials').getValue()
-  userInfo = credentials?.userInfo ?? null
-  return userInfo
+  return credentials?.userInfo ?? null
 }

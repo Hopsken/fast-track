@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   Tabs,
   TabsContent,
@@ -20,9 +20,14 @@ export function ConfigureAuth() {
   const [credentials] = useStorage('AuthCredentials')
 
   // Track selected tab locally - initialized from credentials if available
-  const [selectedAuthType, setSelectedAuthType] = useState<AuthType>(
-    credentials?.type ?? 'oauth'
-  )
+  const [selectedAuthType, setSelectedAuthType] = useState<AuthType>('oauth')
+
+  // Sync tab selection when credentials load asynchronously
+  useEffect(() => {
+    if (credentials?.type) {
+      setSelectedAuthType(credentials.type)
+    }
+  }, [credentials?.type])
 
   const [error, setError] = useState<string | null>(null)
   const [connectingMethod, setConnectingMethod] = useState<AuthType | null>(
@@ -43,8 +48,13 @@ export function ConfigureAuth() {
     try {
       const nextUrl = await authService.connect()
       window.open(nextUrl, '_blank')
-    } catch (error) {
-      logger.error('Error connecting to Jira:', error)
+    } catch (err) {
+      logger.error('Error connecting to Jira:', err)
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Failed to initiate OAuth connection. Please try again.'
+      )
     } finally {
       setConnectingMethod(null)
     }
@@ -93,6 +103,7 @@ export function ConfigureAuth() {
         <JiraOAuthSetup
           onConnect={handleConnect}
           isLoading={connectingMethod === 'oauth'}
+          error={selectedAuthType === 'oauth' ? error : null}
         />
       </TabsContent>
 
@@ -100,7 +111,7 @@ export function ConfigureAuth() {
         <JiraApiKeySetup
           onConnect={handleApiKeyConnect}
           isLoading={connectingMethod === 'apiKey'}
-          error={error}
+          error={selectedAuthType === 'apiKey' ? error : null}
           defaultValues={apiKeyDefaults}
         />
       </TabsContent>

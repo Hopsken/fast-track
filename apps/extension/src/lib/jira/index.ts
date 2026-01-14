@@ -1,4 +1,5 @@
-import { AuthCredentials, JiraApiKeyConfig, JiraOAuthConfig } from '~/types'
+import { AuthCredentials, JiraOAuthConfig } from '~/types'
+import { buildApiKeyConfig, buildOAuthConfig } from '~/utils/auth'
 import { getLogger } from '~/utils/logger'
 
 import { getStorageItem } from '../storage'
@@ -14,40 +15,6 @@ let cachedJira: { client: JiraAPI; signature: string } | null = null
 
 const TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000
 const log = getLogger('jira-auth')
-
-/**
- * Build a JiraOAuthConfig from AuthCredentials
- */
-function buildOAuthConfig(
-  credentials: AuthCredentials
-): JiraOAuthConfig | null {
-  if (credentials.type !== 'oauth' || !credentials.oauth) return null
-
-  return {
-    type: 'oauth',
-    host: credentials.host,
-    instance_id: credentials.oauth.instance_id,
-    access_token: credentials.oauth.access_token,
-    refresh_token: credentials.oauth.refresh_token,
-    expires_at: credentials.oauth.expires_at
-  }
-}
-
-/**
- * Build a JiraApiKeyConfig from AuthCredentials
- */
-function buildApiKeyConfig(
-  credentials: AuthCredentials
-): JiraApiKeyConfig | null {
-  if (credentials.type !== 'apiKey' || !credentials.apiKey) return null
-
-  return {
-    type: 'apiKey',
-    host: credentials.host,
-    email: credentials.apiKey.email,
-    apiKey: credentials.apiKey.apiKey
-  }
-}
 
 async function ensureValidTokens(
   credentials: AuthCredentials

@@ -18,11 +18,13 @@ import {
 export interface JiraOAuthSetupProps {
   onConnect: () => void
   isLoading: boolean
+  error?: string | null
 }
 
 export const JiraOAuthSetup: React.FC<JiraOAuthSetupProps> = ({
   onConnect,
-  isLoading = false
+  isLoading = false,
+  error
 }) => {
   return (
     <Card>
@@ -66,6 +68,12 @@ export const JiraOAuthSetup: React.FC<JiraOAuthSetupProps> = ({
         <Separator />
 
         <div className="space-y-3">
+          {error && (
+            <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
+              {error}
+            </div>
+          )}
+
           <Button className="w-full" onClick={onConnect} disabled={isLoading}>
             {isLoading ? (
               <div className="flex items-center justify-center gap-2">

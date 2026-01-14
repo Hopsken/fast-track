@@ -15,7 +15,8 @@ import {
 } from 'jira.js/version3'
 import { catchError, of, skipWhile, Subscription, switchMap, timer } from 'rxjs'
 
-import { AuthCredentials, JiraOAuthConfig } from '~/types'
+import { AuthCredentials } from '~/types'
+import { buildOAuthConfig } from '~/utils/auth'
 import { getLogger } from '~/utils/logger'
 
 import { fromStorage$, getStorageItem } from '../storage'
@@ -24,24 +25,6 @@ import { AuthApi } from './auth-api'
 import type { JiraApiConfig } from './types'
 
 const log = getLogger('jira-client')
-
-/**
- * Build a JiraOAuthConfig from AuthCredentials
- */
-function buildOAuthConfig(
-  credentials: AuthCredentials
-): JiraOAuthConfig | null {
-  if (credentials.type !== 'oauth' || !credentials.oauth) return null
-
-  return {
-    type: 'oauth',
-    host: credentials.host,
-    instance_id: credentials.oauth.instance_id,
-    access_token: credentials.oauth.access_token,
-    refresh_token: credentials.oauth.refresh_token,
-    expires_at: credentials.oauth.expires_at
-  }
-}
 
 /**
  * Base Jira client with authentication and jira.js module access
@@ -145,7 +128,7 @@ export class JiraClient extends BaseClient {
       )
       .subscribe((newTokens) => {
         if (newTokens) {
-          // Persist refreshed tokens so future refreshes are correctly scheduled
+          // Persist refreshed tokens, then update client config
           getStorageItem('AuthCredentials')
             .getValue()
             .then((credentials) => {
@@ -159,10 +142,18 @@ export class JiraClient extends BaseClient {
                     expires_at: newTokens.expires_at
                   }
                 }
-                getStorageItem('AuthCredentials').setValue(updatedCredentials)
+                return getStorageItem('AuthCredentials').setValue(
+                  updatedCredentials
+                )
               }
             })
-          this.updateClientConfig(newTokens)
+            .then(() => {
+              // Update client config after storage is persisted
+              this.updateClientConfig(newTokens)
+            })
+            .catch((error) => {
+              log.error('Failed to persist refreshed tokens', error)
+            })
         }
       })
   }
