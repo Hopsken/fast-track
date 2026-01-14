@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useState } from 'react'
 import {
   Tabs,
   TabsContent,
@@ -17,27 +17,22 @@ import { JiraApiKeySetup } from './JiraApiKeySetup'
 import { JiraOAuthSetup } from './JiraOAuthSetup'
 
 export function ConfigureAuth() {
-  const [credentials, setCredentials] = useStorage('AuthCredentials')
-  const authType = useMemo(() => credentials?.type ?? 'oauth', [credentials])
+  const [credentials] = useStorage('AuthCredentials')
+
+  // Track selected tab locally - initialized from credentials if available
+  const [selectedAuthType, setSelectedAuthType] = useState<AuthType>(
+    credentials?.type ?? 'oauth'
+  )
 
   const [error, setError] = useState<string | null>(null)
   const [connectingMethod, setConnectingMethod] = useState<AuthType | null>(
     null
   )
 
-  const handleSelectAuthType = useCallback(
-    (next: string) => {
-      setError(null)
-      // Update auth type in credentials if they exist, otherwise just track selection
-      if (credentials) {
-        setCredentials({
-          ...credentials,
-          type: next as AuthType
-        })
-      }
-    },
-    [credentials, setCredentials]
-  )
+  const handleSelectAuthType = useCallback((next: string) => {
+    setError(null)
+    setSelectedAuthType(next as AuthType)
+  }, [])
 
   const handleConnect = useMemoizedFn(async () => {
     trackEvent('connect_attempt', { method: 'oauth' })
@@ -88,7 +83,7 @@ export function ConfigureAuth() {
     : undefined
 
   return (
-    <Tabs value={authType} onValueChange={handleSelectAuthType}>
+    <Tabs value={selectedAuthType} onValueChange={handleSelectAuthType}>
       <TabsList className="w-full">
         <TabsTrigger value={'oauth'}>Sign in with Atlassian</TabsTrigger>
         <TabsTrigger value="apiKey">API key</TabsTrigger>
