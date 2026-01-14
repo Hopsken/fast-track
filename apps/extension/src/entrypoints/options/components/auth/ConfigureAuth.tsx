@@ -19,6 +19,8 @@ import { JiraOAuthSetup } from './JiraOAuthSetup'
 export function ConfigureAuth() {
   const [credentials] = useStorage('AuthCredentials')
 
+  console.log({ credentials })
+
   // Track selected tab locally - initialized from credentials if available
   const [selectedAuthType, setSelectedAuthType] = useState<AuthType>(
     credentials?.type ?? 'oauth'
