@@ -12,7 +12,7 @@ export default defineConfig({
     timeout: 15_000
   },
   retries: process.env.CI ? 2 : 0,
-  reporter: 'html',
+  reporter: process.env.CI ? 'github' : 'dot',
   // Run tests serially to avoid browser context conflicts
   workers: 1,
   use: {
