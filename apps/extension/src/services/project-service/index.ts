@@ -36,7 +36,12 @@ const collectSuggestionProjects = (suggestions?: IssueSuggestion) => {
 
   return compact(
     flatMap(
-      [suggestions.inProgress, suggestions.todo, suggestions.related],
+      [
+        suggestions.inProgress,
+        suggestions.todo,
+        suggestions.done,
+        suggestions.recommend
+      ],
       (ticketKeys) =>
         ticketKeys.map(
           (ticketKey) => suggestions.tickets[ticketKey]?.projectKey

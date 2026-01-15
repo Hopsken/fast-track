@@ -11,6 +11,11 @@ import { difference, keyBy, uniqBy } from 'lodash-es'
 
 import { sendMessage } from '@/lib/message'
 import {
+  buildHistoryRecommendKeys,
+  bucketSuggestionTickets,
+  filterSuggestionTickets
+} from '@/lib/tickets/issue-suggestions'
+import {
   IssueDetail,
   JiraMergeRequest,
   JiraPriority,
@@ -25,7 +30,8 @@ export type IssueSuggestion = {
   tickets: Record<string, JiraTicket>
   inProgress: string[]
   todo: string[]
-  related: string[]
+  done: string[]
+  recommend: string[]
 }
 
 /**
@@ -44,48 +50,35 @@ class TicketServiceImpl {
   }
 
   async getIssueSuggestions(): Promise<IssueSuggestion> {
-    const [inProgressTickets, todoTickets, relatedTickets] = await Promise.all([
-      this.getMyInProgressTickets(),
-      this.getMyActiveSprintTodoTickets(),
+    const [tickets, historyTickets] = await Promise.all([
+      this.getMySuggestedTickets(),
       this.getRecentHistoryTickets()
     ])
-
-    const inProgress = inProgressTickets.map((ticket) => ticket.key)
-    const todo = difference(
-      todoTickets.map((ticket) => ticket.key),
-      inProgress
-    )
-    const related = difference(
-      relatedTickets.map((ticket) => ticket.key),
-      inProgress,
-      todo
-    )
+    const filteredTickets = filterSuggestionTickets(tickets)
+    const { inProgress, todo, done } = bucketSuggestionTickets(filteredTickets)
+    const uniqueTodo = difference(todo, inProgress)
+    const uniqueDone = difference(done, inProgress, uniqueTodo)
+    const recommend = buildHistoryRecommendKeys(historyTickets, [
+      ...inProgress,
+      ...uniqueTodo,
+      ...uniqueDone
+    ])
 
     return {
       tickets: keyBy(
-        uniqBy(
-          [...inProgressTickets, ...todoTickets, ...relatedTickets],
-          'key'
-        ),
+        uniqBy([...filteredTickets, ...historyTickets], 'key'),
         'key'
       ),
       inProgress,
-      todo,
-      related
+      todo: uniqueTodo,
+      done: uniqueDone,
+      recommend
     }
   }
 
-  private async getMyInProgressTickets(limit = 20): Promise<JiraTicket[]> {
+  private async getMySuggestedTickets(limit = 50): Promise<JiraTicket[]> {
     return this.withJira(async (jira) => {
-      return jira.issues.getMyUnresolvedIssues(limit)
-    })
-  }
-
-  private async getMyActiveSprintTodoTickets(
-    limit = 20
-  ): Promise<JiraTicket[]> {
-    return this.withJira(async (jira) => {
-      return jira.issues.getMyActiveSprintTodoIssues(limit)
+      return jira.issues.getMySuggestedIssues(limit)
     })
   }
 

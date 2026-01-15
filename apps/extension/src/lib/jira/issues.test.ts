@@ -106,3 +106,28 @@ describe('JiraIssueService searchIssuesByText', () => {
     expect(jql).toContain('issuekey ~ "-123"')
   })
 })
+
+describe('JiraIssueService getMySuggestedIssues', () => {
+  it('should generate assignee + in progress or open sprint JQL', async () => {
+    const mockClient = new JiraClient({} as unknown as JiraApiConfig)
+    const service = new JiraIssueService(mockClient)
+
+    const searchSpy = vi.spyOn(
+      mockClient.issueSearch,
+      'searchForIssuesUsingJqlEnhancedSearchPost'
+    )
+
+    await service.getMySuggestedIssues(25)
+
+    expect(searchSpy).toHaveBeenCalled()
+    const callArgs = searchSpy.mock.calls[0]?.[0]
+    const jql = callArgs?.jql ?? ''
+
+    expect(jql).toContain('assignee = currentUser()')
+    expect(jql).toContain(
+      '(statusCategory = "In Progress" OR sprint in openSprints())'
+    )
+    expect(jql).toContain('ORDER BY updated DESC')
+    expect(callArgs?.maxResults).toBe(25)
+  })
+})
