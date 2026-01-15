@@ -10,11 +10,6 @@ import { useCurrentUser } from '@/stores/useCurrentUser'
 import { JiraTicket, JiraTransition, UserPreferences } from '@/types'
 import { generateBranchName } from '@/utils/jira/issues'
 import { queryKeys } from '@/utils/queryKeys'
-import {
-  invalidateTicketCaches,
-  restoreTicketCaches,
-  updateTicketCaches
-} from '@/utils/ticket-cache'
 import { showToast } from '~/stores/useToastStore'
 import { useUserPreferences } from '~/stores/useUserPreferences'
 import { formatErrorMessage } from '~/utils/formatError'
@@ -23,12 +18,17 @@ export function useMutationTransitionIssue() {
   const queryClient = useQueryClient()
   const [preferences] = useUserPreferences()
   const currentUser = useCurrentUser()
+
   return useMutation({
     mutationFn: async (params: {
       ticket: JiraTicket
       transition: JiraTransition
     }) => {
-      await ticketService.transitionTicket(params.ticket, params.transition)
+      const updated = await ticketService.transitionTicket(
+        params.ticket,
+        params.transition
+      )
+
       const shouldAutoAssign =
         !!currentUser &&
         shouldAutoAssignOnTransition(
@@ -36,6 +36,7 @@ export function useMutationTransitionIssue() {
           params.ticket,
           params.transition
         )
+
       if (shouldAutoAssign && currentUser) {
         try {
           await ticketService.assignTicket(params.ticket.key, currentUser)
@@ -47,15 +48,18 @@ export function useMutationTransitionIssue() {
           })
         }
       }
+
+      // Return updated ticket for normy to normalize
+      return (
+        updated ?? {
+          ...params.ticket,
+          status: params.transition.to,
+          isInProgress:
+            params.transition.to.statusCategory?.key === 'indeterminate'
+        }
+      )
     },
     onMutate: async ({ ticket, transition }) => {
-      await queryClient.cancelQueries({
-        queryKey: queryKeys.tickets.suggestions
-      })
-      await queryClient.cancelQueries({
-        queryKey: queryKeys.tickets.detail(ticket.key)
-      })
-
       const nextStatus = transition.to.name || transition.name || 'Status'
       let message = `${ticket.key} -> ${nextStatus}`
 
@@ -91,16 +95,19 @@ export function useMutationTransitionIssue() {
         message
       })
 
-      const snapshot = updateTicketCaches(queryClient, ticket.key, {
+      // Build optimistic update for normy
+      const optimisticData: Record<string, unknown> = {
+        key: ticket.key,
         status: transition.to,
         isInProgress: transition.to.statusCategory?.key === 'indeterminate',
-        assignee:
-          willAutoAssign && currentUser
-            ? mapCurrentUserToAssignee(currentUser)
-            : ticket.assignee
-      })
+        updated: new Date().toISOString()
+      }
 
-      return { toast, nextStatus, snapshot }
+      if (willAutoAssign && currentUser) {
+        optimisticData.assignee = mapCurrentUserToAssignee(currentUser)
+      }
+
+      return { toast, nextStatus, optimisticData }
     },
     onSuccess: async (_, { ticket }, context) => {
       const nextStatus = context?.nextStatus || 'Status'
@@ -111,13 +118,14 @@ export function useMutationTransitionIssue() {
         title: 'Status updated',
         message
       })
+
+      // Invalidate transitions since they depend on current status
       queryClient.invalidateQueries({
         queryKey: queryKeys.tickets.transitions(ticket)
       })
-      invalidateTicketCaches(queryClient, ticket.key)
     },
     onError: (error, _, context) => {
-      restoreTicketCaches(queryClient, context?.snapshot)
+      // normy automatically handles rollback when optimisticData was provided
       context?.toast.update({
         style: 'failure',
         title: 'Status update failed',
