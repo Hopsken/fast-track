@@ -9,7 +9,7 @@ export function useIssueTransitions(issue: JiraTicket) {
   const queryOptions = usePrefetchOptionsIfApplicable()
   return useQuery({
     ...queryOptions,
-    queryKey: queryKeys.issue.transitions(issue),
+    queryKey: queryKeys.tickets.transitions(issue),
     staleTime: 1000 * 60 * 5,
     queryFn: async () => {
       const result = await jiraService.proxyCall(

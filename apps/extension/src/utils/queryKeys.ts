@@ -8,17 +8,6 @@ export type TicketSearchKey = {
 }
 
 export const queryKeys = {
-  issue: {
-    editMeta: (issue: JiraTicket) => ['issue', issue.key, 'editMeta'],
-    mergeRequests: (issue: JiraTicket) =>
-      ['issue', issue.key, 'mergeRequests'] as const,
-    transitions: (issue: JiraTicket) => [
-      'issue',
-      issue.key,
-      'transitions',
-      issue.status.name
-    ]
-  },
   autoComplete: (url: string, query: string) => ['autoComplete', url, query],
   priorities: ['priorities'],
   projects: {
@@ -35,6 +24,12 @@ export const queryKeys = {
           ...params,
           projects: normalizeProjects(params.projects)
         }
-      ] as const
+      ] as const,
+    editMeta: (ticket: JiraTicket) =>
+      ['tickets', ticket.key, 'editMeta'] as const,
+    mergeRequests: (ticket: JiraTicket) =>
+      ['tickets', ticket.key, 'mergeRequests'] as const,
+    transitions: (ticket: JiraTicket) =>
+      ['tickets', ticket.key, 'transitions', ticket.status.name] as const
   }
 }

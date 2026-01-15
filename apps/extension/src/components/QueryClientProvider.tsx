@@ -1,5 +1,6 @@
 import { browser } from '#imports'
 import { PropsWithChildren } from 'react'
+import { QueryNormalizerProvider } from '@normy/react-query'
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
 import { QueryClient } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
@@ -30,6 +31,7 @@ const asyncStoragePersister = createAsyncStoragePersister({
   }
 })
 
+// eslint-disable-next-line turbo/no-undeclared-env-vars
 const queryClientBuster = `${import.meta.env.MODE}-${browser.runtime.getManifest().version}`
 
 const persistOptions: PersistQueryClientProviderProps['persistOptions'] = {
@@ -38,12 +40,43 @@ const persistOptions: PersistQueryClientProviderProps['persistOptions'] = {
   buster: queryClientBuster
 }
 
-export const QueryClientProvider = ({ children }: PropsWithChildren) => (
-  <PersistQueryClientProvider
-    client={queryClient}
-    persistOptions={persistOptions}>
-    {children}
+/**
+ * Normy normalizer config (GraphQL-style)
+ *
+ * Uses `__typename` + `key` or `id` for normalization keys.
+ * Example: "JiraTicket:PROJ-123"
+ *
+ * This enables automatic cache updates across all queries containing the same entity.
+ */
+const normalizerConfig = {
+  getNormalizationObjectKey: (obj: Record<string, unknown>) => {
+    const typename = obj.__typename as string | undefined
+    const id = obj.id
+    const hasValidId = typeof id === 'string' || typeof id === 'number'
 
-    <ReactQueryDevtools />
-  </PersistQueryClientProvider>
+    // GraphQL-style: __typename + key (for JiraTicket)
+    if (typename && typeof obj.key === 'string') {
+      return `${typename}:${obj.key}`
+    }
+
+    // GraphQL-style: __typename + id (for other entities)
+    if (typename && hasValidId) {
+      return `${typename}:${id}`
+    }
+
+    return undefined
+  }
+}
+
+export const QueryClientProvider = ({ children }: PropsWithChildren) => (
+  <QueryNormalizerProvider
+    queryClient={queryClient}
+    normalizerConfig={normalizerConfig}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={persistOptions}>
+      {children}
+      <ReactQueryDevtools />
+    </PersistQueryClientProvider>
+  </QueryNormalizerProvider>
 )

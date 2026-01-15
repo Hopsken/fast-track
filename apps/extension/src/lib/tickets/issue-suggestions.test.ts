@@ -12,6 +12,7 @@ const makeTicket = (
   key: string,
   statusCategoryKey: string | null
 ): JiraTicket => ({
+  __typename: 'JiraTicket',
   id: key,
   key,
   summary: `Ticket ${key}`,
