@@ -24,7 +24,7 @@ export function useMutationTransitionIssue() {
       ticket: JiraTicket
       transition: JiraTransition
     }) => {
-      const updated = await ticketService.transitionTicket(
+      let updated = await ticketService.transitionTicket(
         params.ticket,
         params.transition
       )
@@ -39,13 +39,21 @@ export function useMutationTransitionIssue() {
 
       if (shouldAutoAssign && currentUser) {
         try {
-          await ticketService.assignTicket(params.ticket.key, currentUser)
+          // Use the result from assignTicket since it has the updated assignee
+          const assigned = await ticketService.assignTicket(
+            params.ticket.key,
+            currentUser
+          )
+          if (assigned) {
+            updated = assigned
+          }
         } catch (error) {
           showToast({
             style: 'failure',
             title: 'Failed to assign ticket',
             message: formatErrorMessage(error)
           })
+          // Continue with transition result even if assign fails
         }
       }
 
