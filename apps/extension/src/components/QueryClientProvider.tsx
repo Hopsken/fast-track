@@ -50,6 +50,8 @@ const persistOptions: PersistQueryClientProviderProps['persistOptions'] = {
 const normalizerConfig = {
   getNormalizationObjectKey: (obj: Record<string, unknown>) => {
     const typename = obj.__typename as string | undefined
+    const id = obj.id
+    const hasValidId = typeof id === 'string' || typeof id === 'number'
 
     // GraphQL-style: __typename + key (for JiraTicket)
     if (typename && typeof obj.key === 'string') {
@@ -57,13 +59,13 @@ const normalizerConfig = {
     }
 
     // GraphQL-style: __typename + id (for other entities)
-    if (typename && typeof obj.id === 'string') {
-      return `${typename}:${obj.id}`
+    if (typename && hasValidId) {
+      return `${typename}:${id}`
     }
 
     // Fallback for objects without __typename but with id
-    if (typeof obj.id === 'string') {
-      return obj.id
+    if (hasValidId) {
+      return String(id)
     }
 
     return undefined
