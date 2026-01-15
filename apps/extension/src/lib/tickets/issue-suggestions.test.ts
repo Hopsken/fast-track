@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { JiraTicket } from '@/types'
 
 import {
-  buildRecommendKeys,
+  buildHistoryRecommendKeys,
   bucketSuggestionTickets,
   filterSuggestionTickets
 } from './issue-suggestions'
@@ -80,6 +80,9 @@ describe('issue suggestion helpers', () => {
 
     const excluded = ['PROJ-1', 'PROJ-2']
 
-    expect(buildRecommendKeys(history, excluded)).toEqual(['PROJ-3', 'PROJ-4'])
+    expect(buildHistoryRecommendKeys(history, excluded)).toEqual([
+      'PROJ-3',
+      'PROJ-4'
+    ])
   })
 })

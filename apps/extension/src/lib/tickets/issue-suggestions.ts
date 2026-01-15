@@ -6,7 +6,11 @@ export type IssueSuggestionBuckets = {
   done: string[]
 }
 
-export const buildRecommendKeys = (
+/**
+ * Builds a list of ticket keys from history that aren't already in the primary buckets.
+ * These are "recommended" because the user recently viewed them.
+ */
+export const buildHistoryRecommendKeys = (
   historyTickets: JiraTicket[],
   excludedKeys: string[]
 ) => {
@@ -18,11 +22,14 @@ export const buildRecommendKeys = (
 
 const statusCategoryKeys = new Set(['indeterminate', 'new', 'done'])
 
+const getStatusCategoryKey = (ticket: JiraTicket): string => {
+  const key = ticket.status.statusCategory?.key
+  return typeof key === 'string' ? key.toLowerCase() : ''
+}
+
 export const filterSuggestionTickets = (tickets: JiraTicket[]) =>
   tickets.filter((ticket) =>
-    statusCategoryKeys.has(
-      ticket.status.statusCategory?.key?.toLowerCase?.() ?? ''
-    )
+    statusCategoryKeys.has(getStatusCategoryKey(ticket))
   )
 
 export const bucketSuggestionTickets = (
@@ -30,7 +37,7 @@ export const bucketSuggestionTickets = (
 ): IssueSuggestionBuckets =>
   tickets.reduce<IssueSuggestionBuckets>(
     (acc, ticket) => {
-      const statusKey = ticket.status.statusCategory?.key?.toLowerCase?.() ?? ''
+      const statusKey = getStatusCategoryKey(ticket)
 
       if (statusKey === 'indeterminate') {
         acc.inProgress.push(ticket.key)

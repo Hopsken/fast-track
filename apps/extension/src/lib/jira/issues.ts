@@ -267,13 +267,33 @@ export class JiraIssueService {
     )
   }
 
+  /**
+   * Fetches suggested issues for the current user.
+   * Tries to include sprint issues but falls back to in-progress only
+   * for Kanban-only projects where openSprints() isn't available.
+   */
   async getMySuggestedIssues(limit = 50): Promise<JiraTicket[]> {
-    const jql = [
+    const jqlWithSprints = [
       'assignee = currentUser()',
       '(statusCategory = "In Progress" OR sprint in openSprints())'
     ].join(' AND ')
 
-    return this.searchIssuesUsingJql(`${jql} ORDER BY updated DESC`, { limit })
+    try {
+      return await this.searchIssuesUsingJql(
+        `${jqlWithSprints} ORDER BY updated DESC`,
+        { limit }
+      )
+    } catch (error) {
+      // Fallback for Kanban-only projects where openSprints() fails
+      log.warn(
+        'getMySuggestedIssues: sprint query failed, falling back to in-progress only',
+        error
+      )
+      return this.searchIssuesUsingJql(
+        'assignee = currentUser() AND statusCategory = "In Progress" ORDER BY updated DESC',
+        { limit }
+      )
+    }
   }
 
   async getMyActiveSprintTodoIssues(limit = 20): Promise<JiraTicket[]> {

@@ -11,7 +11,7 @@ import { difference, keyBy, uniqBy } from 'lodash-es'
 
 import { sendMessage } from '@/lib/message'
 import {
-  buildRecommendKeys,
+  buildHistoryRecommendKeys,
   bucketSuggestionTickets,
   filterSuggestionTickets
 } from '@/lib/tickets/issue-suggestions'
@@ -58,7 +58,7 @@ class TicketServiceImpl {
     const { inProgress, todo, done } = bucketSuggestionTickets(filteredTickets)
     const uniqueTodo = difference(todo, inProgress)
     const uniqueDone = difference(done, inProgress, uniqueTodo)
-    const recommend = buildRecommendKeys(historyTickets, [
+    const recommend = buildHistoryRecommendKeys(historyTickets, [
       ...inProgress,
       ...uniqueTodo,
       ...uniqueDone
