@@ -390,6 +390,7 @@ export class JiraIssueService {
       statusName.includes('in progress') || statusKey === 'indeterminate'
 
     return {
+      __typename: 'JiraTicket',
       id: String(issue.id),
       key: issue.key,
       summary: issue.fields?.summary || '',

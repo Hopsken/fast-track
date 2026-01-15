@@ -10,6 +10,7 @@ const basePreferences: UserPreferences = {
 }
 
 const baseTicket = {
+  __typename: 'JiraTicket',
   id: '1',
   key: 'JIRA-1',
   summary: 'Test',

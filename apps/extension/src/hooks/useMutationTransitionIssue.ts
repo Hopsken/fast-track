@@ -97,6 +97,7 @@ export function useMutationTransitionIssue() {
 
       // Build optimistic update for normy
       const optimisticData: Record<string, unknown> = {
+        __typename: 'JiraTicket',
         key: ticket.key,
         status: transition.to,
         isInProgress: transition.to.statusCategory?.key === 'indeterminate',

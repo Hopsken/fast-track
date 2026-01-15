@@ -46,6 +46,7 @@ export function useMutationAssignIssue() {
         displayName,
         isUnassign,
         optimisticData: {
+          __typename: 'JiraTicket' as const,
           key: ticket.key,
           assignee: assignee ? mapUserToAssignee(assignee) : null,
           updated: new Date().toISOString()
@@ -116,6 +117,7 @@ export function useMutationAssignMyself() {
       return {
         toast,
         optimisticData: {
+          __typename: 'JiraTicket' as const,
           key: ticket.key,
           assignee: assign ? mapCurrentUserToAssignee(myself) : null,
           updated: new Date().toISOString()

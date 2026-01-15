@@ -45,6 +45,7 @@ export interface JiraMergeRequest {
 export type IssueSource = 'history' | 'sprint' | 'sniff' | 'picker' | 'watching'
 
 export interface JiraTicket {
+  __typename: 'JiraTicket'
   id: string
   key: string
   summary: string
