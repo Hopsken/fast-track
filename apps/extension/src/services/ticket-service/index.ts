@@ -104,7 +104,7 @@ class TicketServiceImpl {
     })
   }
 
-  async getTicketDetails(ticketKey: string): Promise<IssueDetail | null> {
+  async getTicketDetails(ticketKey: string): Promise<IssueDetail> {
     return this.withJira((jira) => jira.issues.getIssueDetail(ticketKey))
   }
 
@@ -126,7 +126,7 @@ class TicketServiceImpl {
   async assignTicket(
     ticketKey: string,
     assignee: UserDetails | null
-  ): Promise<JiraTicket | null> {
+  ): Promise<JiraTicket> {
     return this.withJira(async (jira) => {
       this.log.info('assignTicket', ticketKey, assignee?.accountId ?? null)
       await jira.issues.assignIssue(ticketKey, assignee?.accountId ?? null)
@@ -142,7 +142,7 @@ class TicketServiceImpl {
         assignee: UserDetails
       }
     }
-  ): Promise<JiraTicket | null> {
+  ): Promise<JiraTicket> {
     return this.withJira(async (jira) => {
       let refreshed = await jira.issues.transitionIssue(
         ticket.key,
@@ -178,7 +178,7 @@ class TicketServiceImpl {
   async updateTicketPriority(
     ticket: JiraTicket,
     priority: JiraPriority
-  ): Promise<JiraTicket | null> {
+  ): Promise<JiraTicket> {
     const normalizedPriority = mapPriority(priority)
     const { id: priorityId } = normalizedPriority
     if (!priorityId) {

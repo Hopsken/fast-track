@@ -54,21 +54,16 @@ export class JiraIssueService {
   /**
    * Fetches a single issue by key
    */
-  async getIssue(issueKey: string): Promise<JiraTicket | null> {
-    try {
-      log.info(`🎫 JiraAPI: Fetching issue ${issueKey}`)
+  async getIssue(issueKey: string): Promise<JiraTicket> {
+    log.info(`🎫 JiraAPI: Fetching issue ${issueKey}`)
 
-      const issue = await this.client.issues.getIssue({
-        issueIdOrKey: issueKey,
-        fields: issueFields
-      })
+    const issue = await this.client.issues.getIssue({
+      issueIdOrKey: issueKey,
+      fields: issueFields
+    })
 
-      log.info(`✅ JiraAPI: Successfully fetched issue ${issueKey}`)
-      return this.convertToTicket(issue)
-    } catch (error) {
-      log.error(`❌ JiraAPI: Failed to fetch issue ${issueKey}:`, error)
-      return null
-    }
+    log.info(`✅ JiraAPI: Successfully fetched issue ${issueKey}`)
+    return this.convertToTicket(issue)
   }
 
   async assignIssue(issueKey: string, accountId: string | null) {
@@ -96,7 +91,10 @@ export class JiraIssueService {
     )
   }
 
-  async transitionIssue(issueKey: string, transitionId: string) {
+  async transitionIssue(
+    issueKey: string,
+    transitionId: string
+  ): Promise<JiraTicket> {
     await this.client.issues.doTransition({
       issueIdOrKey: issueKey,
       transition: { id: transitionId }
@@ -105,7 +103,10 @@ export class JiraIssueService {
     return this.getIssue(issueKey)
   }
 
-  async updateIssuePriority(issueKey: string, priorityId: string) {
+  async updateIssuePriority(
+    issueKey: string,
+    priorityId: string
+  ): Promise<JiraTicket> {
     await this.client.issues.editIssue({
       issueIdOrKey: issueKey,
       fields: {
@@ -437,36 +438,31 @@ export class JiraIssueService {
   /**
    * Fetches a single issue with full details for detail view
    */
-  async getIssueDetail(issueKey: string): Promise<IssueDetail | null> {
-    try {
-      log.info(`🎫 JiraAPI: Fetching issue detail ${issueKey}`)
+  async getIssueDetail(issueKey: string): Promise<IssueDetail> {
+    log.info(`🎫 JiraAPI: Fetching issue detail ${issueKey}`)
 
-      const issue = await this.client.issues.getIssue({
-        issueIdOrKey: issueKey,
-        fields: [
-          'summary',
-          'description',
-          'status',
-          'priority',
-          'issuetype',
-          'project',
-          'assignee',
-          'reporter',
-          'labels',
-          'components',
-          'parent',
-          'subtasks',
-          'duedate'
-        ],
-        expand: 'renderedFields'
-      })
+    const issue = await this.client.issues.getIssue({
+      issueIdOrKey: issueKey,
+      fields: [
+        'summary',
+        'description',
+        'status',
+        'priority',
+        'issuetype',
+        'project',
+        'assignee',
+        'reporter',
+        'labels',
+        'components',
+        'parent',
+        'subtasks',
+        'duedate'
+      ],
+      expand: 'renderedFields'
+    })
 
-      log.info(`✅ JiraAPI: Successfully fetched issue detail ${issueKey}`)
-      return this.convertToIssueDetail(issue)
-    } catch (error) {
-      log.error(`❌ JiraAPI: Failed to fetch issue detail ${issueKey}:`, error)
-      return null
-    }
+    log.info(`✅ JiraAPI: Successfully fetched issue detail ${issueKey}`)
+    return this.convertToIssueDetail(issue)
   }
 
   async getIssueMergeRequests(issueKey: string): Promise<JiraMergeRequest[]> {
