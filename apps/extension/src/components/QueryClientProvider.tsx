@@ -31,6 +31,7 @@ const asyncStoragePersister = createAsyncStoragePersister({
   }
 })
 
+// eslint-disable-next-line turbo/no-undeclared-env-vars
 const queryClientBuster = `${import.meta.env.MODE}-${browser.runtime.getManifest().version}`
 
 const persistOptions: PersistQueryClientProviderProps['persistOptions'] = {
@@ -61,11 +62,6 @@ const normalizerConfig = {
     // GraphQL-style: __typename + id (for other entities)
     if (typename && hasValidId) {
       return `${typename}:${id}`
-    }
-
-    // Fallback for objects without __typename but with id
-    if (hasValidId) {
-      return String(id)
     }
 
     return undefined

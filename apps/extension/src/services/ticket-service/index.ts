@@ -162,14 +162,48 @@ class TicketServiceImpl {
     })
   }
 
-  async transitionTicket(ticket: JiraTicket, transition: JiraTransition) {
+  async transitionTicket(
+    ticket: JiraTicket,
+    transition: JiraTransition,
+    options?: {
+      autoAssign?: {
+        assignee: UserDetails
+      }
+    }
+  ) {
     return this.updateTicketOptimistically(ticket.key, {
       reason: 'transition',
       perform: async (jira) => {
-        const refreshed = await jira.issues.transitionIssue(
+        let refreshed = await jira.issues.transitionIssue(
           ticket.key,
           transition.id
         )
+
+        // Auto-assign if requested
+        if (options?.autoAssign) {
+          try {
+            const { assignee } = options.autoAssign
+            this.log.info(
+              'transitionTicket: auto-assigning',
+              ticket.key,
+              assignee.accountId
+            )
+            await jira.issues.assignIssue(
+              ticket.key,
+              assignee.accountId ?? null
+            )
+            // Fetch updated ticket with new assignee
+            refreshed = await jira.issues.getIssue(ticket.key)
+          } catch (error) {
+            this.log.error(
+              'transitionTicket: auto-assign failed',
+              ticket.key,
+              error
+            )
+            // Don't throw - transition succeeded, just log the assign failure
+          }
+        }
+
         return refreshed
       }
     })
