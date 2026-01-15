@@ -7,7 +7,7 @@ import { minutes } from '@/utils/time'
 
 export const useIssueMergeRequests = (ticket: JiraTicket) => {
   return useQuery<JiraMergeRequest[]>({
-    queryKey: queryKeys.issue.mergeRequests(ticket),
+    queryKey: queryKeys.tickets.mergeRequests(ticket),
     enabled: !!ticket.key,
     queryFn: async () => {
       if (!ticket.key) return []

@@ -112,7 +112,7 @@ export function useMutationTransitionIssue() {
         message
       })
       queryClient.invalidateQueries({
-        queryKey: queryKeys.issue.transitions(ticket)
+        queryKey: queryKeys.tickets.transitions(ticket)
       })
       invalidateTicketCaches(queryClient, ticket.key)
     },
