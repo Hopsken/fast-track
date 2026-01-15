@@ -9,7 +9,6 @@ import { defineProxyService } from '@webext-core/proxy-service'
 import { UserDetails } from 'jira.js/version3/models/userDetails'
 import { difference, keyBy, uniqBy } from 'lodash-es'
 
-import { sendMessage } from '@/lib/message'
 import {
   buildHistoryRecommendKeys,
   bucketSuggestionTickets,
@@ -40,13 +39,12 @@ export type IssueSuggestion = {
 class TicketServiceImpl {
   private log = getLogger('ticket-service')
 
-  private async getJira(): Promise<JiraAPI | null> {
-    try {
-      return await getJiraApi()
-    } catch (error) {
-      this.log.error('TicketService: failed to initialize Jira client', error)
-      return null
+  private async getJira(): Promise<JiraAPI> {
+    const jira = await getJiraApi()
+    if (!jira) {
+      throw new Error('Jira client not configured')
     }
+    return jira
   }
 
   async getIssueSuggestions(): Promise<IssueSuggestion> {
@@ -107,9 +105,7 @@ class TicketServiceImpl {
   }
 
   async getTicketDetails(ticketKey: string): Promise<IssueDetail | null> {
-    return this.withJira(async (jira) => {
-      return jira.issues.getIssueDetail(ticketKey)
-    })
+    return this.withJira((jira) => jira.issues.getIssueDetail(ticketKey))
   }
 
   async getIssueMergeRequests(issueKey: string): Promise<JiraMergeRequest[]> {
@@ -118,47 +114,23 @@ class TicketServiceImpl {
     })
   }
 
-  async isConfigured() {
-    return (await this.getJira()) != null
+  async isConfigured(): Promise<boolean> {
+    try {
+      await this.getJira()
+      return true
+    } catch {
+      return false
+    }
   }
 
-  private notifyTicketsUpdated(reason: string, tickets?: JiraTicket[]) {
-    sendMessage('ticketsUpdated', {
-      reason,
-      tickets,
-      fetchedAt: new Date().toISOString()
-    })
-  }
-
-  private async updateTicketOptimistically(
+  async assignTicket(
     ticketKey: string,
-    options: {
-      reason: string
-      perform: (jira: JiraAPI) => Promise<JiraTicket | null>
-    }
+    assignee: UserDetails | null
   ): Promise<JiraTicket | null> {
-    const jira = await this.getJira()
-    if (!jira) {
-      throw new Error(
-        'TicketService: updateTicketOptimistically skipped, not configured'
-      )
-    }
-
-    const refreshed = await options.perform(jira)
-    if (refreshed) {
-      this.notifyTicketsUpdated(options.reason)
-    }
-    return refreshed
-  }
-
-  async assignTicket(ticketKey: string, assignee: UserDetails | null) {
-    return this.updateTicketOptimistically(ticketKey, {
-      reason: 'assign',
-      perform: async (jira) => {
-        this.log.info('assignTicket', ticketKey, assignee?.accountId ?? null)
-        await jira.issues.assignIssue(ticketKey, assignee?.accountId ?? null)
-        return jira.issues.getIssue(ticketKey)
-      }
+    return this.withJira(async (jira) => {
+      this.log.info('assignTicket', ticketKey, assignee?.accountId ?? null)
+      await jira.issues.assignIssue(ticketKey, assignee?.accountId ?? null)
+      return jira.issues.getIssue(ticketKey)
     })
   }
 
@@ -170,70 +142,56 @@ class TicketServiceImpl {
         assignee: UserDetails
       }
     }
-  ) {
-    return this.updateTicketOptimistically(ticket.key, {
-      reason: 'transition',
-      perform: async (jira) => {
-        let refreshed = await jira.issues.transitionIssue(
-          ticket.key,
-          transition.id
-        )
+  ): Promise<JiraTicket | null> {
+    return this.withJira(async (jira) => {
+      let refreshed = await jira.issues.transitionIssue(
+        ticket.key,
+        transition.id
+      )
 
-        // Auto-assign if requested
-        if (options?.autoAssign) {
-          try {
-            const { assignee } = options.autoAssign
-            this.log.info(
-              'transitionTicket: auto-assigning',
-              ticket.key,
-              assignee.accountId
-            )
-            await jira.issues.assignIssue(
-              ticket.key,
-              assignee.accountId ?? null
-            )
-            // Fetch updated ticket with new assignee
-            refreshed = await jira.issues.getIssue(ticket.key)
-          } catch (error) {
-            this.log.error(
-              'transitionTicket: auto-assign failed',
-              ticket.key,
-              error
-            )
-            // Don't throw - transition succeeded, just log the assign failure
-          }
+      // Auto-assign if requested
+      if (options?.autoAssign) {
+        try {
+          const { assignee } = options.autoAssign
+          this.log.info(
+            'transitionTicket: auto-assigning',
+            ticket.key,
+            assignee.accountId
+          )
+          await jira.issues.assignIssue(ticket.key, assignee.accountId ?? null)
+          // Fetch updated ticket with new assignee
+          refreshed = await jira.issues.getIssue(ticket.key)
+        } catch (error) {
+          this.log.error(
+            'transitionTicket: auto-assign failed',
+            ticket.key,
+            error
+          )
+          // Don't throw - transition succeeded, just log the assign failure
         }
-
-        return refreshed
       }
+
+      return refreshed
     })
   }
 
-  async updateTicketPriority(ticket: JiraTicket, priority: JiraPriority) {
+  async updateTicketPriority(
+    ticket: JiraTicket,
+    priority: JiraPriority
+  ): Promise<JiraTicket | null> {
     const normalizedPriority = mapPriority(priority)
     const { id: priorityId } = normalizedPriority
     if (!priorityId) {
       throw new Error('updateTicketPriority: priority id is required')
     }
 
-    return this.updateTicketOptimistically(ticket.key, {
-      reason: 'priority',
-      perform: async (jira) => {
-        const refreshed = await jira.issues.updateIssuePriority(
-          ticket.key,
-          priorityId
-        )
-        return refreshed
-      }
-    })
+    return this.withJira((jira) =>
+      jira.issues.updateIssuePriority(ticket.key, priorityId)
+    )
   }
 
-  public async withJira<T>(action: (jira: JiraAPI) => Promise<T>) {
+  private async withJira<T>(action: (jira: JiraAPI) => Promise<T>): Promise<T> {
     const jira = await this.getJira()
-    if (!jira) {
-      throw new Error(`TicketService: withJira skipped, not configured`)
-    }
-
     return action(jira)
   }
 }
