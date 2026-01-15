@@ -16,6 +16,7 @@
 
     "extension#build": {
       "inputs": ["$TURBO_ROOT$/package.json"],
+      "outputs": [".output/**"],
       "env": ["WXT_UMAMI_WEBSITE_ID", "DEV"]
     },
 
