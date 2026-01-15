@@ -49,7 +49,6 @@ export const useTicketSearch = (options: TicketSearchOptions = {}) => {
     }),
     enabled,
     queryFn: async () => searchTickets(debouncedQuery),
-    staleTime: 0,
     gcTime: minutes(5)
   })
 }

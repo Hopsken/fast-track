@@ -8,7 +8,6 @@ import { queryKeys } from '@/utils/queryKeys'
 export function useAutoCompleteQuery<T>(url: string, query: string) {
   return useQuery({
     queryKey: queryKeys.autoComplete(url, query),
-    staleTime: 1000 * 60,
     queryFn: async () => {
       const jiraService = getJiraService()
       const result = await jiraService.sendRequest<T>({

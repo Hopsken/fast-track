@@ -10,7 +10,6 @@ export function useIssueTransitions(issue: JiraTicket) {
   return useQuery({
     ...queryOptions,
     queryKey: queryKeys.tickets.transitions(issue),
-    staleTime: 1000 * 60 * 5,
     queryFn: async () => {
       const result = await jiraService.proxyCall(
         'issues.getIssueTransitions',

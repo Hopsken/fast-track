@@ -13,7 +13,6 @@ export const useIssueMergeRequests = (ticket: JiraTicket) => {
       if (!ticket.key) return []
       return ticketService.getIssueMergeRequests(ticket.key)
     },
-    staleTime: minutes(5),
     gcTime: minutes(30)
   })
 }

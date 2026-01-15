@@ -14,8 +14,8 @@ import { days, minutes } from '@/utils/time'
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: minutes(5),
-      gcTime: days(1)
+      staleTime: 0,
+      gcTime: minutes(5)
     }
   }
 })
