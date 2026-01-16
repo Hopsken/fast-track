@@ -63,6 +63,7 @@ class JiraAPIImpl {
   private v3Client: Version3Client | null = null
   private clientCredentialsSignature: string | null = null
   private refreshTimeoutId: number | null = null
+  private refreshPromise: Promise<void> | null = null
   private issueService: JiraIssueService | null = null
 
   constructor() {
@@ -159,10 +160,51 @@ class JiraAPIImpl {
     log.debug(`Token refresh scheduled in ${Math.round(delay / 1000)}s`)
 
     this.refreshTimeoutId = self.setTimeout(() => {
-      this.refreshTokens(credentials).catch((err) => {
+      this.refreshTokensIfNeeded(credentials).catch((err) => {
         log.error('Proactive token refresh failed', err)
       })
     }, delay)
+  }
+
+  private isTokenExpiring(credentials: AuthCredentials): boolean {
+    if (credentials.type !== 'oauth' || !credentials.oauth) return false
+    const expiresAtMs = new Date(credentials.oauth.expires_at).getTime()
+    return expiresAtMs - TOKEN_EXPIRY_BUFFER_MS <= Date.now()
+  }
+
+  private async refreshTokensIfNeeded(
+    credentials: AuthCredentials
+  ): Promise<void> {
+    if (!this.isTokenExpiring(credentials)) {
+      return
+    }
+
+    if (this.refreshPromise) {
+      await this.refreshPromise
+      return
+    }
+
+    this.refreshPromise = this.refreshTokens(credentials)
+    try {
+      await this.refreshPromise
+    } finally {
+      this.refreshPromise = null
+    }
+  }
+
+  private async shouldPersistRefreshedCredentials(
+    credentials: AuthCredentials
+  ): Promise<boolean> {
+    const stored = await getStorageItem('AuthCredentials').getValue()
+    if (!stored || stored.type !== 'oauth' || !stored.oauth) {
+      return false
+    }
+
+    return (
+      stored.host === credentials.host &&
+      stored.oauth.instance_id === credentials.oauth?.instance_id &&
+      stored.oauth.refresh_token === credentials.oauth?.refresh_token
+    )
   }
 
   private async refreshTokens(credentials: AuthCredentials): Promise<void> {
@@ -178,6 +220,13 @@ class JiraAPIImpl {
         refresh_token: credentials.oauth.refresh_token,
         expires_at: credentials.oauth.expires_at
       })
+
+      const shouldPersist =
+        await this.shouldPersistRefreshedCredentials(credentials)
+      if (!shouldPersist) {
+        log.info('Skipping token persist; credentials changed or cleared')
+        return
+      }
 
       // Update storage - this triggers subscription which updates cached credentials
       await getStorageItem('AuthCredentials').setValue({
@@ -217,6 +266,15 @@ class JiraAPIImpl {
 
     if (!credentials) {
       throw new Error('Jira not configured')
+    }
+
+    if (credentials.type === 'oauth' && credentials.oauth) {
+      await this.refreshTokensIfNeeded(credentials)
+      credentials =
+        this.credentials ?? (await getStorageItem('AuthCredentials').getValue())
+      if (!credentials) {
+        throw new Error('Jira not configured')
+      }
     }
 
     // Return cached client if credentials haven't changed
