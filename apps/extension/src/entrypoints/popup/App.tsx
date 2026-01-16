@@ -1,8 +1,8 @@
-import { useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { Button } from '@internal/ui/components/button'
 import { Command, CommandInput } from '@internal/ui/components/command'
 import { cn } from '@internal/ui/lib/utils'
-import { useMemoizedFn } from 'ahooks'
+import { useMemoizedFn, useMount } from 'ahooks'
 import { ArrowLeft } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
 
@@ -14,6 +14,7 @@ import {
 import { QueryClientProvider } from '@/components/QueryClientProvider'
 import { TicketDetails } from '@/components/tickets'
 import { useAuthConfigurationStatus } from '@/hooks/useAuthConfigurationStatus'
+import { trackEvent } from '@/services/analytics'
 import { UserContextProvider } from '@/stores/useCurrentUser'
 import { useIsCommandLoading } from '@/stores/useLoadingStore'
 import { UserPreferencesProvider } from '@/stores/useUserPreferences'
@@ -80,6 +81,10 @@ function App() {
       enableOnFormTags: true
     }
   )
+
+  useMount(() => {
+    trackEvent('open-popup')
+  })
 
   // Focus input when active page changes
   useLayoutEffect(() => {
