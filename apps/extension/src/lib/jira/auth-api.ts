@@ -12,6 +12,12 @@ type AccessibleResource = {
   avatarUrl: string
 }
 
+/**
+ * Shared refresh promise to prevent concurrent refresh attempts.
+ * Refresh tokens are typically single-use, so concurrent refreshes would fail.
+ */
+let refreshPromise: Promise<JiraOAuthConfig> | null = null
+
 export class AuthApi {
   private async getAccessibleResources(access_token: string) {
     const response = await ky.get<AccessibleResource[]>(
@@ -41,7 +47,26 @@ export class AuthApi {
     }
   }
 
+  /**
+   * Refresh OAuth token with mutex to prevent concurrent refresh attempts.
+   * If a refresh is already in progress, returns the existing promise.
+   */
   async refreshToken(tokens: JiraOAuthConfig): Promise<JiraOAuthConfig> {
+    // Return existing refresh promise if one is in progress
+    if (refreshPromise) {
+      return refreshPromise
+    }
+
+    refreshPromise = this.doRefreshToken(tokens).finally(() => {
+      refreshPromise = null
+    })
+
+    return refreshPromise
+  }
+
+  private async doRefreshToken(
+    tokens: JiraOAuthConfig
+  ): Promise<JiraOAuthConfig> {
     const newTokens = await boostApi
       .post<{
         access_token: string
