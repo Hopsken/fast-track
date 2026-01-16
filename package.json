@@ -11,8 +11,9 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "turbo run dev --filter=extension",
+    "dev": "turbo run dev",
     "build": "turbo run build --filter=extension",
+    "dev:extension": "turbo run dev --filter=extension",
     "dev:website": "turbo run dev --filter=website",
     "build:website": "turbo run build --filter=website",
     "zip": "turbo run zip --filter=extension",

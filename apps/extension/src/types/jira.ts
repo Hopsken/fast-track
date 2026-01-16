@@ -65,10 +65,10 @@ export interface JiraTicket {
 }
 
 export interface IssueDetail extends JiraTicket {
-  description: string
+  description?: string
   reporter?: JiraAssignee
-  labels: string[]
-  components: Array<{ id: string; name: string }>
+  labels?: string[]
+  components?: Array<{ id: string; name: string }>
   parent?: {
     key: string
     summary: string
@@ -85,7 +85,7 @@ export interface IssueDetail extends JiraTicket {
   }>
   dueDate?: string
   // Extra project info not in JiraTicket
-  project: {
+  project?: {
     key: string
     name: string
     avatarUrl?: string

@@ -1,4 +1,5 @@
 import React from 'react'
+import { QueryNormalizerProvider } from '@normy/react-query'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -39,10 +40,14 @@ describe('useTicketDetails', () => {
     )
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryNormalizerProvider queryClient={queryClient}>
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      </QueryNormalizerProvider>
     )
 
-    const { result } = renderHook(() => useTicketDetails(mockDetail), {
+    const { result } = renderHook(() => useTicketDetails(mockDetail.key), {
       wrapper
     })
 

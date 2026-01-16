@@ -155,7 +155,7 @@ class TicketServiceImpl {
   }
 
   async updateTicketPriority(
-    ticket: JiraTicket,
+    ticketKey: string,
     priority: JiraPriority
   ): Promise<JiraTicket> {
     const normalizedPriority = mapPriority(priority)
@@ -164,7 +164,7 @@ class TicketServiceImpl {
       throw new Error('updateTicketPriority: priority id is required')
     }
 
-    return this.jira.issues.updateIssuePriority(ticket.key, priorityId)
+    return this.jira.issues.updateIssuePriority(ticketKey, priorityId)
   }
 }
 

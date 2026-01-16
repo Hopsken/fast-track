@@ -10,12 +10,11 @@ import { Action, ActionLoading, ActionUser } from '@/components/actions'
 import { useAutoCompleteUsers } from '@/hooks/useAutoComplete'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
 import { useMutationAssignIssue } from '@/hooks/useMutationAssignIssue'
-import { JiraTicket } from '@/types'
 import { AssigneeAvatar } from '~/components/ui/jira'
 
-export function TicketAssignMenu({ ticket }: { ticket: JiraTicket }) {
+export function TicketAssignMenu({ ticketKey }: { ticketKey: string }) {
   const { data: editMeta, isLoading: isLoadingEditMeta } =
-    useIssueEditMeta(ticket)
+    useIssueEditMeta(ticketKey)
   const search = useCommandState((state) => state.search)
 
   const assigneeAutoCompleteUrl =
@@ -31,7 +30,7 @@ export function TicketAssignMenu({ ticket }: { ticket: JiraTicket }) {
       value="assignee-none"
       prefix={<AssigneeAvatar assignee={null} />}
       title="No assignee"
-      onSelect={() => assignTicket({ ticket, assignee: null })}
+      onSelect={() => assignTicket({ ticketKey, assignee: null })}
     />
   )
 
@@ -51,7 +50,7 @@ export function TicketAssignMenu({ ticket }: { ticket: JiraTicket }) {
           key={identifier}
           value={`${displayName} ${identifier}`}
           user={user}
-          onSelect={() => assignTicket({ ticket, assignee: user })}
+          onSelect={() => assignTicket({ ticketKey, assignee: user })}
         />
       )
     })

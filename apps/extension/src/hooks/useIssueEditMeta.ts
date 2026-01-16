@@ -6,16 +6,16 @@ import { JiraTicket } from '@/types'
 import { queryKeys } from '@/utils/queryKeys'
 import { minutes } from '@/utils/time'
 
-export function useIssueEditMeta(issue: JiraTicket) {
+export function useIssueEditMeta(ticketKey: string) {
   const queryOptions = usePrefetchOptionsIfApplicable()
   return useQuery({
     ...queryOptions,
-    queryKey: queryKeys.tickets.editMeta(issue),
+    queryKey: queryKeys.tickets.editMeta(ticketKey),
     staleTime: minutes(5),
     queryFn: async () => {
       const result = await jiraService.proxyCall(
         'issues.getIssueEditMetadata',
-        issue
+        ticketKey
       )
 
       return result as {

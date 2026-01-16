@@ -100,6 +100,10 @@ export function useMutationTransitionIssue() {
       return { toast, nextStatus, optimisticData }
     },
     onSuccess: async (_, { ticket }, context) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.tickets.keys(ticket.key)
+      })
+
       const nextStatus = context?.nextStatus || 'Status'
       const message = `${ticket.key} to ${nextStatus}`
 
@@ -107,11 +111,6 @@ export function useMutationTransitionIssue() {
         style: 'success',
         title: 'Status updated',
         message
-      })
-
-      // Invalidate transitions since they depend on current status
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.tickets.transitions(ticket)
       })
     },
     onError: (error, _, context) => {

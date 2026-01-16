@@ -42,7 +42,7 @@ describe('TicketDetails', () => {
 
     render(
       <Command>
-        <TicketDetails ticket={mockTicket} />
+        <TicketDetails ticketKey={mockTicket.key} />
       </Command>
     )
 

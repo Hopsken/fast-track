@@ -548,10 +548,10 @@ export class JiraIssueService {
     }
   }
 
-  public async getIssueEditMetadata(issue: JiraTicket) {
+  public async getIssueEditMetadata(ticketKey: string) {
     const client = await this.getClient()
     return client.issues.getEditIssueMeta({
-      issueIdOrKey: issue.key
+      issueIdOrKey: ticketKey
     })
   }
 }

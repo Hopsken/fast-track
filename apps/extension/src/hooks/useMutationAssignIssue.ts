@@ -1,32 +1,34 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { UserDetails } from 'jira.js/version3/models/userDetails'
 
 import { ticketService } from '@/services'
 import { useCurrentUser } from '@/stores/useCurrentUser'
 import { JiraTicket, JiraUserInfo } from '@/types'
 import { mapUserToAssignee } from '@/utils/jira/issues'
+import { queryKeys } from '@/utils/queryKeys'
 import { showToast } from '~/stores/useToastStore'
 import { formatErrorMessage } from '~/utils/formatError'
 
 export function useMutationAssignIssue() {
   return useMutation({
     mutationFn: async (params: {
-      ticket: JiraTicket
+      ticketKey: string
       assignee: UserDetails | null
     }) => {
       const updated = await ticketService.assignTicket(
-        params.ticket.key,
+        params.ticketKey,
         params.assignee
       )
       // Return updated ticket for normy to normalize
       return (
         updated ?? {
-          ...params.ticket,
+          __typename: 'JiraTicket' as const,
+          key: params.ticketKey,
           assignee: params.assignee ? mapUserToAssignee(params.assignee) : null
         }
       )
     },
-    onMutate: async ({ ticket, assignee }) => {
+    onMutate: async ({ ticketKey, assignee }) => {
       const isUnassign = !assignee
       const displayName =
         assignee?.displayName ||
@@ -37,7 +39,7 @@ export function useMutationAssignIssue() {
       const toast = showToast({
         style: 'loading',
         title: isUnassign ? 'Removing assignment...' : 'Assigning...',
-        message: isUnassign ? ticket.key : `${ticket.key} -> ${displayName}`
+        message: isUnassign ? ticketKey : `${ticketKey} -> ${displayName}`
       })
 
       // Return optimisticData for normy to apply immediately
@@ -47,21 +49,21 @@ export function useMutationAssignIssue() {
         isUnassign,
         optimisticData: {
           __typename: 'JiraTicket' as const,
-          key: ticket.key,
+          key: ticketKey,
           assignee: assignee ? mapUserToAssignee(assignee) : null,
           updated: new Date().toISOString()
         }
       }
     },
-    onSuccess: (_, { ticket }, context) => {
+    onSuccess: (_, { ticketKey }, context) => {
       const displayName = context?.displayName ?? 'No assignee'
       const isUnassign = context?.isUnassign
       context?.toast.update({
         style: 'success',
         title: isUnassign ? 'Unassigned' : 'Assigned',
         message: isUnassign
-          ? `${ticket.key} unassigned`
-          : `${ticket.key} assigned to ${displayName}`
+          ? `${ticketKey} unassigned`
+          : `${ticketKey} assigned to ${displayName}`
       })
     },
     onError: (error, _, context) => {
@@ -78,6 +80,8 @@ export function useMutationAssignIssue() {
 
 export function useMutationAssignMyself() {
   const myself = useCurrentUser()
+  const queryClient = useQueryClient()
+
   const mapCurrentUserToAssignee = (user: JiraUserInfo) =>
     mapUserToAssignee({
       displayName: user.name,
@@ -87,30 +91,31 @@ export function useMutationAssignMyself() {
     } as UserDetails)
 
   return useMutation({
-    mutationFn: async (params: { ticket: JiraTicket; assign: boolean }) => {
+    mutationFn: async (params: { ticketKey: string; assign: boolean }) => {
       if (!myself)
         throw new Error('useMutationAssignMyself: myself is required')
 
       const updated = await ticketService.assignTicket(
-        params.ticket.key,
+        params.ticketKey,
         params.assign ? myself : null
       )
       // Return updated ticket for normy to normalize
       return (
         updated ?? {
-          ...params.ticket,
+          __typename: 'JiraTicket' as const,
+          key: params.ticketKey,
           assignee: params.assign ? mapCurrentUserToAssignee(myself) : null
         }
       )
     },
-    onMutate: async ({ ticket, assign }) => {
+    onMutate: async ({ ticketKey, assign }) => {
       if (!myself)
         throw new Error('useMutationAssignMyself: myself is required')
 
       const toast = showToast({
         style: 'loading',
         title: assign ? 'Assigning to you...' : 'Removing assignment...',
-        message: ticket.key
+        message: ticketKey
       })
 
       // Return optimisticData for normy to apply immediately
@@ -118,17 +123,20 @@ export function useMutationAssignMyself() {
         toast,
         optimisticData: {
           __typename: 'JiraTicket' as const,
-          key: ticket.key,
+          key: ticketKey,
           assignee: assign ? mapCurrentUserToAssignee(myself) : null,
           updated: new Date().toISOString()
         }
       }
     },
-    onSuccess: (_, { ticket, assign }, context) => {
+    onSuccess: (_, { ticketKey, assign }, context) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.tickets.keys(ticketKey)
+      })
       context?.toast.update({
         style: 'success',
         title: assign ? 'Assigned to you' : 'Unassigned',
-        message: ticket.key
+        message: ticketKey
       })
     },
     onError: (error, _, context) => {

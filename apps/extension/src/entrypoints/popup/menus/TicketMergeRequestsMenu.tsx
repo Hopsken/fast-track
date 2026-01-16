@@ -11,7 +11,7 @@ import { JiraMergeRequest, JiraTicket } from '@/types'
 import { openInNewTab } from '@/utils/extension'
 
 type MergeRequestState = {
-  ticket: JiraTicket
+  ticketKey: string
 }
 
 export const getProviderIcon = (provider: JiraMergeRequest['provider']) => {
@@ -28,12 +28,12 @@ export const getProviderOpenTitle = (
   return 'Merge request'
 }
 
-export function TicketMergeRequestsMenu({ ticket }: MergeRequestState) {
-  const { data: mergeRequests, isLoading } = useIssueMergeRequests(ticket)
+export function TicketMergeRequestsMenu({ ticketKey }: MergeRequestState) {
+  const { data: mergeRequests, isLoading } = useIssueMergeRequests(ticketKey)
 
   return (
     <CommandList>
-      <CommandGroup heading={`${ticket.key} merge requests`}>
+      <CommandGroup heading={`${ticketKey} merge requests`}>
         {mergeRequests?.map((mergeRequest) => (
           <Action
             key={mergeRequest.id}

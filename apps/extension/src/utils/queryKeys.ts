@@ -15,7 +15,8 @@ export const queryKeys = {
   },
   tickets: {
     suggestions: ['tickets', 'suggestions'] as const,
-    detail: (issueKey: string) => ['tickets', 'detail', issueKey] as const,
+    keys: (ticketKey: string) => ['tickets', ticketKey] as const,
+    detail: (ticketKey: string) => ['tickets', ticketKey, 'detail'] as const,
     search: (params: TicketSearchKey) =>
       [
         'tickets',
@@ -25,10 +26,10 @@ export const queryKeys = {
           projects: normalizeProjects(params.projects)
         }
       ] as const,
-    editMeta: (ticket: JiraTicket) =>
-      ['tickets', ticket.key, 'editMeta'] as const,
-    mergeRequests: (ticket: JiraTicket) =>
-      ['tickets', ticket.key, 'mergeRequests'] as const,
+    editMeta: (ticketKey: string) =>
+      ['tickets', ticketKey, 'editMeta'] as const,
+    mergeRequests: (ticketKey: string) =>
+      ['tickets', ticketKey, 'mergeRequests'] as const,
     transitions: (ticket: JiraTicket) =>
       ['tickets', ticket.key, 'transitions', ticket.status.name] as const
   }

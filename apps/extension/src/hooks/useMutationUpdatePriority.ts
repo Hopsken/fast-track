@@ -1,28 +1,29 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { ticketService } from '@/services'
-import { JiraPriority, JiraTicket } from '@/types'
+import { JiraPriority } from '@/types'
+import { queryKeys } from '@/utils/queryKeys'
 import { showToast } from '~/stores/useToastStore'
 import { formatErrorMessage } from '~/utils/formatError'
 
 export function useMutationUpdatePriority() {
+  const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: async (params: {
-      ticket: JiraTicket
+      ticketKey: string
       priority: JiraPriority
     }) => {
-      const updated = await ticketService.updateTicketPriority(
-        params.ticket,
+      return ticketService.updateTicketPriority(
+        params.ticketKey,
         params.priority
       )
-      // Return updated ticket for normy to normalize
-      return updated ?? { ...params.ticket, priority: params.priority }
     },
-    onMutate: async ({ ticket, priority }) => {
+    onMutate: async ({ ticketKey, priority }) => {
       const toast = showToast({
         style: 'loading',
         title: 'Updating priority...',
-        message: `${ticket.key} -> ${priority.name}`
+        message: `${ticketKey} -> ${priority.name}`
       })
 
       // Return optimisticData for normy to apply immediately
@@ -31,18 +32,22 @@ export function useMutationUpdatePriority() {
         priorityName: priority.name,
         optimisticData: {
           __typename: 'JiraTicket' as const,
-          key: ticket.key,
+          key: ticketKey,
           priority,
           updated: new Date().toISOString()
         }
       }
     },
-    onSuccess: (_, { ticket }, context) => {
+    onSuccess: (_, { ticketKey }, context) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.tickets.keys(ticketKey)
+      })
+
       const priorityName = context?.priorityName ?? 'priority'
       context?.toast.update({
         style: 'success',
         title: 'Priority updated',
-        message: `${ticket.key} set to ${priorityName}`
+        message: `${ticketKey} set to ${priorityName}`
       })
     },
     onError: (error, _, context) => {

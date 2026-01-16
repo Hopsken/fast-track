@@ -121,27 +121,27 @@ function App() {
         </CommandRoute>
 
         <CommandRoute path="/actions">
-          {(ticket) => <TicketActionsMenu ticket={ticket} />}
+          {(ticket) => <TicketActionsMenu ticketKey={ticket.key} />}
         </CommandRoute>
 
         <CommandRoute path="/ticket/assign">
-          {(ticket) => <TicketAssignMenu ticket={ticket} />}
+          {(ticket) => <TicketAssignMenu ticketKey={ticket.key} />}
         </CommandRoute>
 
         <CommandRoute path="/ticket/merge-requests">
-          {(ticket) => <TicketMergeRequestsMenu ticket={ticket} />}
+          {(ticket) => <TicketMergeRequestsMenu ticketKey={ticket.key} />}
         </CommandRoute>
 
         <CommandRoute path="/ticket/status">
-          {(ticket) => <TicketStatusMenu ticket={ticket} />}
+          {(ticket) => <TicketStatusMenu ticketKey={ticket.key} />}
         </CommandRoute>
 
         <CommandRoute path="/ticket/priority">
-          {(ticket) => <TicketPriorityMenu ticket={ticket} />}
+          {(ticket) => <TicketPriorityMenu ticketKey={ticket.key} />}
         </CommandRoute>
 
         <CommandRoute path="/ticket/details">
-          {(ticket) => <TicketDetails ticket={ticket} />}
+          {(ticket) => <TicketDetails ticketKey={ticket.key} />}
         </CommandRoute>
 
         <Footer />

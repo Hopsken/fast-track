@@ -8,10 +8,9 @@ import {
 import { Action, ActionLoading } from '@/components/actions'
 import { useIssuePriorities } from '@/hooks/useIssuePriorities'
 import { useMutationUpdatePriority } from '@/hooks/useMutationUpdatePriority'
-import { JiraTicket } from '@/types'
 import { PriorityIcon } from '~/components/ui/jira'
 
-export function TicketPriorityMenu({ ticket }: { ticket: JiraTicket }) {
+export function TicketPriorityMenu({ ticketKey }: { ticketKey: string }) {
   const { data: priorities, isLoading } = useIssuePriorities()
   const { mutate: updatePriority } = useMutationUpdatePriority()
 
@@ -24,7 +23,7 @@ export function TicketPriorityMenu({ ticket }: { ticket: JiraTicket }) {
         value={priority.name || priority.id || 'priority'}
         prefix={<PriorityIcon priority={priority} />}
         title={priority.name}
-        onSelect={() => updatePriority({ ticket, priority })}
+        onSelect={() => updatePriority({ ticketKey, priority })}
       />
     ))
   }

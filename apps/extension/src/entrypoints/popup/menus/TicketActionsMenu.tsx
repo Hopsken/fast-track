@@ -38,7 +38,7 @@ import { useMutationAssignMyself } from '@/hooks/useMutationAssignIssue'
 import { useTicketDetails } from '@/hooks/useTicketDetails'
 import { useCurrentUser } from '@/stores/useCurrentUser'
 import { useUserPreferences } from '@/stores/useUserPreferences'
-import { JiraTicket } from '@/types'
+import { IssueDetail, JiraTicket } from '@/types'
 import { generateBranchName, getIssueTitleLink } from '@/utils/jira/issues'
 import { openJiraIssue } from '@/utils/open-jira-issue'
 
@@ -48,14 +48,20 @@ import {
 } from './TicketMergeRequestsMenu'
 
 export const TicketActionsMenu = memo(function TicketActionsMenu({
-  ticket: initialTicket
+  ticketKey
 }: {
-  ticket: JiraTicket
+  ticketKey: string
 }) {
-  // prefetch ticket details
-  const { data: ticketDetails } = useTicketDetails(initialTicket)
-  const ticket = ticketDetails || initialTicket
+  const { data: ticket } = useTicketDetails(ticketKey)
 
+  if (!ticket) {
+    return null
+  }
+
+  return <TicketActionsMenuInner ticket={ticket} />
+})
+
+const TicketActionsMenuInner = ({ ticket }: { ticket: IssueDetail }) => {
   const isOptionKeyPressed = useIsOptionKeyPressed()
   const [preferences] = useUserPreferences()
 
@@ -202,7 +208,7 @@ export const TicketActionsMenu = memo(function TicketActionsMenu({
       </PrefetchProvider>
     </CommandList>
   )
-})
+}
 
 function AssignOrUnassignMySelf({ ticket }: { ticket: JiraTicket }) {
   const userInfo = useCurrentUser()
@@ -215,7 +221,7 @@ function AssignOrUnassignMySelf({ ticket }: { ticket: JiraTicket }) {
       value="unassign-myself"
       prefix={<AssigneeAvatar size="1rem" assignee={ticket.assignee} />}
       title="Unassigned from me"
-      onSelect={() => assignMyself({ ticket, assign: false })}
+      onSelect={() => assignMyself({ ticketKey: ticket.key, assign: false })}
       shortcut={{
         macOS: { modifiers: ['cmd', 'shift'], key: 'u' },
         Windows: { modifiers: ['alt', 'shift'], key: 'u' }
@@ -226,7 +232,7 @@ function AssignOrUnassignMySelf({ ticket }: { ticket: JiraTicket }) {
       value="assign-myself"
       icon={UserRoundPlus}
       title="Assign to me"
-      onSelect={() => assignMyself({ ticket, assign: true })}
+      onSelect={() => assignMyself({ ticketKey: ticket.key, assign: true })}
       shortcut={{
         macOS: { modifiers: ['cmd', 'shift'], key: 'm' },
         Windows: { modifiers: ['alt', 'shift'], key: 'm' }
@@ -237,14 +243,14 @@ function AssignOrUnassignMySelf({ ticket }: { ticket: JiraTicket }) {
 
 function PrefetchActions({ ticket }: { ticket: JiraTicket }) {
   useIssuePriorities()
-  useIssueEditMeta(ticket)
+  useIssueEditMeta(ticket.key)
   useIssueTransitions(ticket)
 
   return null
 }
 
 function MergeRequestsActions({ ticket }: { ticket: JiraTicket }) {
-  const { data: mergeRequests } = useIssueMergeRequests(ticket)
+  const { data: mergeRequests } = useIssueMergeRequests(ticket.key)
   const [newestMergeRequest] = mergeRequests || []
   const hasMultipleMergeRequests = (mergeRequests?.length ?? 0) > 1
 

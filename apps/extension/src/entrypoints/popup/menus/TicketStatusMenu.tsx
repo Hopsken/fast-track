@@ -8,9 +8,16 @@ import {
 import { Action, ActionLoading } from '@/components/actions'
 import { useIssueTransitions } from '@/hooks/useIssueTransitions'
 import { useMutationTransitionIssue } from '@/hooks/useMutationTransitionIssue'
+import { useTicketDetails } from '@/hooks/useTicketDetails'
 import { JiraTicket, JiraTransition } from '@/types'
 
-export function TicketStatusMenu({ ticket }: { ticket: JiraTicket }) {
+export function TicketStatusMenu({ ticketKey }: { ticketKey: string }) {
+  const { data: ticket } = useTicketDetails(ticketKey)
+  if (!ticket) return null
+  return <TicketStatusMenuInner ticket={ticket} />
+}
+
+function TicketStatusMenuInner({ ticket }: { ticket: JiraTicket }) {
   const { data: transitions, isLoading } = useIssueTransitions(ticket)
   const { mutate: transitionIssue } = useMutationTransitionIssue()
 
