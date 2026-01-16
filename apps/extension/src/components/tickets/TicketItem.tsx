@@ -28,7 +28,6 @@ interface TicketItemProps {
 
 export function TicketItem({
   ticket,
-  source,
   searchQuery = '',
   showAvatar = true,
   showPriority = true,
@@ -40,8 +39,6 @@ export function TicketItem({
     navigate.push('/actions', ticket)
 
     projectService.recordProjectClick(ticket.projectKey)
-
-    trackEvent('select-ticket', { source })
   })
 
   function renderPriority() {

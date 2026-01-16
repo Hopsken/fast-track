@@ -99,6 +99,18 @@ class TicketServiceImpl {
     return this.jira.issues.getIssueMergeRequests(issueKey)
   }
 
+  async getIssueEditMetadata(ticketKey: string) {
+    return this.jira.issues.getIssueEditMetadata(ticketKey)
+  }
+
+  async getIssueTransitions(ticket: JiraTicket) {
+    return this.jira.issues.getIssueTransitions(ticket)
+  }
+
+  async getPriorities() {
+    return this.jira.issues.getPriorities()
+  }
+
   async isConfigured(): Promise<boolean> {
     return this.jira.isConfigured()
   }

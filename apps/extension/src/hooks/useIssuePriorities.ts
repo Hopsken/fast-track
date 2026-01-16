@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { usePrefetchOptionsIfApplicable } from '@/components/PrefetchQuery'
-import { jiraService } from '@/services'
+import { ticketService } from '@/services'
 import { isNonNullable } from '@/utils/assert'
 import { queryKeys } from '@/utils/queryKeys'
 
@@ -12,10 +12,8 @@ export function useIssuePriorities() {
     queryKey: queryKeys.priorities,
     staleTime: Infinity,
     queryFn: async () => {
-      const result = await jiraService.proxyCall('issues.getPriorities')
-      const priorities = Array.isArray(result) ? result : []
-
-      return priorities.filter(isNonNullable)
+      const result = await ticketService.getPriorities()
+      return result.filter(isNonNullable)
     }
   })
 }
