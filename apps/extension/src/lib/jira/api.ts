@@ -240,8 +240,9 @@ class JiraAPIImpl {
       })
       log.info('Tokens refreshed and persisted')
     } catch (error) {
+      // TODO: Handle specific errors (e.g., network, invalid credentials)
       log.error('Token refresh failed, clearing credentials', error)
-      await getStorageItem('AuthCredentials').removeValue()
+      // await getStorageItem('AuthCredentials').removeValue()
     }
   }
 
