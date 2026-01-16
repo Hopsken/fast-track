@@ -270,8 +270,7 @@ class JiraAPIImpl {
 
     if (credentials.type === 'oauth' && credentials.oauth) {
       await this.refreshTokensIfNeeded(credentials)
-      credentials =
-        this.credentials ?? (await getStorageItem('AuthCredentials').getValue())
+      credentials = await getStorageItem('AuthCredentials').getValue()
       if (!credentials) {
         throw new Error('Jira not configured')
       }
