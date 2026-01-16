@@ -3,6 +3,7 @@
  * Handles issue fetching, bulk operations, and ticket conversion
  */
 
+import { Version3Client } from 'jira.js'
 import type { Issue } from 'jira.js/version3/models/issue'
 import type { IssuePickerSuggestions } from 'jira.js/version3/models/issuePickerSuggestions'
 import { chunk, compact, flatMap, map } from 'lodash-es'
@@ -23,8 +24,6 @@ import { getLogger } from '~/utils/logger'
 
 import { toISODateString } from '../date'
 
-import type { JiraClient } from './client'
-
 const issueFields = [
   'id',
   'key',
@@ -43,13 +42,18 @@ const issueFields = [
 const normalizeJqlValue = (value: string) => value.replace(/["\\]/g, '')
 const log = getLogger('jira-issues')
 
+type ClientGetter = () => Promise<Version3Client>
+type WebBaseUrlGetter = () => string
+
 /**
- * Service for issue-related operations with functional programming patterns
+ * Service for issue-related operations.
+ * Uses getter functions to lazily obtain the client, enabling transparent auth refresh.
  */
 export class JiraIssueService {
-  private rateLimitDelay = 100 // ms between requests
-
-  constructor(private client: JiraClient) {}
+  constructor(
+    private getClient: ClientGetter,
+    private getWebBaseUrl: WebBaseUrlGetter
+  ) {}
 
   /**
    * Fetches a single issue by key
@@ -57,7 +61,8 @@ export class JiraIssueService {
   async getIssue(issueKey: string): Promise<JiraTicket> {
     log.info(`🎫 JiraAPI: Fetching issue ${issueKey}`)
 
-    const issue = await this.client.issues.getIssue({
+    const client = await this.getClient()
+    const issue = await client.issues.getIssue({
       issueIdOrKey: issueKey,
       fields: issueFields
     })
@@ -67,21 +72,24 @@ export class JiraIssueService {
   }
 
   async assignIssue(issueKey: string, accountId: string | null) {
-    await this.client.issues.assignIssue({
+    const client = await this.getClient()
+    await client.issues.assignIssue({
       issueIdOrKey: issueKey,
       accountId
     })
   }
 
   async getPriorities(): Promise<JiraPriority[]> {
-    const priorities = await this.client.issuePriorities.getPriorities()
+    const client = await this.getClient()
+    const priorities = await client.issuePriorities.getPriorities()
     return (priorities || [])
       .map((priority) => mapPriority(priority))
       .filter((priority): priority is JiraPriority => !!priority.id)
   }
 
   async getIssueTransitions(issue: JiraTicket): Promise<JiraTransition[]> {
-    const transitions = await this.client.issues.getTransitions({
+    const client = await this.getClient()
+    const transitions = await client.issues.getTransitions({
       issueIdOrKey: issue.key,
       sortByOpsBarAndStatus: true
     })
@@ -95,7 +103,8 @@ export class JiraIssueService {
     issueKey: string,
     transitionId: string
   ): Promise<JiraTicket> {
-    await this.client.issues.doTransition({
+    const client = await this.getClient()
+    await client.issues.doTransition({
       issueIdOrKey: issueKey,
       transition: { id: transitionId }
     })
@@ -107,7 +116,8 @@ export class JiraIssueService {
     issueKey: string,
     priorityId: string
   ): Promise<JiraTicket> {
-    await this.client.issues.editIssue({
+    const client = await this.getClient()
+    await client.issues.editIssue({
       issueIdOrKey: issueKey,
       fields: {
         priority: { id: priorityId }
@@ -127,9 +137,10 @@ export class JiraIssueService {
         hasQuery: !!query
       })
 
+      const client = await this.getClient()
       // Use jira.js Issue Search API for Issue Picker
       const response: IssuePickerSuggestions =
-        await this.client.issueSearch.getIssuePickerResource(
+        await client.issueSearch.getIssuePickerResource(
           query && query.trim() ? { query } : {}
         )
 
@@ -235,8 +246,9 @@ export class JiraIssueService {
     }
   ): Promise<JiraTicket[]> {
     const { source, limit = 30 } = options ?? {}
+    const client = await this.getClient()
     const response =
-      await this.client.issueSearch.searchForIssuesUsingJqlEnhancedSearchPost({
+      await client.issueSearch.searchForIssuesUsingJqlEnhancedSearchPost({
         jql,
         fields: issueFields,
         maxResults: limit
@@ -343,8 +355,9 @@ export class JiraIssueService {
    */
   private async processBulkBatch(batch: string[]): Promise<JiraTicket[]> {
     try {
+      const client = await this.getClient()
       // Use bulk fetch API to get multiple issues at once
-      const searchResult = await this.client.issues.bulkFetchIssues({
+      const searchResult = await client.issues.bulkFetchIssues({
         issueIdsOrKeys: batch,
         fields: issueFields
       })
@@ -379,7 +392,7 @@ export class JiraIssueService {
    * Converts a jira.js Issue to internal ticket format
    */
   private convertToTicket(issue: Issue, source?: IssueSource): JiraTicket {
-    const browseBaseUrl = this.client.getWebBaseUrl()
+    const browseBaseUrl = this.getWebBaseUrl()
     const jiraWebUrl = browseBaseUrl
       ? `${browseBaseUrl}/browse/${issue.key}`
       : (issue.self ?? '')
@@ -441,7 +454,8 @@ export class JiraIssueService {
   async getIssueDetail(issueKey: string): Promise<IssueDetail> {
     log.info(`🎫 JiraAPI: Fetching issue detail ${issueKey}`)
 
-    const issue = await this.client.issues.getIssue({
+    const client = await this.getClient()
+    const issue = await client.issues.getIssue({
       issueIdOrKey: issueKey,
       fields: [
         'summary',
@@ -467,7 +481,8 @@ export class JiraIssueService {
 
   async getIssueMergeRequests(issueKey: string): Promise<JiraMergeRequest[]> {
     try {
-      const links = await this.client.issueRemoteLinks.getRemoteIssueLinks({
+      const client = await this.getClient()
+      const links = await client.issueRemoteLinks.getRemoteIssueLinks({
         issueIdOrKey: issueKey
       })
 
@@ -533,23 +548,10 @@ export class JiraIssueService {
     }
   }
 
-  public getIssueEditMetadata(issue: JiraTicket) {
-    return this.client.issues.getEditIssueMeta({
+  public async getIssueEditMetadata(issue: JiraTicket) {
+    const client = await this.getClient()
+    return client.issues.getEditIssueMeta({
       issueIdOrKey: issue.key
     })
-  }
-
-  /**
-   * Updates the rate limit delay
-   */
-  setRateLimitDelay(delay: number): void {
-    this.rateLimitDelay = Math.max(0, delay)
-  }
-
-  /**
-   * Gets the current rate limit delay
-   */
-  getRateLimitDelay(): number {
-    return this.rateLimitDelay
   }
 }

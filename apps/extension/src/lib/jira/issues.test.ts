@@ -1,26 +1,25 @@
+import { Version3Client } from 'jira.js'
 import { describe, it, expect, vi } from 'vitest'
 
-import { JiraClient } from './client'
 import { JiraIssueService } from './issues'
-import { JiraApiConfig } from './types'
 
-// Mock JiraClient and its dependencies
-vi.mock('./client', () => {
+// Create a mock client factory
+function createMockClient() {
   return {
-    JiraClient: vi.fn().mockImplementation(() => ({
-      issueSearch: {
-        searchForIssuesUsingJqlEnhancedSearchPost: vi
-          .fn()
-          .mockResolvedValue({ issues: [] })
-      }
-    }))
-  }
-})
+    issueSearch: {
+      searchForIssuesUsingJqlEnhancedSearchPost: vi
+        .fn()
+        .mockResolvedValue({ issues: [] })
+    }
+  } as unknown as Version3Client
+}
 
 describe('JiraIssueService searchIssuesByText', () => {
   it('should generate project-scoped numeric search OR project-scoped summary search', async () => {
-    const mockClient = new JiraClient({} as unknown as JiraApiConfig)
-    const service = new JiraIssueService(mockClient)
+    const mockClient = createMockClient()
+    const getClient = vi.fn().mockResolvedValue(mockClient)
+    const getWebBaseUrl = vi.fn().mockReturnValue('')
+    const service = new JiraIssueService(getClient, getWebBaseUrl)
 
     const searchSpy = vi.spyOn(
       mockClient.issueSearch,
@@ -40,8 +39,10 @@ describe('JiraIssueService searchIssuesByText', () => {
   })
 
   it('should generate global exact key search', async () => {
-    const mockClient = new JiraClient({} as unknown as JiraApiConfig)
-    const service = new JiraIssueService(mockClient)
+    const mockClient = createMockClient()
+    const getClient = vi.fn().mockResolvedValue(mockClient)
+    const getWebBaseUrl = vi.fn().mockReturnValue('')
+    const service = new JiraIssueService(getClient, getWebBaseUrl)
 
     const searchSpy = vi.spyOn(
       mockClient.issueSearch,
@@ -62,8 +63,10 @@ describe('JiraIssueService searchIssuesByText', () => {
   })
 
   it('should handle mixed tokens', async () => {
-    const mockClient = new JiraClient({} as unknown as JiraApiConfig)
-    const service = new JiraIssueService(mockClient)
+    const mockClient = createMockClient()
+    const getClient = vi.fn().mockResolvedValue(mockClient)
+    const getWebBaseUrl = vi.fn().mockReturnValue('')
+    const service = new JiraIssueService(getClient, getWebBaseUrl)
 
     const searchSpy = vi.spyOn(
       mockClient.issueSearch,
@@ -87,8 +90,10 @@ describe('JiraIssueService searchIssuesByText', () => {
   })
 
   it('should handle search without project keys', async () => {
-    const mockClient = new JiraClient({} as unknown as JiraApiConfig)
-    const service = new JiraIssueService(mockClient)
+    const mockClient = createMockClient()
+    const getClient = vi.fn().mockResolvedValue(mockClient)
+    const getWebBaseUrl = vi.fn().mockReturnValue('')
+    const service = new JiraIssueService(getClient, getWebBaseUrl)
 
     const searchSpy = vi.spyOn(
       mockClient.issueSearch,
@@ -109,8 +114,10 @@ describe('JiraIssueService searchIssuesByText', () => {
 
 describe('JiraIssueService getMySuggestedIssues', () => {
   it('should generate assignee + in progress or open sprint JQL', async () => {
-    const mockClient = new JiraClient({} as unknown as JiraApiConfig)
-    const service = new JiraIssueService(mockClient)
+    const mockClient = createMockClient()
+    const getClient = vi.fn().mockResolvedValue(mockClient)
+    const getWebBaseUrl = vi.fn().mockReturnValue('')
+    const service = new JiraIssueService(getClient, getWebBaseUrl)
 
     const searchSpy = vi.spyOn(
       mockClient.issueSearch,

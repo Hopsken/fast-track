@@ -31,6 +31,8 @@ type MethodReturn<T, P extends string> =
   PathValue<T, P> extends (...args: any[]) => infer R ? Awaited<R> : never
 
 class JiraServiceImpl {
+  private jira = getJiraApi()
+
   /**
    * Call any Jira API method by path, e.g.:
    * proxyCall('issues.getIssueEditMetadata', issue)
@@ -41,45 +43,29 @@ class JiraServiceImpl {
     methodPath: P,
     ...args: MethodArgs<JiraAPI, P>
   ): Promise<MethodReturn<JiraAPI, P> | null> {
-    return this.withJira(async (jira) => {
-      const parts = methodPath.split('.').filter(Boolean)
-      if (parts.length === 0) {
-        throw new Error('JiraService: methodPath is required')
-      }
+    const parts = methodPath.split('.').filter(Boolean)
+    if (parts.length === 0) {
+      throw new Error('JiraService: methodPath is required')
+    }
 
-      const methodName = parts.pop() as string
-      const context = parts.reduce<any>(
-        (target, key) => target?.[key],
-        jira as any
+    const methodName = parts.pop() as string
+    const context = parts.reduce<any>(
+      (target, key) => target?.[key],
+      this.jira as any
+    )
+
+    const method = context?.[methodName]
+    if (typeof method !== 'function') {
+      throw new Error(
+        `JiraService: ${methodPath} is not a callable Jira API method`
       )
+    }
 
-      const method = context?.[methodName]
-      if (typeof method !== 'function') {
-        throw new Error(
-          `JiraService: ${methodPath} is not a callable Jira API method`
-        )
-      }
-
-      return method.apply(context, args)
-    }, methodPath)
+    return method.apply(context, args)
   }
 
   public async sendRequest<T>(config: RequestConfig): Promise<T> {
-    return this.withJira(async (jira) => {
-      return jira.request<T>(config)
-    }, 'sendRequest')
-  }
-
-  async withJira<T>(
-    action: (jira: JiraAPI) => Promise<T>,
-    context: string
-  ): Promise<T> {
-    const jira = await getJiraApi()
-    if (!jira) {
-      throw new Error(`JiraService: ${context} skipped, not configured`)
-    }
-
-    return action(jira)
+    return this.jira.request<T>(config)
   }
 }
 

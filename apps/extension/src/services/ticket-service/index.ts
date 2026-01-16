@@ -22,7 +22,7 @@ import {
   JiraTransition
 } from '@/types'
 import { mapPriority } from '@/utils/jira/issues'
-import { getJiraApi, JiraAPI } from '~/lib/jira'
+import { getJiraApi } from '~/lib/jira'
 import { getLogger } from '~/utils/logger'
 
 export type IssueSuggestion = {
@@ -38,14 +38,7 @@ export type IssueSuggestion = {
  */
 class TicketServiceImpl {
   private log = getLogger('ticket-service')
-
-  private async getJira(): Promise<JiraAPI> {
-    const jira = await getJiraApi()
-    if (!jira) {
-      throw new Error('Jira client not configured')
-    }
-    return jira
-  }
+  private jira = getJiraApi()
 
   async getIssueSuggestions(): Promise<IssueSuggestion> {
     const [tickets, historyTickets] = await Promise.all([
@@ -75,15 +68,11 @@ class TicketServiceImpl {
   }
 
   private async getMySuggestedTickets(limit = 50): Promise<JiraTicket[]> {
-    return this.withJira(async (jira) => {
-      return jira.issues.getMySuggestedIssues(limit)
-    })
+    return this.jira.issues.getMySuggestedIssues(limit)
   }
 
   private async getRecentHistoryTickets(limit = 7): Promise<JiraTicket[]> {
-    return this.withJira(async (jira) => {
-      return jira.issues.getRecentHistoryIssues(limit)
-    })
+    return this.jira.issues.getRecentHistoryIssues(limit)
   }
 
   async searchTickets(
@@ -95,43 +84,32 @@ class TicketServiceImpl {
       return []
     }
 
-    return this.withJira(async (jira) => {
-      const results = await jira.issues.searchIssuesByText(
-        normalizedQuery,
-        options
-      )
-      return uniqBy(results, 'key')
-    })
+    const results = await this.jira.issues.searchIssuesByText(
+      normalizedQuery,
+      options
+    )
+    return uniqBy(results, 'key')
   }
 
   async getTicketDetails(ticketKey: string): Promise<IssueDetail> {
-    return this.withJira((jira) => jira.issues.getIssueDetail(ticketKey))
+    return this.jira.issues.getIssueDetail(ticketKey)
   }
 
   async getIssueMergeRequests(issueKey: string): Promise<JiraMergeRequest[]> {
-    return this.withJira(async (jira) => {
-      return jira.issues.getIssueMergeRequests(issueKey)
-    })
+    return this.jira.issues.getIssueMergeRequests(issueKey)
   }
 
   async isConfigured(): Promise<boolean> {
-    try {
-      await this.getJira()
-      return true
-    } catch {
-      return false
-    }
+    return this.jira.isConfigured()
   }
 
   async assignTicket(
     ticketKey: string,
     assignee: UserDetails | null
   ): Promise<JiraTicket> {
-    return this.withJira(async (jira) => {
-      this.log.info('assignTicket', ticketKey, assignee?.accountId ?? null)
-      await jira.issues.assignIssue(ticketKey, assignee?.accountId ?? null)
-      return jira.issues.getIssue(ticketKey)
-    })
+    this.log.info('assignTicket', ticketKey, assignee?.accountId ?? null)
+    await this.jira.issues.assignIssue(ticketKey, assignee?.accountId ?? null)
+    return this.jira.issues.getIssue(ticketKey)
   }
 
   async transitionTicket(
@@ -143,36 +121,37 @@ class TicketServiceImpl {
       }
     }
   ): Promise<JiraTicket> {
-    return this.withJira(async (jira) => {
-      let refreshed = await jira.issues.transitionIssue(
-        ticket.key,
-        transition.id
-      )
+    let refreshed = await this.jira.issues.transitionIssue(
+      ticket.key,
+      transition.id
+    )
 
-      // Auto-assign if requested
-      if (options?.autoAssign) {
-        try {
-          const { assignee } = options.autoAssign
-          this.log.info(
-            'transitionTicket: auto-assigning',
-            ticket.key,
-            assignee.accountId
-          )
-          await jira.issues.assignIssue(ticket.key, assignee.accountId ?? null)
-          // Fetch updated ticket with new assignee
-          refreshed = await jira.issues.getIssue(ticket.key)
-        } catch (error) {
-          this.log.error(
-            'transitionTicket: auto-assign failed',
-            ticket.key,
-            error
-          )
-          // Don't throw - transition succeeded, just log the assign failure
-        }
+    // Auto-assign if requested
+    if (options?.autoAssign) {
+      try {
+        const { assignee } = options.autoAssign
+        this.log.info(
+          'transitionTicket: auto-assigning',
+          ticket.key,
+          assignee.accountId
+        )
+        await this.jira.issues.assignIssue(
+          ticket.key,
+          assignee.accountId ?? null
+        )
+        // Fetch updated ticket with new assignee
+        refreshed = await this.jira.issues.getIssue(ticket.key)
+      } catch (error) {
+        this.log.error(
+          'transitionTicket: auto-assign failed',
+          ticket.key,
+          error
+        )
+        // Don't throw - transition succeeded, just log the assign failure
       }
+    }
 
-      return refreshed
-    })
+    return refreshed
   }
 
   async updateTicketPriority(
@@ -185,14 +164,7 @@ class TicketServiceImpl {
       throw new Error('updateTicketPriority: priority id is required')
     }
 
-    return this.withJira((jira) =>
-      jira.issues.updateIssuePriority(ticket.key, priorityId)
-    )
-  }
-
-  private async withJira<T>(action: (jira: JiraAPI) => Promise<T>): Promise<T> {
-    const jira = await this.getJira()
-    return action(jira)
+    return this.jira.issues.updateIssuePriority(ticket.key, priorityId)
   }
 }
 

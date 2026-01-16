@@ -5,21 +5,17 @@ import { z } from 'zod'
 import { JiraAPI } from '@/lib/jira'
 import { AuthApi } from '@/lib/jira/auth-api'
 import { getStorageItem } from '@/lib/storage'
-import {
-  AuthCredentials,
-  JiraApiKeyConfig,
-  JiraOAuthConfig,
-  ReceivedTokenPayload,
-  JiraUserInfo
-} from '@/types'
+import { AuthCredentials, ReceivedTokenPayload, JiraUserInfo } from '@/types'
 
 import { trackEvent } from './analytics'
 
 export interface AuthService {
   receiveTokens(tokens: ReceivedTokenPayload): Promise<JiraUserInfo>
-  connectWithApiKey(
-    credentials: Omit<JiraApiKeyConfig, 'type'>
-  ): Promise<JiraUserInfo>
+  connectWithApiKey(credentials: {
+    host: string
+    email: string
+    apiKey: string
+  }): Promise<JiraUserInfo>
   connect(): Promise<string>
   disconnect(): Promise<boolean>
   getCredentials(): Promise<AuthCredentials | null>
@@ -53,24 +49,11 @@ class AuthServiceImpl implements AuthService {
     const oauthConfig =
       await this.authApi.getOAuthConfigFromAccessToken(parsedTokens)
 
-    // Build full OAuth config for JiraAPI
-    const fullOAuthConfig: JiraOAuthConfig = {
-      type: 'oauth',
-      host: oauthConfig.host,
-      instance_id: oauthConfig.instance_id,
-      access_token: oauthConfig.access_token,
-      refresh_token: oauthConfig.refresh_token,
-      expires_at: oauthConfig.expires_at
-    }
-
-    const jiraApi = new JiraAPI(fullOAuthConfig)
-    const userInfo = await jiraApi.getMyself()
-
-    // Store consolidated credentials
+    // Build credentials for validation
     const credentials: AuthCredentials = {
       type: 'oauth',
       host: oauthConfig.host,
-      userInfo,
+      userInfo: null,
       oauth: {
         instance_id: oauthConfig.instance_id,
         access_token: oauthConfig.access_token,
@@ -80,6 +63,10 @@ class AuthServiceImpl implements AuthService {
       apiKey: null
     }
 
+    const userInfo = await JiraAPI.validateCredentials(credentials)
+
+    // Store with user info
+    credentials.userInfo = userInfo
     await this.credentialsStorage.setValue(credentials)
 
     trackEvent('connect_success', { method: 'oauth' })
@@ -87,26 +74,19 @@ class AuthServiceImpl implements AuthService {
     return userInfo
   }
 
-  public async connectWithApiKey(
-    credentials: Omit<JiraApiKeyConfig, 'type'>
-  ): Promise<JiraUserInfo> {
-    const parsedCredentials = apiKeySchema.parse(credentials)
+  public async connectWithApiKey(input: {
+    host: string
+    email: string
+    apiKey: string
+  }): Promise<JiraUserInfo> {
+    const parsedCredentials = apiKeySchema.parse(input)
     const normalizedHost = this.normalizeHost(parsedCredentials.host)
 
-    const apiKeyConfig: JiraApiKeyConfig = {
-      ...parsedCredentials,
-      host: normalizedHost,
-      type: 'apiKey'
-    }
-
-    const jiraApi = new JiraAPI(apiKeyConfig)
-    const userInfo = await jiraApi.getMyself()
-
-    // Store consolidated credentials
-    const authCredentials: AuthCredentials = {
+    // Build credentials for validation
+    const credentials: AuthCredentials = {
       type: 'apiKey',
       host: normalizedHost,
-      userInfo,
+      userInfo: null,
       oauth: null,
       apiKey: {
         email: parsedCredentials.email,
@@ -114,7 +94,11 @@ class AuthServiceImpl implements AuthService {
       }
     }
 
-    await this.credentialsStorage.setValue(authCredentials)
+    const userInfo = await JiraAPI.validateCredentials(credentials)
+
+    // Store with user info
+    credentials.userInfo = userInfo
+    await this.credentialsStorage.setValue(credentials)
 
     trackEvent('connect_success', { method: 'apiKey' })
 
@@ -131,7 +115,8 @@ class AuthServiceImpl implements AuthService {
     await Promise.all([
       this.credentialsStorage.removeValue(),
       // Clear React Query cache
-      getStorageItem('REACT_QUERY_OFFLINE_CACHE').removeValue()
+      getStorageItem('REACT_QUERY_OFFLINE_CACHE').removeValue(),
+      getStorageItem('ProjectClicks').removeValue()
     ])
 
     return true
