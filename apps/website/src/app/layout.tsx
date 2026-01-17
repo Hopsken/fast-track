@@ -1,12 +1,20 @@
 import React from 'react'
-import { Space_Grotesk } from 'next/font/google'
+import { cn } from '@internal/ui/lib/utils'
+import { Inter, Crimson_Pro } from 'next/font/google'
 
 import './global.css'
 
-const spaceGrotesk = Space_Grotesk({
-  display: 'swap',
+const inter = Inter({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700']
+  variable: '--font-sans',
+  display: 'swap'
+})
+
+const crimsonPro = Crimson_Pro({
+  subsets: ['latin'],
+  variable: '--font-serif',
+  display: 'swap',
+  weight: ['400', '600', '700'] // Regular, SemiBold, Bold
 })
 
 export const metadata = {
@@ -20,12 +28,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={cn(inter.variable, crimsonPro.variable)}>
       <head>
         <link rel="shortcut icon" href="/favicon.ico" type="image/png" />
       </head>
-      <body
-        className={`${spaceGrotesk.className} bg-slate-50 text-slate-900 antialiased`}>
+      <body className="bg-[#FDFBF9] font-sans text-stone-900 antialiased">
         {children}
       </body>
     </html>
