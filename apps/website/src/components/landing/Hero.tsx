@@ -6,8 +6,6 @@ import Image from 'next/image'
 
 import heroImage from '../../assets/hero.png'
 
-import { BrowserMockup } from './BrowserMockup'
-
 export function Hero() {
   return (
     <section className="relative overflow-hidden pb-24 pt-20 md:pb-32 md:pt-32">
@@ -52,6 +50,8 @@ export function Hero() {
             src={heroImage}
             alt="Fast Track Extension Interface"
             className="h-auto w-full rounded-xl border border-stone-200 shadow-2xl shadow-stone-900/10"
+            width={1000}
+            height={620}
             priority
             placeholder="blur"
           />
