@@ -17,7 +17,7 @@ export default defineConfig({
   }),
 
   manifest: {
-    name: 'Fast Track',
+    name: 'Fast Track for Jira',
     version: packageJson.version,
     description:
       'Quick search and access to your Jira tickets with enhanced board experience',
