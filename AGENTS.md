@@ -7,10 +7,11 @@
 - **Shared UI**: `packages/ui` owns Shadcn components; add new ones via Shadcn CLI from there
 - **Extension source**: `apps/extension/src/` → `entrypoints/`, `components/`, `hooks/`, `services/`, `storage/`, `stores/`, `utils/`
 - **Build output**: `apps/extension/.output/`; zips via `pnpm zip`
+- **Shared configs**: `packages/eslint-config`, `packages/typescript-config`, `packages/tailwind-config`.
 
 ## Tech Stack
 
-- **Frontend**: React 19 + TypeScript (strict), Tailwind + Shadcn
+- **Frontend**: React 19 + TypeScript (strict), Tailwind (tw-animate-css configured) + Shadcn
 - **Build**: WXT + Vite, WebExt proxy services, `jira.js`, RxJS, Zustand, React Query, Lodash-es
 - **Runtime**: Background (omnibox, proxy services) | Content scripts (`PageObserver`) | Popup/Options (React UI)
 
