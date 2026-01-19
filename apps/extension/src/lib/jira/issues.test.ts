@@ -168,4 +168,82 @@ describe('JiraIssueService getMySuggestedIssues', () => {
     expect(results).toHaveLength(1)
     expect(results[0]?.key).toBe('PROJ-1')
   })
+
+  it('should order tickets by updated across sources before applying the limit', async () => {
+    const { client, searchMock } = createMockClient()
+    const getClient = vi.fn().mockResolvedValue(client)
+    const getWebBaseUrl = vi.fn().mockReturnValue('')
+    const service = new JiraIssueService(getClient, getWebBaseUrl)
+
+    const inProgressIssue = {
+      id: '1',
+      key: 'PROJ-1',
+      fields: {
+        summary: 'Older in progress ticket',
+        issuetype: {
+          name: 'Task',
+          iconUrl: '',
+          description: ''
+        },
+        status: {
+          id: '10',
+          name: 'In Progress',
+          description: '',
+          statusCategory: {
+            key: 'indeterminate',
+            colorName: '',
+            name: ''
+          }
+        },
+        assignee: null,
+        priority: null,
+        project: {
+          key: 'PROJ',
+          name: 'Project'
+        },
+        created: '2024-01-01T00:00:00.000Z',
+        updated: '2024-01-02T00:00:00.000Z'
+      }
+    } as unknown as Issue
+
+    const sprintIssue = {
+      id: '2',
+      key: 'PROJ-2',
+      fields: {
+        summary: 'Newer sprint ticket',
+        issuetype: {
+          name: 'Task',
+          iconUrl: '',
+          description: ''
+        },
+        status: {
+          id: '11',
+          name: 'To Do',
+          description: '',
+          statusCategory: {
+            key: 'new',
+            colorName: '',
+            name: ''
+          }
+        },
+        assignee: null,
+        priority: null,
+        project: {
+          key: 'PROJ',
+          name: 'Project'
+        },
+        created: '2024-02-01T00:00:00.000Z',
+        updated: '2024-02-02T00:00:00.000Z'
+      }
+    } as unknown as Issue
+
+    searchMock
+      .mockResolvedValueOnce({ issues: [inProgressIssue] })
+      .mockResolvedValueOnce({ issues: [sprintIssue] })
+
+    const results = await service.getMySuggestedIssues(1)
+
+    expect(results).toHaveLength(1)
+    expect(results[0]?.key).toBe('PROJ-2')
+  })
 })

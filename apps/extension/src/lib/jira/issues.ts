@@ -6,7 +6,7 @@
 import { Version3Client } from 'jira.js'
 import type { Issue } from 'jira.js/version3/models/issue'
 import type { IssuePickerSuggestions } from 'jira.js/version3/models/issuePickerSuggestions'
-import { chunk, compact, flatMap, map } from 'lodash-es'
+import { chunk, compact, flatMap, map, orderBy } from 'lodash-es'
 
 import {
   IssueDetail,
@@ -341,7 +341,13 @@ export class JiraIssueService {
       }
     })
 
-    return Array.from(uniqueTickets.values()).slice(0, limit)
+    const sortedTickets = orderBy(
+      Array.from(uniqueTickets.values()),
+      (ticket) => ticket.updated || '',
+      'desc'
+    )
+
+    return sortedTickets.slice(0, limit)
   }
 
   async getMyActiveSprintTodoIssues(limit = 20): Promise<JiraTicket[]> {
