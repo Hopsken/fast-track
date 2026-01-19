@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Keys, useHotkeys } from 'react-hotkeys-hook'
 
 import {
@@ -25,7 +26,7 @@ export function useActionShortcut(
   callback: () => void,
   enabled = true
 ) {
-  const shortcut = resolvePlatformShortcut(hotkeys)
+  const [shortcut] = useState(() => resolvePlatformShortcut(hotkeys))
   const keys = mapKeyboardShortcutToReactHotkeys(shortcut)
   useHotkeys(keys, callback, {
     preventDefault: true,

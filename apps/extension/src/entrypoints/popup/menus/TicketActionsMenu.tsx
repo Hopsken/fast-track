@@ -104,7 +104,10 @@ const TicketActionsMenuInner = ({ ticket }: { ticket: IssueDetail }) => {
       <CommandGroup heading="General">
         <ActionPush
           value="assign-to"
-          target={() => ({ path: '/ticket/assign', state: ticket })}
+          target={() => ({
+            path: '/ticket/assign',
+            state: { ticketKey: ticket.key }
+          })}
           icon={UserPen}
           title="Assign to..."
           shortcut={{
@@ -117,7 +120,10 @@ const TicketActionsMenuInner = ({ ticket }: { ticket: IssueDetail }) => {
 
         <ActionPush
           value="change-status"
-          target={() => ({ path: '/ticket/status', state: ticket })}
+          target={() => ({
+            path: '/ticket/status',
+            state: { ticketKey: ticket.key }
+          })}
           icon={Route}
           title="Change status..."
           shortcut={{
@@ -128,7 +134,10 @@ const TicketActionsMenuInner = ({ ticket }: { ticket: IssueDetail }) => {
 
         <ActionPush
           value="change-priority"
-          target={() => ({ path: '/ticket/priority', state: ticket })}
+          target={() => ({
+            path: '/ticket/priority',
+            state: { ticketKey: ticket.key }
+          })}
           icon={ChartNoAxesColumnIncreasing}
           title="Change priority..."
           shortcut={{

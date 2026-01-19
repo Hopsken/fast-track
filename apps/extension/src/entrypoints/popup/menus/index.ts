@@ -4,9 +4,9 @@ export type CommandRoutes = {
   '/': void
   '/actions': JiraTicket
   '/ticket/merge-requests': JiraTicket
-  '/ticket/assign': JiraTicket
-  '/ticket/status': JiraTicket
-  '/ticket/priority': JiraTicket
+  '/ticket/assign': { ticketKey: string }
+  '/ticket/status': { ticketKey: string }
+  '/ticket/priority': { ticketKey: string }
   '/ticket/details': JiraTicket
 }
 

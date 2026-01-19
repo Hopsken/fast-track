@@ -103,6 +103,10 @@ export function useMutationTransitionIssue() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.tickets.keys(ticket.key)
       })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.tickets.suggestions,
+        type: 'all'
+      })
 
       const nextStatus = context?.nextStatus || 'Status'
       const message = `${ticket.key} to ${nextStatus}`

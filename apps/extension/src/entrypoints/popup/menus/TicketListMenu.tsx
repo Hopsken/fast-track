@@ -1,12 +1,19 @@
-import { CommandGroup, CommandList } from '@internal/ui/components/command'
+import {
+  CommandGroup,
+  CommandList,
+  useCommandState
+} from '@internal/ui/components/command'
 import { compact } from 'lodash-es'
 
 import { ActionLoading } from '@/components/actions'
+import { useCommandNavigate } from '@/components/CommandRouter'
 import { TicketItem } from '@/components/tickets'
+import { useActionShortcut } from '@/hooks/useActionShortcut'
 import { useIssueSuggestions } from '@/hooks/useIssueSuggestions'
 import { useSearchQuery } from '@/hooks/useTicketSearch'
 import { IssueSuggestion } from '@/services/ticket-service'
 import { JiraTicket } from '@/types'
+import { isTicketKey } from '@/utils/jira/issues'
 
 import { SearchResultMenu } from './SearchResultMenu'
 
@@ -15,6 +22,8 @@ export function TicketListMenu() {
   const shouldShowSuggestions = !searchQuery.trim()
 
   const { data: issueSuggestions, isLoading } = useIssueSuggestions()
+
+  useQuickNavigate()
 
   return (
     <CommandList aria-label="Ticket search results">
@@ -54,5 +63,43 @@ function SuggestedTickets({ issues }: SuggestedTicketsProps) {
       {renderGroup('Done', getTickets(issues?.done))}
       {renderGroup('Recommend for you', getTickets(issues?.recommend))}
     </>
+  )
+}
+
+function useQuickNavigate() {
+  const navigate = useCommandNavigate()
+  const ticketKey = useCommandState((s) => s.value)
+
+  useActionShortcut(
+    {
+      Windows: { modifiers: ['alt', 'shift'], key: 's' },
+      macOS: { modifiers: ['cmd', 'shift'], key: 's' }
+    },
+    () => {
+      if (!isTicketKey(ticketKey)) return
+      navigate.push('/ticket/status', { ticketKey })
+    }
+  )
+
+  useActionShortcut(
+    {
+      Windows: { modifiers: ['alt', 'shift'], key: 'p' },
+      macOS: { modifiers: ['cmd', 'shift'], key: 'p' }
+    },
+    () => {
+      if (!isTicketKey(ticketKey)) return
+      navigate.push('/ticket/priority', { ticketKey })
+    }
+  )
+
+  useActionShortcut(
+    {
+      Windows: { modifiers: ['alt', 'shift'], key: 'a' },
+      macOS: { modifiers: ['cmd', 'shift'], key: 'a' }
+    },
+    () => {
+      if (!isTicketKey(ticketKey)) return
+      navigate.push('/ticket/assign', { ticketKey })
+    }
   )
 }

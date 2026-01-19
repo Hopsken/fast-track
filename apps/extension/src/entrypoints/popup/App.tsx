@@ -124,7 +124,7 @@ function App() {
         </CommandRoute>
 
         <CommandRoute path="/ticket/assign">
-          {(ticket) => <TicketAssignMenu ticketKey={ticket.key} />}
+          {(props) => <TicketAssignMenu {...props} />}
         </CommandRoute>
 
         <CommandRoute path="/ticket/merge-requests">
@@ -132,11 +132,11 @@ function App() {
         </CommandRoute>
 
         <CommandRoute path="/ticket/status">
-          {(ticket) => <TicketStatusMenu ticketKey={ticket.key} />}
+          {(props) => <TicketStatusMenu {...props} />}
         </CommandRoute>
 
         <CommandRoute path="/ticket/priority">
-          {(ticket) => <TicketPriorityMenu ticketKey={ticket.key} />}
+          {(props) => <TicketPriorityMenu {...props} />}
         </CommandRoute>
 
         <CommandRoute path="/ticket/details">
