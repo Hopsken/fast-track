@@ -9,11 +9,7 @@ import { defineProxyService } from '@webext-core/proxy-service'
 import { UserDetails } from 'jira.js/version3/models/userDetails'
 import { difference, keyBy, uniqBy } from 'lodash-es'
 
-import {
-  buildHistoryRecommendKeys,
-  bucketSuggestionTickets,
-  filterSuggestionTickets
-} from '@/lib/tickets/issue-suggestions'
+import { bucketSuggestionTickets } from '@/lib/tickets/issue-suggestions'
 import {
   IssueDetail,
   JiraMergeRequest,
@@ -45,24 +41,18 @@ class TicketServiceImpl {
       this.getMySuggestedTickets(),
       this.getRecentHistoryTickets()
     ])
-    const filteredTickets = filterSuggestionTickets(tickets)
-    const { inProgress, todo, done } = bucketSuggestionTickets(filteredTickets)
-    const uniqueTodo = difference(todo, inProgress)
-    const uniqueDone = difference(done, inProgress, uniqueTodo)
-    const recommend = buildHistoryRecommendKeys(historyTickets, [
-      ...inProgress,
-      ...uniqueTodo,
-      ...uniqueDone
-    ])
+
+    const { inProgress, todo, done } = bucketSuggestionTickets(tickets)
+    const recommend = difference(
+      historyTickets.map((ticket) => ticket.key),
+      tickets.map((ticket) => ticket.key)
+    )
 
     return {
-      tickets: keyBy(
-        uniqBy([...filteredTickets, ...historyTickets], 'key'),
-        'key'
-      ),
+      tickets: keyBy(uniqBy([...tickets, ...historyTickets], 'key'), 'key'),
       inProgress,
-      todo: uniqueTodo,
-      done: uniqueDone,
+      todo,
+      done,
       recommend
     }
   }
