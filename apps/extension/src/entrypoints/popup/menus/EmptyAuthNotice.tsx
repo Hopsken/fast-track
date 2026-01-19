@@ -1,5 +1,4 @@
 import { Button } from '@internal/ui/components/button'
-import { CommandList } from '@internal/ui/components/command'
 import {
   Empty,
   EmptyContent,
@@ -19,7 +18,7 @@ export function EmptyAuthNotice() {
   }
 
   return (
-    <CommandList>
+    <div className="linear w-xl">
       <Empty>
         <EmptyHeader>
           <EmptyMedia variant="icon">
@@ -37,6 +36,6 @@ export function EmptyAuthNotice() {
           </div>
         </EmptyContent>
       </Empty>
-    </CommandList>
+    </div>
   )
 }

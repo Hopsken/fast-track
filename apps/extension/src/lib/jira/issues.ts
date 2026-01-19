@@ -6,7 +6,7 @@
 import { Version3Client } from 'jira.js'
 import type { Issue } from 'jira.js/version3/models/issue'
 import type { IssuePickerSuggestions } from 'jira.js/version3/models/issuePickerSuggestions'
-import { chain, chunk, compact, flatMap, map, orderBy } from 'lodash-es'
+import { chunk, compact, flatMap, map, orderBy, uniqBy } from 'lodash-es'
 
 import {
   IssueDetail,
@@ -238,13 +238,13 @@ export class JiraIssueService {
     return this.searchIssuesUsingJql(jql, { limit: maxResults })
   }
 
-  private async searchIssuesUsingJql(
+  private searchIssuesUsingJql = async (
     jql: string,
     options?: {
       source?: IssueSource
       limit?: number
     }
-  ): Promise<JiraTicket[]> {
+  ): Promise<JiraTicket[]> => {
     const { source, limit = 30 } = options ?? {}
     const client = await this.getClient()
     const response =
@@ -334,13 +334,9 @@ export class JiraIssueService {
       return []
     }
 
-    const uniqueTickets = chain(tickets)
-      .uniqBy((ticket) => ticket.key)
-      .orderBy('updated', 'desc')
-      .slice(0, limit)
-      .value()
+    const uniqueTickets = orderBy(uniqBy(tickets, 'key'), 'updated', 'desc')
 
-    return uniqueTickets
+    return uniqueTickets.slice(0, limit)
   }
 
   async getMyActiveSprintTodoIssues(limit = 20): Promise<JiraTicket[]> {

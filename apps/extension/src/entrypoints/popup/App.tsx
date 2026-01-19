@@ -1,8 +1,8 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 import { Button } from '@internal/ui/components/button'
 import { Command, CommandInput } from '@internal/ui/components/command'
 import { cn } from '@internal/ui/lib/utils'
-import { useMemoizedFn, useMount } from 'ahooks'
+import { useCreation, useMemoizedFn, useMount } from 'ahooks'
 import { ArrowLeft } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
 
@@ -13,9 +13,11 @@ import {
 } from '@/components/CommandRouter'
 import { QueryClientProvider } from '@/components/QueryClientProvider'
 import { TicketDetails } from '@/components/tickets'
-import { useAuthConfigurationStatus } from '@/hooks/useAuthConfigurationStatus'
 import { trackEvent } from '@/services/analytics'
-import { UserContextProvider } from '@/stores/useCurrentUser'
+import {
+  UserContextProvider,
+  useIsAuthConfigured
+} from '@/stores/useCurrentUser'
 import { useIsCommandLoading } from '@/stores/useLoadingStore'
 import { UserPreferencesProvider } from '@/stores/useUserPreferences'
 
@@ -41,7 +43,6 @@ function App() {
     setValue,
     pop
   } = useCommandRouter()
-  const isAuthConfigured = useAuthConfigurationStatus()
   const inputRef = useRef<HTMLInputElement>(null)
   const isCommandLoading = useIsCommandLoading()
 
@@ -82,10 +83,6 @@ function App() {
     }
   )
 
-  useMount(() => {
-    trackEvent('open-popup')
-  })
-
   // Focus input when active page changes
   useLayoutEffect(() => {
     inputRef?.current?.focus()
@@ -119,10 +116,7 @@ function App() {
         </div>
 
         <CommandRoute path="/">
-          {() => {
-            if (isAuthConfigured === null) return null
-            return isAuthConfigured ? <TicketListMenu /> : <EmptyAuthNotice />
-          }}
+          <TicketListMenu />
         </CommandRoute>
 
         <CommandRoute path="/actions">
@@ -155,15 +149,39 @@ function App() {
   )
 }
 
+function AuthenticatedApp() {
+  return (
+    <UserPreferencesProvider>
+      <CommandRouter<CommandRoutes> defaultPage="/">
+        <App />
+      </CommandRouter>
+    </UserPreferencesProvider>
+  )
+}
+
+function AppRouter() {
+  const isAuthConfigured = useIsAuthConfigured()
+
+  if (isAuthConfigured == null) {
+    return null
+  }
+
+  if (!isAuthConfigured) {
+    return <EmptyAuthNotice />
+  }
+
+  return <AuthenticatedApp />
+}
+
 function AppWithProviders() {
+  useCreation(() => {
+    trackEvent('open-popup')
+  }, [])
+
   return (
     <QueryClientProvider>
       <UserContextProvider>
-        <UserPreferencesProvider>
-          <CommandRouter<CommandRoutes> defaultPage="/">
-            <App />
-          </CommandRouter>
-        </UserPreferencesProvider>
+        <AppRouter />
       </UserContextProvider>
     </QueryClientProvider>
   )

@@ -5,6 +5,11 @@ import { getLogger } from '~/utils/logger'
 
 const log = getLogger('storage-hook')
 
+type State<T extends StorageKey> = {
+  state: 'pending' | 'success' | 'error'
+  value: StorageValue<T>
+}
+
 /**
  * React hook for accessing WXT storage with automatic updates
  */
@@ -14,28 +19,32 @@ export function useStorage<T extends StorageKey>(
   StorageValue<T>,
   (
     value: StorageValue<T> | ((prev: StorageValue<T>) => StorageValue<T>)
-  ) => void
+  ) => void,
+  State<T>['state']
 ] {
   const [storageItem] = useState(getStorageItem(key))
-  const [value, setValue] = useState<StorageValue<T>>(storageItem.fallback)
+  const [value, setValue] = useState<State<T>>({
+    state: 'pending',
+    value: storageItem.fallback
+  })
 
   useEffect(() => {
     storageItem
       .getValue()
       .then((storageValue) => {
-        setValue(storageValue)
+        setValue({ state: 'success', value: storageValue })
       })
       .catch((error) => {
         log.warn(
           `Failed to get storage value for key ${storageItem.key}:`,
           error
         )
-        setValue(storageItem.fallback)
+        setValue({ state: 'error', value: storageItem.fallback })
       })
 
     // Watch for changes
     return storageItem.watch((newValue) => {
-      setValue(newValue)
+      setValue({ state: 'success', value: newValue })
     })
   }, [storageItem])
 
@@ -49,91 +58,16 @@ export function useStorage<T extends StorageKey>(
 
     const finalValue =
       typeof newValue === 'function'
-        ? (newValue as (prev: StorageValue<T>) => StorageValue<T>)(value)
+        ? (newValue as (prev: StorageValue<T>) => StorageValue<T>)(value.value)
         : newValue
 
     storageItem
       .setValue(finalValue)
-      .then(() => setValue(finalValue))
+      .then(() => setValue({ state: 'success', value: finalValue }))
       .catch((error) => {
         log.error(`Failed to set storage value for key ${key}:`, error)
       })
   }
 
-  return [value, setStorageValue]
-}
-
-/**
- * Hook for multiple storage values
- */
-export function useMultipleStorage<T extends StorageKey>(
-  keys: readonly T[]
-): [
-  { [K in T]: StorageValue<K> },
-  (updates: Partial<{ [K in T]: StorageValue<K> }>) => void
-] {
-  const [values, setValues] = useState<{ [K in T]: StorageValue<K> }>(() => {
-    // Initialize with default values
-    const initialValues = {} as { [K in T]: StorageValue<K> }
-    keys.forEach((key) => {
-      initialValues[key] = getStorageItem(key).fallback
-    })
-    return initialValues
-  })
-
-  useEffect(() => {
-    // Get initial values
-    const getInitialValues = async () => {
-      const initialValues = {} as { [K in T]: StorageValue<K> }
-
-      await Promise.all(
-        keys.map(async (key) => {
-          try {
-            const value = await getStorageItem(key).getValue()
-            initialValues[key] = value ?? getStorageItem(key).fallback
-          } catch (error) {
-            log.warn(`Failed to get initial value for ${key}:`, error)
-            initialValues[key] = getStorageItem(key).fallback
-          }
-        })
-      )
-
-      setValues(initialValues)
-    }
-
-    getInitialValues()
-
-    // Set up watchers
-    const unwatchFunctions = keys.map((key) => {
-      return getStorageItem(key).watch((newValue) => {
-        // eslint-disable-next-line sonarjs/no-nested-functions
-        setValues((prev) => ({
-          ...prev,
-          [key]: newValue ?? getStorageItem(key).fallback
-        }))
-      })
-    })
-
-    return () => {
-      unwatchFunctions.forEach((unwatch) => unwatch())
-    }
-  }, [keys])
-
-  const updateValues = async (
-    updates: Partial<{ [K in T]: StorageValue<K> }>
-  ) => {
-    const updatePromises = Object.entries(updates).map(([key, value]) => {
-      const storageItem = getStorageItem(key as StorageKey)
-      return storageItem.setValue(value as never)
-    })
-
-    try {
-      await Promise.all(updatePromises)
-      setValues((prev) => ({ ...prev, ...updates }))
-    } catch (error) {
-      log.error('Failed to update storage values:', error)
-    }
-  }
-
-  return [values, updateValues]
+  return [value.value, setStorageValue, value.state]
 }

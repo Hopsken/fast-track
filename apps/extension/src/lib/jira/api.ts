@@ -9,6 +9,7 @@
 import { Config, Version3Client } from 'jira.js'
 
 import { AuthCredentials, JiraUserInfo } from '@/types'
+import { isValidCredentials } from '@/utils/auth'
 import { getLogger } from '@/utils/logger'
 
 import { fromStorage$, getStorageItem } from '../storage'
@@ -74,39 +75,12 @@ class JiraAPIImpl {
   // Auth Management
   // ─────────────────────────────────────────────────────────────────────────
 
-  /**
-   * Validate that credentials have all required fields
-   */
-  private isValidCredentials(credentials: AuthCredentials): boolean {
-    if (!credentials.host) {
-      return false
-    }
-
-    if (credentials.type === 'oauth') {
-      const { oauth } = credentials
-      return !!(
-        oauth &&
-        oauth.instance_id &&
-        oauth.access_token &&
-        oauth.refresh_token &&
-        oauth.expires_at
-      )
-    }
-
-    if (credentials.type === 'apiKey') {
-      const { apiKey } = credentials
-      return !!(apiKey && apiKey.email && apiKey.apiKey)
-    }
-
-    return false
-  }
-
   private setupAuthSubscription(): void {
     fromStorage$('AuthCredentials').subscribe((credentials) => {
       this.credentials = credentials
 
       // Clear if no credentials or invalid
-      if (!credentials || !this.isValidCredentials(credentials)) {
+      if (!isValidCredentials(credentials)) {
         log.info(credentials ? 'Invalid credentials, cleared' : 'Auth cleared')
         this.credentials = null
         this.invalidateClient()

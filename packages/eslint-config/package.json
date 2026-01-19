@@ -11,7 +11,7 @@
     "./nextjs": "./nextjs.js",
     "./react": "./react.js"
   },
-  "devDependencies": {
+  "dependencies": {
     "@eslint/compat": "^1.1.1",
     "@eslint/eslintrc": "^2.1.1",
     "@eslint/js": "^9.34.0",
