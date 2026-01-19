@@ -1,35 +1,34 @@
 import { Version3Client } from 'jira.js'
+import type { Issue } from 'jira.js/version3/models/issue'
 import { describe, it, expect, vi } from 'vitest'
 
 import { JiraIssueService } from './issues'
 
 // Create a mock client factory
 function createMockClient() {
+  const searchMock = vi.fn().mockResolvedValue({ issues: [] })
+
   return {
-    issueSearch: {
-      searchForIssuesUsingJqlEnhancedSearchPost: vi
-        .fn()
-        .mockResolvedValue({ issues: [] })
-    }
-  } as unknown as Version3Client
+    client: {
+      issueSearch: {
+        searchForIssuesUsingJqlEnhancedSearchPost: searchMock
+      }
+    } as unknown as Version3Client,
+    searchMock
+  }
 }
 
 describe('JiraIssueService searchIssuesByText', () => {
   it('should generate project-scoped numeric search OR project-scoped summary search', async () => {
-    const mockClient = createMockClient()
-    const getClient = vi.fn().mockResolvedValue(mockClient)
+    const { client, searchMock } = createMockClient()
+    const getClient = vi.fn().mockResolvedValue(client)
     const getWebBaseUrl = vi.fn().mockReturnValue('')
     const service = new JiraIssueService(getClient, getWebBaseUrl)
-
-    const searchSpy = vi.spyOn(
-      mockClient.issueSearch,
-      'searchForIssuesUsingJqlEnhancedSearchPost'
-    )
 
     await service.searchIssuesByText('123', { projectKeys: ['PROJ'] })
 
     // Expected JQL: (project in ("PROJ") AND (summary ~ "123*" OR summary ~ "*123" OR issuekey ~ "-123"))
-    expect(searchSpy).toHaveBeenCalledWith(
+    expect(searchMock).toHaveBeenCalledWith(
       expect.objectContaining({
         jql: expect.stringMatching(
           /\(project in \("PROJ"\) AND \(summary ~ "123\*" OR summary ~ "\*123" OR issuekey ~ "-123"\)\)/
@@ -39,22 +38,17 @@ describe('JiraIssueService searchIssuesByText', () => {
   })
 
   it('should generate global exact key search', async () => {
-    const mockClient = createMockClient()
-    const getClient = vi.fn().mockResolvedValue(mockClient)
+    const { client, searchMock } = createMockClient()
+    const getClient = vi.fn().mockResolvedValue(client)
     const getWebBaseUrl = vi.fn().mockReturnValue('')
     const service = new JiraIssueService(getClient, getWebBaseUrl)
-
-    const searchSpy = vi.spyOn(
-      mockClient.issueSearch,
-      'searchForIssuesUsingJqlEnhancedSearchPost'
-    )
 
     await service.searchIssuesByText('PROJ-123', { projectKeys: ['PROJ'] })
 
     // Expected JQL: ((project in ("PROJ") AND (summary ...)) OR (issuekey = "PROJ-123"))
 
-    expect(searchSpy).toHaveBeenCalled()
-    const callArgs = searchSpy.mock.calls[0]?.[0]
+    expect(searchMock).toHaveBeenCalled()
+    const callArgs = searchMock.mock.calls[0]?.[0]
     const jql = callArgs?.jql
 
     expect(jql).toContain('project in ("PROJ")')
@@ -63,20 +57,15 @@ describe('JiraIssueService searchIssuesByText', () => {
   })
 
   it('should handle mixed tokens', async () => {
-    const mockClient = createMockClient()
-    const getClient = vi.fn().mockResolvedValue(mockClient)
+    const { client, searchMock } = createMockClient()
+    const getClient = vi.fn().mockResolvedValue(client)
     const getWebBaseUrl = vi.fn().mockReturnValue('')
     const service = new JiraIssueService(getClient, getWebBaseUrl)
 
-    const searchSpy = vi.spyOn(
-      mockClient.issueSearch,
-      'searchForIssuesUsingJqlEnhancedSearchPost'
-    )
-
     await service.searchIssuesByText('foo 123', { projectKeys: ['PROJ'] })
 
-    expect(searchSpy).toHaveBeenCalled()
-    const callArgs = searchSpy.mock.calls[0]?.[0]
+    expect(searchMock).toHaveBeenCalled()
+    const callArgs = searchMock.mock.calls[0]?.[0]
     const jql = callArgs?.jql
 
     // Structure: (project IN (...) AND ((summary ...) OR (numeric ...)))
@@ -90,20 +79,15 @@ describe('JiraIssueService searchIssuesByText', () => {
   })
 
   it('should handle search without project keys', async () => {
-    const mockClient = createMockClient()
-    const getClient = vi.fn().mockResolvedValue(mockClient)
+    const { client, searchMock } = createMockClient()
+    const getClient = vi.fn().mockResolvedValue(client)
     const getWebBaseUrl = vi.fn().mockReturnValue('')
     const service = new JiraIssueService(getClient, getWebBaseUrl)
 
-    const searchSpy = vi.spyOn(
-      mockClient.issueSearch,
-      'searchForIssuesUsingJqlEnhancedSearchPost'
-    )
-
     await service.searchIssuesByText('123', { projectKeys: [] })
 
-    expect(searchSpy).toHaveBeenCalled()
-    const callArgs = searchSpy.mock.calls[0]?.[0]
+    expect(searchMock).toHaveBeenCalled()
+    const callArgs = searchMock.mock.calls[0]?.[0]
     const jql = callArgs?.jql
 
     // Structure: ((summary ~ ... OR issuekey ~ ...))
@@ -113,28 +97,75 @@ describe('JiraIssueService searchIssuesByText', () => {
 })
 
 describe('JiraIssueService getMySuggestedIssues', () => {
-  it('should generate assignee + in progress or open sprint JQL', async () => {
-    const mockClient = createMockClient()
-    const getClient = vi.fn().mockResolvedValue(mockClient)
+  it('should generate separate in-progress and open sprint JQL', async () => {
+    const { client, searchMock } = createMockClient()
+    const getClient = vi.fn().mockResolvedValue(client)
     const getWebBaseUrl = vi.fn().mockReturnValue('')
     const service = new JiraIssueService(getClient, getWebBaseUrl)
 
-    const searchSpy = vi.spyOn(
-      mockClient.issueSearch,
-      'searchForIssuesUsingJqlEnhancedSearchPost'
-    )
-
     await service.getMySuggestedIssues(25)
 
-    expect(searchSpy).toHaveBeenCalled()
-    const callArgs = searchSpy.mock.calls[0]?.[0]
-    const jql = callArgs?.jql ?? ''
+    expect(searchMock).toHaveBeenCalledTimes(2)
+    const callArgs = searchMock.mock.calls.map((call) => call[0])
+    const jqls = callArgs.map((args) => args?.jql ?? '')
 
-    expect(jql).toContain('assignee = currentUser()')
-    expect(jql).toContain(
-      '(statusCategory = "In Progress" OR sprint in openSprints())'
+    expect(jqls.join(' ')).toContain('assignee = currentUser()')
+    expect(
+      jqls.some((jql) => jql.includes('statusCategory = "In Progress"'))
+    ).toBe(true)
+    expect(jqls.some((jql) => jql.includes('sprint in openSprints()'))).toBe(
+      true
     )
-    expect(jql).toContain('ORDER BY updated DESC')
-    expect(callArgs?.maxResults).toBe(25)
+    expect(jqls.every((jql) => jql.includes('ORDER BY updated DESC'))).toBe(
+      true
+    )
+    expect(callArgs.every((args) => args?.maxResults === 25)).toBe(true)
+  })
+
+  it('should return in-progress tickets when sprint query fails', async () => {
+    const { client, searchMock } = createMockClient()
+    const getClient = vi.fn().mockResolvedValue(client)
+    const getWebBaseUrl = vi.fn().mockReturnValue('')
+    const service = new JiraIssueService(getClient, getWebBaseUrl)
+
+    const inProgressIssue = {
+      id: '1',
+      key: 'PROJ-1',
+      fields: {
+        summary: 'In progress ticket',
+        issuetype: {
+          name: 'Task',
+          iconUrl: '',
+          description: ''
+        },
+        status: {
+          id: '10',
+          name: 'In Progress',
+          description: '',
+          statusCategory: {
+            key: 'indeterminate',
+            colorName: '',
+            name: ''
+          }
+        },
+        assignee: null,
+        priority: null,
+        project: {
+          key: 'PROJ',
+          name: 'Project'
+        },
+        created: '',
+        updated: ''
+      }
+    } as unknown as Issue
+
+    searchMock
+      .mockResolvedValueOnce({ issues: [inProgressIssue] })
+      .mockRejectedValueOnce(new Error('Open sprints not available'))
+
+    const results = await service.getMySuggestedIssues(25)
+
+    expect(results).toHaveLength(1)
+    expect(results[0]?.key).toBe('PROJ-1')
   })
 })
