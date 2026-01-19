@@ -1,4 +1,6 @@
-import { showToast } from '@/stores/useToastStore'
+import log from 'loglevel'
+
+import { showToast } from '../../stores/useToastStore'
 
 import { Action, ActionProps } from './Action'
 
@@ -13,16 +15,25 @@ export function ActionCopyToClipboard({
   onCopy,
   ...restProps
 }: ActionCopyToClipboardProps) {
-  const onSelect = () => {
-    navigator.clipboard.writeText(content)
-    onCopy?.()
-    showToast({
-      title: `Copied: ${content}`,
-      style: 'success'
-    })
-    window.setTimeout(() => {
-      window.close()
-    }, 0)
+  const onSelect = async () => {
+    try {
+      await navigator.clipboard.writeText(content)
+      onCopy?.()
+      showToast({
+        title: `Copied: ${content}`,
+        style: 'success'
+      })
+      window.setTimeout(() => {
+        window.close()
+      }, 20)
+    } catch (error) {
+      log.error(error)
+      showToast({
+        title: 'Failed to copy to clipboard',
+        style: 'failure'
+      })
+      return
+    }
   }
   return <Action {...restProps} onSelect={onSelect} exitOnSelect={false} />
 }
