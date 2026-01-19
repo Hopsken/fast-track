@@ -6,7 +6,7 @@
 import { Version3Client } from 'jira.js'
 import type { Issue } from 'jira.js/version3/models/issue'
 import type { IssuePickerSuggestions } from 'jira.js/version3/models/issuePickerSuggestions'
-import { chunk, compact, flatMap, map } from 'lodash-es'
+import { chain, chunk, compact, flatMap, map, orderBy } from 'lodash-es'
 
 import {
   IssueDetail,
@@ -282,31 +282,65 @@ export class JiraIssueService {
 
   /**
    * Fetches suggested issues for the current user.
-   * Tries to include sprint issues but falls back to in-progress only
-   * for Kanban-only projects where openSprints() isn't available.
+   * Fetches in-progress and open sprint issues separately to improve resilience
+   * when openSprints() isn't available.
    */
   async getMySuggestedIssues(limit = 50): Promise<JiraTicket[]> {
-    const jqlWithSprints = [
-      'assignee = currentUser()',
-      '(statusCategory = "In Progress" OR sprint in openSprints())'
-    ].join(' AND ')
+    const assigneeClause = 'assignee = currentUser()'
+    const inProgressJql = `${assigneeClause} AND statusCategory = "In Progress"`
+    const openSprintJql = `${assigneeClause} AND sprint in openSprints()`
 
-    try {
-      return await this.searchIssuesUsingJql(
-        `${jqlWithSprints} ORDER BY updated DESC`,
-        { limit }
-      )
-    } catch (error) {
-      // Fallback for Kanban-only projects where openSprints() fails
+    const results = await Promise.allSettled([
+      this.searchIssuesUsingJql(`${inProgressJql} ORDER BY updated DESC`, {
+        limit
+      }),
+      this.searchIssuesUsingJql(`${openSprintJql} ORDER BY updated DESC`, {
+        limit
+      })
+    ])
+
+    const [inProgressResult, sprintResult] = results
+
+    if (inProgressResult.status === 'rejected') {
       log.warn(
-        'getMySuggestedIssues: sprint query failed, falling back to in-progress only',
-        error
-      )
-      return this.searchIssuesUsingJql(
-        'assignee = currentUser() AND statusCategory = "In Progress" ORDER BY updated DESC',
-        { limit }
+        'getMySuggestedIssues: in-progress query failed',
+        inProgressResult.reason
       )
     }
+
+    if (sprintResult.status === 'rejected') {
+      log.warn(
+        'getMySuggestedIssues: open sprint query failed, continuing with available results',
+        sprintResult.reason
+      )
+    }
+
+    const tickets = flatMap(
+      results.flatMap((result) =>
+        result.status === 'fulfilled' ? [result.value] : []
+      )
+    )
+
+    if (tickets.length === 0) {
+      const rejectedResults = results.filter(
+        (result): result is PromiseRejectedResult =>
+          result.status === 'rejected'
+      )
+
+      if (rejectedResults.length === results.length) {
+        throw rejectedResults[0]?.reason
+      }
+
+      return []
+    }
+
+    const uniqueTickets = chain(tickets)
+      .uniqBy((ticket) => ticket.key)
+      .orderBy('updated', 'desc')
+      .slice(0, limit)
+      .value()
+
+    return uniqueTickets
   }
 
   async getMyActiveSprintTodoIssues(limit = 20): Promise<JiraTicket[]> {
