@@ -7,6 +7,7 @@ import onlyWarn from 'eslint-plugin-only-warn'
 import turboPlugin from 'eslint-plugin-turbo'
 import importX from 'eslint-plugin-import-x'
 import sonarjs from 'eslint-plugin-sonarjs'
+import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript'
 
 export const config = defineConfig([
   // Base ESLint recommended rules
@@ -19,6 +20,7 @@ export const config = defineConfig([
     ...importX.flatConfigs.typescript,
     settings: {
       ...importX.flatConfigs.typescript.settings,
+      'import-x/resolver-next': [createTypeScriptImportResolver()],
       'import-x/core-modules': ['#imports']
     },
     rules: {
