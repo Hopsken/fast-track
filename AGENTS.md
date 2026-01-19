@@ -11,7 +11,7 @@
 ## Tech Stack
 
 - **Frontend**: React 19 + TypeScript (strict), Tailwind + Shadcn
-- **Build**: WXT + Vite, WebExt proxy services, `jira.js`, RxJS, Zustand, React Query
+- **Build**: WXT + Vite, WebExt proxy services, `jira.js`, RxJS, Zustand, React Query, Lodash-es
 - **Runtime**: Background (omnibox, proxy services) | Content scripts (`PageObserver`) | Popup/Options (React UI)
 
 ## Core Principles
