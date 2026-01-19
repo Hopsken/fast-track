@@ -1,8 +1,8 @@
 import { expect, test } from '../fixtures'
 
 test.describe('Popup - Search', () => {
-  test('allows typing in the search input', async ({ openExtensionPage }) => {
-    const popup = await openExtensionPage('popup.html')
+  test('allows typing in the search input', async ({ openAuthenticatedPopup }) => {
+    const popup = await openAuthenticatedPopup()
 
     // cmdk uses role="combobox" for the input, and we have data-slot and aria-label
     const searchInput = popup.locator('[data-slot="command-input"]')
@@ -13,9 +13,9 @@ test.describe('Popup - Search', () => {
   })
 
   test('search input clears on escape when has value', async ({
-    openExtensionPage
+    openAuthenticatedPopup
   }) => {
-    const popup = await openExtensionPage('popup.html')
+    const popup = await openAuthenticatedPopup()
 
     const searchInput = popup.locator('[data-slot="command-input"]')
     await expect(searchInput).toBeVisible({ timeout: 15_000 })

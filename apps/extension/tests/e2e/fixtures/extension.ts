@@ -4,10 +4,30 @@ import { test as base, BrowserContext, chromium, Page } from '@playwright/test'
 
 const extensionPath = path.resolve(__dirname, '../../../.output/chromium-mv3')
 
+/**
+ * Mock AuthCredentials for testing authenticated popup views.
+ * Uses API key auth since it's simpler and doesn't require token refresh.
+ */
+const MOCK_AUTH_CREDENTIALS = {
+  type: 'apiKey' as const,
+  host: 'https://test.atlassian.net',
+  userInfo: {
+    accountId: 'test-account-id',
+    email: 'test@example.com',
+    name: 'Test User'
+  },
+  oauth: null,
+  apiKey: {
+    email: 'test@example.com',
+    apiKey: 'test-api-key'
+  }
+}
+
 export interface ExtensionFixture {
   context: BrowserContext
   extensionId: string
   openExtensionPage: (pagePath: string) => Promise<Page>
+  openAuthenticatedPopup: () => Promise<Page>
 }
 
 /**
@@ -50,6 +70,32 @@ export const test = base.extend<ExtensionFixture>({
     }
 
     await use(openPage)
+  },
+
+  openAuthenticatedPopup: async ({ context, extensionId }, use) => {
+    const openPopup = async (): Promise<Page> => {
+      // First, open any extension page to set storage before popup loads
+      const setupPage = await context.newPage()
+      await setupPage.goto(`chrome-extension://${extensionId}/options.html`)
+      await setupPage.waitForLoadState('domcontentloaded')
+
+      // Set auth credentials in storage
+      await setupPage.evaluate((credentials) => {
+        return chrome.storage.local.set({ AuthCredentials: credentials })
+      }, MOCK_AUTH_CREDENTIALS)
+
+      // Close setup page
+      await setupPage.close()
+
+      // Now open the popup - it will read the auth credentials on initial load
+      const popup = await context.newPage()
+      await popup.goto(`chrome-extension://${extensionId}/popup.html`)
+      await popup.waitForLoadState('domcontentloaded')
+
+      return popup
+    }
+
+    await use(openPopup)
   }
 })
 
