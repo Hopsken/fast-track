@@ -1,9 +1,10 @@
 import { CommandItem } from '@internal/ui/components/command'
 import { useMemoizedFn } from 'ahooks'
 
+import { useIsOptionKeyPressed } from '@/hooks/useIsOptionKeyPressed'
 import { projectService } from '@/services'
-import { trackEvent } from '@/services/analytics'
 import { JiraTicket } from '@/types'
+import { openJiraIssue } from '@/utils/open-jira-issue'
 import {
   IssueTypeIcon,
   StatusBadge,
@@ -34,11 +35,18 @@ export function TicketItem({
   showStatus = true
 }: TicketItemProps) {
   const navigate = useCommandNavigate()
+  const isOptionKeyPressed = useIsOptionKeyPressed()
 
   const onSelect = useMemoizedFn(() => {
-    navigate.push('/actions', ticket)
+    Promise.resolve().then(() =>
+      projectService.recordProjectClick(ticket.projectKey)
+    )
 
-    projectService.recordProjectClick(ticket.projectKey)
+    if (isOptionKeyPressed) {
+      openJiraIssue(ticket.key)
+    } else {
+      navigate.push('/actions', ticket)
+    }
   })
 
   function renderPriority() {
