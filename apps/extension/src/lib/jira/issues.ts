@@ -11,13 +11,20 @@ import { chunk, compact, flatMap, map, orderBy, uniqBy } from 'lodash-es'
 import {
   IssueDetail,
   IssueSource,
+  JiraComment,
   JiraMergeRequest,
   JiraPriority,
   JiraTicket,
   JiraTransition
 } from '@/types'
 import { isNonNullable } from '@/utils/assert'
-import { isTicketKey, mapPriority, mapTransition } from '@/utils/jira/issues'
+import { adfToPlainText } from '@/utils/jira/comments'
+import {
+  isTicketKey,
+  mapPriority,
+  mapTransition,
+  mapUserToAssignee
+} from '@/utils/jira/issues'
 import { extractMergeRequestsFromRemoteLinks } from '@/utils/jira/merge-requests'
 import { normalizeProjects } from '@/utils/ticket-search'
 import { getLogger } from '~/utils/logger'
@@ -522,6 +529,31 @@ export class JiraIssueService {
         `❌ JiraAPI: Failed to fetch remote links for ${issueKey}:`,
         error
       )
+      return []
+    }
+  }
+
+  async getIssueComments(issueKey: string): Promise<JiraComment[]> {
+    try {
+      const client = await this.getClient()
+
+      const page = await client.issueComments.getComments({
+        issueIdOrKey: issueKey,
+        orderBy: 'created',
+        maxResults: 50
+      })
+
+      return (
+        page.comments?.map((comment) => ({
+          id: String(comment.id ?? ''),
+          author: comment.author ? mapUserToAssignee(comment.author) : null,
+          created: comment.created ?? '',
+          updated: comment.updated ?? null,
+          text: adfToPlainText(comment.body)
+        })) ?? []
+      ).filter((c) => !!c.id)
+    } catch (error) {
+      log.error(`❌ JiraAPI: Failed to fetch comments for ${issueKey}:`, error)
       return []
     }
   }

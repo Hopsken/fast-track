@@ -12,6 +12,7 @@ import {
   GitBranch,
   GitPullRequest,
   Link2,
+  MessageSquareText,
   Route,
   UserPen,
   UserRoundPlus
@@ -29,6 +30,7 @@ import { useCommandNavigate } from '@/components/CommandRouter'
 import { PrefetchProvider } from '@/components/PrefetchQuery'
 import { TicketBasicFields } from '@/components/tickets'
 import { useIsOptionKeyPressed } from '@/hooks/useIsOptionKeyPressed'
+import { useIssueComments } from '@/hooks/useIssueComments'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
 import { useIssueMergeRequests } from '@/hooks/useIssueMergeRequests'
 import { useIssuePriorities } from '@/hooks/useIssuePriorities'
@@ -152,6 +154,16 @@ const TicketActionsMenuInner = ({ ticket }: { ticket: IssueDetail }) => {
             Windows: { modifiers: ['alt', 'shift'], key: 'p' }
           }}
         />
+
+        <ActionPush
+          value="comments"
+          target={() => ({
+            path: '/ticket/comments',
+            state: { ticketKey: ticket.key }
+          })}
+          icon={MessageSquareText}
+          title="Comments..."
+        />
       </CommandGroup>
 
       <CommandSeparator />
@@ -261,6 +273,7 @@ function PrefetchActions({ ticket }: { ticket: JiraTicket }) {
   useIssuePriorities()
   useIssueEditMeta(ticket.key)
   useIssueTransitions(ticket)
+  useIssueComments(ticket.key)
 
   return null
 }
