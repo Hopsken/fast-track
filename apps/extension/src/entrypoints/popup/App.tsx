@@ -22,16 +22,16 @@ import { useIsCommandLoading } from '@/stores/useLoadingStore'
 import { UserPreferencesProvider } from '@/stores/useUserPreferences'
 
 import {
-  CommandRoutes,
   TicketActionsMenu,
   TicketAssignMenu,
   TicketMergeRequestsMenu,
   TicketPriorityMenu,
-  TicketStatusMenu
+  TicketStatusMenu,
+  TicketDetailsMenu,
+  MainMenu
 } from './menus'
 import { EmptyAuthNotice } from './menus/EmptyAuthNotice'
 import { Footer } from './menus/Footer'
-import { MainMenu } from './menus/MainMenu'
 
 function App() {
   const {
@@ -120,8 +120,8 @@ function App() {
           <MainMenu />
         </CommandRoute>
 
-        <CommandRoute path="/actions">
-          {(ticket) => <TicketActionsMenu ticketKey={ticket.key} />}
+        <CommandRoute path="/ticket/actions">
+          {(props) => <TicketActionsMenu {...props} />}
         </CommandRoute>
 
         <CommandRoute path="/ticket/assign">
@@ -129,7 +129,7 @@ function App() {
         </CommandRoute>
 
         <CommandRoute path="/ticket/merge-requests">
-          {(ticket) => <TicketMergeRequestsMenu ticketKey={ticket.key} />}
+          {(props) => <TicketMergeRequestsMenu {...props} />}
         </CommandRoute>
 
         <CommandRoute path="/ticket/status">
@@ -141,7 +141,7 @@ function App() {
         </CommandRoute>
 
         <CommandRoute path="/ticket/details">
-          {(ticket) => <TicketDetails ticketKey={ticket.key} />}
+          {(props) => <TicketDetailsMenu {...props} />}
         </CommandRoute>
 
         <Footer />
@@ -153,7 +153,7 @@ function App() {
 function AuthenticatedApp() {
   return (
     <UserPreferencesProvider>
-      <CommandRouter<CommandRoutes> defaultPage="/">
+      <CommandRouter defaultPage="/">
         <App />
       </CommandRouter>
     </UserPreferencesProvider>

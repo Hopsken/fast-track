@@ -28,7 +28,6 @@ import { ActionShortcut } from '@/components/actions/ActionShortcut'
 import { useCommandNavigate } from '@/components/CommandRouter'
 import { PrefetchProvider } from '@/components/PrefetchQuery'
 import { TicketBasicFields } from '@/components/tickets'
-import { CommandRoutes } from '@/entrypoints/popup/menus'
 import { useIsOptionKeyPressed } from '@/hooks/useIsOptionKeyPressed'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
 import { useIssueMergeRequests } from '@/hooks/useIssueMergeRequests'
@@ -47,11 +46,19 @@ import {
   getProviderOpenTitle
 } from './TicketMergeRequestsMenu'
 
+type Props = {
+  ticketKey: string
+}
+
+declare global {
+  interface RouteMap {
+    '/ticket/actions': Props
+  }
+}
+
 export const TicketActionsMenu = memo(function TicketActionsMenu({
   ticketKey
-}: {
-  ticketKey: string
-}) {
+}: Props) {
   const { data: ticket } = useTicketDetails(ticketKey)
 
   if (!ticket) {
@@ -65,13 +72,13 @@ const TicketActionsMenuInner = ({ ticket }: { ticket: IssueDetail }) => {
   const isOptionKeyPressed = useIsOptionKeyPressed()
   const [preferences] = useUserPreferences()
 
-  const { push } = useCommandNavigate<CommandRoutes>()
+  const { push } = useCommandNavigate()
 
   const onSelect = useMemoizedFn(() => {
     if (isOptionKeyPressed) {
       openJiraIssue(ticket.key)
     } else {
-      push('/ticket/details', ticket)
+      push('/ticket/details', { ticketKey: ticket.key })
     }
   })
 
@@ -288,7 +295,7 @@ function MergeRequestsActions({ ticket }: { ticket: JiraTicket }) {
           }}
           target={() => ({
             path: '/ticket/merge-requests',
-            state: ticket
+            state: { ticketKey: ticket.key }
           })}
         />
       )}

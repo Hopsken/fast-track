@@ -7,8 +7,12 @@ import { createStore } from 'zustand/vanilla'
 // --- Types ---
 
 // User defines this map: { "root": void; "details": { id: string } }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type RouteMap = Record<string, any>
+
+declare global {
+  interface RouteMap extends Record<string, Record<string, unknown>> {
+    '/': never
+  }
+}
 
 interface PageSnapshot<T extends RouteMap> {
   path: keyof T
@@ -40,7 +44,7 @@ function createCommandRouterStore<T extends RouteMap>(
   const defaultPageSnapshot: PageSnapshot<T> = {
     path: defaultPage,
 
-    state: undefined as T[keyof T],
+    state: {} as T[keyof T],
     search: '',
     value: ''
   }
@@ -133,8 +137,8 @@ export function useCommandSearch() {
   return useStore(store, (state) => last(state.history)?.search ?? '')
 }
 
-export function useCommandNavigate<T extends RouteMap>() {
-  const store = useCommandRouterStore<T>()
+export function useCommandNavigate() {
+  const store = useCommandRouterStore<RouteMap>()
   return useStore(
     store,
     useShallow((state) => ({

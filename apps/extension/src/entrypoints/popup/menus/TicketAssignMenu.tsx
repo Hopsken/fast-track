@@ -12,7 +12,17 @@ import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
 import { useMutationAssignIssue } from '@/hooks/useMutationAssignIssue'
 import { AssigneeAvatar } from '~/components/ui/jira'
 
-export function TicketAssignMenu({ ticketKey }: { ticketKey: string }) {
+type Props = {
+  ticketKey: string
+}
+
+declare global {
+  interface RouteMap {
+    '/ticket/assign': Props
+  }
+}
+
+export function TicketAssignMenu({ ticketKey }: Props) {
   const { data: editMeta, isLoading: isLoadingEditMeta } =
     useIssueEditMeta(ticketKey)
   const search = useCommandState((state) => state.search)

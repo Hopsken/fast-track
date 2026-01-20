@@ -1,4 +1,5 @@
 import { useMemo } from '#imports'
+// eslint-disable-next-line import-x/no-named-as-default
 import DOMPurify from 'dompurify'
 
 export function TicketDescription({ html }: { html?: string }) {
@@ -13,7 +14,7 @@ export function TicketDescription({ html }: { html?: string }) {
 
   return (
     <div
-      className="jira-description space-y-3 overflow-hidden break-words text-sm leading-relaxed"
+      className="jira-description wrap-break-word space-y-3 overflow-hidden text-sm leading-relaxed"
       dangerouslySetInnerHTML={{ __html: cleanHtml }}
     />
   )

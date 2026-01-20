@@ -3,7 +3,7 @@ import { UserDetails } from 'jira.js/version3/models/userDetails'
 
 import { ticketService } from '@/services'
 import { useCurrentUser } from '@/stores/useCurrentUser'
-import { JiraTicket, JiraUserInfo } from '@/types'
+import { JiraUserInfo } from '@/types'
 import { mapUserToAssignee } from '@/utils/jira/issues'
 import { queryKeys } from '@/utils/queryKeys'
 import { showToast } from '~/stores/useToastStore'

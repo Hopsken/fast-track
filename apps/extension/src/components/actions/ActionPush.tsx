@@ -1,15 +1,15 @@
 import { useMemoizedFn } from 'ahooks'
 
-import { RouteMap, useCommandNavigate } from '../CommandRouter'
+import { useCommandNavigate } from '../CommandRouter'
 
 import { Action, ActionProps } from './Action'
 
-export interface ActionPushProps<T extends RouteMap>
+export interface ActionPushProps<T extends keyof RouteMap>
   extends Omit<ActionProps, 'onSelect'> {
-  target: () => { path: keyof T; state: T[keyof T] }
+  target: () => { path: T; state: RouteMap[T] }
 }
 
-export function ActionPush<T extends RouteMap = RouteMap>({
+export function ActionPush<T extends keyof RouteMap>({
   target,
   ...restProps
 }: ActionPushProps<T>) {

@@ -45,7 +45,7 @@ export function TicketItem({
     if (isOptionKeyPressed) {
       openJiraIssue(ticket.key)
     } else {
-      navigate.push('/actions', ticket)
+      navigate.push('/ticket/actions', { ticketKey: ticket.key })
     }
   })
 

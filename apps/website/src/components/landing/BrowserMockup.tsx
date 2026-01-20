@@ -1,7 +1,6 @@
 'use client'
 
 import { cn } from '@internal/ui/lib/utils'
-import { motion } from 'motion/react'
 
 interface BrowserMockupProps {
   children: React.ReactNode

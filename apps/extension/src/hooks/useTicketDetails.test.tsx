@@ -35,9 +35,7 @@ describe('useTicketDetails', () => {
       key: 'TEST-1',
       summary: 'Test Issue'
     } as unknown as JiraTicket
-    vi.mocked(ticketService.getTicketDetails).mockResolvedValue(
-      mockDetail as any
-    )
+    vi.mocked(ticketService.getTicketDetails).mockResolvedValue(mockDetail)
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <QueryNormalizerProvider queryClient={queryClient}>

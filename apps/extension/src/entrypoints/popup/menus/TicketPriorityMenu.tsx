@@ -10,7 +10,17 @@ import { useIssuePriorities } from '@/hooks/useIssuePriorities'
 import { useMutationUpdatePriority } from '@/hooks/useMutationUpdatePriority'
 import { PriorityIcon } from '~/components/ui/jira'
 
-export function TicketPriorityMenu({ ticketKey }: { ticketKey: string }) {
+type Props = {
+  ticketKey: string
+}
+
+declare global {
+  interface RouteMap {
+    '/ticket/priority': Props
+  }
+}
+
+export function TicketPriorityMenu({ ticketKey }: Props) {
   const { data: priorities, isLoading } = useIssuePriorities()
   const { mutate: updatePriority } = useMutationUpdatePriority()
 

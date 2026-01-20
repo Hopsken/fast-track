@@ -7,10 +7,16 @@ import { Github, Gitlab, GitPullRequest } from 'lucide-react'
 
 import { Action } from '@/components/actions'
 import { useIssueMergeRequests } from '@/hooks/useIssueMergeRequests'
-import { JiraMergeRequest, JiraTicket } from '@/types'
+import { JiraMergeRequest } from '@/types'
 import { openInNewTab } from '@/utils/extension'
 
-type MergeRequestState = {
+declare global {
+  interface RouteMap {
+    '/ticket/merge-requests': MergeRequestMenuProps
+  }
+}
+
+type MergeRequestMenuProps = {
   ticketKey: string
 }
 
@@ -28,7 +34,7 @@ export const getProviderOpenTitle = (
   return 'Merge request'
 }
 
-export function TicketMergeRequestsMenu({ ticketKey }: MergeRequestState) {
+export function TicketMergeRequestsMenu({ ticketKey }: MergeRequestMenuProps) {
   const { data: mergeRequests, isLoading } = useIssueMergeRequests(ticketKey)
 
   return (

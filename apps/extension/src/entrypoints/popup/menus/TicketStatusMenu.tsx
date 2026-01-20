@@ -11,7 +11,16 @@ import { useMutationTransitionIssue } from '@/hooks/useMutationTransitionIssue'
 import { useTicketDetails } from '@/hooks/useTicketDetails'
 import { JiraTicket, JiraTransition } from '@/types'
 
-export function TicketStatusMenu({ ticketKey }: { ticketKey: string }) {
+type Props = {
+  ticketKey: string
+}
+
+declare global {
+  interface RouteMap {
+    '/ticket/status': Props
+  }
+}
+export function TicketStatusMenu({ ticketKey }: Props) {
   const { data: ticket } = useTicketDetails(ticketKey)
   if (!ticket) return null
   return <TicketStatusMenuInner ticket={ticket} />

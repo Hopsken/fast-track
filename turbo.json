@@ -11,7 +11,7 @@
     },
 
     "website#build": {
-      "env": ["NEXT_PUBLIC_API_URL", "JIRA_CLIENT_ID"],
+      "env": ["NEXT_PUBLIC_API_URL", "JIRA_CLIENT_ID", "JIRA_CLIENT_SECRET"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**"]
     },

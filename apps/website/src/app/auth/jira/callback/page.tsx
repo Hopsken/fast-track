@@ -124,8 +124,12 @@ const processAuthentication = async (
   }
 }
 
+type ProcessState = 'processing' | 'success' | 'error'
+
 export default async function JiraCallbackPage(props: PageProps) {
-  let status: 'processing' | 'success' | 'error' = 'processing'
+  // eslint-disable-next-line sonarjs/no-dead-store
+  let status: ProcessState = 'processing'
+  // eslint-disable-next-line sonarjs/no-dead-store
   let message = 'Processing authentication...'
   let tokenData: TokenData | null = null
 
@@ -164,7 +168,7 @@ export default async function JiraCallbackPage(props: PageProps) {
     message = 'Internal server error occurred'
   }
 
-  const getStatusIcon = (currentStatus: 'processing' | 'success' | 'error') => {
+  const getStatusIcon = (currentStatus: ProcessState) => {
     switch (currentStatus) {
       case 'processing':
         return (
@@ -218,9 +222,7 @@ export default async function JiraCallbackPage(props: PageProps) {
     }
   }
 
-  const getStatusColor = (
-    currentStatus: 'processing' | 'success' | 'error'
-  ) => {
+  const getStatusColor = (currentStatus: ProcessState) => {
     switch (currentStatus) {
       case 'processing':
         return 'bg-blue-100'

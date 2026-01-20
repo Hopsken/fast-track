@@ -38,7 +38,7 @@ const features = [
               </div>
               <div className="text-sm">
                 <div className="font-medium text-stone-900">
-                  Transition to "In Progress"
+                  Transition to &quot;In Progress&quot;
                 </div>
                 <div className="text-xs text-stone-500">User Action</div>
               </div>

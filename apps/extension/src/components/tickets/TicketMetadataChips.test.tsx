@@ -14,7 +14,7 @@ describe('TicketMetadataChips', () => {
     status: { name: 'Done', statusCategory: { colorName: 'green' } },
     issueType: { name: 'Bug', iconUrl: 'bug.png' },
     priority: { name: 'High', iconUrl: 'high.png' }
-  } as any
+  } as unknown as JiraTicket
 
   it('renders basic chips', () => {
     render(<TicketMetadataChips ticket={mockTicket} />)
@@ -26,7 +26,7 @@ describe('TicketMetadataChips', () => {
     const detailTicket: IssueDetail = {
       ...mockTicket,
       labels: ['frontend', 'backend', 'urgent', 'v1']
-    } as any
+    } as unknown as IssueDetail
     render(<TicketMetadataChips ticket={detailTicket} />)
     expect(screen.getByText('frontend')).toBeDefined()
     expect(screen.getByText('backend')).toBeDefined()
