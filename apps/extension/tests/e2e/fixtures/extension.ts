@@ -1,3 +1,5 @@
+import { mkdtemp, rm } from 'node:fs/promises'
+import os from 'node:os'
 import path from 'node:path'
 
 import { test as base, BrowserContext, chromium, Page } from '@playwright/test'
@@ -38,7 +40,11 @@ export interface ExtensionFixture {
 export const test = base.extend<ExtensionFixture>({
   // eslint-disable-next-line no-empty-pattern
   context: async ({}, use) => {
-    const context = await chromium.launchPersistentContext('', {
+    const userDataDir = await mkdtemp(
+      path.join(os.tmpdir(), 'jira-boost-e2e-')
+    )
+
+    const context = await chromium.launchPersistentContext(userDataDir, {
       headless: true,
       channel: 'chromium',
       args: [
@@ -47,8 +53,12 @@ export const test = base.extend<ExtensionFixture>({
       ]
     })
 
-    await use(context)
-    await context.close()
+    try {
+      await use(context)
+    } finally {
+      await context.close()
+      await rm(userDataDir, { recursive: true, force: true })
+    }
   },
 
   extensionId: async ({ context }, use) => {

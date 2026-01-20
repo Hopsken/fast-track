@@ -10,7 +10,12 @@ const extensionPath = path.join(extensionRoot, '.output/chromium-mv3')
 export default async function globalSetup(_config: FullConfig) {
   const buildResult = spawnSync('pnpm', ['exec', 'turbo', 'run', 'build'], {
     cwd: extensionRoot,
-    stdio: 'inherit'
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      // Enable axios-level Jira mocks in the built extension bundle
+      VITE_E2E_MOCKS: '1'
+    }
   })
 
   if (buildResult.status !== 0) {

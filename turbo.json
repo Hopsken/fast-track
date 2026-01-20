@@ -19,7 +19,7 @@
     "extension#build": {
       "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/package.json", ".env*"],
       "outputs": [".output/**"],
-      "env": ["WXT_UMAMI_WEBSITE_ID", "DEV"]
+      "env": ["WXT_UMAMI_WEBSITE_ID", "DEV", "VITE_E2E_MOCKS"]
     },
 
     "zip": {

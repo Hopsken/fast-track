@@ -15,6 +15,7 @@ import { getLogger } from '@/utils/logger'
 import { fromStorage$, getStorageItem } from '../storage'
 
 import { AuthApi } from './auth-api'
+import { createJiraE2EMockAdapter } from './e2e/axios-mocks'
 import { JiraIssueService } from './issues'
 
 const log = getLogger('jira-api')
@@ -37,8 +38,17 @@ function buildClientConfig(credentials: AuthCredentials): Config {
   }
 
   if (credentials.type === 'apiKey' && credentials.apiKey) {
+    const isE2E = import.meta.env.VITE_E2E_MOCKS === '1'
+
     return {
       host: credentials.host,
+      baseRequestConfig: isE2E
+        ? {
+            // Use an axios adapter to mock Jira responses in e2e.
+            // This is the most reliable approach because jira.js uses axios internally.
+            adapter: createJiraE2EMockAdapter()
+          }
+        : undefined,
       authentication: {
         basic: {
           email: credentials.apiKey.email,
