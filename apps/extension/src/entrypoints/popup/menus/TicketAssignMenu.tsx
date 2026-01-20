@@ -6,10 +6,12 @@ import {
   useCommandState
 } from '@internal/ui/components/command'
 
+import { TicketActionHeading } from '@/components'
 import { Action, ActionLoading, ActionUser } from '@/components/actions'
 import { useAutoCompleteUsers } from '@/hooks/useAutoComplete'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
 import { useMutationAssignIssue } from '@/hooks/useMutationAssignIssue'
+import { useTicketDetails } from '@/hooks/useTicketDetails'
 import { AssigneeAvatar } from '~/components/ui/jira'
 
 type Props = {
@@ -23,6 +25,7 @@ declare global {
 }
 
 export function TicketAssignMenu({ ticketKey }: Props) {
+  const { data: ticket } = useTicketDetails(ticketKey)
   const { data: editMeta, isLoading: isLoadingEditMeta } =
     useIssueEditMeta(ticketKey)
   const search = useCommandState((state) => state.search)
@@ -69,6 +72,7 @@ export function TicketAssignMenu({ ticketKey }: Props) {
   return (
     <CommandList>
       <ActionLoading isLoading={isLoading} />
+      {ticket && <TicketActionHeading ticket={ticket} />}
       <CommandGroup heading="Assign to...">
         {unassignAction}
         {renderList()}

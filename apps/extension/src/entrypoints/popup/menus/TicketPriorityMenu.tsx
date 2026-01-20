@@ -5,9 +5,11 @@ import {
   CommandLoading
 } from '@internal/ui/components/command'
 
+import { TicketActionHeading } from '@/components'
 import { Action, ActionLoading } from '@/components/actions'
 import { useIssuePriorities } from '@/hooks/useIssuePriorities'
 import { useMutationUpdatePriority } from '@/hooks/useMutationUpdatePriority'
+import { useTicketDetails } from '@/hooks/useTicketDetails'
 import { PriorityIcon } from '~/components/ui/jira'
 
 type Props = {
@@ -21,6 +23,7 @@ declare global {
 }
 
 export function TicketPriorityMenu({ ticketKey }: Props) {
+  const { data: ticket } = useTicketDetails(ticketKey)
   const { data: priorities, isLoading } = useIssuePriorities()
   const { mutate: updatePriority } = useMutationUpdatePriority()
 
@@ -40,6 +43,7 @@ export function TicketPriorityMenu({ ticketKey }: Props) {
 
   return (
     <CommandList>
+      {ticket && <TicketActionHeading ticket={ticket} />}
       <CommandGroup heading="Change priority...">{renderList()}</CommandGroup>
       <ActionLoading isLoading={isLoading} />
       {!isLoading && <CommandEmpty>No priorities</CommandEmpty>}
