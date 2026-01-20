@@ -5,7 +5,6 @@
 
 import { Version3Client } from 'jira.js'
 import type { Issue } from 'jira.js/version3/models/issue'
-import type { IssuePickerSuggestions } from 'jira.js/version3/models/issuePickerSuggestions'
 import { chunk, compact, flatMap, map, orderBy, uniqBy } from 'lodash-es'
 
 import {

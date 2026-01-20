@@ -86,10 +86,19 @@ export function createJiraE2EMockAdapter(): AxiosAdapter {
 
     // --- Search ---
     if (method === 'post' && url.pathname.startsWith('/rest/api/3/search')) {
-      const body =
-        typeof config.data === 'string'
-          ? (JSON.parse(config.data) as { jql?: string })
-          : (config.data as { jql?: string } | undefined)
+      let body: { jql?: string } | undefined
+      if (typeof config.data === 'string') {
+        try {
+          body = JSON.parse(config.data) as { jql?: string }
+        } catch {
+          return json(config, 400, {
+            message: 'Invalid JSON body for Jira search mock',
+            url: url.toString()
+          })
+        }
+      } else {
+        body = config.data as { jql?: string } | undefined
+      }
 
       const jql = body?.jql ?? ''
 

@@ -15,7 +15,6 @@ import { getLogger } from '@/utils/logger'
 import { fromStorage$, getStorageItem } from '../storage'
 
 import { AuthApi } from './auth-api'
-import { createJiraE2EMockAdapter } from './e2e/axios-mocks'
 import { JiraIssueService } from './issues'
 
 const log = getLogger('jira-api')
@@ -23,9 +22,14 @@ const log = getLogger('jira-api')
 const TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000
 
 /**
- * Build jira.js client config from AuthCredentials
+ * Build jira.js client config from AuthCredentials.
+ *
+ * Note: This is async so we can lazy-load E2E-only mocking code without
+ * pulling it into normal bundles.
  */
-function buildClientConfig(credentials: AuthCredentials): Config {
+async function buildClientConfig(
+  credentials: AuthCredentials
+): Promise<Config> {
   if (credentials.type === 'oauth' && credentials.oauth) {
     return {
       host: `https://api.atlassian.com/ex/jira/${credentials.oauth.instance_id}`,
@@ -38,17 +42,35 @@ function buildClientConfig(credentials: AuthCredentials): Config {
   }
 
   if (credentials.type === 'apiKey' && credentials.apiKey) {
-    const isE2E = import.meta.env.VITE_E2E_MOCKS === '1'
+    // Extra safety guard:
+    // - `VITE_E2E_MOCKS` is a build-time flag
+    // - `__JIRA_BOOST_E2E__` must be enabled at runtime by the Playwright fixture
+    // This reduces the risk of accidentally shipping mocked Jira behavior.
+    const runtimeFlagEnabled =
+      (globalThis as unknown as { __JIRA_BOOST_E2E__?: boolean })
+        .__JIRA_BOOST_E2E__ === true
+
+    const webdriverEnabled =
+      typeof navigator !== 'undefined' && navigator.webdriver === true
+
+    const runtimeE2EEnabled = runtimeFlagEnabled || webdriverEnabled
+
+    const isE2E = import.meta.env.VITE_E2E_MOCKS === '1' && runtimeE2EEnabled
+
+    let baseRequestConfig: Config['baseRequestConfig'] | undefined
+
+    if (isE2E) {
+      const { createJiraE2EMockAdapter } = await import('./e2e/axios-mocks')
+      baseRequestConfig = {
+        // Use an axios adapter to mock Jira responses in e2e.
+        // This is the most reliable approach because jira.js uses axios internally.
+        adapter: createJiraE2EMockAdapter()
+      }
+    }
 
     return {
       host: credentials.host,
-      baseRequestConfig: isE2E
-        ? {
-            // Use an axios adapter to mock Jira responses in e2e.
-            // This is the most reliable approach because jira.js uses axios internally.
-            adapter: createJiraE2EMockAdapter()
-          }
-        : undefined,
+      baseRequestConfig,
       authentication: {
         basic: {
           email: credentials.apiKey.email,
@@ -268,7 +290,7 @@ class JiraAPIImpl {
     }
 
     // Create new client
-    this.v3Client = new Version3Client(buildClientConfig(credentials))
+    this.v3Client = new Version3Client(await buildClientConfig(credentials))
     this.clientCredentialsSignature = signature
     this.issueService = null // Will be recreated with new client
     log.debug('Created new jira.js client')
@@ -347,7 +369,7 @@ class JiraAPIImpl {
   static async validateCredentials(
     credentials: AuthCredentials
   ): Promise<JiraUserInfo> {
-    const client = new Version3Client(buildClientConfig(credentials))
+    const client = new Version3Client(await buildClientConfig(credentials))
     const user = await client.myself.getCurrentUser()
     return {
       accountId: user.accountId,

@@ -67,7 +67,30 @@ export const test = base.extend<ExtensionFixture>({
       context.serviceWorkers()[0] ??
       (await context.waitForEvent('serviceworker', { timeout: 30_000 }))
 
+    // Enable runtime E2E mode in the MV3 background service worker.
+    // This is used as an additional safety guard so E2E mocks cannot
+    // accidentally activate in non-test environments.
+    await serviceWorker.evaluate(() => {
+      ;(globalThis as unknown as { __JIRA_BOOST_E2E__?: boolean }).__JIRA_BOOST_E2E__ =
+        true
+    })
+
     const extensionId = new URL(serviceWorker.url()).host
+
+    // The extension opens the options page on first install. In E2E we use a fresh
+    // userDataDir per test, so this happens every time and can interrupt our
+    // navigations (popup/options). Close the auto-opened page if it appears.
+    try {
+      const autoPage = await context.waitForEvent('page', { timeout: 2_000 })
+      // Only close if it is (or becomes) an options page.
+      await autoPage.waitForLoadState('domcontentloaded').catch(() => {})
+      if (autoPage.url().includes(`chrome-extension://${extensionId}/options.html`)) {
+        await autoPage.close().catch(() => {})
+      }
+    } catch {
+      // ignore
+    }
+
     await use(extensionId)
   },
 
@@ -84,18 +107,17 @@ export const test = base.extend<ExtensionFixture>({
 
   openAuthenticatedPopup: async ({ context, extensionId }, use) => {
     const openPopup = async (): Promise<Page> => {
-      // First, open any extension page to set storage before popup loads
-      const setupPage = await context.newPage()
-      await setupPage.goto(`chrome-extension://${extensionId}/options.html`)
-      await setupPage.waitForLoadState('domcontentloaded')
+      // Set auth credentials directly from the background service worker to
+      // avoid racey UI-side persistence writing to storage.
+      const serviceWorker =
+        context.serviceWorkers()[0] ??
+        (await context.waitForEvent('serviceworker', { timeout: 30_000 }))
 
-      // Set auth credentials in storage
-      await setupPage.evaluate((credentials) => {
-        return chrome.storage.local.set({ AuthCredentials: credentials })
+      await serviceWorker.evaluate(async (credentials) => {
+        await new Promise<void>((resolve) => {
+          chrome.storage.local.set({ AuthCredentials: credentials }, () => resolve())
+        })
       }, MOCK_AUTH_CREDENTIALS)
-
-      // Close setup page
-      await setupPage.close()
 
       // Now open the popup - it will read the auth credentials on initial load
       const popup = await context.newPage()

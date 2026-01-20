@@ -83,13 +83,13 @@ test.describe('Popup - Suggested tickets', () => {
     context,
     extensionId
   }) => {
-    const setupPage = await context.newPage()
-    await setupPage.goto(`chrome-extension://${extensionId}/options.html`)
-    await setupPage.waitForLoadState('domcontentloaded')
+    const serviceWorker =
+      context.serviceWorkers()[0] ??
+      (await context.waitForEvent('serviceworker', { timeout: 30_000 }))
 
     // Set up auth + seed React Query offline cache so the popup can render
     // suggestions deterministically without hitting the real Jira network.
-    const manifestVersion = await setupPage.evaluate(() => {
+    const manifestVersion = await serviceWorker.evaluate(() => {
       return chrome.runtime.getManifest().version
     })
 
@@ -105,20 +105,21 @@ test.describe('Popup - Suggested tickets', () => {
       clientState: dehydrate(queryClient)
     }
 
-    await setupPage.evaluate(
+    await serviceWorker.evaluate(
       async ({ credentials, persisted }) => {
-        await chrome.storage.local.clear()
-
-        await chrome.storage.local.set({
-          AuthCredentials: credentials,
-          // createAsyncStoragePersister default key
-          REACT_QUERY_OFFLINE_CACHE: JSON.stringify(persisted)
+        await new Promise<void>((resolve) => {
+          chrome.storage.local.set(
+            {
+              AuthCredentials: credentials,
+              // createAsyncStoragePersister default key
+              REACT_QUERY_OFFLINE_CACHE: JSON.stringify(persisted)
+            },
+            () => resolve()
+          )
         })
       },
       { credentials: MOCK_AUTH_CREDENTIALS, persisted: persistedClient }
     )
-
-    await setupPage.close()
 
     const popup = await context.newPage()
     await popup.goto(`chrome-extension://${extensionId}/popup.html`)

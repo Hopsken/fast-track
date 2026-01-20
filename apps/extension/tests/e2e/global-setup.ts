@@ -8,8 +8,11 @@ const extensionRoot = path.resolve(__dirname, '../..')
 const extensionPath = path.join(extensionRoot, '.output/chromium-mv3')
 
 export default async function globalSetup(_config: FullConfig) {
-  const buildResult = spawnSync('pnpm', ['exec', 'turbo', 'run', 'build'], {
-    cwd: extensionRoot,
+  const buildResult = spawnSync(
+    'pnpm',
+    ['exec', 'turbo', 'run', 'build', '--filter=extension...'],
+    {
+      cwd: extensionRoot,
     stdio: 'inherit',
     env: {
       ...process.env,
