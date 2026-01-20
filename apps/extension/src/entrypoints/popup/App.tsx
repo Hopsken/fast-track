@@ -11,8 +11,8 @@ import {
   CommandRouter,
   useCommandRouter
 } from '@/components/CommandRouter'
+import { EmptyAuthNotice } from '@/components/EmptyAuthNotice'
 import { QueryClientProvider } from '@/components/QueryClientProvider'
-import { TicketDetails } from '@/components/tickets'
 import { trackEvent } from '@/services/analytics'
 import {
   UserContextProvider,
@@ -30,7 +30,6 @@ import {
   TicketDetailsMenu,
   MainMenu
 } from './menus'
-import { EmptyAuthNotice } from './menus/EmptyAuthNotice'
 import { Footer } from './menus/Footer'
 
 function App() {
