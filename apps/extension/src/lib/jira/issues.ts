@@ -5,7 +5,6 @@
 
 import { Version3Client } from 'jira.js'
 import type { Issue } from 'jira.js/version3/models/issue'
-import type { IssuePickerSuggestions } from 'jira.js/version3/models/issuePickerSuggestions'
 import { chunk, compact, flatMap, map, orderBy, uniqBy } from 'lodash-es'
 
 import {
@@ -127,56 +126,6 @@ export class JiraIssueService {
     return this.getIssue(issueKey)
   }
 
-  /**
-   * Fetches suggested issues from Jira Issue Picker API and returns full tickets
-   * When query is omitted or empty, Jira returns personalized suggestions.
-   */
-  async getIssuePickerSuggestions(query?: string): Promise<JiraTicket[]> {
-    try {
-      log.info('🎯 JiraAPI: Fetching issue picker suggestions...', {
-        hasQuery: !!query
-      })
-
-      const client = await this.getClient()
-      // Use jira.js Issue Search API for Issue Picker
-      const response: IssuePickerSuggestions =
-        await client.issueSearch.getIssuePickerResource(
-          query && query.trim() ? { query } : {}
-        )
-
-      // Response shape: { sections: [{ issues: [{ key, summary, ...}] } ...] }
-      const sections: NonNullable<IssuePickerSuggestions['sections']> =
-        Array.isArray(response?.sections) ? (response.sections ?? []) : []
-
-      const issueKeys = Array.from(
-        new Set(
-          sections.flatMap((sec) =>
-            Array.isArray(sec?.issues)
-              ? sec.issues
-                  .map((i) => i?.key)
-                  .filter((k): k is string => typeof k === 'string')
-              : []
-          )
-        )
-      ) as string[]
-
-      if (issueKeys.length === 0) {
-        log.info('ℹ️ JiraAPI: No issue picker suggestions found')
-        return []
-      }
-
-      // Reuse bulk issue fetch to get full ticket details
-      const tickets = await this.getIssues(issueKeys)
-      log.info(
-        `✅ JiraAPI: Retrieved ${tickets.length}/${issueKeys.length} suggested tickets`
-      )
-      return tickets
-    } catch (error) {
-      log.error('❌ JiraAPI: Failed to fetch issue picker suggestions:', error)
-      return []
-    }
-  }
-
   async searchIssuesByText(
     query: string,
     options?: { limit?: number; projectKeys?: string[] }
@@ -259,27 +208,6 @@ export class JiraIssueService {
     )
   }
 
-  async getMyRecentDoneIssues(limit = 5): Promise<JiraTicket[]> {
-    return this.searchIssuesUsingJql(
-      'assignee = currentUser() AND statusCategory = Done AND resolved >= -14d ORDER BY resolved DESC',
-      { limit }
-    )
-  }
-
-  async getMyWatchingIssues(limit = 5): Promise<JiraTicket[]> {
-    return this.searchIssuesUsingJql(
-      'watcher = currentUser() ORDER BY updated DESC',
-      { source: 'watching', limit }
-    )
-  }
-
-  async getMyUnresolvedIssues(limit = 20): Promise<JiraTicket[]> {
-    return this.searchIssuesUsingJql(
-      'assignee = currentUser() AND statusCategory = "In Progress" ORDER BY updated DESC',
-      { limit }
-    )
-  }
-
   /**
    * Fetches suggested issues for the current user.
    * Fetches in-progress and open sprint issues separately to improve resilience
@@ -337,19 +265,6 @@ export class JiraIssueService {
     const uniqueTickets = orderBy(uniqBy(tickets, 'key'), 'updated', 'desc')
 
     return uniqueTickets.slice(0, limit)
-  }
-
-  async getMyActiveSprintTodoIssues(limit = 20): Promise<JiraTicket[]> {
-    const jql = [
-      'sprint in openSprints()',
-      'assignee = currentUser()',
-      'statusCategory = "To Do"'
-    ].join(' AND ')
-
-    return this.searchIssuesUsingJql(`${jql} ORDER BY updated DESC`, {
-      source: 'sprint',
-      limit
-    })
   }
 
   async getRecentHistoryIssues(limit = 10): Promise<JiraTicket[]> {
