@@ -496,32 +496,31 @@ Follow existing patterns for:
 - [x] Write failing tests: `gap-analysis.test.ts`.
 - [x] Implement `computeVisibleFields`.
 
-## Phase 3 — Conflict detection (unit tests first)
+## Phase 3 — TemplateService (integration tests first)
 
-- [x] Write failing tests: `conflict-detection.test.ts`.
-- [x] Implement `refreshAndDetectConflicts` + `validatePresetValue`.
-
-## Phase 4 — TemplateService (integration tests first)
-
-- [x] Write failing tests for CRUD + `markTemplateUsed` + `refreshForActiveSite` selection (recent 5).
+- [x] Write failing tests for CRUD + `markTemplateUsed`
 - [x] Implement TemplateService using storage items.
 
-## Phase 5 — Options UI (Template CRUD)
+## Phase 4 — Options UI (Template CRUD)
 
 - [ ] Add Templates tab and editor.
 - [ ] Ensure editor fetches Jira create meta fields for the scope.
 - [ ] Save template + seed local FieldMetadataCache
 
-## Phase 6 — Popup UI wiring
+## Phase 5 — Popup UI wiring
 
-- [ ] Modify `popup/App.tsx` to trigger `refreshForActiveSite` once/session.
 - [ ] Add TemplateMenu + CreateIssueMenu, integrate with MainMenu trigger.
 - [ ] Ensure selecting template calls `markTemplateUsed`.
 
-## Phase 7 — Field rendering components
+## Phase 6 — Field rendering components
 
 - [ ] Implement FieldRenderer and per-type inputs.
 - [ ] Ensure conflict styling + error messages.
+
+## Phase 7 — Conflict detection (unit tests first)
+
+- [] Write failing tests: `conflict-detection.test.ts`.
+- [ ] Modify `popup/App.tsx` to trigger conflict detection.
 
 ## Phase 8 — Quality gates
 
@@ -618,7 +617,4 @@ Alternatives:
 - Phase 0: Read RFC and confirmed it matches the plan (trigger supports `C` and `+`, refresh-on-popup-open with TTL).
 - Phase 1: Added `apps/extension/src/types/template.ts` and extended `apps/extension/src/lib/storage/schema.ts` with `IssueTemplates` (sync) plus `FieldMetadataCache`/`TemplateConflicts` (local). Reused existing `fromStorage$` helper (no changes needed).
 - Phase 2: Added unit tests for `computeVisibleFields` and implemented it in `apps/extension/src/services/template-service/gap-analysis.ts`.
-- Phase 3: Added unit tests for conflict detection and implemented `refreshAndDetectConflicts` + `validatePresetValue` in `apps/extension/src/services/template-service/conflict-detection.ts` (uses a small `JiraServiceLike` interface to keep it testable).
 - Phase 4: Implemented `TemplateServiceImpl` with CRUD, usage tracking, cache/conflict read-write, and `refreshForActiveSite` (limit + TTL). Added integration tests using an in-memory storage adapter.
-- Deviation: `refreshForActiveSite` effectively refreshes per unique `cacheKey` (site+project+issueType). When multiple templates share the same scope, only the first triggers a Jira call; tests were adjusted accordingly.
-- Partial stop requested: Implemented hooks (`useTemplates`, `useFieldMetadataCache`, `useCreateIssueForm`) but did not proceed with Options/Popup UI + FieldRenderer yet.
