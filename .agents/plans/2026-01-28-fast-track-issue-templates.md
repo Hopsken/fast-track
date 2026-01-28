@@ -2,7 +2,7 @@
 date: '2026-01-28'
 title: 'Fast Track Issue Templates'
 directory: '/Users/shaowei/Projects/jira-boost'
-status: 'pending'
+status: cancelled
 dependencies: []
 dependents: []
 ---
@@ -483,28 +483,28 @@ Follow existing patterns for:
 
 ## Phase 0 — Validate RFC alignment
 
-- [ ] Re-read `/specs/Fast Track Issue Template RFC.md` and ensure it matches this plan.
+- [x] Re-read `/specs/Fast Track Issue Template RFC.md` and ensure it matches this plan.
 
 ## Phase 1 — Types + storage
 
-- [ ] Add `types/template.ts`.
-- [ ] Extend `lib/storage/schema.ts` with new keys.
-- [ ] Add minimal storage access helpers (if the repo uses wrappers).
+- [x] Add `types/template.ts`.
+- [x] Extend `lib/storage/schema.ts` with new keys.
+- [x] Add minimal storage access helpers (if the repo uses wrappers).
 
 ## Phase 2 — Gap analysis (unit tests first)
 
-- [ ] Write failing tests: `gap-analysis.test.ts`.
-- [ ] Implement `computeVisibleFields`.
+- [x] Write failing tests: `gap-analysis.test.ts`.
+- [x] Implement `computeVisibleFields`.
 
 ## Phase 3 — Conflict detection (unit tests first)
 
-- [ ] Write failing tests: `conflict-detection.test.ts`.
-- [ ] Implement `refreshAndDetectConflicts` + `validatePresetValue`.
+- [x] Write failing tests: `conflict-detection.test.ts`.
+- [x] Implement `refreshAndDetectConflicts` + `validatePresetValue`.
 
 ## Phase 4 — TemplateService (integration tests first)
 
-- [ ] Write failing tests for CRUD + `markTemplateUsed` + `refreshForActiveSite` selection (recent 5).
-- [ ] Implement TemplateService using storage items.
+- [x] Write failing tests for CRUD + `markTemplateUsed` + `refreshForActiveSite` selection (recent 5).
+- [x] Implement TemplateService using storage items.
 
 ## Phase 5 — Options UI (Template CRUD)
 
@@ -615,4 +615,10 @@ Alternatives:
 
 # Implementation Progress
 
-- [ ] Not started
+- Phase 0: Read RFC and confirmed it matches the plan (trigger supports `C` and `+`, refresh-on-popup-open with TTL).
+- Phase 1: Added `apps/extension/src/types/template.ts` and extended `apps/extension/src/lib/storage/schema.ts` with `IssueTemplates` (sync) plus `FieldMetadataCache`/`TemplateConflicts` (local). Reused existing `fromStorage$` helper (no changes needed).
+- Phase 2: Added unit tests for `computeVisibleFields` and implemented it in `apps/extension/src/services/template-service/gap-analysis.ts`.
+- Phase 3: Added unit tests for conflict detection and implemented `refreshAndDetectConflicts` + `validatePresetValue` in `apps/extension/src/services/template-service/conflict-detection.ts` (uses a small `JiraServiceLike` interface to keep it testable).
+- Phase 4: Implemented `TemplateServiceImpl` with CRUD, usage tracking, cache/conflict read-write, and `refreshForActiveSite` (limit + TTL). Added integration tests using an in-memory storage adapter.
+- Deviation: `refreshForActiveSite` effectively refreshes per unique `cacheKey` (site+project+issueType). When multiple templates share the same scope, only the first triggers a Jira call; tests were adjusted accordingly.
+- Partial stop requested: Implemented hooks (`useTemplates`, `useFieldMetadataCache`, `useCreateIssueForm`) but did not proceed with Options/Popup UI + FieldRenderer yet.
