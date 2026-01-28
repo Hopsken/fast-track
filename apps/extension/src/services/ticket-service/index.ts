@@ -21,6 +21,8 @@ import { mapPriority } from '@/utils/jira/issues'
 import { getJiraApi } from '~/lib/jira'
 import { getLogger } from '~/utils/logger'
 
+import { isValidCreateMetaFields, parseCreateMetaFields } from './create-meta'
+
 export type IssueSuggestion = {
   tickets: Record<string, JiraTicket>
   inProgress: string[]
@@ -91,6 +93,16 @@ class TicketServiceImpl {
 
   async getIssueEditMetadata(ticketKey: string) {
     return this.jira.issues.getIssueEditMetadata(ticketKey)
+  }
+
+  async getCreateIssueFields(input: {
+    projectIdOrKey: string
+    issueTypeId: string
+  }) {
+    const page = await this.jira.issues.getCreateIssueMetaFields(input)
+    const fields = parseCreateMetaFields(page)
+    if (!isValidCreateMetaFields(fields)) return []
+    return fields
   }
 
   async getIssueTransitions(ticket: JiraTicket) {

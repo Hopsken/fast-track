@@ -8,12 +8,7 @@ import type {
   IssueTemplate
 } from '~/types/template'
 
-import { refreshAndDetectConflicts } from './conflict-detection'
-import { isValidCreateMetaFields, parseCreateMetaFields } from './create-meta'
-
-type CreateMetaPage = {
-  fields?: unknown[]
-}
+import { getTicketService } from '../ticket-service'
 
 export interface RefreshForActiveSiteOptions {
   ttlMs: number
@@ -21,19 +16,6 @@ export interface RefreshForActiveSiteOptions {
 }
 
 const MAX_TEMPLATES = 50
-
-function byRecency(a: IssueTemplate, b: IssueTemplate) {
-  const aTime = a.lastUsedAt ?? a.updatedAt ?? a.createdAt
-  const bTime = b.lastUsedAt ?? b.updatedAt ?? b.createdAt
-  return bTime.localeCompare(aTime)
-}
-
-function isCacheFresh(cache: CachedFieldMetadata | undefined, ttlMs: number) {
-  if (!cache) return false
-  const last = Date.parse(cache.lastUpdated)
-  if (Number.isNaN(last)) return false
-  return Date.now() - last <= ttlMs
-}
 
 /**
  * Template service implementation (proxy-service style)
@@ -45,29 +27,6 @@ export class TemplateServiceImpl {
   private templatesItem = getStorageItem('IssueTemplates')
   private cacheItem = getStorageItem('FieldMetadataCache')
   private conflictsItem = getStorageItem('TemplateConflicts')
-
-  private jira = getJiraApi()
-
-  private async getActiveSiteUrl(): Promise<string | null> {
-    const auth = await getStorageItem('AuthCredentials').getValue()
-    return auth?.host ? `https://${auth.host}`.replace(/\/$/, '') : null
-  }
-
-  private async fetchCreateIssueFields(input: {
-    projectIdOrKey: string
-    issueTypeId: string
-  }) {
-    // Use jira.js client via the shared JiraIssueService wrapper.
-    // This keeps Jira HTTP concerns in lib/jira (same direction as ticket-service).
-    const page = await this.jira.issues.getCreateIssueMetaFields({
-      projectIdOrKey: input.projectIdOrKey,
-      issueTypeId: input.issueTypeId
-    })
-
-    const fields = parseCreateMetaFields(page)
-    if (!isValidCreateMetaFields(fields)) return []
-    return fields
-  }
 
   // ===== CRUD =====
   async getTemplates(): Promise<IssueTemplate[]> {
@@ -179,59 +138,6 @@ export class TemplateServiceImpl {
   ): Promise<void> {
     const all = await this.conflictsItem.getValue()
     await this.conflictsItem.setValue({ ...all, [templateId]: conflicts })
-  }
-
-  // ===== Refresh =====
-  async refreshForActiveSite(
-    options: RefreshForActiveSiteOptions
-  ): Promise<void> {
-    const siteUrl = await this.getActiveSiteUrl()
-    if (!siteUrl) return
-
-    const templates = (await this.templatesItem.getValue())
-      .filter((t) => t.scope.siteUrl === siteUrl)
-      .sort(byRecency)
-      .slice(0, options.limit)
-
-    if (templates.length === 0) return
-
-    const allCache = await this.cacheItem.getValue()
-    const allConflicts = await this.conflictsItem.getValue()
-
-    const inFlightByCacheKey = new Map<string, Promise<void>>()
-
-    for (const template of templates) {
-      const cacheKey = `${template.scope.siteUrl}:${template.scope.projectKey}:${template.scope.issueTypeId}`
-
-      if (isCacheFresh(allCache[cacheKey], options.ttlMs)) {
-        continue
-      }
-
-      const existing = inFlightByCacheKey.get(cacheKey)
-      if (existing) {
-        await existing
-      }
-
-      const task = (async () => {
-        const result = await refreshAndDetectConflicts(template, {
-          getCreateIssueFields: async ({ projectIdOrKey, issueTypeId }) =>
-            this.fetchCreateIssueFields({ projectIdOrKey, issueTypeId })
-        })
-
-        allConflicts[template.id] = result.conflicts
-        if (result.updatedCache && result.updatedCache.fields.length > 0) {
-          allCache[cacheKey] = result.updatedCache
-        }
-      })()
-
-      inFlightByCacheKey.set(cacheKey, task)
-      await task
-    }
-
-    await Promise.all([
-      this.cacheItem.setValue(allCache),
-      this.conflictsItem.setValue(allConflicts)
-    ])
   }
 }
 
