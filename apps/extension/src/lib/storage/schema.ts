@@ -14,6 +14,11 @@ import type {
   LicenseInfo,
   UserPreferences
 } from '~/types'
+import type {
+  CachedFieldMetadata,
+  FieldConflict,
+  IssueTemplate
+} from '~/types/template'
 import { getLogger } from '~/utils/logger'
 
 const log = getLogger('storage-schema')
@@ -165,6 +170,13 @@ type StorageItems = {
       lastSelected: string
     }
   >
+
+  // ===== SYNC STORAGE =====
+  IssueTemplates: IssueTemplate[]
+
+  // ===== LOCAL STORAGE =====
+  FieldMetadataCache: Record<string, CachedFieldMetadata>
+  TemplateConflicts: Record<string, FieldConflict[]>
 }
 
 export type StorageKey = keyof StorageItems
@@ -185,7 +197,12 @@ const STORAGE_DEFAULTS: Omit<StorageItems, 'AuthCredentials'> = {
   },
   DeviceId: '',
   'analytics-enabled': true,
-  ProjectClicks: {}
+  ProjectClicks: {},
+
+  // templates
+  IssueTemplates: [],
+  FieldMetadataCache: {},
+  TemplateConflicts: {}
 }
 
 // Enhanced storage key groups with logical organization
@@ -228,8 +245,10 @@ const storageItems: Record<
   // Other storage items without versioning
   ...Object.entries(STORAGE_DEFAULTS).reduce(
     (acc, [key, value]) => {
+      const storageArea = key === 'IssueTemplates' ? 'sync' : 'local'
+
       acc[key as Exclude<StorageKey, 'AuthCredentials'>] = storage.defineItem(
-        `local:${key}`,
+        `${storageArea}:${key}`,
         {
           fallback: value,
           init: () => (key === 'DeviceId' ? crypto.randomUUID() : value)

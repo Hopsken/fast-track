@@ -5,6 +5,7 @@
 
 import { Version3Client } from 'jira.js'
 import type { Issue } from 'jira.js/version3/models/issue'
+import type { PageOfCreateMetaIssueTypeWithField } from 'jira.js/version3/models/pageOfCreateMetaIssueTypeWithField'
 import { chunk, compact, flatMap, map, orderBy, uniqBy } from 'lodash-es'
 
 import {
@@ -68,6 +69,25 @@ export class JiraIssueService {
 
     log.info(`✅ JiraAPI: Successfully fetched issue ${issueKey}`)
     return this.convertToTicket(issue)
+  }
+
+  /**
+   * Fetch issue create meta for a given project + issue type.
+   *
+   * We intentionally return the raw response shape so higher-level modules
+   * (e.g. template-service) can parse/validate and map it to their own types.
+   */
+  async getCreateIssueMetaFields(input: {
+    projectIdOrKey: string
+    issueTypeId: string
+  }): Promise<PageOfCreateMetaIssueTypeWithField> {
+    const client = await this.getClient()
+
+    // jira.js provides a dedicated wrapper for this endpoint
+    return client.issues.getCreateIssueMetaIssueTypeId({
+      projectIdOrKey: input.projectIdOrKey,
+      issueTypeId: input.issueTypeId
+    })
   }
 
   async assignIssue(issueKey: string, accountId: string | null) {
