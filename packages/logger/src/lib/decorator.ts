@@ -4,12 +4,12 @@ const logger = LoggerFactory.getInstance()
 
 export function logging() {
   return function (
-    target: any,
+    target: unknown,
     propertyKey: string,
     descriptor: PropertyDescriptor
   ) {
-    const originalMethod = descriptor.value
-    descriptor.value = function (...args: any[]) {
+    const originalMethod = descriptor.value as (...args: unknown[]) => unknown
+    descriptor.value = function (...args: unknown[]) {
       logger.log(`Calling ${propertyKey} with arguments:`, args)
       const result = originalMethod.apply(this, args)
       logger.log(`Method ${propertyKey} returned:`, result)

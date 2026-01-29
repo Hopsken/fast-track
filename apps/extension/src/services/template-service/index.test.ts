@@ -22,7 +22,7 @@ describe('TemplateServiceImpl', () => {
         issueTypeName: 'Bug'
       },
       fields: { priority: { behavior: 'preset', presetValue: { id: '1' } } }
-    } as any)
+    })
 
     const fetched = await svc.getTemplate(created.id)
     expect(fetched?.name).toBe('Frontend Bug')
@@ -47,7 +47,7 @@ describe('TemplateServiceImpl', () => {
         issueTypeName: 'Bug'
       },
       fields: {}
-    } as any)
+    })
 
     await svc.markTemplateUsed(t.id)
     const again = await svc.getTemplate(t.id)

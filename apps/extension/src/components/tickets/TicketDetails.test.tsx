@@ -21,7 +21,10 @@ vi.mock('@/services', () => ({
 describe('TicketDetails', () => {
   beforeEach(() => {
     vi.resetAllMocks()
-    vi.mocked(useCommandNavigate).mockReturnValue({ pop: vi.fn() } as any)
+    vi.mocked(useCommandNavigate).mockReturnValue({
+      pop: vi.fn(),
+      push: vi.fn()
+    })
   })
 
   it('renders content', async () => {

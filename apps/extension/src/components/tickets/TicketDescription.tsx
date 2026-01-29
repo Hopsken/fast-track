@@ -3,7 +3,7 @@ import { useMemo } from '#imports'
 import DOMPurify from 'dompurify'
 
 export function TicketDescription({ html }: { html?: string }) {
-  // TODO: support images
+  // MVP: images are not supported yet
   const cleanHtml = useMemo(() => DOMPurify.sanitize(html || ''), [html])
 
   if (!cleanHtml) {

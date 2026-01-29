@@ -3,6 +3,7 @@ import { Button } from '@internal/ui/components/button'
 import { Input } from '@internal/ui/components/input'
 import { Label } from '@internal/ui/components/label'
 import { Textarea } from '@internal/ui/components/textarea'
+import { omit } from 'lodash-es'
 
 import { templateService, ticketService } from '@/services'
 import type { CachedFieldMetadata, IssueTemplate } from '~/types/template'
@@ -40,8 +41,9 @@ function mapCreateMetaToCache(input: {
       key: (record.key as string | undefined) ?? fieldId,
       name: (record.name as string | undefined) ?? fieldId,
       required: Boolean(record.required),
-      schema: schema as any,
-      allowedValues: allowedValues as any,
+      schema: schema as CachedFieldMetadata['fields'][number]['schema'],
+      allowedValues:
+        allowedValues as CachedFieldMetadata['fields'][number]['allowedValues'],
       autoCompleteUrl: record.autoCompleteUrl as string | undefined,
       hasDefaultValue: Boolean(record.hasDefaultValue),
       defaultValue: record.defaultValue as unknown
@@ -88,8 +90,8 @@ export function TemplateEditor({
         if (cancelled) return
         setLoadedTemplate(t)
         if (t) {
-          const { id: _id, createdAt: _c, updatedAt: _u, ...rest } = t
-          setDraft(rest)
+          const draft = omit(t, ['id', 'createdAt', 'updatedAt'])
+          setDraft(draft)
         }
       } catch (e) {
         if (cancelled) return
@@ -310,7 +312,11 @@ export function TemplateEditor({
       <div className="flex items-center justify-between gap-3">
         <div className="flex gap-2">
           <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? 'Saving…' : templateId ? 'Save' : 'Create'}
+            {(() => {
+              if (isSaving) return 'Saving…'
+              if (templateId) return 'Save'
+              return 'Create'
+            })()}
           </Button>
           {templateId ? (
             <Button variant="destructive" onClick={handleDelete}>

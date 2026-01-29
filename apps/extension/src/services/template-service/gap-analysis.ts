@@ -13,25 +13,32 @@ export interface VisibleField {
   conflict?: FieldConflict
 }
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function computeVisibleFields(
   template: IssueTemplate,
   cache?: CachedFieldMetadata,
   conflicts?: FieldConflict[]
 ): VisibleField[] {
-  const visible: VisibleField[] = []
-  const conflictMap = new Map((conflicts ?? []).map((c) => [c.fieldId, c]))
+  const conflictList = conflicts ?? []
+  const conflictMap = new Map(conflictList.map((c) => [c.fieldId, c]))
 
   const getMetadata = (fieldId: string) =>
     cache?.fields.find((f) => f.fieldId === fieldId)
 
-  // 1) Summary always
-  visible.push({
-    fieldId: 'summary',
-    metadata: getMetadata('summary'),
-    isEditable: true
-  })
+  const shouldSkipField = (fieldId: string) =>
+    fieldId === 'summary' ||
+    fieldId === 'description' ||
+    fieldId === 'project' ||
+    fieldId === 'issuetype'
 
-  // 2) Description (if visible or template exists)
+  const visible: VisibleField[] = [
+    {
+      fieldId: 'summary',
+      metadata: getMetadata('summary'),
+      isEditable: true
+    }
+  ]
+
   const descConfig = template.fields['description']
   if (descConfig?.behavior === 'visible' || template.descriptionTemplate) {
     visible.push({
@@ -42,10 +49,8 @@ export function computeVisibleFields(
     })
   }
 
-  // 3) Process configured fields
   for (const [fieldId, config] of Object.entries(template.fields)) {
-    if (fieldId === 'summary' || fieldId === 'description') continue
-    if (fieldId === 'project' || fieldId === 'issuetype') continue
+    if (shouldSkipField(fieldId)) continue
 
     const metadata = getMetadata(fieldId)
     const conflict = conflictMap.get(fieldId)
@@ -66,12 +71,9 @@ export function computeVisibleFields(
     }
   }
 
-  // 4) Add now_required conflicts not already visible
-  for (const conflict of conflicts ?? []) {
+  for (const conflict of conflictList) {
     if (conflict.type !== 'now_required') continue
-    if (conflict.fieldId === 'project' || conflict.fieldId === 'issuetype')
-      continue
-    if (conflict.fieldId === 'summary') continue
+    if (shouldSkipField(conflict.fieldId)) continue
 
     const alreadyVisible = visible.some((f) => f.fieldId === conflict.fieldId)
     if (alreadyVisible) continue

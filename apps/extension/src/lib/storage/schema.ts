@@ -42,8 +42,7 @@ interface LegacyAuthStorage {
 async function migrateFromLegacyAuthKeys(): Promise<AuthCredentials | null> {
   log.info('Running migration: consolidating legacy auth keys')
 
-  try {
-    // Read legacy values directly from storage
+  const readLegacy = async () => {
     const [authType, oauthTokens, oauthUserInfo, apiKeyAuth, jiraHost] =
       await Promise.all([
         storage.getItem<LegacyAuthStorage['AuthType']>('local:AuthType'),
@@ -55,12 +54,42 @@ async function migrateFromLegacyAuthKeys(): Promise<AuthCredentials | null> {
         storage.getItem<LegacyAuthStorage['JiraHost']>('local:JiraHost')
       ])
 
+    return { authType, oauthTokens, oauthUserInfo, apiKeyAuth, jiraHost }
+  }
+
+  const cleanupLegacy = async () => {
+    await Promise.all([
+      storage.removeItem('local:AuthType'),
+      storage.removeItem('local:OAuthTokens'),
+      storage.removeItem('local:OAuthUserInfo'),
+      storage.removeItem('local:ApiKeyAuth'),
+      storage.removeItem('local:JiraHost')
+    ])
+  }
+
+  const computeHost = (input: {
+    authType: LegacyAuthStorage['AuthType'] | null
+    oauthTokens: LegacyAuthStorage['OAuthTokens']
+    apiKeyAuth: LegacyAuthStorage['ApiKeyAuth']
+    jiraHost: LegacyAuthStorage['JiraHost'] | null
+  }) => {
+    const { authType, oauthTokens, apiKeyAuth, jiraHost } = input
+
+    if (authType === 'oauth' && oauthTokens?.host) return oauthTokens.host
+    if (authType === 'apiKey' && apiKeyAuth?.host) return apiKeyAuth.host
+
+    return jiraHost || ''
+  }
+
+  try {
+    const { authType, oauthTokens, oauthUserInfo, apiKeyAuth, jiraHost } =
+      await readLegacy()
+
     // Check if there's any auth data to migrate
     const hasOAuth = oauthTokens !== null
     const hasApiKey = apiKeyAuth !== null
-    const hasAnyAuth = hasOAuth || hasApiKey
 
-    if (!hasAnyAuth) {
+    if (!hasOAuth && !hasApiKey) {
       log.info('No existing auth data to migrate')
       return null
     }
@@ -68,25 +97,16 @@ async function migrateFromLegacyAuthKeys(): Promise<AuthCredentials | null> {
     // Warn about type/data mismatches
     if (authType === 'oauth' && !oauthTokens) {
       log.warn('authType is oauth but no tokens found, data may be corrupted')
-    }
-    if (authType === 'apiKey' && !apiKeyAuth) {
+    } else if (authType === 'apiKey' && !apiKeyAuth) {
       log.warn(
         'authType is apiKey but no API key config found, data may be corrupted'
       )
     }
 
-    // Determine the host - prefer from the active auth method
-    let host = jiraHost || ''
-    if (authType === 'oauth' && oauthTokens?.host) {
-      host = oauthTokens.host
-    } else if (authType === 'apiKey' && apiKeyAuth?.host) {
-      host = apiKeyAuth.host
-    }
-
     // Build consolidated credentials
     const credentials: AuthCredentials = {
       type: authType || 'oauth',
-      host,
+      host: computeHost({ authType, oauthTokens, apiKeyAuth, jiraHost }),
       userInfo: oauthUserInfo,
       oauth: oauthTokens
         ? {
@@ -131,15 +151,7 @@ async function migrateFromLegacyAuthKeys(): Promise<AuthCredentials | null> {
       hasUserInfo: !!credentials.userInfo
     })
 
-    // Clean up legacy keys after successful migration
-    await Promise.all([
-      storage.removeItem('local:AuthType'),
-      storage.removeItem('local:OAuthTokens'),
-      storage.removeItem('local:OAuthUserInfo'),
-      storage.removeItem('local:ApiKeyAuth'),
-      storage.removeItem('local:JiraHost')
-    ])
-
+    await cleanupLegacy()
     log.info('Legacy auth keys cleaned up')
 
     return credentials

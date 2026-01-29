@@ -9,7 +9,11 @@ import type { AxiosAdapter, AxiosResponse } from 'axios'
  * - The most reliable seam is providing `baseRequestConfig.adapter` to jira.js
  */
 export function createJiraE2EMockAdapter(): AxiosAdapter {
-  const json = (config: any, status: number, data: unknown): AxiosResponse => ({
+  const json = (
+    config: Parameters<AxiosAdapter>[0],
+    status: number,
+    data: unknown
+  ): AxiosResponse => ({
     status,
     statusText: String(status),
     data,
@@ -18,6 +22,19 @@ export function createJiraE2EMockAdapter(): AxiosAdapter {
     request: {}
   })
 
+  const getStatusName = (
+    statusCategoryKey: 'indeterminate' | 'new' | 'done'
+  ): string => {
+    switch (statusCategoryKey) {
+      case 'indeterminate':
+        return 'In Progress'
+      case 'new':
+        return 'To Do'
+      case 'done':
+        return 'Done'
+    }
+  }
+
   const makeIssue = (params: {
     host: string
     key: string
@@ -25,14 +42,9 @@ export function createJiraE2EMockAdapter(): AxiosAdapter {
     statusCategoryKey: 'indeterminate' | 'new' | 'done'
   }) => {
     const { host, key, summary, statusCategoryKey } = params
-    const id = key.replace(/[^0-9]/g, '') || key
+    const id = key.replace(/\D/g, '') || key
 
-    const statusName =
-      statusCategoryKey === 'indeterminate'
-        ? 'In Progress'
-        : statusCategoryKey === 'new'
-          ? 'To Do'
-          : 'Done'
+    const statusName = getStatusName(statusCategoryKey)
 
     return {
       id,
@@ -72,6 +84,7 @@ export function createJiraE2EMockAdapter(): AxiosAdapter {
     }
   }
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   return async (config) => {
     const method = (config.method ?? 'get').toLowerCase()
 

@@ -3,7 +3,7 @@ import type { PageOfCreateMetaIssueTypeWithField } from 'jira.js/version3/models
 import type { FieldMetadata } from '~/types/template'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return !!value && typeof value === 'object'
+  return !!value && typeof value === 'object' && !Array.isArray(value)
 }
 
 /**
@@ -18,23 +18,23 @@ export function parseCreateMetaFields(
   const list = input.fields ?? input.results ?? []
   if (!Array.isArray(list) || list.length === 0) return []
 
-  const fields: FieldMetadata[] = []
+  const out: FieldMetadata[] = []
 
-  for (const raw of list) {
-    if (!raw || !isRecord(raw)) continue
+  const toField = (raw: unknown): FieldMetadata | null => {
+    if (!raw || !isRecord(raw)) return null
 
     // FieldCreateMetadata id is the actual fieldId (e.g. 'summary', 'customfield_10010')
     const fieldId = typeof raw.fieldId === 'string' ? raw.fieldId : null
-    if (!fieldId) continue
+    if (!fieldId) return null
 
     const key = typeof raw.key === 'string' ? raw.key : fieldId
     const name = typeof raw.name === 'string' ? raw.name : key
     const required = typeof raw.required === 'boolean' ? raw.required : false
 
     const schema = isRecord(raw.schema) ? raw.schema : null
-    if (!schema || typeof schema.type !== 'string') continue
+    if (!schema || typeof schema.type !== 'string') return null
 
-    fields.push({
+    return {
       fieldId,
       key,
       name,
@@ -52,10 +52,15 @@ export function parseCreateMetaFields(
           ? raw.hasDefaultValue
           : undefined,
       defaultValue: (raw as { defaultValue?: unknown }).defaultValue
-    })
+    }
   }
 
-  return fields
+  for (const raw of list) {
+    const field = toField(raw)
+    if (field) out.push(field)
+  }
+
+  return out
 }
 
 export function isValidCreateMetaFields(fields: FieldMetadata[]): boolean {
