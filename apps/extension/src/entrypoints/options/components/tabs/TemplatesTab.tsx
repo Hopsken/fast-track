@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react'
 
-import type { IssueTemplate, TemplateScope } from '~/types/template'
+import type { IssueTemplate, IssueTemplateScope } from '~/types/template'
 
 import { TemplateEditor } from './TemplateEditor'
 import { TemplateList } from './TemplateList'
 
-const EMPTY_SCOPE: TemplateScope = {
-  siteUrl: '',
+const EMPTY_SCOPE: IssueTemplateScope = {
+  baseUrlHost: '',
   projectKey: '',
   issueTypeId: '',
   issueTypeName: ''

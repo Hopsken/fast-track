@@ -25,11 +25,11 @@ interface TemplateEditorProps {
 }
 
 function getCacheKey(input: {
-  siteUrl: string
+  baseUrlHost: string
   projectKey: string
   issueTypeId: string
 }) {
-  return `${input.siteUrl}:${input.projectKey}:${input.issueTypeId}`
+  return `${input.baseUrlHost}:${input.projectKey}:${input.issueTypeId}`
 }
 
 function mapCreateMetaToCache(input: {
@@ -116,18 +116,18 @@ export function TemplateEditor({
     }
   }, [templateId, initialDraft, stableTemplateService])
 
-  const scopeSiteUrl = draft.scope.siteUrl.trim()
+  const scopeBaseUrlHost = draft.scope.baseUrlHost.trim()
   const scopeProjectKey = draft.scope.projectKey.trim()
   const scopeIssueTypeId = draft.scope.issueTypeId.trim()
 
-  const canFetchMeta = scopeSiteUrl && scopeProjectKey && scopeIssueTypeId
+  const canFetchMeta = scopeBaseUrlHost && scopeProjectKey && scopeIssueTypeId
 
   const handleFetchMeta = useCallback(async () => {
     setMetaError(null)
 
     if (!canFetchMeta) {
       setMetaError(
-        'Please fill Site URL, Project Key, and Issue Type Id first.'
+        'Please fill Jira Host, Project Key, and Issue Type Id first.'
       )
       return
     }
@@ -140,7 +140,7 @@ export function TemplateEditor({
       })
 
       const cacheKey = getCacheKey({
-        siteUrl: scopeSiteUrl,
+        baseUrlHost: scopeBaseUrlHost,
         projectKey: scopeProjectKey,
         issueTypeId: scopeIssueTypeId
       })
@@ -156,7 +156,7 @@ export function TemplateEditor({
     canFetchMeta,
     scopeIssueTypeId,
     scopeProjectKey,
-    scopeSiteUrl,
+    scopeBaseUrlHost,
     stableTemplateService,
     stableTicketService
   ])
@@ -223,17 +223,17 @@ export function TemplateEditor({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="template-site">Site URL</Label>
+          <Label htmlFor="template-site">Jira Host</Label>
           <Input
             id="template-site"
-            value={draft.scope.siteUrl}
+            value={draft.scope.baseUrlHost}
             onChange={(e) =>
               setDraft((d) => ({
                 ...d,
-                scope: { ...d.scope, siteUrl: e.target.value }
+                scope: { ...d.scope, baseUrlHost: e.target.value }
               }))
             }
-            placeholder="https://your-company.atlassian.net"
+            placeholder="your-company.atlassian.net"
           />
         </div>
         <div className="space-y-2">

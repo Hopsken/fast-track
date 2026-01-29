@@ -4,7 +4,7 @@
 
 - **Monorepo**: Turborepo + pnpm workspaces (Node.js 22)
 - **Apps**: `apps/extension` (WXT), `apps/website` (Next.js), `packages/` (shared code)
-- **Shared UI**: `packages/ui` owns Shadcn components; add new ones via Shadcn CLI from there
+- **Shared UI**: `packages/ui` owns Shadcn components; add new ones via Shadcn CLI from there.
 - **Extension source**: `apps/extension/src/` → `entrypoints/`, `components/`, `hooks/`, `services/`, `storage/`, `stores/`, `utils/`
 - **Build output**: `apps/extension/.output/`; zips via `pnpm zip`
 - **Shared configs**: `packages/eslint-config`, `packages/typescript-config`, `packages/tailwind-config`.
@@ -20,6 +20,7 @@
 - **Module-First**: Abstract features into reusable modules before app code
 - **Test-First (TDD)**: Write failing tests → then implement (non-negotiable)
 - **Simplicity**: Use framework features directly; no unnecessary wrappers
+- **Best practice**: Follow React best practices and composition patterns.
 
 ## Quality Gates
 

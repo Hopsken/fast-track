@@ -1,11 +1,13 @@
 import { defineProxyService } from '@webext-core/proxy-service'
 import { omit } from 'lodash-es'
+import { nanoid } from 'nanoid'
 
 import { getStorageItem } from '~/lib/storage/schema'
-import type {
-  CachedFieldMetadata,
-  FieldConflict,
-  IssueTemplate
+import {
+  IssueTemplateSchema,
+  type CachedFieldMetadata,
+  type FieldConflict,
+  type IssueTemplate
 } from '~/types/template'
 
 const MAX_TEMPLATES = 50
@@ -23,18 +25,26 @@ export class TemplateServiceImpl {
 
   // ===== CRUD =====
   async getTemplates(): Promise<IssueTemplate[]> {
-    return this.templatesItem.getValue()
+    const templates = await this.templatesItem.getValue()
+
+    const valid: IssueTemplate[] = []
+    for (const t of templates) {
+      const res = IssueTemplateSchema.safeParse(t)
+      if (res.success) valid.push(res.data)
+    }
+
+    return valid
   }
 
   async getTemplate(id: string): Promise<IssueTemplate | null> {
-    const templates = await this.templatesItem.getValue()
+    const templates = await this.getTemplates()
     return templates.find((t) => t.id === id) ?? null
   }
 
   async createTemplate(
     input: Omit<IssueTemplate, 'id' | 'createdAt' | 'updatedAt'>
   ): Promise<IssueTemplate> {
-    const templates = await this.templatesItem.getValue()
+    const templates = await this.getTemplates()
 
     if (templates.length >= MAX_TEMPLATES) {
       throw new Error(
@@ -43,28 +53,33 @@ export class TemplateServiceImpl {
     }
 
     const now = new Date().toISOString()
-    const template: IssueTemplate = {
+    const candidate: IssueTemplate = {
       ...input,
-      id: crypto.randomUUID(),
+      id: nanoid(),
       createdAt: now,
       updatedAt: now
     }
 
-    await this.templatesItem.setValue([...templates, template])
-    return template
+    const parsed = IssueTemplateSchema.safeParse(candidate)
+    if (!parsed.success) {
+      throw new Error(`Invalid template: ${parsed.error.message}`)
+    }
+
+    await this.templatesItem.setValue([...templates, parsed.data])
+    return parsed.data
   }
 
   async updateTemplate(
     id: string,
     updates: Partial<IssueTemplate>
   ): Promise<IssueTemplate> {
-    const templates = await this.templatesItem.getValue()
+    const templates = await this.getTemplates()
     const idx = templates.findIndex((t) => t.id === id)
     if (idx === -1) throw new Error('Template not found')
 
     const current = templates[idx] as IssueTemplate
 
-    const next: IssueTemplate = {
+    const candidate: IssueTemplate = {
       ...current,
       ...updates,
       id,
@@ -73,18 +88,23 @@ export class TemplateServiceImpl {
       trigger: updates.trigger ?? current.trigger,
       scope: updates.scope ?? current.scope,
       fields: updates.fields ?? current.fields,
-      createdAt: updates.createdAt ?? current.createdAt,
+      createdAt: current.createdAt,
       updatedAt: new Date().toISOString()
     }
 
+    const parsed = IssueTemplateSchema.safeParse(candidate)
+    if (!parsed.success) {
+      throw new Error(`Invalid template: ${parsed.error.message}`)
+    }
+
     const copy = templates.slice()
-    copy[idx] = next
+    copy[idx] = parsed.data
     await this.templatesItem.setValue(copy)
-    return next
+    return parsed.data
   }
 
   async deleteTemplate(id: string): Promise<void> {
-    const templates = await this.templatesItem.getValue()
+    const templates = await this.getTemplates()
     await this.templatesItem.setValue(templates.filter((t) => t.id !== id))
 
     const conflicts = await this.conflictsItem.getValue()

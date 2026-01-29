@@ -3,7 +3,7 @@ date: '2026-01-28'
 title: 'Fast Track Issue Templates'
 directory: '/Users/shaowei/Projects/jira-boost'
 status: cancelled
-dependencies: []
+dependencies: [jira-templates-wizard-and-scoped-crud]
 dependents: []
 ---
 

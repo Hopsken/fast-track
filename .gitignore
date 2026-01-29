@@ -63,3 +63,4 @@ web-ext.config.ts
 !.gemini/settings.json
 
 *.tsbuildinfo
+.osgrep
