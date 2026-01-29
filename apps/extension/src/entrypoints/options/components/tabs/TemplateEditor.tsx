@@ -1,4 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from '@internal/ui/components/alert-dialog'
 import { Button } from '@internal/ui/components/button'
 import { Input } from '@internal/ui/components/input'
 import { Label } from '@internal/ui/components/label'
@@ -171,8 +182,6 @@ export function TemplateEditor({
 
   const handleDelete = useCallback(async () => {
     if (!templateId) return
-    const confirmed = window.confirm('Delete this template?')
-    if (!confirmed) return
 
     setError(null)
     try {
@@ -318,10 +327,31 @@ export function TemplateEditor({
               return 'Create'
             })()}
           </Button>
+
           {templateId ? (
-            <Button variant="destructive" onClick={handleDelete}>
-              Delete
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">Delete</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete template?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action can’t be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel asChild>
+                    <Button variant="secondary">Cancel</Button>
+                  </AlertDialogCancel>
+                  <AlertDialogAction asChild>
+                    <Button variant="destructive" onClick={handleDelete}>
+                      Delete
+                    </Button>
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           ) : null}
         </div>
 

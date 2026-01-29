@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 import { Button } from '@internal/ui/components/button'
 
 import { useTemplates } from '~/hooks/useTemplates'
+import { cn } from '~/lib/utils'
 
 interface TemplateListProps {
   selectedId: string | null
@@ -22,31 +23,42 @@ export function TemplateList({ selectedId, onSelect }: TemplateListProps) {
         </Button>
       </div>
 
-      <div className="rounded-md border border-gray-200 bg-white">
+      <div className="bg-background rounded-md border">
         {isLoading ? (
-          <div className="p-3 text-sm text-gray-600">Loading…</div>
+          <div className="text-muted-foreground p-3 text-sm">Loading…</div>
         ) : null}
 
         {!isLoading && (templates?.length ?? 0) === 0 ? (
-          <div className="p-3 text-sm text-gray-600">No templates yet.</div>
+          <div className="flex items-center justify-between gap-3 p-3">
+            <div className="text-muted-foreground text-sm">
+              No templates yet.
+            </div>
+            <Button size="sm" variant="secondary" onClick={handleNew}>
+              Create one
+            </Button>
+          </div>
         ) : null}
 
         {!isLoading && (templates?.length ?? 0) > 0 ? (
           <ul className="divide-y">
             {templates?.map((t) => {
               const isSelected = selectedId === t.id
-              const buttonClass =
-                'flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors ' +
-                (isSelected ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50')
 
               return (
                 <li key={t.id}>
                   <button
                     type="button"
-                    className={buttonClass}
+                    aria-current={isSelected ? 'true' : undefined}
+                    className={cn(
+                      'flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors',
+                      'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+                      isSelected
+                        ? 'bg-accent text-accent-foreground'
+                        : 'hover:bg-muted'
+                    )}
                     onClick={() => onSelect(t.id)}>
                     <span className="truncate font-medium">{t.name}</span>
-                    <span className="ml-2 shrink-0 rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
+                    <span className="bg-muted text-muted-foreground ml-2 shrink-0 rounded px-2 py-0.5 text-xs">
                       {t.trigger}
                     </span>
                   </button>
