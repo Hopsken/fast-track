@@ -1,19 +1,12 @@
 import { defineProxyService } from '@webext-core/proxy-service'
+import { omit } from 'lodash-es'
 
-import { getJiraApi } from '~/lib/jira'
 import { getStorageItem } from '~/lib/storage/schema'
 import type {
   CachedFieldMetadata,
   FieldConflict,
   IssueTemplate
 } from '~/types/template'
-
-import { getTicketService } from '../ticket-service'
-
-export interface RefreshForActiveSiteOptions {
-  ttlMs: number
-  limit: number
-}
 
 const MAX_TEMPLATES = 50
 
@@ -96,8 +89,7 @@ export class TemplateServiceImpl {
 
     const conflicts = await this.conflictsItem.getValue()
     if (conflicts[id]) {
-      const { [id]: _removed, ...rest } = conflicts
-      await this.conflictsItem.setValue(rest)
+      await this.conflictsItem.setValue(omit(conflicts, id))
     }
   }
 
