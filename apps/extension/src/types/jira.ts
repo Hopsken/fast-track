@@ -42,6 +42,31 @@ export interface JiraMergeRequest {
   provider: 'github' | 'gitlab'
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// Projects (minimal shape used by the extension)
+// ─────────────────────────────────────────────────────────────────────────
+
+export interface JiraProjectIssueType {
+  id: string
+  name: string
+  description?: string
+  iconUrl?: string
+  subtask?: boolean
+}
+
+/**
+ * Minimal project shape used by the extension UI.
+ *
+ * Note: `issueTypes` is always present (can be empty).
+ */
+export interface JiraProject {
+  id: string
+  key: string
+  name: string
+  issueTypes: JiraProjectIssueType[]
+  avatarUrl?: string
+}
+
 export type IssueSource = 'history' | 'sprint' | 'sniff' | 'picker' | 'watching'
 
 export interface JiraTicket {

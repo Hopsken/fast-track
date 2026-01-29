@@ -125,9 +125,7 @@ export class ProjectServiceImpl {
       maxResults: 7
     })
 
-    return (page.values ?? [])
-      .filter((p) => Boolean(p.key && p.name))
-      .map((p) => ({ key: p.key!, name: p.name! }))
+    return (page.values ?? []).map((p) => ({ key: p.key, name: p.name }))
   }
 
   async getProjectIssueTypes(
@@ -135,9 +133,7 @@ export class ProjectServiceImpl {
   ): Promise<Array<{ id: string; name: string }>> {
     const issueTypes = await this.jira.projects.getProjectIssueTypes(projectId)
 
-    return (issueTypes ?? [])
-      .filter((it) => Boolean(it.id && it.name))
-      .map((it) => ({ id: it.id!, name: it.name! }))
+    return (issueTypes ?? []).map((it) => ({ id: it.id, name: it.name }))
   }
 }
 
