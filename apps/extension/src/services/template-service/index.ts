@@ -85,7 +85,6 @@ export class TemplateServiceImpl {
       id,
       // preserve required fields if caller passes partial updates
       name: updates.name ?? current.name,
-      trigger: updates.trigger ?? current.trigger,
       scope: updates.scope ?? current.scope,
       fields: updates.fields ?? current.fields,
       createdAt: current.createdAt,

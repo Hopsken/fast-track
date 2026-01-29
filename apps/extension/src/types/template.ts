@@ -35,7 +35,6 @@ export type FieldConfig = z.infer<typeof FieldConfigSchema>
 export const IssueTemplateSchema = z.object({
   id: z.string().min(1),
   name: z.string().trim().min(1),
-  trigger: z.string().trim().min(1),
   icon: z.string().optional(),
   scope: IssueTemplateScopeSchema,
   fields: z.record(z.string(), FieldConfigSchema),

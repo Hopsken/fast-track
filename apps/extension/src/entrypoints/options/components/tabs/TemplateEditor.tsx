@@ -210,17 +210,6 @@ export function TemplateEditor({
             placeholder="Bug report"
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="template-trigger">Trigger</Label>
-          <Input
-            id="template-trigger"
-            value={draft.trigger}
-            onChange={(e) =>
-              setDraft((d) => ({ ...d, trigger: e.target.value }))
-            }
-            placeholder="bug"
-          />
-        </div>
 
         <div className="space-y-2">
           <Label htmlFor="template-site">Jira Host</Label>

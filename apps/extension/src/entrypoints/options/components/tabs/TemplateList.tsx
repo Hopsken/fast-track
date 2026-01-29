@@ -58,9 +58,6 @@ export function TemplateList({ selectedId, onSelect }: TemplateListProps) {
                     )}
                     onClick={() => onSelect(t.id)}>
                     <span className="truncate font-medium">{t.name}</span>
-                    <span className="bg-muted text-muted-foreground ml-2 shrink-0 rounded px-2 py-0.5 text-xs">
-                      {t.trigger}
-                    </span>
                   </button>
                 </li>
               )

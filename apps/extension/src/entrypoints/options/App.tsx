@@ -7,11 +7,15 @@ import {
   useNavigate
 } from 'react-router-dom'
 
+import { QueryClientProvider } from '@/components/QueryClientProvider'
 import { UserPreferencesProvider } from '~/stores/useUserPreferences'
 
 import { OptionsHeader, TabNavigation, AboutTab } from './components'
 import { GeneralTab } from './components/tabs/GeneralTab'
 import { LicenseTab } from './components/tabs/LicenseTab'
+import { TemplateDetailPage } from './routes/templates/TemplateDetailPage'
+import { TemplatesIndexPage } from './routes/templates/TemplatesIndexPage'
+import { TemplateWizardPage } from './routes/templates/TemplateWizardPage'
 
 import '~/assets/styles/main.css'
 
@@ -35,6 +39,11 @@ function OptionsPageLayout() {
               <Routes>
                 <Route path="/" element={<Navigate to="/general" replace />} />
                 <Route path="/general" element={<GeneralTab />} />
+
+                <Route path="/templates" element={<TemplatesIndexPage />} />
+                <Route path="/templates/new" element={<TemplateWizardPage />} />
+                <Route path="/templates/:id" element={<TemplateDetailPage />} />
+
                 <Route path="/license" element={<LicenseTab />} />
                 <Route path="/about" element={<AboutTab version={version} />} />
                 <Route path="*" element={<Navigate to="/general" replace />} />
@@ -50,7 +59,9 @@ function OptionsPageLayout() {
 function OptionsPage() {
   return (
     <HashRouter>
-      <OptionsPageLayout />
+      <QueryClientProvider>
+        <OptionsPageLayout />
+      </QueryClientProvider>
     </HashRouter>
   )
 }

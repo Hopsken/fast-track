@@ -26,7 +26,6 @@ describe('TemplateServiceImpl', () => {
 
     const created = await svc.createTemplate({
       name: 'Frontend Bug',
-      trigger: 'febug',
       icon: '🐞',
       scope: {
         baseUrlHost: 'a.atlassian.net',
@@ -54,7 +53,6 @@ describe('TemplateServiceImpl', () => {
 
     const t = await svc.createTemplate({
       name: 'T',
-      trigger: 't',
       scope: {
         baseUrlHost: 'a.atlassian.net',
         projectKey: 'PROJ',
@@ -74,7 +72,6 @@ describe('TemplateServiceImpl', () => {
 
     await svc.createTemplate({
       name: 'Valid',
-      trigger: 'v',
       scope: {
         baseUrlHost: 'a.atlassian.net',
         projectKey: 'PROJ',
@@ -122,7 +119,6 @@ describe('TemplateServiceImpl', () => {
     await expect(
       svc.createTemplate({
         name: 'Bad',
-        trigger: 'bad',
         scope: {
           baseUrlHost: 'a.atlassian.net',
           projectKey: 'PROJ',

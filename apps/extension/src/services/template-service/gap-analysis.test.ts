@@ -14,7 +14,6 @@ function createTemplate(partial?: Partial<IssueTemplate>): IssueTemplate {
   return {
     id: 't1',
     name: 'Template',
-    trigger: 'tmp',
     scope: {
       baseUrlHost: 'example.atlassian.net',
       projectKey: 'PROJ',

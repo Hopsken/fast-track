@@ -1,5 +1,5 @@
 import { ComponentType } from 'react'
-import { Info, KeyRound, Settings } from 'lucide-react'
+import { FileText, Info, KeyRound, Settings } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
 export interface Tab {
@@ -10,6 +10,7 @@ export interface Tab {
 
 export const tabs: Tab[] = [
   { id: 'general', label: 'General', icon: Settings },
+  { id: 'templates', label: 'Templates', icon: FileText },
   { id: 'license', label: 'License', icon: KeyRound },
   { id: 'about', label: 'About', icon: Info }
 ]
