@@ -16,6 +16,7 @@ import { fromStorage$, getStorageItem } from '../storage'
 
 import { AuthApi } from './auth-api'
 import { JiraIssueService } from './issues'
+import { JiraProjectService } from './projects'
 
 const log = getLogger('jira-api')
 
@@ -98,6 +99,7 @@ class JiraAPIImpl {
   private refreshTimeoutId: number | null = null
   private refreshPromise: Promise<void> | null = null
   private issueService: JiraIssueService | null = null
+  private projectService: JiraProjectService | null = null
 
   constructor() {
     this.setupAuthSubscription()
@@ -147,6 +149,7 @@ class JiraAPIImpl {
     this.v3Client = null
     this.clientCredentialsSignature = null
     this.issueService = null
+    this.projectService = null
     if (this.refreshTimeoutId) {
       clearTimeout(this.refreshTimeoutId)
       this.refreshTimeoutId = null
@@ -312,6 +315,16 @@ class JiraAPIImpl {
       )
     }
     return this.issueService
+  }
+
+  /**
+   * Project operations (list/search, issue types)
+   */
+  get projects(): JiraProjectService {
+    if (!this.projectService) {
+      this.projectService = new JiraProjectService(async () => this.getClient())
+    }
+    return this.projectService
   }
 
   /**

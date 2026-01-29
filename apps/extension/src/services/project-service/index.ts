@@ -3,6 +3,7 @@ import { compact, countBy, flatMap, orderBy } from 'lodash-es'
 
 import { getStorageItem } from '@/lib/storage'
 import { IssueSuggestion } from '@/services/ticket-service'
+import { getJiraApi } from '~/lib/jira'
 
 export type ProjectClickInfo = {
   count: number
@@ -50,7 +51,9 @@ const collectSuggestionProjects = (suggestions?: IssueSuggestion) => {
   )
 }
 
-class ProjectServiceImpl {
+export class ProjectServiceImpl {
+  private jira = getJiraApi()
+
   private scoreProjects(suggestionProjects: string[], clicks: ProjectClicks) {
     const suggestionCounts = countBy(
       suggestionProjects.map(normalizeProjectKey).filter(Boolean)
@@ -111,6 +114,30 @@ class ProjectServiceImpl {
     ])
 
     return this.scoreProjects(suggestionProjects, clicks ?? {})
+  }
+
+  async searchProjects(
+    query: string
+  ): Promise<Array<{ key: string; name: string }>> {
+    const normalized = query.trim()
+
+    const page = await this.jira.projects.searchProjects(normalized, {
+      maxResults: 7
+    })
+
+    return (page.values ?? [])
+      .filter((p) => Boolean(p.key && p.name))
+      .map((p) => ({ key: p.key!, name: p.name! }))
+  }
+
+  async getProjectIssueTypes(
+    projectId: string
+  ): Promise<Array<{ id: string; name: string }>> {
+    const issueTypes = await this.jira.projects.getProjectIssueTypes(projectId)
+
+    return (issueTypes ?? [])
+      .filter((it) => Boolean(it.id && it.name))
+      .map((it) => ({ id: it.id!, name: it.name! }))
   }
 }
 

@@ -328,11 +328,11 @@ Also add a default redirect if needed.
 
 ## Step 3
 
-- [ ] Extend `ProjectServiceImpl`:
-  - [ ] `listProjects(): Promise<Array<{ key: string; name: string }>>`
-  - [ ] `searchProjects(query: string): Promise<Array<{ key: string; name: string }>>`
-  - [ ] `getIssueTypesForProject(projectKey: string): Promise<Array<{ id: string; name: string }>>`
-  - [ ] Add tests using mocked Jira layer.
+- [x] Extend `ProjectServiceImpl`:
+  - [x] `listProjects(): Promise<Array<{ key: string; name: string }>>`
+  - [x] `searchProjects(query: string): Promise<Array<{ key: string; name: string }>>`
+  - [x] `getIssueTypesForProject(projectKey: string): Promise<Array<{ id: string; name: string }>>`
+  - [x] Add tests using mocked Jira layer.
 
 ## Step 4
 
@@ -451,3 +451,26 @@ Also add a default redirect if needed.
     - Added coverage that create rejects invalid input.
     - Note: tests now explicitly clear shared fake storage between runs.
   - Fix during this step: adjusted `IssueTemplateSchema.fields` to use `z.record(z.string(), FieldConfigSchema)` (Zod v4 record signature) so field configs validate correctly.
+
+- [x] Step 5: Extended `ProjectServiceImpl` with Jira-backed project + issue type APIs.
+  - Change requested after initial implementation: **use jira.js service wrappers instead of raw `jira.request`**.
+  - Added: `apps/extension/src/lib/jira/projects.ts` (`JiraProjectService`)
+    - Wraps jira.js V3 endpoints:
+      - `client.projects.searchProjects(...)`
+      - `client.issueTypes.getIssueTypesForProject(...)`
+    - Adds convenience helpers:
+      - `listProjects()` (pagination)
+      - `getProjectByKey()`
+      - `getIssueTypesForProjectKey()`
+  - Updated: `apps/extension/src/lib/jira/api.ts`
+    - Added `jira.projects` getter (similar to `jira.issues`) backed by `JiraProjectService`.
+  - Updated: `apps/extension/src/services/project-service/index.ts`
+    - `listProjects`, `searchProjects`, `getIssueTypesForProject` now call `getJiraApi().projects.*` instead of `getJiraApi().request`.
+  - Updated tests with mocked Jira layer:
+    - `apps/extension/src/services/project-service/index.test.ts`
+    - Now mocks `getJiraApi().projects` and verifies mapping + error propagation.
+  - Follow-up fix: resolved TypeScript type errors introduced by the JiraProjectService refactor.
+    - `apps/extension/src/lib/jira/projects.ts`: fixed `keys` param type (jira.js expects `string[]`, not comma-separated string)
+    - `apps/extension/src/services/project-service/index.ts`: removed invalid type predicates on jira.js `Project` and used narrowing + non-null assertions
+    - `apps/extension/src/services/project-service/index.test.ts`: removed invalid `vi.fn<...>` generic usage that didn't match Vitest's typings
+    - Verified: `pnpm -C apps/extension typecheck` passes
