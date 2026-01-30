@@ -89,7 +89,7 @@ describe('TemplateWizardPage', () => {
       </QueryClientProvider>
     )
 
-    const continueButton = screen.getByRole('button', { name: 'Next: Basics' })
+    const continueButton = screen.getByRole('button', { name: 'Next: Fields' })
     expect((continueButton as HTMLButtonElement).disabled).toBe(true)
 
     const projectInput = screen.getByPlaceholderText('Search projects…')

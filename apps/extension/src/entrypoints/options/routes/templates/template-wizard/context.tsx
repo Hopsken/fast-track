@@ -4,6 +4,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState
 } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -16,6 +17,8 @@ import { queryKeys } from '@/utils/queryKeys'
 import { minutes } from '@/utils/time'
 import { getProjectService } from '~/services/project-service'
 import { getTemplateService } from '~/services/template-service'
+import { getTicketService } from '~/services/ticket-service'
+import type { FieldConfig, FieldMetadata } from '~/types/template'
 
 import { type Step, type WizardScope } from './types'
 
@@ -33,6 +36,13 @@ export type WizardState = {
   // Issue type picker
   issueTypeOptions: SearchOption<JiraIssueType>[]
 
+  // Fields (Step 2)
+  availableFields: FieldMetadata[]
+  areFieldsLoading: boolean
+  fieldsError: string | null
+  fieldsConfig: Record<string, FieldConfig>
+
+  // Basics (Step 3)
   name: string
   descriptionTemplate: string
 
@@ -48,6 +58,9 @@ export type WizardActions = {
 
   selectIssueType: (opt: JiraIssueType | null) => void
 
+  setFieldConfig: (fieldId: string, config: FieldConfig) => void
+  removeFieldConfig: (fieldId: string) => void
+
   setName: (next: string) => void
   setDescriptionTemplate: (next: string) => void
 
@@ -57,6 +70,7 @@ export type WizardActions = {
 export type WizardMeta = {
   host: string
   canProceedToStep2: boolean
+  canProceedToStep3: boolean
   canSave: boolean
 
   isIssueTypeDisabled: boolean
@@ -112,7 +126,6 @@ export function TemplateWizardProvider({
       const svc = getProjectService()
       return q.length === 0 ? svc.getRecentProjects() : svc.searchProjects(q)
     },
-    // Always enabled so users see results instantly when opening the picker.
     staleTime: minutes(1),
     gcTime: minutes(5)
   })
@@ -127,8 +140,9 @@ export function TemplateWizardProvider({
   }, [projectsQuery.data])
 
   const isProjectOptionsLoading = projectsQuery.isLoading
-
-  const projectError = formatErrorMessage(projectsQuery.error)
+  const projectError = projectsQuery.error
+    ? formatErrorMessage(projectsQuery.error)
+    : null
 
   const issueTypeOptions = useMemo(() => {
     const { project } = scope
@@ -143,6 +157,68 @@ export function TemplateWizardProvider({
       }))
   }, [scope])
 
+  // --- Step 2: Fields ---
+
+  const fieldsQuery = useQuery({
+    queryKey: queryKeys.tickets.createMeta(
+      scope.project?.key ?? '',
+      scope.issueType?.id ?? ''
+    ),
+    queryFn: async () => {
+      if (!scope.project || !scope.issueType) return []
+      const svc = getTicketService()
+      return svc.getCreateIssueFields({
+        projectIdOrKey: scope.project.key,
+        issueTypeId: scope.issueType.id
+      })
+    },
+    enabled: Boolean(scope.project && scope.issueType),
+    staleTime: minutes(5)
+  })
+
+  const availableFields = useMemo(
+    () => fieldsQuery.data ?? [],
+    [fieldsQuery.data]
+  )
+  const areFieldsLoading = fieldsQuery.isLoading
+  const fieldsError = fieldsQuery.error
+    ? formatErrorMessage(fieldsQuery.error)
+    : null
+
+  // Reset fieldsConfig when scope changes (derive during render, not via effect)
+  const scopeKey = `${scope.project?.key ?? ''}:${scope.issueType?.id ?? ''}`
+  const prevScopeKeyRef = useRef(scopeKey)
+  const [fieldsConfig, setFieldsConfig] = useState<Record<string, FieldConfig>>(
+    {}
+  )
+  if (prevScopeKeyRef.current !== scopeKey) {
+    prevScopeKeyRef.current = scopeKey
+    setFieldsConfig({})
+  }
+
+  const setFieldConfig = useCallback((fieldId: string, config: FieldConfig) => {
+    setFieldsConfig((prev) => ({
+      ...prev,
+      [fieldId]: config
+    }))
+  }, [])
+
+  const removeFieldConfig = useCallback(
+    (fieldId: string) => {
+      // Guard: never ignore required fields
+      const meta = availableFields.find((f) => f.fieldId === fieldId)
+      if (meta?.required) return
+
+      setFieldsConfig((prev) => ({
+        ...prev,
+        [fieldId]: { behavior: 'ignore', presetValue: undefined }
+      }))
+    },
+    [availableFields]
+  )
+
+  // --- Step 3: Basics ---
+
   const [name, setName] = useState('')
   const [descriptionTemplate, setDescriptionTemplate] = useState('')
 
@@ -150,6 +226,7 @@ export function TemplateWizardProvider({
   const [isSaving, setIsSaving] = useState(false)
 
   const canProceedToStep2 = Boolean(scope.project && scope.issueType)
+  const canProceedToStep3 = true // Fields are optional/configurable
 
   const canSave = Boolean(name.trim()) && Boolean(host) && canProceedToStep2
 
@@ -202,7 +279,15 @@ export function TemplateWizardProvider({
           issueTypeId: scope.issueType.id,
           issueTypeName: scope.issueType.name
         },
-        fields: {},
+        fields: {
+          // Ensure required fields are always saved as visible
+          ...Object.fromEntries(
+            availableFields
+              .filter((f) => f.required)
+              .map((f) => [f.fieldId, { behavior: 'visible' as const }])
+          ),
+          ...fieldsConfig
+        },
         descriptionTemplate: descriptionTemplate.trim()
           ? descriptionTemplate
           : undefined,
@@ -215,7 +300,15 @@ export function TemplateWizardProvider({
     } finally {
       setIsSaving(false)
     }
-  }, [descriptionTemplate, host, name, onCreated, scope])
+  }, [
+    availableFields,
+    descriptionTemplate,
+    fieldsConfig,
+    host,
+    name,
+    onCreated,
+    scope
+  ])
 
   const state = useMemo<WizardState>(
     () => ({
@@ -226,46 +319,54 @@ export function TemplateWizardProvider({
       isProjectOptionsLoading,
       projectError,
       issueTypeOptions,
+      availableFields,
+      areFieldsLoading,
+      fieldsError,
+      fieldsConfig,
       name,
       descriptionTemplate,
       saveError,
       isSaving
     }),
     [
-      descriptionTemplate,
-      isProjectOptionsLoading,
-      isSaving,
-      issueTypeOptions,
-      name,
-      projectError,
-      projectOptions,
-      projectQuery,
-      saveError,
+      step,
       scope,
-      step
+      projectQuery,
+      projectOptions,
+      isProjectOptionsLoading,
+      projectError,
+      issueTypeOptions,
+      availableFields,
+      areFieldsLoading,
+      fieldsError,
+      fieldsConfig,
+      name,
+      descriptionTemplate,
+      saveError,
+      isSaving
     ]
   )
 
   const actions = useMemo<WizardActions>(
     () => ({
       goToStep: setStep,
-
       setProjectQuery,
       selectProject,
-
       selectIssueType,
-
+      setFieldConfig,
+      removeFieldConfig,
       setName,
       setDescriptionTemplate,
       save
     }),
-    [save, selectIssueType, selectProject]
+    [removeFieldConfig, save, selectIssueType, selectProject, setFieldConfig]
   )
 
   const meta = useMemo<WizardMeta>(
     () => ({
       host,
       canProceedToStep2,
+      canProceedToStep3,
       canSave,
       isIssueTypeDisabled,
       issueTypePlaceholder,
@@ -273,6 +374,7 @@ export function TemplateWizardProvider({
     }),
     [
       canProceedToStep2,
+      canProceedToStep3,
       canSave,
       host,
       isIssueTypeDisabled,

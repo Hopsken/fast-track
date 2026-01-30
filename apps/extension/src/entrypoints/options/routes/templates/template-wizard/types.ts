@@ -5,4 +5,4 @@ export type WizardScope = {
   issueType?: JiraIssueType
 }
 
-export type Step = 1 | 2
+export type Step = 1 | 2 | 3

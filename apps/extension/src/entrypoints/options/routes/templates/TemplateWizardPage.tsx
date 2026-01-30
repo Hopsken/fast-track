@@ -35,6 +35,7 @@ export function TemplateWizardPage() {
       <div className="space-y-6">
         <TemplateWizard.Header />
         <TemplateWizard.ScopeStep />
+        <TemplateWizard.FieldsStep />
         <TemplateWizard.BasicsStep />
       </div>
     </TemplateWizard.Provider>

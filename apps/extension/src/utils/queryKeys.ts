@@ -42,6 +42,8 @@ export const queryKeys = {
     mergeRequests: (ticketKey: string) =>
       ['tickets', ticketKey, 'mergeRequests'] as const,
     transitions: (ticket: JiraTicket) =>
-      ['tickets', ticket.key, 'transitions', ticket.status.name] as const
+      ['tickets', ticket.key, 'transitions', ticket.status.name] as const,
+    createMeta: (projectId: string, issueTypeId: string) =>
+      ['tickets', 'createMeta', projectId, issueTypeId] as const
   }
 }

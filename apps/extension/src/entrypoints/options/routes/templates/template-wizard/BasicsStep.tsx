@@ -13,13 +13,11 @@ export function TemplateWizardBasicsStep() {
     meta: { canSave }
   } = useWizardContext()
 
-  if (step !== 2) return null
+  if (step !== 3) return null
 
   return (
     <div className="space-y-4">
       <div className="space-y-4">
-        <h3 className="text-sm font-medium text-gray-900">Basics</h3>
-
         <div className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2">
@@ -56,7 +54,7 @@ export function TemplateWizardBasicsStep() {
       </div>
 
       <div className="flex items-center justify-between gap-3">
-        <Button variant="secondary" onClick={() => goToStep(1)}>
+        <Button variant="secondary" onClick={() => goToStep(2)}>
           Back
         </Button>
         <div className="flex items-center gap-2">

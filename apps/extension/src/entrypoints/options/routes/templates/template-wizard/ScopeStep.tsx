@@ -88,7 +88,7 @@ export function TemplateWizardScopeStep() {
           <Link to="/templates">Cancel</Link>
         </Button>
         <Button onClick={() => goToStep(2)} disabled={!canProceedToStep2}>
-          Next: Basics
+          Next: Fields
         </Button>
       </div>
     </div>
