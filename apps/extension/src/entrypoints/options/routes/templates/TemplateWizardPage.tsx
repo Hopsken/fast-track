@@ -28,6 +28,7 @@ export function TemplateWizardPage() {
 
   return (
     <TemplateWizard.Provider
+      mode="create"
       host={currentHost}
       onCreated={(id) => {
         navigate(`/templates/${id}`)

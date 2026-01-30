@@ -1,4 +1,15 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, useState } from 'react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from '@internal/ui/components/alert-dialog'
 import { Button } from '@internal/ui/components/button'
 import { Separator } from '@internal/ui/components/separator'
 import { Link } from 'react-router-dom'
@@ -45,11 +56,55 @@ function AutoGrowTextarea({
 }
 
 /* ------------------------------------------------------------------ */
+/*  Delete confirmation dialog                                         */
+/* ------------------------------------------------------------------ */
+
+function DeleteDialog({
+  onConfirm,
+  isDeleting
+}: {
+  onConfirm: () => void
+  isDeleting: boolean
+}) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger asChild>
+        <Button variant="destructive" disabled={isDeleting}>
+          {isDeleting ? 'Deleting…' : 'Delete'}
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete template?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action can&apos;t be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel asChild>
+            <Button variant="secondary">Cancel</Button>
+          </AlertDialogCancel>
+          <AlertDialogAction asChild>
+            <Button variant="destructive" onClick={onConfirm}>
+              Delete
+            </Button>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  )
+}
+
+/* ------------------------------------------------------------------ */
 /*  Template editor                                                    */
 /* ------------------------------------------------------------------ */
 
 export function TemplateEditor() {
   const { state, actions, meta } = useWizardContext()
+
+  const isEdit = meta.mode === 'edit'
 
   return (
     <div className="space-y-8">
@@ -90,14 +145,30 @@ export function TemplateEditor() {
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-end gap-2 pt-4">
+      <div className="flex items-center gap-2 pt-4">
+        {/* Delete button (edit mode only, left-aligned) */}
+        {isEdit && actions.deleteTemplate && (
+          <DeleteDialog
+            onConfirm={() => void actions.deleteTemplate!()}
+            isDeleting={state.isDeleting}
+          />
+        )}
+
+        <div className="flex-1" />
+
         <Button asChild variant="secondary">
-          <Link to="/templates">Cancel</Link>
+          <Link to="/templates">{isEdit ? 'Back' : 'Cancel'}</Link>
         </Button>
         <Button
           onClick={() => actions.save().catch(() => {})}
           disabled={!meta.canSave || state.isSaving}>
-          {state.isSaving ? 'Creating…' : 'Create'}
+          {state.isSaving
+            ? isEdit
+              ? 'Saving…'
+              : 'Creating…'
+            : isEdit
+              ? 'Save'
+              : 'Create'}
         </Button>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { Input } from '@internal/ui/components/input'
 import { Label } from '@internal/ui/components/label'
 
 import { GeneralIcon, InputSearch } from '@/components/ui'
@@ -16,9 +17,34 @@ export function ScopeSection() {
       issueTypeOptions
     },
     actions: { setProjectQuery, selectProject, selectIssueType },
-    meta: { issueTypePlaceholder, issueTypeEmptyText, isIssueTypeDisabled }
+    meta: {
+      mode,
+      scopeDisplay,
+      issueTypePlaceholder,
+      issueTypeEmptyText,
+      isIssueTypeDisabled
+    }
   } = useWizardContext()
 
+  // Edit mode: read-only scope display
+  if (mode === 'edit' && scopeDisplay) {
+    return (
+      <section className="space-y-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label>Project</Label>
+            <Input value={scopeDisplay.projectKey} readOnly />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Issue type</Label>
+            <Input value={scopeDisplay.issueTypeName} readOnly />
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  // Create mode: interactive scope pickers
   const { project, issueType } = scope
 
   return (

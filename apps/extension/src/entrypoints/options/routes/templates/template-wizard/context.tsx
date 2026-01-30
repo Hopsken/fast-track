@@ -18,9 +18,17 @@ import { minutes } from '@/utils/time'
 import { getProjectService } from '~/services/project-service'
 import { getTemplateService } from '~/services/template-service'
 import { getTicketService } from '~/services/ticket-service'
-import type { FieldConfig, FieldMetadata } from '~/types/template'
+import type {
+  FieldConfig,
+  FieldMetadata,
+  IssueTemplate
+} from '~/types/template'
 
 import { type WizardScope } from './types'
+
+/* ------------------------------------------------------------------ */
+/*  Public types                                                       */
+/* ------------------------------------------------------------------ */
 
 export type WizardState = {
   scope: WizardScope
@@ -46,6 +54,7 @@ export type WizardState = {
 
   saveError: string | null
   isSaving: boolean
+  isDeleting: boolean
 }
 
 export type WizardActions = {
@@ -60,16 +69,22 @@ export type WizardActions = {
   setDescriptionTemplate: (next: string) => void
 
   save: () => Promise<void>
+  deleteTemplate: (() => Promise<void>) | null
 }
 
 export type WizardMeta = {
   host: string
   hasScope: boolean
   canSave: boolean
+  mode: 'create' | 'edit'
 
+  // Scope picker helpers (create mode)
   isIssueTypeDisabled: boolean
   issueTypePlaceholder: string
   issueTypeEmptyText: string
+
+  // Scope display (edit mode)
+  scopeDisplay: { projectKey: string; issueTypeName: string } | null
 }
 
 export type WizardContextValue = {
@@ -90,18 +105,56 @@ export function useWizardContext() {
   return ctx
 }
 
-type ProviderProps = {
-  host: string
-  onCreated: (templateId: string) => void
-  children: React.ReactNode
+/* ------------------------------------------------------------------ */
+/*  Helpers                                                            */
+/* ------------------------------------------------------------------ */
+
+/** Build a synthetic WizardScope from a persisted template. */
+function scopeFromTemplate(template: IssueTemplate): WizardScope {
+  return {
+    project: {
+      id: '',
+      key: template.scope.projectKey,
+      name: template.scope.projectKey,
+      issueTypes: []
+    },
+    issueType: {
+      id: template.scope.issueTypeId,
+      name: template.scope.issueTypeName,
+      iconUrl: '',
+      description: ''
+    }
+  }
 }
 
-export function TemplateWizardProvider({
-  host,
-  onCreated,
-  children
-}: ProviderProps) {
-  const [scope, setScope] = useState<WizardScope>({})
+/* ------------------------------------------------------------------ */
+/*  Provider                                                           */
+/* ------------------------------------------------------------------ */
+
+type ProviderProps = {
+  host: string
+  children: React.ReactNode
+} & (
+  | { mode: 'create'; onCreated: (templateId: string) => void }
+  | {
+      mode: 'edit'
+      template: IssueTemplate
+      onSaved: () => void
+      onDeleted: () => void
+    }
+)
+
+export function TemplateWizardProvider(props: ProviderProps) {
+  const { host, children, mode } = props
+
+  const isEdit = mode === 'edit'
+  const existingTemplate = isEdit ? props.template : null
+
+  // ------ Scope ------
+
+  const [scope, setScope] = useState<WizardScope>(() =>
+    existingTemplate ? scopeFromTemplate(existingTemplate) : {}
+  )
 
   const [projectQuery, setProjectQuery] = useState('')
 
@@ -119,7 +172,9 @@ export function TemplateWizardProvider({
       return q.length === 0 ? svc.getRecentProjects() : svc.searchProjects(q)
     },
     staleTime: minutes(1),
-    gcTime: minutes(5)
+    gcTime: minutes(5),
+    // Skip fetching projects in edit mode — scope is locked
+    enabled: !isEdit
   })
 
   const projectOptions = useMemo<SearchOption<JiraProject>[]>(() => {
@@ -179,15 +234,15 @@ export function TemplateWizardProvider({
     ? formatErrorMessage(fieldsQuery.error)
     : null
 
-  // Reset fieldsConfig when scope changes
+  // Reset fieldsConfig when scope changes (create mode only)
   const scopeKey = `${scope.project?.key ?? ''}:${scope.issueType?.id ?? ''}`
   const [fieldsConfig, setFieldsConfig] = useState<Record<string, FieldConfig>>(
-    {}
+    () => existingTemplate?.fields ?? {}
   )
 
   useEffect(() => {
-    setFieldsConfig({})
-  }, [scopeKey])
+    if (!isEdit) setFieldsConfig({})
+  }, [scopeKey, isEdit])
 
   const setFieldConfig = useCallback((fieldId: string, config: FieldConfig) => {
     setFieldsConfig((prev) => ({
@@ -206,11 +261,14 @@ export function TemplateWizardProvider({
 
   // --- Basics ---
 
-  const [name, setName] = useState('')
-  const [descriptionTemplate, setDescriptionTemplate] = useState('')
+  const [name, setName] = useState(() => existingTemplate?.name ?? '')
+  const [descriptionTemplate, setDescriptionTemplate] = useState(
+    () => existingTemplate?.descriptionTemplate ?? ''
+  )
 
   const [saveError, setSaveError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const canSave = Boolean(name.trim()) && Boolean(host) && hasScope
 
@@ -224,59 +282,106 @@ export function TemplateWizardProvider({
     ? 'No issue types'
     : 'No project selected'
 
-  const selectProject = useCallback((project: JiraProject | null) => {
-    if (!project) {
-      setScope({})
-      return
-    }
+  const selectProject = useCallback(
+    (project: JiraProject | null) => {
+      if (isEdit) return // scope locked in edit mode
+      if (!project) {
+        setScope({})
+        return
+      }
 
-    setScope((prev) => ({
-      ...prev,
-      project,
-      issueType: project.key === prev.project?.key ? prev.issueType : undefined
-    }))
-  }, [])
+      setScope((prev) => ({
+        ...prev,
+        project,
+        issueType:
+          project.key === prev.project?.key ? prev.issueType : undefined
+      }))
+    },
+    [isEdit]
+  )
 
-  const selectIssueType = useCallback((issueType: JiraIssueType | null) => {
-    setScope((prev) => ({
-      ...prev,
-      issueType: issueType ?? undefined
-    }))
-  }, [])
+  const selectIssueType = useCallback(
+    (issueType: JiraIssueType | null) => {
+      if (isEdit) return // scope locked in edit mode
+      setScope((prev) => ({
+        ...prev,
+        issueType: issueType ?? undefined
+      }))
+    },
+    [isEdit]
+  )
+
+  // --- Save ---
 
   const save = useCallback(async () => {
     setSaveError(null)
     setIsSaving(true)
 
-    if (!scope.project || !scope.issueType) {
-      return
-    }
+    if (!scope.project || !scope.issueType) return
 
     try {
       const svc = getTemplateService()
-      const created = await svc.createTemplate({
-        name: name.trim(),
-        icon: undefined,
-        scope: {
-          baseUrlHost: host,
-          projectKey: scope.project.key,
-          issueTypeId: scope.issueType.id,
-          issueTypeName: scope.issueType.name
-        },
-        fields: fieldsConfig,
-        descriptionTemplate: descriptionTemplate.trim()
-          ? descriptionTemplate
-          : undefined,
-        lastUsedAt: undefined
-      })
 
-      onCreated(created.id)
+      if (isEdit && existingTemplate) {
+        await svc.updateTemplate(existingTemplate.id, {
+          name: name.trim(),
+          fields: fieldsConfig,
+          descriptionTemplate: descriptionTemplate.trim()
+            ? descriptionTemplate
+            : undefined
+        })
+        props.onSaved()
+      } else {
+        const created = await svc.createTemplate({
+          name: name.trim(),
+          icon: undefined,
+          scope: {
+            baseUrlHost: host,
+            projectKey: scope.project.key,
+            issueTypeId: scope.issueType.id,
+            issueTypeName: scope.issueType.name
+          },
+          fields: fieldsConfig,
+          descriptionTemplate: descriptionTemplate.trim()
+            ? descriptionTemplate
+            : undefined,
+          lastUsedAt: undefined
+        })
+        ;(props as { onCreated: (id: string) => void }).onCreated(created.id)
+      }
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : String(e))
     } finally {
       setIsSaving(false)
     }
-  }, [descriptionTemplate, fieldsConfig, host, name, onCreated, scope])
+  }, [
+    descriptionTemplate,
+    existingTemplate,
+    fieldsConfig,
+    host,
+    isEdit,
+    name,
+    props,
+    scope
+  ])
+
+  // --- Delete (edit mode only) ---
+
+  const deleteTemplate = useCallback(async () => {
+    if (!existingTemplate) return
+    setIsDeleting(true)
+    try {
+      const svc = getTemplateService()
+      await svc.deleteTemplate(existingTemplate.id)
+      ;(props as { onDeleted: () => void }).onDeleted()
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : String(e))
+    } finally {
+      setIsDeleting(false)
+    }
+  }, [existingTemplate, props])
+
+  // --- Context value ---
 
   const state = useMemo<WizardState>(
     () => ({
@@ -293,7 +398,8 @@ export function TemplateWizardProvider({
       name,
       descriptionTemplate,
       saveError,
-      isSaving
+      isSaving,
+      isDeleting
     }),
     [
       scope,
@@ -309,7 +415,8 @@ export function TemplateWizardProvider({
       name,
       descriptionTemplate,
       saveError,
-      isSaving
+      isSaving,
+      isDeleting
     ]
   )
 
@@ -322,9 +429,18 @@ export function TemplateWizardProvider({
       removeFieldConfig,
       setName,
       setDescriptionTemplate,
-      save
+      save,
+      deleteTemplate: isEdit ? deleteTemplate : null
     }),
-    [removeFieldConfig, save, selectIssueType, selectProject, setFieldConfig]
+    [
+      deleteTemplate,
+      isEdit,
+      removeFieldConfig,
+      save,
+      selectIssueType,
+      selectProject,
+      setFieldConfig
+    ]
   )
 
   const wizardMeta = useMemo<WizardMeta>(
@@ -332,17 +448,26 @@ export function TemplateWizardProvider({
       host,
       hasScope,
       canSave,
+      mode,
       isIssueTypeDisabled,
       issueTypePlaceholder,
-      issueTypeEmptyText
+      issueTypeEmptyText,
+      scopeDisplay: existingTemplate
+        ? {
+            projectKey: existingTemplate.scope.projectKey,
+            issueTypeName: existingTemplate.scope.issueTypeName
+          }
+        : null
     }),
     [
       canSave,
+      existingTemplate,
       hasScope,
       host,
       isIssueTypeDisabled,
       issueTypeEmptyText,
-      issueTypePlaceholder
+      issueTypePlaceholder,
+      mode
     ]
   )
 
