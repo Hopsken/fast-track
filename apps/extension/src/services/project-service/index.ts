@@ -3,6 +3,7 @@ import { compact, countBy, flatMap, orderBy } from 'lodash-es'
 
 import { getStorageItem } from '@/lib/storage'
 import { IssueSuggestion } from '@/services/ticket-service'
+import { JiraIssueType, JiraProject } from '@/types'
 import { getJiraApi } from '~/lib/jira'
 
 export type ProjectClickInfo = {
@@ -107,7 +108,7 @@ export class ProjectServiceImpl {
     await projectClicksStorage.setValue(pruned)
   }
 
-  async getFrequentProjects(suggestions?: IssueSuggestion) {
+  async getFrequentProjectKeys(suggestions?: IssueSuggestion) {
     const [clicks, suggestionProjects] = await Promise.all([
       projectClicksStorage.getValue(),
       Promise.resolve(collectSuggestionProjects(suggestions))
@@ -116,24 +117,35 @@ export class ProjectServiceImpl {
     return this.scoreProjects(suggestionProjects, clicks ?? {})
   }
 
-  async searchProjects(
-    query: string
-  ): Promise<Array<{ key: string; name: string }>> {
+  async searchProjects(query: string): Promise<JiraProject[]> {
     const normalized = query.trim()
 
-    const page = await this.jira.projects.searchProjects(normalized, {
+    const { values } = await this.jira.projects.searchProjects(normalized, {
       maxResults: 7
     })
 
-    return (page.values ?? []).map((p) => ({ key: p.key, name: p.name }))
+    return values
   }
 
-  async getProjectIssueTypes(
-    projectId: string
-  ): Promise<Array<{ id: string; name: string }>> {
-    const issueTypes = await this.jira.projects.getProjectIssueTypes(projectId)
+  async getProject(projectIdOrKey: string) {
+    const normalized = projectIdOrKey.trim()
+    if (!normalized) throw new Error('Project key is required')
 
-    return (issueTypes ?? []).map((it) => ({ id: it.id, name: it.name }))
+    return this.jira.projects.getProject(normalized)
+  }
+
+  async getRecentProjects() {
+    return this.jira.projects.getRecentProjects()
+  }
+
+  async getProjectsByKeys(keys: string[]) {
+    if (!keys || keys.length === 0) return []
+    const { values } = await this.jira.projects.searchProjects('', { keys })
+    return values ?? []
+  }
+
+  async getProjectIssueTypes(projectId: string): Promise<JiraIssueType[]> {
+    return this.jira.projects.getProjectIssueTypes(projectId)
   }
 }
 

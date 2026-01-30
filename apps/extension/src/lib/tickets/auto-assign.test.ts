@@ -14,7 +14,7 @@ const baseTicket = {
   id: '1',
   key: 'JIRA-1',
   summary: 'Test',
-  issueType: { name: 'Story', iconUrl: '', description: '' },
+  issueType: { id: '1', name: 'Story', iconUrl: '', description: '' },
   status: {
     id: '10',
     name: 'To Do',

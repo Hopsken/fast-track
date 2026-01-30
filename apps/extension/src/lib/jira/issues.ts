@@ -374,6 +374,7 @@ export class JiraIssueService {
       key: issue.key,
       summary: issue.fields?.summary || '',
       issueType: {
+        id: issue.fields?.issuetype?.id || '',
         name: issue.fields?.issuetype?.name || '',
         iconUrl: issue.fields?.issuetype?.iconUrl || '',
         description: issue.fields?.issuetype?.description || ''

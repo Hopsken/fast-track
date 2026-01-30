@@ -1,33 +1,47 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Button } from '@internal/ui/components/button'
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandLoading
-} from '@internal/ui/components/command'
 import { Input } from '@internal/ui/components/input'
 import { Label } from '@internal/ui/components/label'
 import { Textarea } from '@internal/ui/components/textarea'
 import { Link, useNavigate } from 'react-router-dom'
 
+import { InputSearch, type SearchOption } from '@/components/ui'
 import { useCurrentJiraHost } from '~/hooks/useCurrentJiraHost'
 import { getProjectService } from '~/services/project-service'
 import { getTemplateService } from '~/services/template-service'
 
 type WizardScope = {
   projectKey: string
+  projectName: string
   issueTypeId: string
   issueTypeName: string
 }
 
 type ProjectOption = { key: string; name: string }
+
 type IssueTypeOption = { id: string; name: string }
 
 type Step = 1 | 2
+
+function toProjectSearchOption(
+  project: ProjectOption
+): SearchOption<ProjectOption> {
+  return {
+    value: project.key,
+    label: `${project.key} — ${project.name}`,
+    data: project
+  }
+}
+
+function toIssueTypeSearchOption(
+  issueType: IssueTypeOption
+): SearchOption<IssueTypeOption> {
+  return {
+    value: issueType.id,
+    label: issueType.name,
+    data: issueType
+  }
+}
 
 export function TemplateWizardPage() {
   const navigate = useNavigate()
@@ -35,9 +49,6 @@ export function TemplateWizardPage() {
 
   const [step, setStep] = useState<Step>(1)
 
-  const [projectQuery, setProjectQuery] = useState('')
-  const [projectOptions, setProjectOptions] = useState<ProjectOption[]>([])
-  const [projectLoading, setProjectLoading] = useState(false)
   const [projectError, setProjectError] = useState<string | null>(null)
 
   const [issueTypes, setIssueTypes] = useState<IssueTypeOption[]>([])
@@ -46,6 +57,7 @@ export function TemplateWizardPage() {
 
   const [scope, setScope] = useState<WizardScope>({
     projectKey: '',
+    projectName: '',
     issueTypeId: '',
     issueTypeName: ''
   })
@@ -63,28 +75,54 @@ export function TemplateWizardPage() {
   const canSave =
     Boolean(name.trim()) && Boolean(currentHost) && canProceedToStep2
 
-  const selectedProjectLabel = useMemo(() => {
-    const p = projectOptions.find((p) => p.key === scope.projectKey)
-    return p ? `${p.key} — ${p.name}` : scope.projectKey
-  }, [projectOptions, scope.projectKey])
+  const isIssueTypeDisabled = !scope.projectKey || issueTypesLoading
 
-  async function runProjectSearch(query: string) {
+  const issueTypePlaceholder = (() => {
+    if (!scope.projectKey) return 'Select a project first…'
+    if (issueTypesLoading) return 'Loading issue types…'
+    return 'Search issue types…'
+  })()
+
+  const issueTypeEmptyText =
+    issueTypesError ??
+    (scope.projectKey ? 'No issue types' : 'No project selected')
+
+  const selectedProjectLabel = useMemo(() => {
+    if (!scope.projectKey) return ''
+    return scope.projectName
+      ? `${scope.projectKey} — ${scope.projectName}`
+      : scope.projectKey
+  }, [scope.projectKey, scope.projectName])
+
+  const getIssueTypeRecommendations = useCallback(async () => {
+    return issueTypes.map(toIssueTypeSearchOption)
+  }, [issueTypes])
+
+  const getProjectRecommendations = useCallback(async () => {
     setProjectError(null)
-    setProjectLoading(true)
     try {
       const svc = getProjectService()
-      const results = query.trim()
-        ? await svc.searchProjects(query)
-        : await svc.searchProjects('')
-      setProjectOptions(results)
+      const projects = await svc.getRecentProjects()
+      return projects.map(toProjectSearchOption)
     } catch (e) {
       setProjectError(e instanceof Error ? e.message : String(e))
-    } finally {
-      setProjectLoading(false)
+      return []
     }
-  }
+  }, [])
 
-  async function loadIssueTypes(projectKey: string) {
+  const searchProjects = useCallback(async (query: string) => {
+    setProjectError(null)
+    try {
+      const svc = getProjectService()
+      const results = await svc.searchProjects(query.trim())
+      return results.map(toProjectSearchOption)
+    } catch (e) {
+      setProjectError(e instanceof Error ? e.message : String(e))
+      return []
+    }
+  }, [])
+
+  const loadIssueTypes = useCallback(async (projectKey: string) => {
     setIssueTypesError(null)
     setIssueTypesLoading(true)
     try {
@@ -93,24 +131,78 @@ export function TemplateWizardPage() {
       setIssueTypes(results)
     } catch (e) {
       setIssueTypesError(e instanceof Error ? e.message : String(e))
+      setIssueTypes([])
     } finally {
       setIssueTypesLoading(false)
     }
-  }
+  }, [])
 
-  async function handleSelectProject(project: ProjectOption) {
-    setScope({ projectKey: project.key, issueTypeId: '', issueTypeName: '' })
-    setIssueTypes([])
-    await loadIssueTypes(project.key)
-  }
+  const handleSelectProject = useCallback(
+    async (opt: SearchOption<ProjectOption> | null) => {
+      if (!opt) {
+        setScope({
+          projectKey: '',
+          projectName: '',
+          issueTypeId: '',
+          issueTypeName: ''
+        })
+        setIssueTypes([])
+        setIssueTypesError(null)
+        return
+      }
 
-  function handleSelectIssueType(it: IssueTypeOption) {
-    setScope((s) => ({
-      ...s,
-      issueTypeId: it.id,
-      issueTypeName: it.name
-    }))
-  }
+      const project = opt.data ?? { key: opt.value, name: opt.label }
+
+      setScope({
+        projectKey: project.key,
+        projectName: project.name,
+        issueTypeId: '',
+        issueTypeName: ''
+      })
+
+      getProjectService()
+        .recordProjectClick(project.key)
+        .catch(() => {
+          // ignore
+        })
+
+      setIssueTypes([])
+      await loadIssueTypes(project.key)
+    },
+    [loadIssueTypes]
+  )
+
+  const searchIssueTypes = useCallback(
+    async (query: string) => {
+      if (!scope.projectKey) return []
+
+      const q = query.trim().toLowerCase()
+      const results = issueTypes.filter((it) =>
+        it.name.toLowerCase().includes(q)
+      )
+
+      return results.map(toIssueTypeSearchOption)
+    },
+    [issueTypes, scope.projectKey]
+  )
+
+  const handleSelectIssueType = useCallback(
+    (opt: SearchOption<IssueTypeOption> | null) => {
+      if (!opt) {
+        setScope((s) => ({ ...s, issueTypeId: '', issueTypeName: '' }))
+        return
+      }
+
+      const issueType = opt.data ?? { id: opt.value, name: opt.label }
+
+      setScope((s) => ({
+        ...s,
+        issueTypeId: issueType.id,
+        issueTypeName: issueType.name
+      }))
+    },
+    []
+  )
 
   async function handleSave() {
     if (!currentHost) return
@@ -186,39 +278,17 @@ export function TemplateWizardPage() {
             <div className="space-y-4 p-4">
               <div className="space-y-2">
                 <Label>Project</Label>
-                <div className="rounded-md border">
-                  <Command>
-                    <CommandInput
-                      placeholder="Search projects…"
-                      value={projectQuery}
-                      onValueChange={(v) => {
-                        setProjectQuery(v)
-                        void runProjectSearch(v)
-                      }}
-                    />
-                    <CommandList>
-                      {projectLoading ? (
-                        <CommandLoading>Loading…</CommandLoading>
-                      ) : null}
-                      {!projectLoading && projectError ? (
-                        <CommandEmpty>{projectError}</CommandEmpty>
-                      ) : null}
-                      {!projectLoading && !projectError ? (
-                        <CommandEmpty>No projects</CommandEmpty>
-                      ) : null}
-                      <CommandGroup>
-                        {projectOptions.map((p) => (
-                          <CommandItem
-                            key={p.key}
-                            value={`${p.key} ${p.name}`}
-                            onSelect={() => void handleSelectProject(p)}>
-                            {p.key} — {p.name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </div>
+                <InputSearch<ProjectOption>
+                  placeholder="Search projects…"
+                  value={scope.projectKey}
+                  onSelect={(opt) => void handleSelectProject(opt)}
+                  onSearch={searchProjects}
+                  getRecommendations={getProjectRecommendations}
+                  debounceMs={300}
+                  minSearchLength={1}
+                  loadingText="Loading…"
+                  emptyText={projectError ?? 'No projects'}
+                />
                 {scope.projectKey ? (
                   <div className="text-xs text-gray-600">
                     Selected:{' '}
@@ -229,43 +299,18 @@ export function TemplateWizardPage() {
 
               <div className="space-y-2">
                 <Label>Issue type</Label>
-                <div className="rounded-md border">
-                  <Command>
-                    <CommandInput
-                      placeholder={
-                        scope.projectKey
-                          ? 'Search issue types…'
-                          : 'Select a project first…'
-                      }
-                      disabled={!scope.projectKey}
-                    />
-                    <CommandList>
-                      {issueTypesLoading ? (
-                        <CommandLoading>Loading…</CommandLoading>
-                      ) : null}
-                      {!issueTypesLoading && issueTypesError ? (
-                        <CommandEmpty>{issueTypesError}</CommandEmpty>
-                      ) : null}
-                      {!issueTypesLoading && !issueTypesError ? (
-                        <CommandEmpty>
-                          {scope.projectKey
-                            ? 'No issue types'
-                            : 'No project selected'}
-                        </CommandEmpty>
-                      ) : null}
-                      <CommandGroup>
-                        {issueTypes.map((it) => (
-                          <CommandItem
-                            key={it.id}
-                            value={it.name}
-                            onSelect={() => handleSelectIssueType(it)}>
-                            {it.name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </div>
+                <InputSearch<IssueTypeOption>
+                  placeholder={issueTypePlaceholder}
+                  value={scope.issueTypeId}
+                  onSelect={handleSelectIssueType}
+                  onSearch={searchIssueTypes}
+                  getRecommendations={getIssueTypeRecommendations}
+                  debounceMs={200}
+                  minSearchLength={1}
+                  loadingText="Loading…"
+                  emptyText={issueTypeEmptyText}
+                  disabled={isIssueTypeDisabled}
+                />
                 {scope.issueTypeName ? (
                   <div className="text-xs text-gray-600">
                     Selected:{' '}

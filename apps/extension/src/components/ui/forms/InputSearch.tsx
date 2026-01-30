@@ -1,15 +1,13 @@
 'use client'
 
 import * as React from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Combobox,
   ComboboxContent,
   ComboboxEmpty,
-  ComboboxGroup,
   ComboboxInput,
   ComboboxItem,
-  ComboboxLabel,
   ComboboxList
 } from '@internal/ui/components/combobox'
 
@@ -28,33 +26,42 @@ export interface SearchOption<T = unknown> {
   disabled?: boolean
 }
 
+type ComboboxChangeEventDetails = {
+  reason?: string
+}
+
 export interface InputSearchProps<T = unknown> {
   /** Placeholder text for the search input */
   placeholder?: string
   /** Text to show when no results are found */
   emptyText?: string
-  /** Text to show while loading */
+  /** Text to show while loading (searching or loading recommendations) */
   loadingText?: string
-  /** Currently selected value */
+
+  /** Currently selected value (SearchOption.value) */
   value?: string
   /** Callback when selection changes */
   onSelect?: (option: SearchOption<T> | null) => void
-  /** Async function to fetch search results */
+
+  /** Async function to fetch search results (query length >= minSearchLength) */
   onSearch?: (query: string) => Promise<SearchOption<T>[]>
-  /** Static options to use when not searching (recommendations) */
-  recommendations?: SearchOption<T>[]
+
+  /**
+   * Async function to fetch recommendations shown when query length < minSearchLength.
+   * Loaded lazily when the list opens.
+   */
+  getRecommendations?: () => Promise<SearchOption<T>[]>
+
   /** Debounce delay in ms for search (default: 300) */
   debounceMs?: number
   /** Minimum characters before triggering search (default: 1) */
   minSearchLength?: number
+
   /** Whether the search input is disabled */
   disabled?: boolean
   /** Additional className for the input */
   className?: string
-  /** Label for recommendations group */
-  recommendationsLabel?: string
-  /** Label for search results group */
-  resultsLabel?: string
+
   /** Render custom option content */
   renderOption?: (
     option: SearchOption<T>,
@@ -71,213 +78,258 @@ export function InputSearch<T = unknown>({
   value,
   onSelect,
   onSearch,
-  recommendations = [],
+  getRecommendations,
   debounceMs = 300,
   minSearchLength = 1,
   disabled = false,
   className,
-  recommendationsLabel = 'Recommendations',
-  resultsLabel = 'Results',
   renderOption,
   clearable = true
 }: InputSearchProps<T>) {
+  const [open, setOpen] = useState(false)
+
   const [inputValue, setInputValue] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+
+  const [isSearching, setIsSearching] = useState(false)
   const [searchResults, setSearchResults] = useState<SearchOption<T>[]>([])
   const [hasSearched, setHasSearched] = useState(false)
 
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const abortControllerRef = useRef<AbortController | null>(null)
+  const [isLoadingRecommendations, setIsLoadingRecommendations] =
+    useState(false)
+  const [recommendations, setRecommendations] = useState<SearchOption<T>[]>([])
+  const [hasLoadedRecommendations, setHasLoadedRecommendations] =
+    useState(false)
 
-  // Combine all options for combobox
-  const allOptions = React.useMemo(() => {
-    const optionsMap = new Map<string, SearchOption<T>>()
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const searchAbortRef = useRef<AbortController | null>(null)
+  const recommendationsAbortRef = useRef<AbortController | null>(null)
 
-    // Add recommendations first
-    recommendations.forEach((opt) => optionsMap.set(opt.value, opt))
-
-    // Add search results (may override recommendations with same value)
-    searchResults.forEach((opt) => optionsMap.set(opt.value, opt))
-
-    return Array.from(optionsMap.values())
+  const allOptions = useMemo(() => {
+    const map = new Map<string, SearchOption<T>>()
+    for (const opt of recommendations) map.set(opt.value, opt)
+    for (const opt of searchResults) map.set(opt.value, opt)
+    return Array.from(map.values())
   }, [recommendations, searchResults])
 
-  // Find the selected option
-  const selectedOption = React.useMemo(() => {
+  const selectedOption = useMemo(() => {
     if (!value) return null
-    return allOptions.find((opt) => opt.value === value) || null
-  }, [value, allOptions])
+    return allOptions.find((opt) => opt.value === value) ?? null
+  }, [allOptions, value])
 
-  // Perform async search with debouncing
+  const shouldShowRecommendations = inputValue.length < minSearchLength
+  const shouldShowResults = hasSearched && inputValue.length >= minSearchLength
+
   const performSearch = useCallback(
     async (query: string) => {
-      // Cancel previous request
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort()
-      }
+      if (searchAbortRef.current) searchAbortRef.current.abort()
 
       if (!onSearch || query.length < minSearchLength) {
         setSearchResults([])
         setHasSearched(false)
-        setIsLoading(false)
+        setIsSearching(false)
         return
       }
 
-      setIsLoading(true)
       setHasSearched(true)
+      setIsSearching(true)
 
-      abortControllerRef.current = new AbortController()
+      searchAbortRef.current = new AbortController()
 
       try {
         const results = await onSearch(query)
         setSearchResults(results)
       } catch (error) {
-        // Ignore abort errors
-        if (error instanceof Error && error.name === 'AbortError') {
-          return
-        }
-        console.error('Search failed:', error)
+        if (error instanceof Error && error.name === 'AbortError') return
         setSearchResults([])
       } finally {
-        setIsLoading(false)
+        setIsSearching(false)
       }
     },
-    [onSearch, minSearchLength]
+    [minSearchLength, onSearch]
   )
 
-  // Handle input changes with debouncing
-  const handleInputChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = event.target.value
-      setInputValue(newValue)
+  const handleUserInputValueChange = useCallback(
+    (next: string) => {
+      setInputValue(next)
 
-      // Clear previous debounce
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current)
-      }
-
-      // Schedule new search
-      debounceRef.current = setTimeout(() => {
-        performSearch(newValue)
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current)
+      searchDebounceRef.current = setTimeout(() => {
+        void performSearch(next)
       }, debounceMs)
     },
     [debounceMs, performSearch]
   )
 
-  // Handle value change from combobox
   const handleValueChange = useCallback(
-    (newValue: string | null) => {
-      if (!newValue && clearable) {
+    (next: string | null) => {
+      if (!next) {
         onSelect?.(null)
+        setInputValue('')
+        setSearchResults([])
+        setHasSearched(false)
+        setIsSearching(false)
         return
       }
 
-      if (!newValue) return
+      const option = allOptions.find((opt) => opt.value === next)
+      onSelect?.(option ?? { value: next, label: next })
 
-      const option = allOptions.find((opt) => opt.value === newValue)
-      if (option) {
-        onSelect?.(option)
-      }
+      // keep the input empty so the selected value shows as placeholder
+      setInputValue('')
     },
-    [allOptions, onSelect, clearable]
+    [allOptions, onSelect]
   )
 
-  // Cleanup on unmount
+  // If recommendation loader changes, reset cached recommendations.
+  useEffect(() => {
+    setRecommendations([])
+    setHasLoadedRecommendations(false)
+    setIsLoadingRecommendations(false)
+    if (recommendationsAbortRef.current) recommendationsAbortRef.current.abort()
+  }, [getRecommendations])
+
+  const ensureRecommendationsLoaded = useCallback(() => {
+    if (!getRecommendations) return
+    if (!shouldShowRecommendations) return
+    if (hasLoadedRecommendations) return
+    if (isLoadingRecommendations) return
+
+    if (recommendationsAbortRef.current) recommendationsAbortRef.current.abort()
+    recommendationsAbortRef.current = new AbortController()
+
+    setIsLoadingRecommendations(true)
+
+    let cancelled = false
+    getRecommendations()
+      .then((items) => {
+        if (cancelled) return
+        setRecommendations(items)
+        setHasLoadedRecommendations(true)
+      })
+      .catch((error) => {
+        if (cancelled) return
+        if (error instanceof Error && error.name === 'AbortError') return
+        setRecommendations([])
+        setHasLoadedRecommendations(true)
+      })
+      .finally(() => {
+        if (cancelled) return
+        setIsLoadingRecommendations(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [
+    getRecommendations,
+    hasLoadedRecommendations,
+    isLoadingRecommendations,
+    shouldShowRecommendations
+  ])
+
+  // Lazy-load recommendations when the list opens and we're in recommendation mode.
+  useEffect(() => {
+    if (!open) return
+    ensureRecommendationsLoaded()
+  }, [ensureRecommendationsLoaded, open])
+
   useEffect(() => {
     return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current)
-      }
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort()
-      }
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current)
+      if (searchAbortRef.current) searchAbortRef.current.abort()
+      if (recommendationsAbortRef.current)
+        recommendationsAbortRef.current.abort()
     }
   }, [])
 
-  // Default option renderer
-  const defaultRenderOption = (
-    option: SearchOption<T>,
-    _isSelected: boolean
-  ) => (
+  const defaultRenderOption = (option: SearchOption<T>) => (
     <div className="flex w-full items-center gap-2 overflow-hidden">
-      {option.icon && (
+      {option.icon ? (
         <span className="flex shrink-0 items-center">{option.icon}</span>
-      )}
+      ) : null}
       <div className="flex flex-1 flex-col overflow-hidden">
         <span className="truncate">{option.label}</span>
-        {option.description && (
+        {option.description ? (
           <span className="text-muted-foreground truncate text-xs">
             {option.description}
           </span>
-        )}
+        ) : null}
       </div>
     </div>
   )
 
-  const optionRenderer = renderOption || defaultRenderOption
+  const optionRenderer =
+    renderOption ?? ((opt: SearchOption<T>) => defaultRenderOption(opt))
 
-  // Determine what to show
-  const showRecommendations =
-    recommendations.length > 0 && inputValue.length < minSearchLength
-  const showResults = hasSearched && searchResults.length > 0
-  const showEmpty =
-    hasSearched &&
-    !isLoading &&
-    searchResults.length === 0 &&
-    !showRecommendations
-  const showLoading = isLoading
+  const isLoading = isSearching || isLoadingRecommendations
 
   return (
-    <Combobox
-      value={value || ''}
+    <Combobox<string>
+      value={value ?? null}
       onValueChange={handleValueChange}
+      inputValue={inputValue}
+      onInputValueChange={(next, eventDetails) => {
+        const details = eventDetails as unknown as ComboboxChangeEventDetails
+
+        // Only treat actual typing/clearing as user input.
+        // Base UI also fires input updates for selection/navigation; we ignore those.
+        if (
+          details?.reason &&
+          details.reason !== 'input-change' &&
+          details.reason !== 'input-clear' &&
+          details.reason !== 'clear-press'
+        ) {
+          return
+        }
+
+        handleUserInputValueChange(next)
+      }}
+      onOpenChange={(next) => setOpen(next)}
+      // Always open on input click (requested behavior).
+      openOnInputClick
+      // We control results externally (async search / recommendations).
+      filter={null}
       disabled={disabled}>
       <ComboboxInput
-        placeholder={selectedOption?.label || placeholder}
+        placeholder={selectedOption?.label ?? placeholder}
         className={className}
         disabled={disabled}
-        showClear={clearable && !!value}
+        showClear={clearable && Boolean(value)}
         showTrigger={!clearable || !value}
-        onChange={handleInputChange}
-        value={inputValue}
+        onMouseDown={() => {
+          ensureRecommendationsLoaded()
+        }}
       />
+
       <ComboboxContent>
+        {!isLoading ? <ComboboxEmpty>{emptyText}</ComboboxEmpty> : null}
         <ComboboxList>
-          {showLoading && (
+          {isLoading ? (
             <div className="text-muted-foreground py-6 text-center text-sm">
               {loadingText}
             </div>
-          )}
-
-          {showEmpty && <ComboboxEmpty>{emptyText}</ComboboxEmpty>}
-
-          {showRecommendations && (
-            <ComboboxGroup>
-              <ComboboxLabel>{recommendationsLabel}</ComboboxLabel>
-              {recommendations.map((option) => (
+          ) : null}
+          {shouldShowRecommendations
+            ? recommendations.map((option) => (
                 <ComboboxItem
                   key={option.value}
                   value={option.value}
                   disabled={option.disabled}>
                   {optionRenderer(option, option.value === value)}
                 </ComboboxItem>
-              ))}
-            </ComboboxGroup>
-          )}
+              ))
+            : null}
 
-          {showResults && (
-            <ComboboxGroup>
-              <ComboboxLabel>{resultsLabel}</ComboboxLabel>
-              {searchResults.map((option) => (
+          {shouldShowResults
+            ? searchResults.map((option) => (
                 <ComboboxItem
                   key={option.value}
                   value={option.value}
                   disabled={option.disabled}>
                   {optionRenderer(option, option.value === value)}
                 </ComboboxItem>
-              ))}
-            </ComboboxGroup>
-          )}
+              ))
+            : null}
         </ComboboxList>
       </ComboboxContent>
     </Combobox>

@@ -13,6 +13,7 @@ const makeTicket = (
   key,
   summary: `Ticket ${key}`,
   issueType: {
+    id: '1',
     name: 'Task',
     iconUrl: '',
     description: ''

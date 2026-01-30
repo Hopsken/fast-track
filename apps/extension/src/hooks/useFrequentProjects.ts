@@ -14,7 +14,7 @@ export function useFrequentProjects() {
       const suggestions = queryClient.getQueryData<IssueSuggestion>(
         queryKeys.tickets.suggestions
       )
-      return projectService.getFrequentProjects(suggestions)
+      return projectService.getFrequentProjectKeys(suggestions)
     },
     staleTime: minutes(1),
     gcTime: minutes(5)

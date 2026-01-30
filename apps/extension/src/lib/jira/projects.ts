@@ -9,7 +9,7 @@ import type { Version3Client } from 'jira.js'
 import type { PageProject } from 'jira.js/version3/models/pageProject'
 import type { Project } from 'jira.js/version3/models/project'
 
-import type { JiraProject, JiraProjectIssueType } from '@/types/jira'
+import type { JiraProject, JiraIssueType } from '@/types/jira'
 
 type ClientGetter = () => Promise<Version3Client>
 
@@ -17,15 +17,15 @@ export type JiraProjectPage = Omit<PageProject, 'values'> & {
   values: JiraProject[]
 }
 
-const toIssueTypes = (project: Project): JiraProjectIssueType[] => {
+const toIssueTypes = (project: Project): JiraIssueType[] => {
   return (project.issueTypes ?? [])
     .filter((it) => it.id && it.name)
     .map((it) => ({
       id: it.id!,
       name: it.name ?? '',
-      description: it.description,
-      iconUrl: it.iconUrl,
-      subtask: it.subtask
+      description: it.description ?? '',
+      iconUrl: it.iconUrl ?? '',
+      subtask: it.subtask ?? false
     }))
 }
 
@@ -51,6 +51,7 @@ export class JiraProjectService {
     params?: {
       startAt?: number
       maxResults?: number
+      keys?: string[]
     }
   ): Promise<JiraProjectPage> {
     const client = await this.getClient()
@@ -59,6 +60,7 @@ export class JiraProjectService {
       query,
       startAt: params?.startAt,
       maxResults: params?.maxResults,
+      keys: params?.keys,
       expand: 'issueTypes'
     })
 
@@ -88,13 +90,17 @@ export class JiraProjectService {
    * Convenience helper for getting issue types without an additional endpoint.
    * This uses `getProject(..., expand: issueTypes)` under the hood.
    */
-  async getProjectIssueTypes(
-    projectIdOrKey: string
-  ): Promise<JiraProjectIssueType[]> {
+  async getProjectIssueTypes(projectIdOrKey: string): Promise<JiraIssueType[]> {
     const normalized = String(projectIdOrKey).trim()
     if (!normalized) return []
 
     const project = await this.getProject(normalized)
     return project.issueTypes
+  }
+
+  async getRecentProjects(): Promise<JiraProject[]> {
+    const client = await this.getClient()
+    const projects = await client.projects.getRecent()
+    return projects.map(toJiraProject)
   }
 }

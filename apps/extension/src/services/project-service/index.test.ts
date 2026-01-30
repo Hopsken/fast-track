@@ -5,6 +5,7 @@ import { ProjectServiceImpl } from './index'
 const projectsMock = {
   listProjects: vi.fn(),
   searchProjects: vi.fn(),
+  getProject: vi.fn(),
   getProjectIssueTypes: vi.fn()
 }
 
@@ -20,6 +21,7 @@ describe('ProjectServiceImpl (jira project service)', () => {
   beforeEach(() => {
     projectsMock.listProjects.mockReset()
     projectsMock.searchProjects.mockReset()
+    projectsMock.getProject.mockReset()
     projectsMock.getProjectIssueTypes.mockReset()
   })
 
@@ -43,6 +45,19 @@ describe('ProjectServiceImpl (jira project service)', () => {
       'alp',
       expect.objectContaining({ maxResults: 7 })
     )
+  })
+
+  it('getProject returns {key,name}', async () => {
+    projectsMock.getProject.mockResolvedValueOnce({
+      key: 'ABC',
+      name: 'Alpha'
+    })
+
+    const svc = new ProjectServiceImpl()
+    const res = await svc.getProject('ABC')
+
+    expect(res).toEqual({ key: 'ABC', name: 'Alpha' })
+    expect(projectsMock.getProject).toHaveBeenCalledWith('ABC')
   })
 
   it('getProjectIssueTypes maps to {id,name}', async () => {
