@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo, useState } from 'react'
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -9,20 +9,20 @@ describe('InputSearch', () => {
     const onSelect = vi.fn()
 
     function Harness() {
-      const [value, setValue] = React.useState<string | undefined>(undefined)
-      const [query, setQuery] = React.useState('')
+      const [value, setValue] = useState<string | undefined>(undefined)
+      const [query, setQuery] = useState('')
 
-      const options: SearchOption[] = query
+      const options: SearchOption<string>[] = query
         ? []
-        : [{ value: 'TMP', label: 'TMP — Team Management Kanban' }]
+        : [{ value: 'TMP', label: 'TMP — Team Management Kanban', data: 'TMP' }]
 
       return (
-        <InputSearch
+        <InputSearch<string>
           placeholder="Search projects…"
           value={value}
           onSelect={(opt) => {
             onSelect(opt)
-            setValue(opt?.value)
+            setValue(opt ?? undefined)
           }}
           query={query}
           onQueryChange={setQuery}
@@ -62,13 +62,15 @@ describe('InputSearch', () => {
     const onSelect = vi.fn()
 
     function Harness() {
-      const [value, setValue] = React.useState<string | undefined>(undefined)
-      const [query, setQuery] = React.useState('')
+      const [value, setValue] = useState<string | undefined>(undefined)
+      const [query, setQuery] = useState('')
 
-      const options: SearchOption[] = React.useMemo(() => {
+      const options: SearchOption<string>[] = useMemo(() => {
         if (!query) return []
         if (query.toLowerCase().includes('tm')) {
-          return [{ value: 'TMP', label: 'TMP — Team Management Kanban' }]
+          return [
+            { value: 'TMP', label: 'TMP — Team Management Kanban', data: 'TMP' }
+          ]
         }
         return []
       }, [query])
@@ -79,7 +81,7 @@ describe('InputSearch', () => {
           value={value}
           onSelect={(opt) => {
             onSelect(opt)
-            setValue(opt?.value)
+            setValue(opt ?? undefined)
           }}
           query={query}
           onQueryChange={setQuery}

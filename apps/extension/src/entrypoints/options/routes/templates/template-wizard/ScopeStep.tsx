@@ -3,9 +3,9 @@ import { Label } from '@internal/ui/components/label'
 import { Link } from 'react-router-dom'
 
 import { InputSearch } from '@/components/ui'
+import { JiraIssueType, JiraProject } from '@/types'
 
 import { useWizardContext } from './context'
-import type { IssueTypeOption, ProjectOption } from './types'
 
 export function TemplateWizardScopeStep() {
   const {
@@ -18,13 +18,7 @@ export function TemplateWizardScopeStep() {
       projectError,
       issueTypeOptions
     },
-    actions: {
-      setProjectQuery,
-      setProjectOpen,
-      selectProject,
-      selectIssueType,
-      goToStep
-    },
+    actions: { setProjectQuery, selectProject, selectIssueType, goToStep },
     meta: {
       canProceedToStep2,
       issueTypePlaceholder,
@@ -32,6 +26,8 @@ export function TemplateWizardScopeStep() {
       isIssueTypeDisabled
     }
   } = useWizardContext()
+
+  const { project, issueType } = scope
 
   if (step !== 1) return null
 
@@ -41,16 +37,16 @@ export function TemplateWizardScopeStep() {
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="template-project">Project</Label>
-            <InputSearch<ProjectOption>
+            <InputSearch<JiraProject>
               id="template-project"
               name="templateProject"
               autoComplete="off"
               placeholder="Search projects…"
-              value={scope.projectKey}
-              onSelect={(opt) => void selectProject(opt)}
+              value={project}
+              onSelect={selectProject}
+              filter={false}
               query={projectQuery}
               onQueryChange={setProjectQuery}
-              onOpenChange={setProjectOpen}
               options={projectOptions}
               isLoading={isProjectOptionsLoading}
               loadingText="Loading…"
@@ -60,20 +56,15 @@ export function TemplateWizardScopeStep() {
 
           <div className="space-y-2">
             <Label htmlFor="template-issue-type">Issue type</Label>
-            <InputSearch<IssueTypeOption>
+            <InputSearch<JiraIssueType>
               id="template-issue-type"
               name="templateIssueType"
               autoComplete="off"
               placeholder={issueTypePlaceholder}
-              value={scope.issueTypeId}
+              value={issueType}
               onSelect={selectIssueType}
               options={issueTypeOptions}
-              filter={(itemValue, query) => {
-                const q = query.trim().toLowerCase()
-                if (!q) return true
-                const opt = issueTypeOptions.find((o) => o.value === itemValue)
-                return (opt?.label ?? '').toLowerCase().includes(q)
-              }}
+              filter={true}
               loadingText="Loading…"
               emptyText={issueTypeEmptyText}
               disabled={isIssueTypeDisabled}

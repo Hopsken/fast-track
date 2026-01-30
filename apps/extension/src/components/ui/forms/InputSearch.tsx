@@ -21,7 +21,7 @@ export interface SearchOption<T = unknown> {
   /** Optional icon to display */
   icon?: React.ReactNode
   /** Original data associated with this option */
-  data?: T
+  data: T
   /** Whether this option is disabled */
   disabled?: boolean
 }
@@ -53,25 +53,16 @@ export interface InputSearchProps<T = unknown> {
   /** Whether options are currently loading */
   isLoading?: boolean
 
-  /** Called when the popover opens/closes (useful for lazy-loading recommendations) */
-  onOpenChange?: (open: boolean) => void
-
   /**
    * Optional Base UI filter function; defaults to `null` (no filtering).
    * Base UI calls this with the item's `value` (string) and the current query.
    */
-  filter?:
-    | ((
-        itemValue: string,
-        query: string,
-        itemToString?: (itemValue: string) => string
-      ) => boolean)
-    | null
+  filter?: boolean
 
   /** Currently selected value (SearchOption.value) */
-  value?: string
+  value?: T
   /** Callback when selection changes */
-  onSelect?: (option: SearchOption<T> | null) => void
+  onSelect?: (option: T | null) => void
 
   /** Whether the search input is disabled */
   disabled?: boolean
@@ -106,8 +97,7 @@ export function InputSearch<T = unknown>({
   onQueryChange,
   options,
   isLoading = false,
-  onOpenChange,
-  filter = null,
+  filter = true,
   value,
   onSelect,
   disabled = false,
@@ -136,51 +126,28 @@ export function InputSearch<T = unknown>({
     [isQueryControlled, onQueryChange]
   )
 
-  // Cache the selected label so the input can still show the selection even if
-  // it's not present in the current options list.
-  const [selectedLabel, setSelectedLabel] = useState('')
-
   const selectedOption = useMemo(() => {
-    if (!value) return null
-    return options.find((opt) => opt.value === value) ?? null
+    if (value === undefined || value === null) return null
+    return options.find((opt) => opt.data === value) ?? null
   }, [options, value])
 
-  const displayLabel = selectedOption?.label ?? selectedLabel
+  const displayLabel = selectedOption?.label
 
   // When closed, show the selected label as the input value.
   // When open, show the controlled query.
   const inputValue = open ? query : (displayLabel ?? '')
-
-  // Keep cached label in sync when we can resolve it from options.
-  useEffect(() => {
-    if (!value) return
-    if (!selectedOption?.label) return
-    setSelectedLabel(selectedOption.label)
-  }, [selectedOption?.label, value])
 
   useEffect(() => {
     openRef.current = open
   }, [open])
 
   const handleValueChange = useCallback(
-    (next: string | null) => {
-      if (!next) {
-        onSelect?.(null)
-        setSelectedLabel('')
-        setQuery('')
-        return
-      }
-
-      const option = options.find((opt) => opt.value === next)
-      const resolved = option ?? { value: next, label: next }
-
-      onSelect?.(resolved)
-      setSelectedLabel(resolved.label)
-
+    (next: SearchOption<T> | null, eventDetails: any) => {
+      onSelect?.(next?.data ?? null)
       // Clear query so next open starts from recommendations.
       setQuery('')
     },
-    [onSelect, options, setQuery]
+    [onSelect, setQuery]
   )
 
   const defaultRenderOption = (option: SearchOption<T>) => (
@@ -199,12 +166,19 @@ export function InputSearch<T = unknown>({
     </div>
   )
 
+  const filteredOptions = useMemo(() => {
+    if (!filter || !query.trim()) return options
+    const lowerQuery = query.toLowerCase()
+    return options.filter((opt) => opt.label.toLowerCase().includes(lowerQuery))
+  }, [filter, query, options])
+
   const optionRenderer =
     renderOption ?? ((opt: SearchOption<T>) => defaultRenderOption(opt))
 
   return (
-    <Combobox<string>
-      value={value ?? null}
+    <Combobox<SearchOption<T>>
+      items={filteredOptions}
+      value={selectedOption}
       onValueChange={handleValueChange}
       inputValue={inputValue}
       onInputValueChange={(next, eventDetails) => {
@@ -235,12 +209,9 @@ export function InputSearch<T = unknown>({
 
         openRef.current = next
         setOpen(next)
-        onOpenChange?.(next)
       }}
       // Always open on input click.
       openOnInputClick
-      // Results are controlled externally, but consumer may opt into Base UI filtering.
-      filter={filter}
       disabled={disabled}>
       <ComboboxInput
         id={id}
@@ -259,16 +230,14 @@ export function InputSearch<T = unknown>({
         <ComboboxEmpty>{isLoading ? loadingText : emptyText}</ComboboxEmpty>
 
         <ComboboxList>
-          {!isLoading
-            ? options.map((option) => (
-                <ComboboxItem
-                  key={option.value}
-                  value={option.value}
-                  disabled={option.disabled}>
-                  {optionRenderer(option, option.value === value)}
-                </ComboboxItem>
-              ))
-            : null}
+          {filteredOptions.map((option) => (
+            <ComboboxItem
+              key={option.value}
+              value={option}
+              disabled={option.disabled}>
+              {optionRenderer(option, option.data === value)}
+            </ComboboxItem>
+          ))}
         </ComboboxList>
       </ComboboxContent>
     </Combobox>

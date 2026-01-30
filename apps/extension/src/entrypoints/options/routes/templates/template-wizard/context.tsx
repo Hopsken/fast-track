@@ -10,19 +10,14 @@ import { useQuery } from '@tanstack/react-query'
 import { useDebounce } from 'ahooks'
 
 import type { SearchOption } from '@/components/ui'
+import { JiraIssueType, JiraProject } from '@/types'
+import { formatErrorMessage } from '@/utils/formatError'
 import { queryKeys } from '@/utils/queryKeys'
 import { minutes } from '@/utils/time'
 import { getProjectService } from '~/services/project-service'
 import { getTemplateService } from '~/services/template-service'
 
-import {
-  type IssueTypeOption,
-  type ProjectOption,
-  type Step,
-  type WizardScope,
-  toIssueTypeSearchOption,
-  toProjectSearchOption
-} from './types'
+import { type Step, type WizardScope } from './types'
 
 export type WizardState = {
   step: Step
@@ -31,12 +26,12 @@ export type WizardState = {
 
   // Project picker
   projectQuery: string
-  projectOptions: SearchOption<ProjectOption>[]
+  projectOptions: SearchOption<JiraProject>[]
   isProjectOptionsLoading: boolean
   projectError: string | null
 
   // Issue type picker
-  issueTypeOptions: SearchOption<IssueTypeOption>[]
+  issueTypeOptions: SearchOption<JiraIssueType>[]
 
   name: string
   descriptionTemplate: string
@@ -49,10 +44,9 @@ export type WizardActions = {
   goToStep: (step: Step) => void
 
   setProjectQuery: (query: string) => void
-  setProjectOpen: (open: boolean) => void
-  selectProject: (opt: SearchOption<ProjectOption> | null) => Promise<void>
+  selectProject: (opt: JiraProject | null) => void
 
-  selectIssueType: (opt: SearchOption<IssueTypeOption> | null) => void
+  selectIssueType: (opt: JiraIssueType | null) => void
 
   setName: (next: string) => void
   setDescriptionTemplate: (next: string) => void
@@ -101,15 +95,8 @@ export function TemplateWizardProvider({
 }: ProviderProps) {
   const [step, setStep] = useState<Step>(1)
 
-  const [scope, setScope] = useState<WizardScope>({
-    projectKey: '',
-    projectName: '',
-    issueTypeId: '',
-    issueTypeName: ''
-  })
+  const [scope, setScope] = useState<WizardScope>({})
 
-  // Controlled pickers
-  const [isProjectOpen, setProjectOpen] = useState(false)
   const [projectQuery, setProjectQuery] = useState('')
 
   const debouncedProjectQuery = useDebounce(projectQuery.trim(), {
@@ -118,7 +105,7 @@ export function TemplateWizardProvider({
     trailing: true
   })
 
-  const projectsQuery = useQuery<ProjectOption[]>({
+  const projectsQuery = useQuery<JiraProject[]>({
     queryKey: queryKeys.projects.recentOrSearch(debouncedProjectQuery),
     queryFn: async ({ queryKey }) => {
       const q = String(queryKey[2] ?? '').trim()
@@ -130,37 +117,31 @@ export function TemplateWizardProvider({
     gcTime: minutes(5)
   })
 
-  const projectOptions = useMemo(() => {
+  const projectOptions = useMemo<SearchOption<JiraProject>[]>(() => {
     const data = projectsQuery.data ?? []
-    return data.map(toProjectSearchOption)
+    return data.map((proj) => ({
+      value: proj.key,
+      label: proj.name,
+      data: proj
+    }))
   }, [projectsQuery.data])
 
-  const isProjectOptionsLoading = projectsQuery.isFetching && isProjectOpen
+  const isProjectOptionsLoading = projectsQuery.isLoading
 
-  const projectError =
-    projectsQuery.error instanceof Error
-      ? projectsQuery.error.message
-      : projectsQuery.error
-        ? String(projectsQuery.error)
-        : null
-
-  const [selectedProject, setSelectedProject] = useState<ProjectOption | null>(
-    null
-  )
-
-  const issueTypes = useMemo<IssueTypeOption[]>(() => {
-    if (!selectedProject) return []
-
-    // Issue types are already included in the project payload.
-    // Only allow selecting non-subtask issue types.
-    return (selectedProject.issueTypes ?? [])
-      .filter((it) => !it.subtask)
-      .map((it) => ({ id: it.id, name: it.name, subtask: it.subtask }))
-  }, [selectedProject])
+  const projectError = formatErrorMessage(projectsQuery.error)
 
   const issueTypeOptions = useMemo(() => {
-    return issueTypes.map(toIssueTypeSearchOption)
-  }, [issueTypes])
+    const { project } = scope
+    if (!project) return []
+
+    return project.issueTypes
+      .filter((i) => !i.subtask)
+      .map((issueType) => ({
+        value: issueType.id,
+        label: issueType.name,
+        data: issueType
+      }))
+  }, [scope])
 
   const [name, setName] = useState('')
   const [descriptionTemplate, setDescriptionTemplate] = useState('')
@@ -168,80 +149,47 @@ export function TemplateWizardProvider({
   const [saveError, setSaveError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
 
-  const canProceedToStep2 = Boolean(
-    scope.projectKey && scope.issueTypeId && scope.issueTypeName
-  )
+  const canProceedToStep2 = Boolean(scope.project && scope.issueType)
 
   const canSave = Boolean(name.trim()) && Boolean(host) && canProceedToStep2
 
-  const isIssueTypeDisabled = !scope.projectKey
+  const isIssueTypeDisabled = !scope.project
 
-  const issueTypePlaceholder = scope.projectKey
+  const issueTypePlaceholder = scope.project
     ? 'Search issue types…'
     : 'Select a project first…'
 
-  const issueTypeEmptyText = scope.projectKey
+  const issueTypeEmptyText = scope.project
     ? 'No issue types'
     : 'No project selected'
 
-  const selectProject = useCallback(
-    async (opt: SearchOption<ProjectOption> | null) => {
-      if (!opt) {
-        setScope({
-          projectKey: '',
-          projectName: '',
-          issueTypeId: '',
-          issueTypeName: ''
-        })
-        setSelectedProject(null)
-        return
-      }
+  const selectProject = useCallback((project: JiraProject | null) => {
+    if (!project) {
+      setScope({})
+      return
+    }
 
-      const project: ProjectOption =
-        opt.data ??
-        ({ key: opt.value, name: opt.label, issueTypes: [] } as ProjectOption)
+    setScope((prev) => ({
+      ...prev,
+      project,
+      issueType: project.key === prev.project?.key ? prev.issueType : undefined
+    }))
+  }, [])
 
-      setSelectedProject(project)
-
-      setScope({
-        projectKey: project.key,
-        projectName: project.name,
-        issueTypeId: '',
-        issueTypeName: ''
-      })
-
-      getProjectService()
-        .recordProjectClick(project.key)
-        .catch(() => {
-          // ignore
-        })
-
-      // Reset issue type selection when project changes.
-    },
-    []
-  )
-
-  const selectIssueType = useCallback(
-    (opt: SearchOption<IssueTypeOption> | null) => {
-      if (!opt) {
-        setScope((s) => ({ ...s, issueTypeId: '', issueTypeName: '' }))
-        return
-      }
-
-      const issueType = opt.data ?? { id: opt.value, name: opt.label }
-
-      setScope((s) => ({
-        ...s,
-        issueTypeId: issueType.id,
-        issueTypeName: issueType.name
-      }))
-    },
-    []
-  )
+  const selectIssueType = useCallback((issueType: JiraIssueType | null) => {
+    setScope((prev) => ({
+      ...prev,
+      issueType: issueType ?? undefined
+    }))
+  }, [])
 
   const save = useCallback(async () => {
     setSaveError(null)
     setIsSaving(true)
+
+    if (!scope.project || !scope.issueType) {
+      return
+    }
 
     try {
       const svc = getTemplateService()
@@ -250,9 +198,9 @@ export function TemplateWizardProvider({
         icon: undefined,
         scope: {
           baseUrlHost: host,
-          projectKey: scope.projectKey,
-          issueTypeId: scope.issueTypeId,
-          issueTypeName: scope.issueTypeName
+          projectKey: scope.project.key,
+          issueTypeId: scope.issueType.id,
+          issueTypeName: scope.issueType.name
         },
         fields: {},
         descriptionTemplate: descriptionTemplate.trim()
@@ -267,15 +215,7 @@ export function TemplateWizardProvider({
     } finally {
       setIsSaving(false)
     }
-  }, [
-    descriptionTemplate,
-    host,
-    name,
-    onCreated,
-    scope.issueTypeId,
-    scope.issueTypeName,
-    scope.projectKey
-  ])
+  }, [descriptionTemplate, host, name, onCreated, scope])
 
   const state = useMemo<WizardState>(
     () => ({
@@ -311,7 +251,6 @@ export function TemplateWizardProvider({
       goToStep: setStep,
 
       setProjectQuery,
-      setProjectOpen,
       selectProject,
 
       selectIssueType,

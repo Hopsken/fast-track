@@ -8,7 +8,7 @@ import { useWizardContext } from './context'
 
 export function TemplateWizardBasicsStep() {
   const {
-    state: { step, scope, name, descriptionTemplate, saveError, isSaving },
+    state: { step, name, descriptionTemplate, saveError, isSaving },
     actions: { goToStep, setName, setDescriptionTemplate, save },
     meta: { canSave }
   } = useWizardContext()
@@ -32,13 +32,6 @@ export function TemplateWizardBasicsStep() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Bug report…"
               />
-            </div>
-
-            <div className="min-w-0 space-y-2">
-              <Label>Scope</Label>
-              <div className="truncate text-sm text-gray-700">
-                {scope.projectKey} • {scope.issueTypeName}
-              </div>
             </div>
           </div>
 
