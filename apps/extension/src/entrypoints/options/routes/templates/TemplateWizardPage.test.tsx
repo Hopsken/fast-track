@@ -37,7 +37,7 @@ describe('TemplateWizardPage', () => {
     } as unknown as ReturnType<typeof getTemplateService>)
   })
 
-  it('allows selecting project and issue type to proceed', async () => {
+  it('renders single-screen editor with scope and create button', async () => {
     const searchProjects = vi.fn().mockResolvedValue([
       {
         id: 'p1',
@@ -89,9 +89,15 @@ describe('TemplateWizardPage', () => {
       </QueryClientProvider>
     )
 
-    const continueButton = screen.getByRole('button', { name: 'Next: Fields' })
-    expect((continueButton as HTMLButtonElement).disabled).toBe(true)
+    // Single screen: inline name, scope selectors, and Create button all visible
+    expect(screen.getByPlaceholderText('Template name')).toBeTruthy()
+    expect(screen.getByPlaceholderText('Add a description…')).toBeTruthy()
+    expect(screen.getByPlaceholderText('Search projects…')).toBeTruthy()
 
+    const createButton = screen.getByRole('button', { name: 'Create' })
+    expect((createButton as HTMLButtonElement).disabled).toBe(true)
+
+    // Select project
     const projectInput = screen.getByPlaceholderText('Search projects…')
 
     await act(async () => {
@@ -104,14 +110,14 @@ describe('TemplateWizardPage', () => {
       expect(searchProjects).toHaveBeenCalledWith('a')
     })
 
-    const projectOption = await screen.findByText('ABC — Alpha')
+    const projectOption = await screen.findByText('Alpha')
     fireEvent.click(projectOption)
 
+    // Select issue type
     const issueTypeInput = await screen.findByPlaceholderText(
       'Search issue types…'
     )
 
-    // Clicking the input should show recommendations (async loaded)
     await act(async () => {
       fireEvent.mouseDown(issueTypeInput)
     })
@@ -124,8 +130,17 @@ describe('TemplateWizardPage', () => {
       fireEvent.click(issueTypeOption)
     })
 
+    // Create still disabled (no name yet)
+    expect((createButton as HTMLButtonElement).disabled).toBe(true)
+
+    // Type a name → Create becomes enabled
+    const nameInput = screen.getByPlaceholderText('Template name')
+    await act(async () => {
+      fireEvent.change(nameInput, { target: { value: 'Bug report' } })
+    })
+
     await waitFor(() => {
-      expect((continueButton as HTMLButtonElement).disabled).toBe(false)
+      expect((createButton as HTMLButtonElement).disabled).toBe(false)
     })
   }, 10000)
 })

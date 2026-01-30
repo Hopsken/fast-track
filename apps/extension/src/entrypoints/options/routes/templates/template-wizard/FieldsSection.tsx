@@ -46,11 +46,11 @@ function normalizePreset(presetValue: unknown): FieldConfig {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Main step                                                          */
+/*  Fields section                                                     */
 /* ------------------------------------------------------------------ */
 
-export function TemplateWizardFieldsStep() {
-  const { state, actions } = useWizardContext()
+export function FieldsSection() {
+  const { state, actions, meta } = useWizardContext()
   const { availableFields, fieldsConfig, areFieldsLoading, fieldsError } = state
   const [commandOpen, setCommandOpen] = useState(false)
 
@@ -96,16 +96,15 @@ export function TemplateWizardFieldsStep() {
     [actions]
   )
 
-  if (state.step !== 2) return null
+  if (!meta.hasScope) return null
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="space-y-1">
-        <h3 className="text-base font-medium">Configure fields</h3>
-        <p className="text-muted-foreground text-sm">
-          Add fields to your template. Fill a value to use it as a preset, or
-          leave it empty to prompt for input when creating a ticket.
+    <section className="space-y-3">
+      <div>
+        <h3 className="text-sm font-medium">Fields</h3>
+        <p className="text-muted-foreground text-xs">
+          Add fields and fill values to use as presets. Leave empty to prompt
+          for input when creating a ticket.
         </p>
       </div>
 
@@ -125,7 +124,7 @@ export function TemplateWizardFieldsStep() {
         <div className="space-y-6">
           {/* Required fields */}
           {requiredFields.length > 0 && (
-            <section className="space-y-3">
+            <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Label className="text-xs font-medium uppercase tracking-wide">
                   Required
@@ -144,11 +143,11 @@ export function TemplateWizardFieldsStep() {
                   />
                 ))}
               </div>
-            </section>
+            </div>
           )}
 
           {/* Optional fields */}
-          <section className="space-y-3">
+          <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Label className="text-xs font-medium uppercase tracking-wide">
                 Optional
@@ -191,7 +190,7 @@ export function TemplateWizardFieldsStep() {
                 ))}
               </div>
             )}
-          </section>
+          </div>
         </div>
       )}
 
@@ -204,14 +203,6 @@ export function TemplateWizardFieldsStep() {
         optionalUnselected={optionalUnselected}
         onSelect={handleAddField}
       />
-
-      {/* Navigation */}
-      <div className="flex items-center justify-between gap-3 border-t pt-4">
-        <Button variant="secondary" onClick={() => actions.goToStep(1)}>
-          Back
-        </Button>
-        <Button onClick={() => actions.goToStep(3)}>Next: Basics</Button>
-      </div>
-    </div>
+    </section>
   )
 }

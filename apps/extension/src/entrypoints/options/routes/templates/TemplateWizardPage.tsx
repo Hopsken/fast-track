@@ -32,12 +32,7 @@ export function TemplateWizardPage() {
       onCreated={(id) => {
         navigate(`/templates/${id}`)
       }}>
-      <div className="space-y-6">
-        <TemplateWizard.Header />
-        <TemplateWizard.ScopeStep />
-        <TemplateWizard.FieldsStep />
-        <TemplateWizard.BasicsStep />
-      </div>
+      <TemplateWizard.Editor />
     </TemplateWizard.Provider>
   )
 }

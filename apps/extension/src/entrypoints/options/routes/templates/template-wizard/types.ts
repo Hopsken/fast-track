@@ -4,5 +4,3 @@ export type WizardScope = {
   project?: JiraProject
   issueType?: JiraIssueType
 }
-
-export type Step = 1 | 2 | 3
