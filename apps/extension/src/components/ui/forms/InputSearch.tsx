@@ -10,6 +10,7 @@ import {
   ComboboxItem,
   ComboboxList
 } from '@internal/ui/components/combobox'
+import { InputGroupAddon } from '@internal/ui/components/input-group'
 
 export interface SearchOption<T = unknown> {
   /** Unique identifier for the option */
@@ -18,8 +19,6 @@ export interface SearchOption<T = unknown> {
   label: string
   /** Optional description shown below the label */
   description?: string
-  /** Optional icon to display */
-  icon?: React.ReactNode
   /** Original data associated with this option */
   data: T
   /** Whether this option is disabled */
@@ -85,6 +84,7 @@ export interface InputSearchProps<T = unknown> {
     option: SearchOption<T>,
     isSelected: boolean
   ) => React.ReactNode
+  renderOptionIcon?: (option: SearchOption<T>) => React.ReactNode
   /** Allow clearing the selection */
   clearable?: boolean
 }
@@ -108,6 +108,7 @@ export function InputSearch<T = unknown>({
   ariaLabel,
   ariaLabelledBy,
   renderOption,
+  renderOptionIcon,
   clearable = true
 }: InputSearchProps<T>) {
   const [open, setOpen] = useState(false)
@@ -142,7 +143,7 @@ export function InputSearch<T = unknown>({
   }, [open])
 
   const handleValueChange = useCallback(
-    (next: SearchOption<T> | null, eventDetails: any) => {
+    (next: SearchOption<T> | null) => {
       onSelect?.(next?.data ?? null)
       // Clear query so next open starts from recommendations.
       setQuery('')
@@ -152,8 +153,10 @@ export function InputSearch<T = unknown>({
 
   const defaultRenderOption = (option: SearchOption<T>) => (
     <div className="flex w-full items-center gap-2 overflow-hidden">
-      {option.icon ? (
-        <span className="flex shrink-0 items-center">{option.icon}</span>
+      {renderOptionIcon ? (
+        <span className="flex shrink-0 items-center">
+          {renderOptionIcon(option)}
+        </span>
       ) : null}
       <div className="flex flex-1 flex-col overflow-hidden">
         <span className="truncate">{option.label}</span>
@@ -223,8 +226,13 @@ export function InputSearch<T = unknown>({
         className={className}
         disabled={disabled}
         showClear={clearable && Boolean(value)}
-        showTrigger={!clearable || !value}
-      />
+        showTrigger={!clearable || !value}>
+        {renderOptionIcon && selectedOption ? (
+          <InputGroupAddon align="inline-start">
+            {renderOptionIcon(selectedOption)}
+          </InputGroupAddon>
+        ) : null}
+      </ComboboxInput>
 
       <ComboboxContent>
         <ComboboxEmpty>{isLoading ? loadingText : emptyText}</ComboboxEmpty>

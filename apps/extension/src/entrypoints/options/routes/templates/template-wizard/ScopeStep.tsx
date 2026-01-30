@@ -2,7 +2,7 @@ import { Button } from '@internal/ui/components/button'
 import { Label } from '@internal/ui/components/label'
 import { Link } from 'react-router-dom'
 
-import { InputSearch } from '@/components/ui'
+import { GeneralIcon, InputSearch } from '@/components/ui'
 import { JiraIssueType, JiraProject } from '@/types'
 
 import { useWizardContext } from './context'
@@ -51,6 +51,11 @@ export function TemplateWizardScopeStep() {
               isLoading={isProjectOptionsLoading}
               loadingText="Loading…"
               emptyText={projectError ?? 'No projects'}
+              renderOptionIcon={(opt) =>
+                opt.data.avatarUrl ? (
+                  <GeneralIcon alt={opt.label} iconUrl={opt.data.avatarUrl} />
+                ) : null
+              }
             />
           </div>
 
@@ -68,6 +73,11 @@ export function TemplateWizardScopeStep() {
               loadingText="Loading…"
               emptyText={issueTypeEmptyText}
               disabled={isIssueTypeDisabled}
+              renderOptionIcon={(opt) =>
+                opt.data.iconUrl ? (
+                  <GeneralIcon alt={opt.label} iconUrl={opt.data.iconUrl} />
+                ) : null
+              }
             />
           </div>
         </div>
