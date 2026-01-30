@@ -23,13 +23,6 @@ export function ScopeSection() {
 
   return (
     <section className="space-y-3">
-      <div>
-        <h3 className="text-sm font-medium">Scope</h3>
-        <p className="text-muted-foreground text-xs">
-          Target project and issue type for this template
-        </p>
-      </div>
-
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor="template-project">Project</Label>

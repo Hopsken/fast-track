@@ -20,7 +20,7 @@
 - **Module-First**: Abstract features into reusable modules before app code
 - **Test-First (TDD)**: Write failing tests → then implement (non-negotiable)
 - **Simplicity**: Use framework features directly; no unnecessary wrappers
-- **Best practice**: Follow React best practices and composition patterns.
+- **Best practice**: Follow React best practices and composition patterns. Strictly one component per file.
 
 ## Quality Gates
 

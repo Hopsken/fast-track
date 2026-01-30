@@ -1,5 +1,6 @@
 import { useCallback, useRef } from 'react'
 import { Button } from '@internal/ui/components/button'
+import { Separator } from '@internal/ui/components/separator'
 import { Link } from 'react-router-dom'
 
 import { useWizardContext } from './context'
@@ -72,6 +73,8 @@ export function TemplateEditor() {
 
       {/* Scope */}
       <ScopeSection />
+
+      <Separator />
 
       {/* Fields (progressive disclosure) */}
       <FieldsSection />
