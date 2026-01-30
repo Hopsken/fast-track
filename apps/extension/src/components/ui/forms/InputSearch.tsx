@@ -87,6 +87,7 @@ export function InputSearch<T = unknown>({
   clearable = true
 }: InputSearchProps<T>) {
   const [open, setOpen] = useState(false)
+  const openRef = useRef(open)
 
   const [inputValue, setInputValue] = useState('')
 
@@ -172,10 +173,15 @@ export function InputSearch<T = unknown>({
       }
 
       const option = allOptions.find((opt) => opt.value === next)
-      onSelect?.(option ?? { value: next, label: next })
+      const resolved = option ?? { value: next, label: next }
 
-      // keep the input empty so the selected value shows as placeholder
-      setInputValue('')
+      onSelect?.(resolved)
+
+      // Reset search state; we want the selected label to be shown as the input value.
+      setSearchResults([])
+      setHasSearched(false)
+      setIsSearching(false)
+      setInputValue(resolved.label)
     },
     [allOptions, onSelect]
   )
@@ -227,6 +233,16 @@ export function InputSearch<T = unknown>({
     shouldShowRecommendations
   ])
 
+  useEffect(() => {
+    openRef.current = open
+  }, [open])
+
+  // When closed, show the selected label as the input value.
+  useEffect(() => {
+    if (open) return
+    setInputValue(selectedOption?.label ?? '')
+  }, [open, selectedOption?.label])
+
   // Lazy-load recommendations when the list opens and we're in recommendation mode.
   useEffect(() => {
     if (!open) return
@@ -263,6 +279,38 @@ export function InputSearch<T = unknown>({
 
   const isLoading = isSearching || isLoadingRecommendations
 
+  const visibleOptions = useMemo(() => {
+    if (shouldShowRecommendations) return recommendations
+    if (shouldShowResults) return searchResults
+    return []
+  }, [
+    recommendations,
+    searchResults,
+    shouldShowRecommendations,
+    shouldShowResults
+  ])
+
+  const showEmptyState = useMemo(() => {
+    if (isLoading) return false
+
+    if (shouldShowRecommendations) {
+      return hasLoadedRecommendations && recommendations.length === 0
+    }
+
+    if (shouldShowResults) {
+      return searchResults.length === 0
+    }
+
+    return false
+  }, [
+    hasLoadedRecommendations,
+    isLoading,
+    recommendations,
+    searchResults,
+    shouldShowRecommendations,
+    shouldShowResults
+  ])
+
   return (
     <Combobox<string>
       value={value ?? null}
@@ -284,14 +332,35 @@ export function InputSearch<T = unknown>({
 
         handleUserInputValueChange(next)
       }}
-      onOpenChange={(next) => setOpen(next)}
+      onOpenChange={(next) => {
+        const wasOpen = openRef.current
+
+        // Some combobox implementations may fire onOpenChange(true) more than once.
+        // Only run "open" initialization logic on an actual closed -> open transition.
+        if (next && !wasOpen) {
+          setInputValue('')
+          setSearchResults([])
+          setHasSearched(false)
+          setIsSearching(false)
+
+          if (searchDebounceRef.current) {
+            clearTimeout(searchDebounceRef.current)
+            searchDebounceRef.current = null
+          }
+
+          if (searchAbortRef.current) searchAbortRef.current.abort()
+        }
+
+        openRef.current = next
+        setOpen(next)
+      }}
       // Always open on input click (requested behavior).
       openOnInputClick
       // We control results externally (async search / recommendations).
       filter={null}
       disabled={disabled}>
       <ComboboxInput
-        placeholder={selectedOption?.label ?? placeholder}
+        placeholder={placeholder}
         className={className}
         disabled={disabled}
         showClear={clearable && Boolean(value)}
@@ -302,26 +371,15 @@ export function InputSearch<T = unknown>({
       />
 
       <ComboboxContent>
-        {!isLoading ? <ComboboxEmpty>{emptyText}</ComboboxEmpty> : null}
-        <ComboboxList>
-          {isLoading ? (
-            <div className="text-muted-foreground py-6 text-center text-sm">
-              {loadingText}
-            </div>
-          ) : null}
-          {shouldShowRecommendations
-            ? recommendations.map((option) => (
-                <ComboboxItem
-                  key={option.value}
-                  value={option.value}
-                  disabled={option.disabled}>
-                  {optionRenderer(option, option.value === value)}
-                </ComboboxItem>
-              ))
-            : null}
+        {isLoading ? <ComboboxEmpty>{loadingText}</ComboboxEmpty> : null}
 
-          {shouldShowResults
-            ? searchResults.map((option) => (
+        {!isLoading && showEmptyState ? (
+          <ComboboxEmpty>{emptyText}</ComboboxEmpty>
+        ) : null}
+
+        <ComboboxList>
+          {!isLoading
+            ? visibleOptions.map((option) => (
                 <ComboboxItem
                   key={option.value}
                   value={option.value}
