@@ -60,7 +60,7 @@ describe('TemplateWizardPage', () => {
       </MemoryRouter>
     )
 
-    const continueButton = screen.getByRole('button', { name: 'Continue' })
+    const continueButton = screen.getByRole('button', { name: 'Next: Basics' })
     expect((continueButton as HTMLButtonElement).disabled).toBe(true)
 
     const projectInput = screen.getByPlaceholderText('Search projects…')

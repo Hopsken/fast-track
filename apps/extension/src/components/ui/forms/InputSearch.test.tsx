@@ -60,4 +60,73 @@ describe('InputSearch', () => {
       label: 'TMP — Team Management Kanban'
     })
   })
+
+  it('keeps showing the selected label even if it came from search results', async () => {
+    const onSelect = vi.fn()
+
+    const getRecommendations = vi
+      .fn<() => Promise<SearchOption[]>>()
+      .mockResolvedValue([])
+
+    const onSearch = vi
+      .fn<(query: string) => Promise<SearchOption[]>>()
+      .mockImplementation(async (query) => {
+        if (query.toLowerCase().includes('tm')) {
+          return [{ value: 'TMP', label: 'TMP — Team Management Kanban' }]
+        }
+        return []
+      })
+
+    function Harness() {
+      const [value, setValue] = React.useState<string | undefined>(undefined)
+
+      return (
+        <InputSearch
+          placeholder="Search projects…"
+          value={value}
+          onSelect={(opt) => {
+            onSelect(opt)
+            setValue(opt?.value)
+          }}
+          getRecommendations={getRecommendations}
+          onSearch={onSearch}
+          debounceMs={0}
+          minSearchLength={1}
+        />
+      )
+    }
+
+    render(<Harness />)
+
+    const input = screen.getByPlaceholderText(
+      'Search projects…'
+    ) as HTMLInputElement
+
+    await act(async () => {
+      fireEvent.mouseDown(input)
+    })
+
+    await act(async () => {
+      fireEvent.change(input, { target: { value: 'tm' } })
+    })
+
+    await waitFor(() => {
+      expect(onSearch).toHaveBeenCalledWith('tm')
+    })
+
+    const option = await screen.findByText('TMP — Team Management Kanban')
+
+    await act(async () => {
+      fireEvent.click(option)
+    })
+
+    await waitFor(() => {
+      expect(input.value).toBe('TMP — Team Management Kanban')
+    })
+
+    expect(onSelect).toHaveBeenCalledWith({
+      value: 'TMP',
+      label: 'TMP — Team Management Kanban'
+    })
+  })
 })

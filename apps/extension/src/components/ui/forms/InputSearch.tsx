@@ -62,6 +62,17 @@ export interface InputSearchProps<T = unknown> {
   /** Additional className for the input */
   className?: string
 
+  /** Input id */
+  id?: string
+  /** Input name (for autofill) */
+  name?: string
+  /** Autocomplete hint */
+  autoComplete?: string
+  /** `aria-label` for the input */
+  ariaLabel?: string
+  /** `aria-labelledby` for the input */
+  ariaLabelledBy?: string
+
   /** Render custom option content */
   renderOption?: (
     option: SearchOption<T>,
@@ -83,6 +94,11 @@ export function InputSearch<T = unknown>({
   minSearchLength = 1,
   disabled = false,
   className,
+  id,
+  name,
+  autoComplete,
+  ariaLabel,
+  ariaLabelledBy,
   renderOption,
   clearable = true
 }: InputSearchProps<T>) {
@@ -90,6 +106,7 @@ export function InputSearch<T = unknown>({
   const openRef = useRef(open)
 
   const [inputValue, setInputValue] = useState('')
+  const [selectedLabel, setSelectedLabel] = useState('')
 
   const [isSearching, setIsSearching] = useState(false)
   const [searchResults, setSearchResults] = useState<SearchOption<T>[]>([])
@@ -116,6 +133,8 @@ export function InputSearch<T = unknown>({
     if (!value) return null
     return allOptions.find((opt) => opt.value === value) ?? null
   }, [allOptions, value])
+
+  const displayLabel = selectedOption?.label ?? selectedLabel
 
   const shouldShowRecommendations = inputValue.length < minSearchLength
   const shouldShowResults = hasSearched && inputValue.length >= minSearchLength
@@ -166,6 +185,7 @@ export function InputSearch<T = unknown>({
       if (!next) {
         onSelect?.(null)
         setInputValue('')
+        setSelectedLabel('')
         setSearchResults([])
         setHasSearched(false)
         setIsSearching(false)
@@ -176,6 +196,10 @@ export function InputSearch<T = unknown>({
       const resolved = option ?? { value: next, label: next }
 
       onSelect?.(resolved)
+
+      // Cache the label so the input can still show the selection even if it's
+      // not present in recommendations/search results.
+      setSelectedLabel(resolved.label)
 
       // Reset search state; we want the selected label to be shown as the input value.
       setSearchResults([])
@@ -237,11 +261,18 @@ export function InputSearch<T = unknown>({
     openRef.current = open
   }, [open])
 
+  // Keep cached label in sync when we can resolve it from option lists.
+  useEffect(() => {
+    if (!value) return
+    if (!selectedOption?.label) return
+    setSelectedLabel(selectedOption.label)
+  }, [selectedOption?.label, value])
+
   // When closed, show the selected label as the input value.
   useEffect(() => {
     if (open) return
-    setInputValue(selectedOption?.label ?? '')
-  }, [open, selectedOption?.label])
+    setInputValue(displayLabel ?? '')
+  }, [displayLabel, open])
 
   // Lazy-load recommendations when the list opens and we're in recommendation mode.
   useEffect(() => {
@@ -360,6 +391,11 @@ export function InputSearch<T = unknown>({
       filter={null}
       disabled={disabled}>
       <ComboboxInput
+        id={id}
+        name={name}
+        autoComplete={autoComplete}
+        aria-label={ariaLabel}
+        aria-labelledby={ariaLabelledBy}
         placeholder={placeholder}
         className={className}
         disabled={disabled}
