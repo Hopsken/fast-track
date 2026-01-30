@@ -6,8 +6,12 @@ import {
   useMemo,
   useState
 } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useDebounce } from 'ahooks'
 
 import type { SearchOption } from '@/components/ui'
+import { queryKeys } from '@/utils/queryKeys'
+import { minutes } from '@/utils/time'
 import { getProjectService } from '~/services/project-service'
 import { getTemplateService } from '~/services/template-service'
 
@@ -23,13 +27,16 @@ import {
 export type WizardState = {
   step: Step
 
+  scope: WizardScope
+
+  // Project picker
+  projectQuery: string
+  projectOptions: SearchOption<ProjectOption>[]
+  isProjectOptionsLoading: boolean
   projectError: string | null
 
-  issueTypes: IssueTypeOption[]
-  issueTypesLoading: boolean
-  issueTypesError: string | null
-
-  scope: WizardScope
+  // Issue type picker
+  issueTypeOptions: SearchOption<IssueTypeOption>[]
 
   name: string
   descriptionTemplate: string
@@ -41,14 +48,11 @@ export type WizardState = {
 export type WizardActions = {
   goToStep: (step: Step) => void
 
+  setProjectQuery: (query: string) => void
+  setProjectOpen: (open: boolean) => void
   selectProject: (opt: SearchOption<ProjectOption> | null) => Promise<void>
+
   selectIssueType: (opt: SearchOption<IssueTypeOption> | null) => void
-
-  searchProjects: (query: string) => Promise<SearchOption<ProjectOption>[]>
-  getProjectRecommendations: () => Promise<SearchOption<ProjectOption>[]>
-
-  searchIssueTypes: (query: string) => Promise<SearchOption<IssueTypeOption>[]>
-  getIssueTypeRecommendations: () => Promise<SearchOption<IssueTypeOption>[]>
 
   setName: (next: string) => void
   setDescriptionTemplate: (next: string) => void
@@ -97,18 +101,66 @@ export function TemplateWizardProvider({
 }: ProviderProps) {
   const [step, setStep] = useState<Step>(1)
 
-  const [projectError, setProjectError] = useState<string | null>(null)
-
-  const [issueTypes, setIssueTypes] = useState<IssueTypeOption[]>([])
-  const [issueTypesLoading, setIssueTypesLoading] = useState(false)
-  const [issueTypesError, setIssueTypesError] = useState<string | null>(null)
-
   const [scope, setScope] = useState<WizardScope>({
     projectKey: '',
     projectName: '',
     issueTypeId: '',
     issueTypeName: ''
   })
+
+  // Controlled pickers
+  const [isProjectOpen, setProjectOpen] = useState(false)
+  const [projectQuery, setProjectQuery] = useState('')
+
+  const debouncedProjectQuery = useDebounce(projectQuery.trim(), {
+    wait: 300,
+    leading: false,
+    trailing: true
+  })
+
+  const projectsQuery = useQuery<ProjectOption[]>({
+    queryKey: queryKeys.projects.recentOrSearch(debouncedProjectQuery),
+    queryFn: async ({ queryKey }) => {
+      const q = String(queryKey[2] ?? '').trim()
+      const svc = getProjectService()
+      return q.length === 0 ? svc.getRecentProjects() : svc.searchProjects(q)
+    },
+    // Always enabled so users see results instantly when opening the picker.
+    staleTime: minutes(1),
+    gcTime: minutes(5)
+  })
+
+  const projectOptions = useMemo(() => {
+    const data = projectsQuery.data ?? []
+    return data.map(toProjectSearchOption)
+  }, [projectsQuery.data])
+
+  const isProjectOptionsLoading = projectsQuery.isFetching && isProjectOpen
+
+  const projectError =
+    projectsQuery.error instanceof Error
+      ? projectsQuery.error.message
+      : projectsQuery.error
+        ? String(projectsQuery.error)
+        : null
+
+  const [selectedProject, setSelectedProject] = useState<ProjectOption | null>(
+    null
+  )
+
+  const issueTypes = useMemo<IssueTypeOption[]>(() => {
+    if (!selectedProject) return []
+
+    // Issue types are already included in the project payload.
+    // Only allow selecting non-subtask issue types.
+    return (selectedProject.issueTypes ?? [])
+      .filter((it) => !it.subtask)
+      .map((it) => ({ id: it.id, name: it.name, subtask: it.subtask }))
+  }, [selectedProject])
+
+  const issueTypeOptions = useMemo(() => {
+    return issueTypes.map(toIssueTypeSearchOption)
+  }, [issueTypes])
 
   const [name, setName] = useState('')
   const [descriptionTemplate, setDescriptionTemplate] = useState('')
@@ -122,60 +174,15 @@ export function TemplateWizardProvider({
 
   const canSave = Boolean(name.trim()) && Boolean(host) && canProceedToStep2
 
-  const isIssueTypeDisabled = !scope.projectKey || issueTypesLoading
+  const isIssueTypeDisabled = !scope.projectKey
 
-  const issueTypePlaceholder = (() => {
-    if (!scope.projectKey) return 'Select a project first…'
-    if (issueTypesLoading) return 'Loading issue types…'
-    return 'Search issue types…'
-  })()
+  const issueTypePlaceholder = scope.projectKey
+    ? 'Search issue types…'
+    : 'Select a project first…'
 
-  const issueTypeEmptyText =
-    issueTypesError ??
-    (scope.projectKey ? 'No issue types' : 'No project selected')
-
-  const getIssueTypeRecommendations = useCallback(async () => {
-    return issueTypes.map(toIssueTypeSearchOption)
-  }, [issueTypes])
-
-  const getProjectRecommendations = useCallback(async () => {
-    setProjectError(null)
-    try {
-      const svc = getProjectService()
-      const projects = await svc.getRecentProjects()
-      return projects.map(toProjectSearchOption)
-    } catch (e) {
-      setProjectError(e instanceof Error ? e.message : String(e))
-      return []
-    }
-  }, [])
-
-  const searchProjects = useCallback(async (query: string) => {
-    setProjectError(null)
-    try {
-      const svc = getProjectService()
-      const results = await svc.searchProjects(query.trim())
-      return results.map(toProjectSearchOption)
-    } catch (e) {
-      setProjectError(e instanceof Error ? e.message : String(e))
-      return []
-    }
-  }, [])
-
-  const loadIssueTypes = useCallback(async (projectKey: string) => {
-    setIssueTypesError(null)
-    setIssueTypesLoading(true)
-    try {
-      const svc = getProjectService()
-      const results = await svc.getProjectIssueTypes(projectKey)
-      setIssueTypes(results)
-    } catch (e) {
-      setIssueTypesError(e instanceof Error ? e.message : String(e))
-      setIssueTypes([])
-    } finally {
-      setIssueTypesLoading(false)
-    }
-  }, [])
+  const issueTypeEmptyText = scope.projectKey
+    ? 'No issue types'
+    : 'No project selected'
 
   const selectProject = useCallback(
     async (opt: SearchOption<ProjectOption> | null) => {
@@ -186,12 +193,15 @@ export function TemplateWizardProvider({
           issueTypeId: '',
           issueTypeName: ''
         })
-        setIssueTypes([])
-        setIssueTypesError(null)
+        setSelectedProject(null)
         return
       }
 
-      const project = opt.data ?? { key: opt.value, name: opt.label }
+      const project: ProjectOption =
+        opt.data ??
+        ({ key: opt.value, name: opt.label, issueTypes: [] } as ProjectOption)
+
+      setSelectedProject(project)
 
       setScope({
         projectKey: project.key,
@@ -206,24 +216,9 @@ export function TemplateWizardProvider({
           // ignore
         })
 
-      setIssueTypes([])
-      await loadIssueTypes(project.key)
+      // Reset issue type selection when project changes.
     },
-    [loadIssueTypes]
-  )
-
-  const searchIssueTypes = useCallback(
-    async (query: string) => {
-      if (!scope.projectKey) return []
-
-      const q = query.trim().toLowerCase()
-      const results = issueTypes.filter((it) =>
-        it.name.toLowerCase().includes(q)
-      )
-
-      return results.map(toIssueTypeSearchOption)
-    },
-    [issueTypes, scope.projectKey]
+    []
   )
 
   const selectIssueType = useCallback(
@@ -285,11 +280,12 @@ export function TemplateWizardProvider({
   const state = useMemo<WizardState>(
     () => ({
       step,
-      projectError,
-      issueTypes,
-      issueTypesLoading,
-      issueTypesError,
       scope,
+      projectQuery,
+      projectOptions,
+      isProjectOptionsLoading,
+      projectError,
+      issueTypeOptions,
       name,
       descriptionTemplate,
       saveError,
@@ -297,12 +293,13 @@ export function TemplateWizardProvider({
     }),
     [
       descriptionTemplate,
+      isProjectOptionsLoading,
       isSaving,
-      issueTypes,
-      issueTypesError,
-      issueTypesLoading,
+      issueTypeOptions,
       name,
       projectError,
+      projectOptions,
+      projectQuery,
       saveError,
       scope,
       step
@@ -312,25 +309,18 @@ export function TemplateWizardProvider({
   const actions = useMemo<WizardActions>(
     () => ({
       goToStep: setStep,
+
+      setProjectQuery,
+      setProjectOpen,
       selectProject,
+
       selectIssueType,
-      searchProjects,
-      getProjectRecommendations,
-      searchIssueTypes,
-      getIssueTypeRecommendations,
+
       setName,
       setDescriptionTemplate,
       save
     }),
-    [
-      getIssueTypeRecommendations,
-      getProjectRecommendations,
-      save,
-      searchIssueTypes,
-      searchProjects,
-      selectIssueType,
-      selectProject
-    ]
+    [save, selectIssueType, selectProject]
   )
 
   const meta = useMemo<WizardMeta>(

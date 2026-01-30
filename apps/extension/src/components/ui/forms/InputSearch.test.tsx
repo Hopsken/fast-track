@@ -7,14 +7,14 @@ import { InputSearch, type SearchOption } from './InputSearch'
 describe('InputSearch', () => {
   it('shows the selected option label as the input value (not just placeholder)', async () => {
     const onSelect = vi.fn()
-    const getRecommendations = vi
-      .fn<() => Promise<SearchOption[]>>()
-      .mockResolvedValue([
-        { value: 'TMP', label: 'TMP — Team Management Kanban' }
-      ])
 
     function Harness() {
       const [value, setValue] = React.useState<string | undefined>(undefined)
+      const [query, setQuery] = React.useState('')
+
+      const options: SearchOption[] = query
+        ? []
+        : [{ value: 'TMP', label: 'TMP — Team Management Kanban' }]
 
       return (
         <InputSearch
@@ -24,8 +24,9 @@ describe('InputSearch', () => {
             onSelect(opt)
             setValue(opt?.value)
           }}
-          getRecommendations={getRecommendations}
-          minSearchLength={1}
+          query={query}
+          onQueryChange={setQuery}
+          options={options}
         />
       )
     }
@@ -38,10 +39,6 @@ describe('InputSearch', () => {
 
     await act(async () => {
       fireEvent.mouseDown(input)
-    })
-
-    await waitFor(() => {
-      expect(getRecommendations).toHaveBeenCalled()
     })
 
     const option = await screen.findByText('TMP — Team Management Kanban')
@@ -64,21 +61,17 @@ describe('InputSearch', () => {
   it('keeps showing the selected label even if it came from search results', async () => {
     const onSelect = vi.fn()
 
-    const getRecommendations = vi
-      .fn<() => Promise<SearchOption[]>>()
-      .mockResolvedValue([])
+    function Harness() {
+      const [value, setValue] = React.useState<string | undefined>(undefined)
+      const [query, setQuery] = React.useState('')
 
-    const onSearch = vi
-      .fn<(query: string) => Promise<SearchOption[]>>()
-      .mockImplementation(async (query) => {
+      const options: SearchOption[] = React.useMemo(() => {
+        if (!query) return []
         if (query.toLowerCase().includes('tm')) {
           return [{ value: 'TMP', label: 'TMP — Team Management Kanban' }]
         }
         return []
-      })
-
-    function Harness() {
-      const [value, setValue] = React.useState<string | undefined>(undefined)
+      }, [query])
 
       return (
         <InputSearch
@@ -88,10 +81,9 @@ describe('InputSearch', () => {
             onSelect(opt)
             setValue(opt?.value)
           }}
-          getRecommendations={getRecommendations}
-          onSearch={onSearch}
-          debounceMs={0}
-          minSearchLength={1}
+          query={query}
+          onQueryChange={setQuery}
+          options={options}
         />
       )
     }
@@ -108,10 +100,6 @@ describe('InputSearch', () => {
 
     await act(async () => {
       fireEvent.change(input, { target: { value: 'tm' } })
-    })
-
-    await waitFor(() => {
-      expect(onSearch).toHaveBeenCalledWith('tm')
     })
 
     const option = await screen.findByText('TMP — Team Management Kanban')

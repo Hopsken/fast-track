@@ -9,14 +9,20 @@ import type { IssueTypeOption, ProjectOption } from './types'
 
 export function TemplateWizardScopeStep() {
   const {
-    state: { step, projectError, scope },
+    state: {
+      step,
+      scope,
+      projectQuery,
+      projectOptions,
+      isProjectOptionsLoading,
+      projectError,
+      issueTypeOptions
+    },
     actions: {
+      setProjectQuery,
+      setProjectOpen,
       selectProject,
-      searchProjects,
-      getProjectRecommendations,
       selectIssueType,
-      searchIssueTypes,
-      getIssueTypeRecommendations,
       goToStep
     },
     meta: {
@@ -42,10 +48,11 @@ export function TemplateWizardScopeStep() {
               placeholder="Search projects…"
               value={scope.projectKey}
               onSelect={(opt) => void selectProject(opt)}
-              onSearch={searchProjects}
-              getRecommendations={getProjectRecommendations}
-              debounceMs={300}
-              minSearchLength={1}
+              query={projectQuery}
+              onQueryChange={setProjectQuery}
+              onOpenChange={setProjectOpen}
+              options={projectOptions}
+              isLoading={isProjectOptionsLoading}
               loadingText="Loading…"
               emptyText={projectError ?? 'No projects'}
             />
@@ -60,10 +67,13 @@ export function TemplateWizardScopeStep() {
               placeholder={issueTypePlaceholder}
               value={scope.issueTypeId}
               onSelect={selectIssueType}
-              onSearch={searchIssueTypes}
-              getRecommendations={getIssueTypeRecommendations}
-              debounceMs={200}
-              minSearchLength={1}
+              options={issueTypeOptions}
+              filter={(itemValue, query) => {
+                const q = query.trim().toLowerCase()
+                if (!q) return true
+                const opt = issueTypeOptions.find((o) => o.value === itemValue)
+                return (opt?.label ?? '').toLowerCase().includes(q)
+              }}
               loadingText="Loading…"
               emptyText={issueTypeEmptyText}
               disabled={isIssueTypeDisabled}

@@ -100,7 +100,7 @@ export class JiraProjectService {
 
   async getRecentProjects(): Promise<JiraProject[]> {
     const client = await this.getClient()
-    const projects = await client.projects.getRecent()
+    const projects = await client.projects.getRecent({ expand: ['issueTypes'] })
     return projects.map(toJiraProject)
   }
 }

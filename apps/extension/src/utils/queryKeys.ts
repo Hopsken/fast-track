@@ -11,7 +11,18 @@ export const queryKeys = {
   autoComplete: (url: string, query: string) => ['autoComplete', url, query],
   priorities: ['priorities'],
   projects: {
-    frequent: ['projects', 'frequent'] as const
+    frequent: ['projects', 'frequent'] as const,
+    recent: ['projects', 'recent'] as const,
+    search: (query: string) => ['projects', 'search', query] as const,
+    /**
+     * Unified key used when the data source depends on whether query is empty:
+     * - empty query => recent projects
+     * - non-empty query => search projects
+     */
+    recentOrSearch: (query: string) =>
+      ['projects', 'recentOrSearch', query] as const,
+    issueTypes: (projectKey: string) =>
+      ['projects', 'issueTypes', projectKey] as const
   },
   tickets: {
     suggestions: ['tickets', 'suggestions'] as const,

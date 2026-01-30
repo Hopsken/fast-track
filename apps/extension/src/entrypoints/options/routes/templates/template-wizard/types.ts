@@ -1,4 +1,5 @@
 import type { SearchOption } from '@/components/ui'
+import type { JiraProject } from '@/types/jira'
 
 export type WizardScope = {
   projectKey: string
@@ -7,8 +8,8 @@ export type WizardScope = {
   issueTypeName: string
 }
 
-export type ProjectOption = { key: string; name: string }
-export type IssueTypeOption = { id: string; name: string }
+export type ProjectOption = Pick<JiraProject, 'key' | 'name' | 'issueTypes'>
+export type IssueTypeOption = { id: string; name: string; subtask?: boolean }
 
 export type Step = 1 | 2
 
