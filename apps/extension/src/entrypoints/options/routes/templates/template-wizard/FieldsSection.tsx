@@ -6,8 +6,6 @@ import {
   EmptyHeader,
   EmptyTitle
 } from '@internal/ui/components/empty'
-import { Label } from '@internal/ui/components/label'
-import { Separator } from '@internal/ui/components/separator'
 import { PlusIcon } from 'lucide-react'
 
 import type { FieldConfig, FieldMetadata } from '~/types/template'
@@ -21,9 +19,6 @@ import { FieldRow } from './FieldRow'
 /* ------------------------------------------------------------------ */
 
 const EXCLUDED = new Set(['project', 'issuetype', 'attachment', 'issuelinks'])
-
-/** Stable default config for fields not yet in fieldsConfig. */
-const DEFAULT_VISIBLE_CONFIG: FieldConfig = { behavior: 'visible' }
 
 /** Determine if a preset value is effectively empty. */
 function isPresetEmpty(value: unknown): boolean {
@@ -54,32 +49,24 @@ export function FieldsSection() {
   const { availableFields, fieldsConfig, areFieldsLoading, fieldsError } = state
   const [commandOpen, setCommandOpen] = useState(false)
 
-  const { requiredFields, optionalSelected, optionalUnselected } =
-    useMemo(() => {
-      const required: FieldMetadata[] = []
-      const selected: FieldMetadata[] = []
-      const unselected: FieldMetadata[] = []
+  const { configuredFields, unconfiguredFields } = useMemo(() => {
+    const fieldMap = new Map(availableFields.map((f) => [f.fieldId, f]))
 
-      for (const f of availableFields) {
-        if (EXCLUDED.has(f.fieldId)) continue
-        if (f.required) {
-          required.push(f)
-          continue
-        }
-        const cfg = fieldsConfig[f.fieldId]
-        if (cfg && cfg.behavior !== 'ignore') {
-          selected.push(f)
-        } else {
-          unselected.push(f)
-        }
-      }
+    // Iterate fieldsConfig keys (JS insertion order) so newly added fields
+    // appear at the bottom of the list.
+    const configured: FieldMetadata[] = []
+    for (const fieldId of Object.keys(fieldsConfig)) {
+      const f = fieldMap.get(fieldId)
+      if (f && !EXCLUDED.has(fieldId)) configured.push(f)
+    }
 
-      return {
-        requiredFields: required,
-        optionalSelected: selected,
-        optionalUnselected: unselected
-      }
-    }, [availableFields, fieldsConfig])
+    const configuredIds = new Set(configured.map((f) => f.fieldId))
+    const unconfigured = availableFields.filter(
+      (f) => !EXCLUDED.has(f.fieldId) && !configuredIds.has(f.fieldId)
+    )
+
+    return { configuredFields: configured, unconfiguredFields: unconfigured }
+  }, [availableFields, fieldsConfig])
 
   const handleAddField = useCallback(
     (fieldId: string) => {
@@ -96,16 +83,26 @@ export function FieldsSection() {
     [actions]
   )
 
-  if (!meta.hasScope) return null
-
   return (
     <section className="space-y-3">
-      <div>
-        <h3 className="text-sm font-medium">Fields</h3>
-        <p className="text-muted-foreground text-xs">
-          Add fields and fill values to use as presets. Leave empty to prompt
-          for input when creating a ticket.
-        </p>
+      <div className="flex items-center justify-between gap-2">
+        <div>
+          <h3 className="text-sm font-medium">Fields</h3>
+          <p className="text-muted-foreground text-xs">
+            Add fields and set preset values. Required fields left unconfigured
+            will be prompted during issue creation.
+          </p>
+        </div>
+        {!areFieldsLoading && !fieldsError && (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setCommandOpen(true)}
+            disabled={unconfiguredFields.length === 0}>
+            <PlusIcon className="size-3.5" />
+            Add field
+          </Button>
+        )}
       </div>
 
       {areFieldsLoading && (
@@ -121,86 +118,42 @@ export function FieldsSection() {
       )}
 
       {!areFieldsLoading && !fieldsError && (
-        <div className="space-y-6">
-          {/* Required fields */}
-          {requiredFields.length > 0 && (
+        <>
+          {configuredFields.length === 0 ? (
+            <Empty className="border py-8">
+              <EmptyHeader>
+                <EmptyTitle className="text-sm">
+                  No fields configured
+                </EmptyTitle>
+                <EmptyDescription>
+                  Click &ldquo;Add field&rdquo; to include fields in this
+                  template. Set a value to use it as a preset, or leave it
+                  empty.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : (
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Label className="text-xs font-medium uppercase tracking-wide">
-                  Required
-                </Label>
-                <Separator className="flex-1" />
-              </div>
-              <div className="space-y-2">
-                {requiredFields.map((field) => (
-                  <FieldRow
-                    key={field.fieldId}
-                    field={field}
-                    config={
-                      fieldsConfig[field.fieldId] ?? DEFAULT_VISIBLE_CONFIG
-                    }
-                    onPresetChange={(v) => handlePresetChange(field.fieldId, v)}
-                  />
-                ))}
-              </div>
+              {configuredFields.map((field) => (
+                <FieldRow
+                  key={field.fieldId}
+                  field={field}
+                  config={fieldsConfig[field.fieldId]!}
+                  onPresetChange={(v) => handlePresetChange(field.fieldId, v)}
+                  onRemove={() => actions.removeFieldConfig(field.fieldId)}
+                />
+              ))}
             </div>
           )}
-
-          {/* Optional fields */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Label className="text-xs font-medium uppercase tracking-wide">
-                Optional
-              </Label>
-              <Separator className="flex-1" />
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setCommandOpen(true)}
-                disabled={optionalUnselected.length === 0}>
-                <PlusIcon className="size-3.5" />
-                Add field
-              </Button>
-            </div>
-
-            {optionalSelected.length === 0 ? (
-              <Empty className="border py-8">
-                <EmptyHeader>
-                  <EmptyTitle className="text-sm">
-                    No optional fields
-                  </EmptyTitle>
-                  <EmptyDescription>
-                    Click &ldquo;Add field&rdquo; to include additional fields
-                    in this template.
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            ) : (
-              <div className="space-y-2">
-                {optionalSelected.map((field) => (
-                  <FieldRow
-                    key={field.fieldId}
-                    field={field}
-                    config={
-                      fieldsConfig[field.fieldId] ?? DEFAULT_VISIBLE_CONFIG
-                    }
-                    onPresetChange={(v) => handlePresetChange(field.fieldId, v)}
-                    onRemove={() => actions.removeFieldConfig(field.fieldId)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        </>
       )}
 
       {/* Add field command dialog */}
       <AddFieldDialog
         open={commandOpen}
         onOpenChange={setCommandOpen}
-        requiredFields={requiredFields}
-        optionalSelected={optionalSelected}
-        optionalUnselected={optionalUnselected}
+        configuredFields={configuredFields}
+        unconfiguredFields={unconfiguredFields}
         onSelect={handleAddField}
       />
     </section>

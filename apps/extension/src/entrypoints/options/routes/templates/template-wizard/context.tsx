@@ -196,19 +196,13 @@ export function TemplateWizardProvider({
     }))
   }, [])
 
-  const removeFieldConfig = useCallback(
-    (fieldId: string) => {
-      // Guard: never ignore required fields
-      const meta = availableFields.find((f) => f.fieldId === fieldId)
-      if (meta?.required) return
-
-      setFieldsConfig((prev) => ({
-        ...prev,
-        [fieldId]: { behavior: 'ignore', presetValue: undefined }
-      }))
-    },
-    [availableFields]
-  )
+  const removeFieldConfig = useCallback((fieldId: string) => {
+    setFieldsConfig((prev) => {
+      const next = { ...prev }
+      delete next[fieldId]
+      return next
+    })
+  }, [])
 
   // --- Basics ---
 
@@ -269,15 +263,7 @@ export function TemplateWizardProvider({
           issueTypeId: scope.issueType.id,
           issueTypeName: scope.issueType.name
         },
-        fields: {
-          // Ensure required fields are always saved as visible
-          ...Object.fromEntries(
-            availableFields
-              .filter((f) => f.required)
-              .map((f) => [f.fieldId, { behavior: 'visible' as const }])
-          ),
-          ...fieldsConfig
-        },
+        fields: fieldsConfig,
         descriptionTemplate: descriptionTemplate.trim()
           ? descriptionTemplate
           : undefined,
@@ -290,15 +276,7 @@ export function TemplateWizardProvider({
     } finally {
       setIsSaving(false)
     }
-  }, [
-    availableFields,
-    descriptionTemplate,
-    fieldsConfig,
-    host,
-    name,
-    onCreated,
-    scope
-  ])
+  }, [descriptionTemplate, fieldsConfig, host, name, onCreated, scope])
 
   const state = useMemo<WizardState>(
     () => ({

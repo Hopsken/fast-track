@@ -74,10 +74,13 @@ export function TemplateEditor() {
       {/* Scope */}
       <ScopeSection />
 
-      <Separator />
-
-      {/* Fields (progressive disclosure) */}
-      <FieldsSection />
+      {meta.hasScope && (
+        <>
+          <Separator />
+          {/* Fields (progressive disclosure) */}
+          <FieldsSection />
+        </>
+      )}
 
       {/* Save error */}
       {state.saveError && (
@@ -87,7 +90,7 @@ export function TemplateEditor() {
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-end gap-2 border-t pt-4">
+      <div className="flex items-center justify-end gap-2 pt-4">
         <Button asChild variant="secondary">
           <Link to="/templates">Cancel</Link>
         </Button>

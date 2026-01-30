@@ -86,5 +86,27 @@ export function computeVisibleFields(
     })
   }
 
+  // Surface required fields from cache that have no template config.
+  // These need user input at create-issue time.
+  if (cache) {
+    for (const field of cache.fields) {
+      if (!field.required) continue
+      if (shouldSkipField(field.fieldId)) continue
+
+      const alreadyVisible = visible.some((f) => f.fieldId === field.fieldId)
+      if (alreadyVisible) continue
+
+      // Field is required but has no template config — show it
+      const hasConfig = field.fieldId in template.fields
+      if (!hasConfig) {
+        visible.push({
+          fieldId: field.fieldId,
+          metadata: field,
+          isEditable: true
+        })
+      }
+    }
+  }
+
   return visible
 }

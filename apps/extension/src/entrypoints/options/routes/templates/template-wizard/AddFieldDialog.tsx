@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Badge } from '@internal/ui/components/badge'
 import {
   CommandDialog,
@@ -14,18 +15,26 @@ import type { FieldMetadata } from '~/types/template'
 export function AddFieldDialog({
   open,
   onOpenChange,
-  requiredFields,
-  optionalSelected,
-  optionalUnselected,
+  configuredFields,
+  unconfiguredFields,
   onSelect
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
-  requiredFields: FieldMetadata[]
-  optionalSelected: FieldMetadata[]
-  optionalUnselected: FieldMetadata[]
+  configuredFields: FieldMetadata[]
+  unconfiguredFields: FieldMetadata[]
   onSelect: (fieldId: string) => void
 }) {
+  // Sort required fields to the top of the available list
+  const sortedUnconfigured = useMemo(
+    () =>
+      [...unconfiguredFields].sort((a, b) => {
+        if (a.required === b.required) return 0
+        return a.required ? -1 : 1
+      }),
+    [unconfiguredFields]
+  )
+
   return (
     <CommandDialog
       open={open}
@@ -36,37 +45,36 @@ export function AddFieldDialog({
       <CommandList>
         <CommandEmpty>No fields found.</CommandEmpty>
 
-        {/* Available to add */}
-        {optionalUnselected.length > 0 && (
+        {/* Available to add — required first */}
+        {sortedUnconfigured.length > 0 && (
           <CommandGroup heading="Available">
-            {optionalUnselected.map((f) => (
+            {sortedUnconfigured.map((f) => (
               <CommandItem
                 key={f.fieldId}
                 value={f.name}
                 onSelect={() => onSelect(f.fieldId)}>
                 <span>{f.name}</span>
-                <span className="text-muted-foreground ml-auto text-xs">
-                  {f.schema.type}
+                <span className="ml-auto flex items-center gap-1.5">
+                  {f.required && (
+                    <Badge variant="secondary" className="text-[10px]">
+                      Required
+                    </Badge>
+                  )}
+                  <span className="text-muted-foreground text-xs">
+                    {f.schema.type}
+                  </span>
                 </span>
               </CommandItem>
             ))}
           </CommandGroup>
         )}
 
-        {/* Already added (disabled) */}
-        {(requiredFields.length > 0 || optionalSelected.length > 0) && (
+        {/* Already configured (disabled) */}
+        {configuredFields.length > 0 && (
           <>
             <CommandSeparator />
             <CommandGroup heading="Already added">
-              {requiredFields.map((f) => (
-                <CommandItem key={f.fieldId} value={f.name} disabled>
-                  <span>{f.name}</span>
-                  <Badge variant="secondary" className="ml-auto">
-                    Required
-                  </Badge>
-                </CommandItem>
-              ))}
-              {optionalSelected.map((f) => (
+              {configuredFields.map((f) => (
                 <CommandItem key={f.fieldId} value={f.name} disabled>
                   <span>{f.name}</span>
                   <Badge variant="outline" className="ml-auto">

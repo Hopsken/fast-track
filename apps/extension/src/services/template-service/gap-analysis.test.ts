@@ -174,6 +174,78 @@ describe('computeVisibleFields', () => {
     )
   })
 
+  it('surfaces unconfigured required fields from cache as visible', () => {
+    const requiredCustomField: FieldMetadata = {
+      fieldId: 'customfield_9',
+      key: 'customfield_9',
+      name: 'Team',
+      required: true,
+      schema: { type: 'string' }
+    }
+    const template = createTemplate({ fields: {} })
+
+    const visible = computeVisibleFields(
+      template,
+      cache([summaryField, priorityField, requiredCustomField]),
+      []
+    )
+
+    // summary is always shown; the required custom field should appear too
+    expect(visible.some((f) => f.fieldId === 'customfield_9')).toBe(true)
+    expect(visible.find((f) => f.fieldId === 'customfield_9')).toMatchObject({
+      fieldId: 'customfield_9',
+      metadata: requiredCustomField,
+      isEditable: true
+    })
+    // optional priority should NOT surface
+    expect(visible.some((f) => f.fieldId === 'priority')).toBe(false)
+  })
+
+  it('does not duplicate required fields already configured in template', () => {
+    const requiredField: FieldMetadata = {
+      fieldId: 'priority',
+      key: 'priority',
+      name: 'Priority',
+      required: true,
+      schema: { type: 'priority' },
+      allowedValues: [{ id: '1', name: 'High' }]
+    }
+    const template = createTemplate({
+      fields: { priority: { behavior: 'preset', presetValue: { id: '1' } } }
+    })
+
+    const visible = computeVisibleFields(
+      template,
+      cache([summaryField, requiredField]),
+      []
+    )
+
+    // preset hides it, and the auto-surface should NOT re-add it
+    expect(visible.filter((f) => f.fieldId === 'priority')).toHaveLength(0)
+  })
+
+  it('does not duplicate required fields already visible via template config', () => {
+    const requiredField: FieldMetadata = {
+      fieldId: 'customfield_9',
+      key: 'customfield_9',
+      name: 'Team',
+      required: true,
+      schema: { type: 'string' }
+    }
+    const template = createTemplate({
+      fields: { customfield_9: { behavior: 'visible' } }
+    })
+
+    const visible = computeVisibleFields(
+      template,
+      cache([summaryField, requiredField]),
+      []
+    )
+
+    // Should appear exactly once (from template config), not duplicated
+    expect(visible.filter((f) => f.fieldId === 'customfield_9')).toHaveLength(1)
+  })
+
   it('ignores project/issuetype fields', () => {
     const template = createTemplate({
       fields: {

@@ -33,7 +33,7 @@ export function FieldRow({
             )}
           </div>
 
-          {/* Right: remove button (only for optional) */}
+          {/* Right: remove button */}
           {onRemove && (
             <button
               type="button"
