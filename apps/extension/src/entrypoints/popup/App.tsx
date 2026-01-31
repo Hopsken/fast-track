@@ -10,7 +10,7 @@ import {
 } from '@/stores/useCurrentUser'
 import { UserPreferencesProvider } from '@/stores/useUserPreferences'
 
-import { CommandMenu } from './menus/CommandMenu'
+import { CommandLayout } from './menus/CommandLayout'
 import { IssueMenu } from './menus/IssueMenu'
 import { MainMenu } from './menus/MainMenu'
 import { CommandRoutes } from './routes'
@@ -19,7 +19,7 @@ function App() {
   return (
     <div className="linear w-xl">
       <Routes>
-        <Route element={<CommandMenu />}>
+        <Route element={<CommandLayout />}>
           <Route index element={<MainMenu />} />
 
           <Route path={CommandRoutes.IssueDef} element={<IssueMenu />} />

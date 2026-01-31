@@ -9,14 +9,14 @@ import { Footer } from './Footer'
 
 const COMMAND_CHARS = ['/', '+']
 
-export function CommandMenu() {
+export function CommandLayout() {
   const { value, search, setValue } = useCommandInput()
-  const { key: locationKey } = useLocation()
+  const { pathname } = useLocation()
 
   const shouldFilter = useMemo(() => {
-    if (locationKey !== '/') return true
+    if (pathname !== '/') return true
     return COMMAND_CHARS.some((char) => search.startsWith(char))
-  }, [locationKey, search])
+  }, [pathname, search])
 
   return (
     <Command

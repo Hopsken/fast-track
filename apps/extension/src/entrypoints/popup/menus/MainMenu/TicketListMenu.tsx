@@ -10,8 +10,8 @@ import { ActionLoading } from '@/components/actions'
 import { TicketItem } from '@/components/tickets'
 import { useActionShortcut } from '@/hooks/useActionShortcut'
 import { useIssueSuggestions } from '@/hooks/useIssueSuggestions'
-import { useSearchQuery } from '@/hooks/useTicketSearch'
 import { IssueSuggestion } from '@/services/ticket-service'
+import { useCommandSearch } from '@/stores/useCommandInputStore'
 import { JiraTicket } from '@/types'
 import { isTicketKey } from '@/utils/jira/issues'
 
@@ -20,7 +20,7 @@ import { CommandRoutes } from '../../routes'
 import { SearchResultMenu } from './SearchResultMenu'
 
 export function TicketListMenu() {
-  const searchQuery = useSearchQuery()
+  const searchQuery = useCommandSearch()
   const shouldShowSuggestions = !searchQuery.trim()
 
   const { data: issueSuggestions, isLoading } = useIssueSuggestions()
@@ -29,12 +29,12 @@ export function TicketListMenu() {
 
   return (
     <CommandList aria-label="Ticket search results">
+      <ActionLoading isLoading={isLoading} />
       {shouldShowSuggestions ? (
         <SuggestedTickets issues={issueSuggestions} />
       ) : (
         <SearchResultMenu suggestions={issueSuggestions} />
       )}
-      <ActionLoading isLoading={isLoading} />
     </CommandList>
   )
 }

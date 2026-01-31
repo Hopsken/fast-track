@@ -43,3 +43,8 @@ export const useCommandInput = () => {
 
   return { value, setValue: setValueCb, search, setSearch: setSearchCb }
 }
+
+export const useCommandSearch = () => {
+  const { key } = useLocation()
+  return useCommandInputStore((s) => s.entries[key]?.search ?? '')
+}
