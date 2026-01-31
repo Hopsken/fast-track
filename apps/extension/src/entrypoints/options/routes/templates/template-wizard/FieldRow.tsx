@@ -11,26 +11,22 @@ import { RestrictedOptionsInput } from './RestrictedOptionsInput'
 /*  Mode helpers                                                       */
 /* ------------------------------------------------------------------ */
 
-type FieldMode = 'preset' | 'restricted'
-
-/** Whether a field supports "restricted" mode (has finite allowed values). */
-function supportsRestricted(field: FieldMetadata): boolean {
-  // TODO(phase2): Support restricted mode for user fields (needs user search picker)
-  // TODO(phase2): Support restricted mode for number fields (e.g. story points)
-  return Boolean(field.allowedValues && field.allowedValues.length > 0)
-}
+type FieldMode = 'visible' | 'preset' | 'restricted'
 
 function getModeFromConfig(config: FieldConfig): FieldMode {
-  return config.behavior === 'restricted' ? 'restricted' : 'preset'
+  if (config.behavior === 'preset') return 'preset'
+  if (config.behavior === 'restricted') return 'restricted'
+  return 'visible'
 }
 
 /* ------------------------------------------------------------------ */
-/*  Mode toggle                                                        */
+/*  3-way toggle                                                       */
 /* ------------------------------------------------------------------ */
 
-const TOGGLE_META: Record<FieldMode, { label: string; title: string }> = {
-  preset: { label: 'Preset', title: 'Auto-fill value at creation' },
-  restricted: { label: 'Restrict', title: 'Limit to a subset of options' }
+const MODE_META: Record<FieldMode, { label: string; title: string }> = {
+  visible: { label: 'Show', title: 'Field appears with all options' },
+  preset: { label: 'Fill', title: 'Auto-fill value at creation' },
+  restricted: { label: 'Limit', title: 'Restrict to subset of options' }
 }
 
 function ModeToggle({
@@ -42,7 +38,7 @@ function ModeToggle({
 }) {
   return (
     <div className="bg-muted flex gap-0.5 rounded-md p-0.5" role="radiogroup">
-      {(['preset', 'restricted'] as const).map((m) => {
+      {(['visible', 'preset', 'restricted'] as const).map((m) => {
         const isActive = mode === m
         return (
           <button
@@ -50,14 +46,14 @@ function ModeToggle({
             type="button"
             role="radio"
             aria-checked={isActive}
-            title={TOGGLE_META[m].title}
+            title={MODE_META[m].title}
             onClick={() => onModeChange(m)}
             className={`rounded-sm px-2 py-0.5 text-xs font-medium transition-colors ${
               isActive
                 ? 'bg-background text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground'
             }`}>
-            {TOGGLE_META[m].label}
+            {MODE_META[m].label}
           </button>
         )
       })}
@@ -81,18 +77,29 @@ export function FieldRow({
   onRemove?: () => void
 }) {
   const currentMode = getModeFromConfig(config)
-  const hasRestricted = supportsRestricted(field)
 
   const handleModeChange = useCallback(
     (mode: FieldMode) => {
-      if (mode === 'restricted') {
-        // Default: all options selected — user deselects what they don't want
-        onConfigChange({
-          behavior: 'restricted',
-          allowedOptions: field.allowedValues ?? []
-        })
-      } else {
-        onConfigChange({ behavior: 'preset', presetValue: undefined })
+      switch (mode) {
+        case 'visible':
+          onConfigChange({ behavior: 'visible' })
+          break
+        case 'preset':
+          onConfigChange({ behavior: 'preset', presetValue: undefined })
+          break
+        case 'restricted':
+          // Default depends on whether field has Jira-provided allowedValues
+          if (field.allowedValues && field.allowedValues.length > 0) {
+            // Start with all Jira options selected
+            onConfigChange({
+              behavior: 'restricted',
+              allowedOptions: field.allowedValues
+            })
+          } else {
+            // User-defined options (number, text, user) — start empty, force user to add
+            onConfigChange({ behavior: 'restricted', allowedOptions: [] })
+          }
+          break
       }
     },
     [field.allowedValues, onConfigChange]
@@ -124,9 +131,7 @@ export function FieldRow({
 
           {/* Right: mode toggle + remove */}
           <div className="flex items-center gap-2">
-            {hasRestricted && (
-              <ModeToggle mode={currentMode} onModeChange={handleModeChange} />
-            )}
+            <ModeToggle mode={currentMode} onModeChange={handleModeChange} />
             {onRemove && (
               <button
                 type="button"
@@ -158,6 +163,7 @@ export function FieldRow({
             onChange={handleRestrictedChange}
           />
         )}
+        {/* visible: no input needed */}
       </div>
     </div>
   )

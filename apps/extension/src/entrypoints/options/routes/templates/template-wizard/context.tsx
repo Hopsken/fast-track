@@ -319,6 +319,45 @@ export function TemplateWizardProvider(props: ProviderProps) {
 
     if (!scope.project || !scope.issueType) return
 
+    // Validate field configurations
+    const validationErrors: string[] = []
+    const fieldMap = new Map(availableFields.map((f) => [f.fieldId, f]))
+
+    for (const [fieldId, config] of Object.entries(fieldsConfig)) {
+      const field = fieldMap.get(fieldId)
+      const fieldName = field?.name ?? fieldId
+
+      if (config.behavior === 'preset') {
+        // Preset must have a value
+        if (
+          config.presetValue === undefined ||
+          config.presetValue === null ||
+          config.presetValue === ''
+        ) {
+          validationErrors.push(
+            `${fieldName}: Preset value required. Set a value or switch to "Show" mode.`
+          )
+        }
+      } else if (config.behavior === 'restricted') {
+        // Restricted must have at least one option
+        if (!config.allowedOptions || config.allowedOptions.length === 0) {
+          validationErrors.push(
+            `${fieldName}: At least one option required for restricted mode.`
+          )
+        }
+      }
+    }
+
+    if (validationErrors.length > 0) {
+      setSaveError(
+        validationErrors.length === 1
+          ? validationErrors[0]!
+          : `${validationErrors.length} validation errors:\n${validationErrors.join('\n')}`
+      )
+      setIsSaving(false)
+      return
+    }
+
     try {
       const svc = getTemplateService()
 
@@ -355,6 +394,7 @@ export function TemplateWizardProvider(props: ProviderProps) {
       setIsSaving(false)
     }
   }, [
+    availableFields,
     descriptionTemplate,
     existingTemplate,
     fieldsConfig,

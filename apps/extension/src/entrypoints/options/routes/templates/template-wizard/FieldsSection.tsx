@@ -50,10 +50,7 @@ export function FieldsSection() {
 
   const handleAddField = useCallback(
     (fieldId: string) => {
-      actions.setFieldConfig(fieldId, {
-        behavior: 'preset',
-        presetValue: undefined
-      })
+      actions.setFieldConfig(fieldId, { behavior: 'visible' })
       setCommandOpen(false)
     },
     [actions]
@@ -110,8 +107,8 @@ export function FieldsSection() {
                 </EmptyTitle>
                 <EmptyDescription>
                   Click &ldquo;Add field&rdquo; to include fields in this
-                  template. Choose preset to auto-fill, restrict to limit
-                  options, or show to display all choices.
+                  template. Use Show for default behavior, Fill to auto-fill
+                  values, or Limit to restrict available options.
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>

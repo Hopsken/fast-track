@@ -48,29 +48,35 @@ export type AllowedValue = z.infer<typeof AllowedValueSchema>
 /**
  * Field configuration within a template — discriminated union on `behavior`.
  *
- * - preset:     Fixed value, auto-applied at creation (field hidden).
- * - restricted: User picks from a curated subset of allowed values at creation.
- *               The field is always visible.
- * - visible:    Field shown at creation with all available options.
- * - ignore:     Field omitted entirely.
+ * - **visible**:    Field shown at creation with all available options (default/empty state).
+ * - **preset**:     Fixed value, auto-applied at creation (field hidden unless conflict).
+ * - **restricted**: User picks from a curated subset of options at creation.
+ * - **ignore**:     Field omitted entirely.
  *
- * `allowedOptions` uses AllowedValue as a universal shape:
- *   - Select / multi-select: native Jira shape { id, name, ... }
- *   - User fields: { id: accountId, name: displayName } — name stored for
- *     display, accountId is the stable reference.
+ * ## Unified Option Model
+ * `allowedOptions` uses AllowedValue as a universal shape for ALL field types:
  *
- * Phase 2 deferred items (schema is ready, UI not yet implemented):
- * TODO(phase2): Restricted mode for number fields — store as { id: '5', value: '5' }
- * TODO(phase2): Restricted mode for user fields — needs user search + accountId picker in wizard
- * TODO(phase2): Restricted mode for free-text fields — not planned
+ * **Jira-provided options** (select, multi-select, priority, etc.):
+ *   - Source: field.allowedValues from Jira API
+ *   - Shape: { id: "10001", name: "High", iconUrl: "..." }
+ *   - UI: User checks subset from existing list
+ *
+ * **User-defined options** (number, text, user):
+ *   - Source: User creates them in wizard UI
+ *   - Number (story points): { id: "sp-5", value: "5" } → stored as label="5", value=5
+ *   - Text: { id: "txt-prod", value: "Production" } → label="Production", value="Production"
+ *   - User: { id: "u-abc123", name: "Alice Chen", value: { accountId: "5f4e..." } }
+ *   - UI: Chip input or user search picker
+ *
+ * The model doesn't distinguish source — only the config UI branches on field.allowedValues.
  */
 export const FieldConfigSchema = z.discriminatedUnion('behavior', [
+  z.object({ behavior: z.literal('visible') }),
   z.object({ behavior: z.literal('preset'), presetValue: z.unknown() }),
   z.object({
     behavior: z.literal('restricted'),
     allowedOptions: z.array(AllowedValueSchema).min(1)
   }),
-  z.object({ behavior: z.literal('visible') }),
   z.object({ behavior: z.literal('ignore') })
 ])
 export type FieldConfig = z.infer<typeof FieldConfigSchema>
@@ -82,9 +88,9 @@ export const IssueTemplateSchema = z.object({
   scope: IssueTemplateScopeSchema,
   fields: z.record(z.string(), FieldConfigSchema),
   descriptionTemplate: z.string().optional(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
-  lastUsedAt: z.string().datetime().optional()
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
+  lastUsedAt: z.iso.datetime().optional()
 })
 export type IssueTemplate = z.infer<typeof IssueTemplateSchema>
 
@@ -103,7 +109,7 @@ export type FieldMetadata = z.infer<typeof FieldMetadataSchema>
 
 export const CachedFieldMetadataSchema = z.object({
   cacheKey: z.string(), // `${baseUrlHost}:${projectKey}:${issueTypeId}`
-  lastUpdated: z.string().datetime(),
+  lastUpdated: z.iso.datetime(),
   fields: z.array(FieldMetadataSchema)
 })
 export type CachedFieldMetadata = z.infer<typeof CachedFieldMetadataSchema>
