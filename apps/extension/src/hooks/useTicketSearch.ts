@@ -2,8 +2,8 @@ import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useDebounce, useMemoizedFn } from 'ahooks'
 
-import { useCommandSearch } from '@/components/CommandRouter'
 import { ticketService } from '@/services'
+import { useCommandInput } from '@/stores/useCommandInputStore'
 import { JiraTicket } from '@/types'
 import { queryKeys } from '@/utils/queryKeys'
 import { rankTickets } from '@/utils/ticket-ranking'
@@ -16,7 +16,7 @@ type TicketSearchOptions = {
   limit?: number
 }
 
-export const useSearchQuery = () => useCommandSearch().trim()
+export const useSearchQuery = () => useCommandInput().search.trim()
 
 export const useTicketSearch = (options: TicketSearchOptions = {}) => {
   const searchQuery = useSearchQuery()

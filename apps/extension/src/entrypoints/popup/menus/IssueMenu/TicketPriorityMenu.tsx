@@ -5,17 +5,15 @@ import {
   CommandLoading
 } from '@internal/ui/components/command'
 
-import { TicketActionHeading } from '@/components'
 import { Action, ActionLoading } from '@/components/actions'
 import { useIssuePriorities } from '@/hooks/useIssuePriorities'
 import { useMutationUpdatePriority } from '@/hooks/useMutationUpdatePriority'
 import { PriorityIcon } from '~/components/ui/jira'
 
-import { useCurrentTicket, useCurrentTicketKey } from './useCurrentTicket'
+import { useCurrentTicket } from './useCurrentTicket'
 
 export function TicketPriorityMenu() {
-  const ticketKey = useCurrentTicketKey()
-  const { data: ticket } = useCurrentTicket()
+  const ticket = useCurrentTicket()
   const { data: priorities, isLoading } = useIssuePriorities()
   const { mutate: updatePriority } = useMutationUpdatePriority()
 
@@ -28,14 +26,13 @@ export function TicketPriorityMenu() {
         value={priority.name || priority.id || 'priority'}
         prefix={<PriorityIcon priority={priority} />}
         title={priority.name}
-        onSelect={() => updatePriority({ ticketKey, priority })}
+        onSelect={() => updatePriority({ ticketKey: ticket.key, priority })}
       />
     ))
   }
 
   return (
     <CommandList>
-      {ticket && <TicketActionHeading ticket={ticket} />}
       <CommandGroup heading="Change priority...">{renderList()}</CommandGroup>
       <ActionLoading isLoading={isLoading} />
       {!isLoading && <CommandEmpty>No priorities</CommandEmpty>}

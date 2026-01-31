@@ -1,8 +1,9 @@
-import { useCallback } from 'react'
+import { useMemoizedFn } from 'ahooks'
+import { useNavigate } from 'react-router-dom'
 
-import { useCommandRouter } from '@/components/CommandRouter'
 import { getJiraService } from '@/services/jira-service'
 import { getTemplateService } from '@/services/template-service'
+import { useCommandInput } from '@/stores/useCommandInputStore'
 import { buildCreateIssueFields } from '~/services/template-service/issue-payload'
 import { showToast } from '~/stores/useToastStore'
 import type { CachedFieldMetadata, IssueTemplate } from '~/types/template'
@@ -22,10 +23,11 @@ export function useCreateIssueForm({
   template,
   cache
 }: UseCreateIssueFormOptions) {
-  const { history, pop, setSearch } = useCommandRouter()
+  const { setSearch } = useCommandInput()
+  const navigate = useNavigate()
   const { values, setErrors, promoteFields, reset } = useCreateIssueDraftStore()
 
-  const submit = useCallback(async () => {
+  const submit = useMemoizedFn(async () => {
     const userInput = pickNonEmptyValues(values)
 
     const fields = buildCreateIssueFields({
@@ -60,8 +62,7 @@ export function useCreateIssueForm({
       reset()
 
       // Return to main menu and clear the "+" query.
-      const popCount = history.length - 1
-      for (let i = 0; i < popCount; i++) pop()
+      navigate('/')
       setSearch('')
     } catch (e) {
       const errorsMap = extractJiraFieldErrors(e)
@@ -83,18 +84,7 @@ export function useCreateIssueForm({
         })
       }
     }
-  }, [
-    values,
-    template,
-    cache,
-    templateId,
-    reset,
-    history,
-    pop,
-    setSearch,
-    setErrors,
-    promoteFields
-  ])
+  })
 
   return { submit }
 }

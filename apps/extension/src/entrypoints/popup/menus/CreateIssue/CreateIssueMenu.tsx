@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import { CommandEmpty, CommandList } from '@internal/ui/components/command'
 import { useHotkeys } from 'react-hotkeys-hook'
 
-import { useCommandRouter } from '@/components/CommandRouter'
 import { useFieldMetadataCache } from '@/hooks/useFieldMetadataCache'
 import { useTemplateConflicts } from '@/hooks/useTemplateConflicts'
 import { useTemplates } from '@/hooks/useTemplates'
@@ -34,7 +33,6 @@ declare global {
 }
 
 export function CreateIssueMenu({ template }: CreateIssueMenuProps) {
-  const { push } = useCommandRouter()
   const {
     values,
     errors,
@@ -101,7 +99,7 @@ export function CreateIssueMenu({ template }: CreateIssueMenuProps) {
   // Field selection handler
   const handleSelectField = (fieldId: string) => {
     clearError(fieldId)
-    push('/create-issue/field-input', { fieldId, templateId: template.id })
+    // push('/create-issue/field-input', { fieldId, templateId: template.id })
   }
 
   // Conflict warning state

@@ -1,5 +1,5 @@
 export const CommandRoutes = {
-  IssueDef: `ticket/:ticketKey`,
+  IssueDef: `ticket/:ticketKey/*`,
   IssueMenu: (key: string) => `/ticket/${key}`,
   IssueAssign: (key: string) => `/ticket/${key}/assign`,
   IssueDetails: (key: string) => `/ticket/${key}/details`,

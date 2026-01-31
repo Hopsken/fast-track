@@ -6,20 +6,19 @@ import {
   useCommandState
 } from '@internal/ui/components/command'
 
-import { TicketActionHeading } from '@/components'
 import { Action, ActionLoading, ActionUser } from '@/components/actions'
 import { useAutoCompleteUsers } from '@/hooks/useAutoComplete'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
 import { useMutationAssignIssue } from '@/hooks/useMutationAssignIssue'
 import { AssigneeAvatar } from '~/components/ui/jira'
 
-import { useCurrentTicket, useCurrentTicketKey } from './useCurrentTicket'
+import { useCurrentTicket } from './useCurrentTicket'
 
 export function TicketAssignMenu() {
-  const ticketKey = useCurrentTicketKey()
-  const { data: ticket } = useCurrentTicket()
-  const { data: editMeta, isLoading: isLoadingEditMeta } =
-    useIssueEditMeta(ticketKey)
+  const ticket = useCurrentTicket()
+  const { data: editMeta, isLoading: isLoadingEditMeta } = useIssueEditMeta(
+    ticket.key
+  )
   const search = useCommandState((state) => state.search)
 
   const assigneeAutoCompleteUrl =
@@ -35,7 +34,7 @@ export function TicketAssignMenu() {
       value="assignee-none"
       prefix={<AssigneeAvatar assignee={null} />}
       title="No assignee"
-      onSelect={() => assignTicket({ ticketKey, assignee: null })}
+      onSelect={() => assignTicket({ ticketKey: ticket.key, assignee: null })}
     />
   )
 
@@ -55,7 +54,9 @@ export function TicketAssignMenu() {
           key={identifier}
           value={`${displayName} ${identifier}`}
           user={user}
-          onSelect={() => assignTicket({ ticketKey, assignee: user })}
+          onSelect={() =>
+            assignTicket({ ticketKey: ticket.key, assignee: user })
+          }
         />
       )
     })
@@ -64,7 +65,6 @@ export function TicketAssignMenu() {
   return (
     <CommandList>
       <ActionLoading isLoading={isLoading} />
-      {ticket && <TicketActionHeading ticket={ticket} />}
       <CommandGroup heading="Assign to...">
         {unassignAction}
         {renderList()}

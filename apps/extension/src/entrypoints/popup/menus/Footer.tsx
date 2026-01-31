@@ -8,7 +8,6 @@ import {
   X
 } from 'lucide-react'
 
-import { useCommandRouterActivePage } from '@/components/CommandRouter'
 import { openOptionsPage } from '@/utils'
 import { formatErrorMessage } from '@/utils/formatError'
 import logoPNG from '~/assets/logo.png'
@@ -47,7 +46,6 @@ const toastThemes: Record<
 export function Footer() {
   const activeToast = useToastState()
   const hideToast = useToastStore((state) => state.hideToast)
-  const activePage = useCommandRouterActivePage()
 
   const activeToastContainerCls = activeToast
     ? toastThemes[activeToast.style].container
@@ -95,8 +93,6 @@ export function Footer() {
   }
 
   function renderFooter() {
-    const showSubmitHint = activePage.path === '/create-issue'
-
     return (
       <div className="flex items-center justify-between">
         <button
@@ -117,10 +113,6 @@ export function Footer() {
             </span>
           </span>
         </button>
-
-        {showSubmitHint ? (
-          <div className="text-muted-foreground text-xs">⌘ Enter to submit</div>
-        ) : null}
       </div>
     )
   }

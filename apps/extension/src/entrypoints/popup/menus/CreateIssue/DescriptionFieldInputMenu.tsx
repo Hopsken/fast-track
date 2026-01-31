@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { CommandGroup, CommandList } from '@internal/ui/components/command'
 import { useHotkeys } from 'react-hotkeys-hook'
-
-import { useCommandRouter } from '@/components/CommandRouter'
+import { useNavigate } from 'react-router-dom'
 
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 
@@ -14,21 +13,15 @@ export function DescriptionFieldInputMenu() {
     typeof currentValue === 'string' ? currentValue : ''
   )
 
-  useEffect(() => {
-    setText(typeof currentValue === 'string' ? currentValue : '')
-  }, [currentValue])
-
-  const { pop, setSearch } = useCommandRouter()
+  const navigate = useNavigate()
 
   useHotkeys(
     'meta+enter',
     () => {
       setValue('description', text)
-      setSearch('')
-      pop()
+      navigate(-1)
     },
-    { preventDefault: true, enableOnFormTags: true },
-    [pop, setSearch, setValue, text]
+    { preventDefault: true, enableOnFormTags: true }
   )
 
   return (

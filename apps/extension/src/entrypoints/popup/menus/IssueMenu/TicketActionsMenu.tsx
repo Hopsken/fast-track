@@ -1,76 +1,30 @@
-import { memo, useMemo } from 'react'
-import {
-  CommandGroup,
-  CommandItem,
-  CommandList,
-  CommandSeparator
-} from '@internal/ui/components/command'
-import { useMemoizedFn } from 'ahooks'
+import { Fragment, useMemo } from 'react'
+import { CommandGroup, CommandSeparator } from '@internal/ui/components/command'
 import {
   ChartNoAxesColumnIncreasing,
   Clipboard,
   GitBranch,
-  GitPullRequest,
   Link2,
   Route,
   UserPen,
   UserRoundPlus
 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 
 import { AssigneeAvatar } from '@/components'
-import {
-  Action,
-  ActionCopyToClipboard,
-  ActionHyperLink,
-  ActionPush
-} from '@/components/actions'
-import { ActionShortcut } from '@/components/actions/ActionShortcut'
-import { PrefetchProvider } from '@/components/PrefetchQuery'
-import { TicketBasicFields } from '@/components/tickets'
-import { useIsOptionKeyPressed } from '@/hooks/useIsOptionKeyPressed'
-import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
-import { useIssueMergeRequests } from '@/hooks/useIssueMergeRequests'
-import { useIssuePriorities } from '@/hooks/useIssuePriorities'
-import { useIssueTransitions } from '@/hooks/useIssueTransitions'
+import { Action, ActionCopyToClipboard, ActionPush } from '@/components/actions'
 import { useMutationAssignMyself } from '@/hooks/useMutationAssignIssue'
 import { useCurrentUser } from '@/stores/useCurrentUser'
 import { useUserPreferences } from '@/stores/useUserPreferences'
-import { IssueDetail, JiraTicket } from '@/types'
+import { JiraTicket } from '@/types'
 import { generateBranchName, getIssueTitleLink } from '@/utils/jira/issues'
-import { openJiraIssue } from '@/utils/open-jira-issue'
 
 import { CommandRoutes } from '../../routes'
 
-import {
-  getProviderIcon,
-  getProviderOpenTitle
-} from './TicketMergeRequestsMenu'
 import { useCurrentTicket } from './useCurrentTicket'
 
-export const TicketActionsMenu = memo(function TicketActionsMenu() {
-  const { data: ticket } = useCurrentTicket()
-
-  if (!ticket) {
-    return null
-  }
-
-  return <TicketActionsMenuInner ticket={ticket} />
-})
-
-const TicketActionsMenuInner = ({ ticket }: { ticket: IssueDetail }) => {
-  const isOptionKeyPressed = useIsOptionKeyPressed()
+export const TicketActionsMenu = () => {
+  const ticket = useCurrentTicket()
   const [preferences] = useUserPreferences()
-
-  const navigate = useNavigate()
-
-  const onSelect = useMemoizedFn(() => {
-    if (isOptionKeyPressed) {
-      openJiraIssue(ticket.key)
-    } else {
-      navigate(CommandRoutes.IssueDetails(ticket.key))
-    }
-  })
 
   const formatted = useMemo(
     () => ({
@@ -81,23 +35,7 @@ const TicketActionsMenuInner = ({ ticket }: { ticket: IssueDetail }) => {
   )
 
   return (
-    <CommandList>
-      <CommandGroup>
-        <CommandItem value={ticket.key} onSelect={onSelect} className="mb-1">
-          <TicketBasicFields ticket={ticket} />
-          <ActionShortcut
-            shortcut={{
-              modifiers: isOptionKeyPressed ? ['alt'] : [],
-              key: 'enter'
-            }}
-          />
-        </CommandItem>
-
-        <MergeRequestsActions ticket={ticket} />
-      </CommandGroup>
-
-      <CommandSeparator />
-
+    <Fragment>
       <CommandGroup heading="General">
         <ActionPush
           value="assign-to"
@@ -199,11 +137,7 @@ const TicketActionsMenuInner = ({ ticket }: { ticket: IssueDetail }) => {
           }}
         />
       </CommandGroup>
-
-      <PrefetchProvider>
-        <PrefetchActions ticket={ticket} />
-      </PrefetchProvider>
-    </CommandList>
+    </Fragment>
   )
 }
 
@@ -235,48 +169,5 @@ function AssignOrUnassignMySelf({ ticket }: { ticket: JiraTicket }) {
         Windows: { modifiers: ['alt', 'shift'], key: 'm' }
       }}
     />
-  )
-}
-
-function PrefetchActions({ ticket }: { ticket: JiraTicket }) {
-  useIssuePriorities()
-  useIssueEditMeta(ticket.key)
-  useIssueTransitions(ticket)
-
-  return null
-}
-
-function MergeRequestsActions({ ticket }: { ticket: JiraTicket }) {
-  const { data: mergeRequests } = useIssueMergeRequests(ticket.key)
-  const [newestMergeRequest] = mergeRequests || []
-  const hasMultipleMergeRequests = (mergeRequests?.length ?? 0) > 1
-
-  return (
-    <>
-      {newestMergeRequest && !hasMultipleMergeRequests && (
-        <ActionHyperLink
-          value="open-merge-request"
-          icon={getProviderIcon(newestMergeRequest.provider)}
-          url={newestMergeRequest.url}
-          title={getProviderOpenTitle(newestMergeRequest.provider)}
-          shortcut={{
-            macOS: { modifiers: ['cmd', 'shift'], key: 'g' },
-            Windows: { modifiers: ['alt', 'shift'], key: 'g' }
-          }}
-        />
-      )}
-      {hasMultipleMergeRequests && (
-        <ActionPush
-          value="open-merge-requests"
-          icon={GitPullRequest}
-          title="Open merge requests..."
-          shortcut={{
-            macOS: { modifiers: ['cmd', 'shift'], key: 'g' },
-            Windows: { modifiers: ['alt', 'shift'], key: 'g' }
-          }}
-          target={CommandRoutes.IssueMergeRequests(ticket.key)}
-        />
-      )}
-    </>
   )
 }

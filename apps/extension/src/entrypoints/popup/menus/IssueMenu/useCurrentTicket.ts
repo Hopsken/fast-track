@@ -1,6 +1,6 @@
-import { useParams } from 'react-router-dom'
+import { useOutletContext, useParams } from 'react-router-dom'
 
-import { useTicketDetails } from '@/hooks/useTicketDetails'
+import { IssueDetail } from '@/types'
 
 export const useCurrentTicketKey = () => {
   const { ticketKey } = useParams<{ ticketKey: string }>()
@@ -10,6 +10,5 @@ export const useCurrentTicketKey = () => {
 }
 
 export function useCurrentTicket() {
-  const ticketKey = useCurrentTicketKey()
-  return useTicketDetails(ticketKey)
+  return useOutletContext<IssueDetail>()
 }

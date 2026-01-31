@@ -7,11 +7,12 @@ import {
 } from '@internal/ui/components/command'
 import { Check } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
+import { useNavigate } from 'react-router-dom'
 
-import { useCommandRouter } from '@/components/CommandRouter'
 import { useFieldMetadataCache } from '@/hooks/useFieldMetadataCache'
 import { useTemplateConflicts } from '@/hooks/useTemplateConflicts'
 import { useTemplates } from '@/hooks/useTemplates'
+import { useCommandInput } from '@/stores/useCommandInputStore'
 import { computeVisibleFields } from '~/services/template-service/gap-analysis'
 import type {
   AllowedValue,
@@ -95,7 +96,8 @@ export function FieldInputMenu({ templateId, fieldId }: Props) {
   const schemaType = metadata?.schema.type
   const schemaItems = metadata?.schema.items
 
-  const { pop, setSearch, activeSearch } = useCommandRouter()
+  const navigate = useNavigate()
+  const { search, setSearch } = useCommandInput()
 
   const { values, setValue } = useCreateIssueDraftStore()
   const currentValue = values[fieldId]
@@ -109,12 +111,7 @@ export function FieldInputMenu({ templateId, fieldId }: Props) {
       schemaType === 'string' ||
       schemaType === 'number'
     ) {
-      const next =
-        typeof currentValue === 'string'
-          ? currentValue
-          : typeof currentValue === 'number'
-            ? String(currentValue)
-            : ''
+      const next = String(currentValue)
       setSearch(next)
     }
   }, [currentValue, fieldId, schemaType, setSearch])
@@ -122,7 +119,7 @@ export function FieldInputMenu({ templateId, fieldId }: Props) {
   const saveAndBack = (value: unknown) => {
     setValue(fieldId, value)
     setSearch('')
-    pop()
+    navigate(-1)
   }
 
   const enableEnterSave =
@@ -139,7 +136,7 @@ export function FieldInputMenu({ templateId, fieldId }: Props) {
     'enter',
     () => {
       if (schemaType === 'number') {
-        const trimmed = activeSearch.trim()
+        const trimmed = search.trim()
         if (!trimmed) {
           saveAndBack(undefined)
           return
@@ -156,7 +153,7 @@ export function FieldInputMenu({ templateId, fieldId }: Props) {
         schemaItems === 'string' &&
         allowedOptions.length === 0
       ) {
-        const parts = activeSearch
+        const parts = search
           .split(',')
           .map((s) => s.trim())
           .filter(Boolean)
@@ -165,7 +162,7 @@ export function FieldInputMenu({ templateId, fieldId }: Props) {
       }
 
       if (fieldId === 'summary' || schemaType === 'string' || !schemaType) {
-        saveAndBack(activeSearch)
+        saveAndBack(search)
       }
     },
     {
@@ -174,11 +171,11 @@ export function FieldInputMenu({ templateId, fieldId }: Props) {
       enableOnFormTags: true
     },
     [
-      activeSearch,
+      search,
       enableEnterSave,
       allowedOptions.length,
       fieldId,
-      pop,
+      navigate,
       saveAndBack,
       schemaItems,
       schemaType,
@@ -216,7 +213,7 @@ export function FieldInputMenu({ templateId, fieldId }: Props) {
         autoCompleteUrl={autoCompleteUrl}
         onDone={() => {
           setSearch('')
-          pop()
+          navigate(-1)
         }}
       />
     )
@@ -285,7 +282,7 @@ export function FieldInputMenu({ templateId, fieldId }: Props) {
             value="done"
             onSelect={() => {
               setSearch('')
-              pop()
+              navigate(-1)
             }}>
             <div className="flex w-full items-center justify-between">
               <span>Done</span>
