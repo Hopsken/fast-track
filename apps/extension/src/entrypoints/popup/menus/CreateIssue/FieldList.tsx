@@ -5,12 +5,11 @@ import type { VisibleField } from '~/services/template-service/gap-analysis'
 import { FieldListItem } from './FieldListItem'
 
 export interface FieldListProps {
-  heading: string
+  heading?: string
   fields: VisibleField[]
   values: Record<string, unknown>
   errors: Record<string, string>
-  requiredFieldIds: Set<string>
-  onSelectField: (fieldId: string) => void
+  onSelectField: (field: VisibleField) => void
 }
 
 export function FieldList({
@@ -18,7 +17,6 @@ export function FieldList({
   fields,
   values,
   errors,
-  requiredFieldIds,
   onSelectField
 }: FieldListProps) {
   if (fields.length === 0) return null
@@ -31,8 +29,8 @@ export function FieldList({
           field={field}
           value={values[field.fieldId]}
           error={errors[field.fieldId]}
-          required={requiredFieldIds.has(field.fieldId)}
-          onSelect={onSelectField}
+          required={field.metadata?.required ?? false}
+          onSelect={() => onSelectField(field)}
         />
       ))}
     </CommandGroup>

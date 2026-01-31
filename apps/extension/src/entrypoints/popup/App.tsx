@@ -11,6 +11,7 @@ import {
 import { UserPreferencesProvider } from '@/stores/useUserPreferences'
 
 import { CommandLayout } from './menus/CommandLayout'
+import { CreateIssueMenu } from './menus/CreateIssue'
 import { IssueMenu } from './menus/IssueMenu'
 import { MainMenu } from './menus/MainMenu'
 import { CommandRoutes } from './routes'
@@ -23,6 +24,11 @@ function App() {
           <Route index element={<MainMenu />} />
 
           <Route path={CommandRoutes.IssueDef} element={<IssueMenu />} />
+
+          <Route
+            path={CommandRoutes.CreateIssue}
+            element={<CreateIssueMenu />}
+          />
         </Route>
       </Routes>
     </div>

@@ -1,24 +1,18 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import {
   CommandEmpty,
   CommandGroup,
   CommandList,
   CommandItem
 } from '@internal/ui/components/command'
+import { useMount } from 'ahooks'
 import { Check } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
-import { useFieldMetadataCache } from '@/hooks/useFieldMetadataCache'
-import { useTemplateConflicts } from '@/hooks/useTemplateConflicts'
-import { useTemplates } from '@/hooks/useTemplates'
 import { useCommandInput } from '@/stores/useCommandInputStore'
-import { computeVisibleFields } from '~/services/template-service/gap-analysis'
-import type {
-  AllowedValue,
-  FieldMetadata,
-  IssueTemplate
-} from '~/types/template'
+import { VisibleField } from '~/services/template-service/gap-analysis'
+import type { AllowedValue, FieldMetadata } from '~/types/template'
 
 import { DescriptionFieldInputMenu } from './DescriptionFieldInputMenu'
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
@@ -35,22 +29,6 @@ declare global {
   }
 }
 
-function toCacheKey(template: IssueTemplate) {
-  const { baseUrlHost, projectKey, issueTypeId } = template.scope
-  return `${baseUrlHost}:${projectKey}:${issueTypeId}`
-}
-
-function getFieldName(fieldId: string, metadata?: FieldMetadata) {
-  return metadata?.name ?? fieldId
-}
-
-function getAllowedOptions(input: {
-  visibleAllowedOptions?: AllowedValue[]
-  metadata?: FieldMetadata
-}): AllowedValue[] {
-  return input.visibleAllowedOptions ?? input.metadata?.allowedValues ?? []
-}
-
 const asRecord = (v: unknown): Record<string, unknown> | null =>
   v && typeof v === 'object' ? (v as Record<string, unknown>) : null
 
@@ -64,48 +42,25 @@ function isArrayOfAllowedValues(value: unknown): value is AllowedValue[] {
   )
 }
 
-export function FieldInputMenu({ templateId, fieldId }: Props) {
-  const { data: templates, isLoading: isLoadingTemplates } = useTemplates()
-  const template = useMemo(
-    () => templates?.find((t) => t.id === templateId) ?? null,
-    [templateId, templates]
-  )
-
-  const cacheKey = template ? toCacheKey(template) : null
-  const { data: cache } = useFieldMetadataCache(cacheKey)
-  const { data: conflicts } = useTemplateConflicts(templateId)
-
-  const cacheFields = cache?.fields ?? []
-  const metadata = cacheFields.find((f) => f.fieldId === fieldId)
-
-  const visibleField = useMemo(() => {
-    if (!template) return null
-    const computed = computeVisibleFields(
-      template,
-      cache ?? undefined,
-      conflicts ?? []
-    )
-    return computed.find((f) => f.fieldId === fieldId) ?? null
-  }, [cache, conflicts, fieldId, template])
-
-  const allowedOptions = getAllowedOptions({
-    visibleAllowedOptions: visibleField?.allowedOptions,
-    metadata
-  })
-
+export function FieldInputMenu() {
+  const { field } = useLocation().state as { field: VisibleField }
+  const { fieldId, metadata } = field
   const schemaType = metadata?.schema.type
   const schemaItems = metadata?.schema.items
 
+  const allowedOptions = useMemo<AllowedValue[]>(
+    () => field.allowedOptions ?? field.metadata?.allowedValues ?? [],
+    [field]
+  )
+  const title = useMemo(() => field.metadata?.name ?? field.fieldId, [field])
+
   const navigate = useNavigate()
   const { search, setSearch } = useCommandInput()
-
   const { values, setValue } = useCreateIssueDraftStore()
-  const currentValue = values[fieldId]
-
-  const title = getFieldName(fieldId, metadata)
+  const currentValue = values[field.fieldId]
 
   // Pre-fill the global command input for scalar fields.
-  useEffect(() => {
+  useMount(() => {
     if (
       fieldId === 'summary' ||
       schemaType === 'string' ||
@@ -114,7 +69,7 @@ export function FieldInputMenu({ templateId, fieldId }: Props) {
       const next = String(currentValue)
       setSearch(next)
     }
-  }, [currentValue, fieldId, schemaType, setSearch])
+  })
 
   const saveAndBack = (value: unknown) => {
     setValue(fieldId, value)
@@ -183,22 +138,6 @@ export function FieldInputMenu({ templateId, fieldId }: Props) {
       setValue
     ]
   )
-
-  if (isLoadingTemplates || !templates) {
-    return (
-      <CommandList>
-        <CommandEmpty>Loading...</CommandEmpty>
-      </CommandList>
-    )
-  }
-
-  if (!template) {
-    return (
-      <CommandList>
-        <CommandEmpty>Template not found</CommandEmpty>
-      </CommandList>
-    )
-  }
 
   if (fieldId === 'description') {
     return <DescriptionFieldInputMenu />

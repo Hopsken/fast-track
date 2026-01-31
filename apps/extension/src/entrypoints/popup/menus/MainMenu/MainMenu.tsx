@@ -1,8 +1,7 @@
 import { useCommandInput } from '@/stores/useCommandInputStore'
 
-import { TemplateMenu } from '../CreateIssue'
-
 import { ExtraActionsMenu } from './ExtraActionsMenu'
+import { IssueTemplatesMenu } from './IssueTemplatesMenu'
 import { TicketListMenu } from './TicketListMenu'
 
 export function MainMenu() {
@@ -13,7 +12,7 @@ export function MainMenu() {
 
   if (isExtraActionsMenuVisible) return <ExtraActionsMenu />
   if (isTemplateMenuVisible) {
-    return <TemplateMenu keyword={searchQuery.slice(1)} />
+    return <IssueTemplatesMenu />
   }
 
   return <TicketListMenu />

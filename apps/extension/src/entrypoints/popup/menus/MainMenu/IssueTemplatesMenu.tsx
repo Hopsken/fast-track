@@ -1,47 +1,55 @@
+import { useCallback } from 'react'
 import {
   CommandEmpty,
   CommandGroup,
   CommandList
 } from '@internal/ui/components/command'
 import { FileText, Settings } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 import { Action, ActionPush } from '@/components/actions'
 import { useTemplates } from '@/hooks/useTemplates'
+import { IssueTemplate } from '@/types/template'
 import { openOptionsPage } from '@/utils'
 
 import { CommandRoutes } from '../../routes'
 
-export function TemplateMenu({ keyword }: { keyword: string }) {
-  const { data: templates } = useTemplates()
-
-  const normalizedKeyword = keyword.trim().toLowerCase()
+export function IssueTemplatesMenu() {
+  const { data: templates, isLoading } = useTemplates()
+  const navigate = useNavigate()
 
   const handleCreateTemplate = () => {
     openOptionsPage('/templates')
   }
 
-  const emptyMessage = normalizedKeyword
-    ? 'No matching templates'
-    : 'No templates'
+  const onSelect = useCallback(
+    (template: IssueTemplate) => {
+      navigate(CommandRoutes.CreateIssueFromTemplate(template.id), {
+        state: { template }
+      })
+    },
+    [navigate]
+  )
 
   return (
     <CommandList>
-      <CommandEmpty>{emptyMessage}</CommandEmpty>
+      <CommandEmpty>No templates</CommandEmpty>
 
       <CommandGroup heading="Issue Templates">
         {templates?.map((template) => (
-          <ActionPush
+          <Action
             key={template.id}
             value={`+${template.name}`}
             // TODO: replace icon with issue type icon
             icon={FileText}
             title={template.name}
-            target={CommandRoutes.CreateIssueFromTemplate(template.id)}
+            onSelect={() => onSelect(template)}
+            exitOnSelect={false}
           />
         ))}
       </CommandGroup>
 
-      {templates?.length === 0 && (
+      {templates?.length === 0 && !isLoading && (
         <Action
           value="create-template"
           icon={Settings}

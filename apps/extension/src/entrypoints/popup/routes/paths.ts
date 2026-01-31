@@ -7,6 +7,8 @@ export const CommandRoutes = {
   IssuePriority: (key: string) => `/ticket/${key}/priority`,
   IssueStatus: (key: string) => `/ticket/${key}/status`,
 
+  CreateIssue: `issue/new/*`,
   CreateIssueFromTemplate: (templateId: string) =>
-    `/issue/new?templateId=${templateId}`
+    `/issue/new?templateId=${templateId}`,
+  CreateIssueEditField: '/issue/new/edit-field'
 }
