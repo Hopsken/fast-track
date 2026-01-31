@@ -1,23 +1,16 @@
 import { useMemoizedFn } from 'ahooks'
-
-import { useCommandNavigate } from '../CommandRouter'
+import { useNavigate } from 'react-router-dom'
 
 import { Action, ActionProps } from './Action'
 
-export interface ActionPushProps<T extends keyof RouteMap>
-  extends Omit<ActionProps, 'onSelect'> {
-  target: () => { path: T; state: RouteMap[T] }
+export interface ActionPushProps extends Omit<ActionProps, 'onSelect'> {
+  target: string
 }
 
-export function ActionPush<T extends keyof RouteMap>({
-  target,
-  ...restProps
-}: ActionPushProps<T>) {
-  const { push } = useCommandNavigate()
-
+export function ActionPush({ target, ...restProps }: ActionPushProps) {
+  const navigate = useNavigate()
   const onSelect = useMemoizedFn(() => {
-    const { path, state } = target()
-    push(String(path), state)
+    navigate(target)
   })
 
   return <Action {...restProps} exitOnSelect={false} onSelect={onSelect} />

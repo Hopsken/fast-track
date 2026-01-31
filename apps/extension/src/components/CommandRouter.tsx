@@ -137,17 +137,6 @@ export function useCommandSearch() {
   return useStore(store, (state) => last(state.history)?.search ?? '')
 }
 
-export function useCommandNavigate() {
-  const store = useCommandRouterStore<RouteMap>()
-  return useStore(
-    store,
-    useShallow((state) => ({
-      push: state.push,
-      pop: state.pop
-    }))
-  )
-}
-
 interface CommandRouterProps<T extends RouteMap> {
   children: ReactNode
   defaultPage: keyof T

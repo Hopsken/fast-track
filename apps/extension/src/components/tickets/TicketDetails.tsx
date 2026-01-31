@@ -1,8 +1,8 @@
 import { Button } from '@internal/ui/components/button'
 import { CommandList } from '@internal/ui/components/command'
 import { Separator } from '@internal/ui/components/separator'
+import { useNavigate } from 'react-router-dom'
 
-import { useCommandNavigate } from '@/components/CommandRouter'
 import { useTicketDetails } from '@/hooks/useTicketDetails'
 
 import { TicketBasicFields } from './TicketBasicFields'
@@ -10,13 +10,13 @@ import { TicketDescription } from './TicketDescription'
 
 export function TicketDetails({ ticketKey }: { ticketKey: string }) {
   const { data: issue, isLoading } = useTicketDetails(ticketKey)
-  const { pop } = useCommandNavigate()
+  const navigate = useNavigate()
 
   if (!issue && !isLoading) {
     return (
       <div className="p-8 text-center">
         <p className="mb-4">Ticket not found</p>
-        <Button onClick={() => pop()} variant="secondary">
+        <Button onClick={() => navigate(-1)} variant="secondary">
           Back
         </Button>
       </div>

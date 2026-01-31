@@ -10,15 +10,7 @@ import { useIssueMergeRequests } from '@/hooks/useIssueMergeRequests'
 import { JiraMergeRequest } from '@/types'
 import { openInNewTab } from '@/utils/extension'
 
-declare global {
-  interface RouteMap {
-    '/ticket/merge-requests': MergeRequestMenuProps
-  }
-}
-
-type MergeRequestMenuProps = {
-  ticketKey: string
-}
+import { useCurrentTicketKey } from './useCurrentTicket'
 
 export const getProviderIcon = (provider: JiraMergeRequest['provider']) => {
   if (provider === 'gitlab') return Gitlab
@@ -34,7 +26,8 @@ export const getProviderOpenTitle = (
   return 'Merge request'
 }
 
-export function TicketMergeRequestsMenu({ ticketKey }: MergeRequestMenuProps) {
+export function TicketMergeRequestsMenu() {
+  const ticketKey = useCurrentTicketKey()
   const { data: mergeRequests, isLoading } = useIssueMergeRequests(ticketKey)
 
   return (

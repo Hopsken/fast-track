@@ -9,21 +9,13 @@ import { TicketActionHeading } from '@/components'
 import { Action, ActionLoading } from '@/components/actions'
 import { useIssuePriorities } from '@/hooks/useIssuePriorities'
 import { useMutationUpdatePriority } from '@/hooks/useMutationUpdatePriority'
-import { useTicketDetails } from '@/hooks/useTicketDetails'
 import { PriorityIcon } from '~/components/ui/jira'
 
-type Props = {
-  ticketKey: string
-}
+import { useCurrentTicket, useCurrentTicketKey } from './useCurrentTicket'
 
-declare global {
-  interface RouteMap {
-    '/ticket/priority': Props
-  }
-}
-
-export function TicketPriorityMenu({ ticketKey }: Props) {
-  const { data: ticket } = useTicketDetails(ticketKey)
+export function TicketPriorityMenu() {
+  const ticketKey = useCurrentTicketKey()
+  const { data: ticket } = useCurrentTicket()
   const { data: priorities, isLoading } = useIssuePriorities()
   const { mutate: updatePriority } = useMutationUpdatePriority()
 

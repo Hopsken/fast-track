@@ -4,7 +4,6 @@ import { UseQueryResult } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { useCommandNavigate } from '@/components/CommandRouter'
 import { useTicketDetails } from '@/hooks/useTicketDetails'
 import { IssueDetail, JiraTicket } from '@/types'
 
@@ -21,10 +20,6 @@ vi.mock('@/services', () => ({
 describe('TicketDetails', () => {
   beforeEach(() => {
     vi.resetAllMocks()
-    vi.mocked(useCommandNavigate).mockReturnValue({
-      pop: vi.fn(),
-      push: vi.fn()
-    })
   })
 
   it('renders content', async () => {

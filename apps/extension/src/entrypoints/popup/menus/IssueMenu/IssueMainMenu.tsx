@@ -16,6 +16,7 @@ import {
   UserPen,
   UserRoundPlus
 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 import { AssigneeAvatar } from '@/components'
 import {
@@ -25,7 +26,6 @@ import {
   ActionPush
 } from '@/components/actions'
 import { ActionShortcut } from '@/components/actions/ActionShortcut'
-import { useCommandNavigate } from '@/components/CommandRouter'
 import { PrefetchProvider } from '@/components/PrefetchQuery'
 import { TicketBasicFields } from '@/components/tickets'
 import { useIsOptionKeyPressed } from '@/hooks/useIsOptionKeyPressed'
@@ -34,51 +34,41 @@ import { useIssueMergeRequests } from '@/hooks/useIssueMergeRequests'
 import { useIssuePriorities } from '@/hooks/useIssuePriorities'
 import { useIssueTransitions } from '@/hooks/useIssueTransitions'
 import { useMutationAssignMyself } from '@/hooks/useMutationAssignIssue'
-import { useTicketDetails } from '@/hooks/useTicketDetails'
 import { useCurrentUser } from '@/stores/useCurrentUser'
 import { useUserPreferences } from '@/stores/useUserPreferences'
 import { IssueDetail, JiraTicket } from '@/types'
 import { generateBranchName, getIssueTitleLink } from '@/utils/jira/issues'
 import { openJiraIssue } from '@/utils/open-jira-issue'
 
+import { CommandRoutes } from '../../routes'
+
 import {
   getProviderIcon,
   getProviderOpenTitle
 } from './TicketMergeRequestsMenu'
+import { useCurrentTicket } from './useCurrentTicket'
 
-type Props = {
-  ticketKey: string
-}
-
-declare global {
-  interface RouteMap {
-    '/ticket/actions': Props
-  }
-}
-
-export const TicketActionsMenu = memo(function TicketActionsMenu({
-  ticketKey
-}: Props) {
-  const { data: ticket } = useTicketDetails(ticketKey)
+export const IssueMainMenu = memo(function IssueMainMenu() {
+  const { data: ticket } = useCurrentTicket()
 
   if (!ticket) {
     return null
   }
 
-  return <TicketActionsMenuInner ticket={ticket} />
+  return <IssueMainMenuInner ticket={ticket} />
 })
 
-const TicketActionsMenuInner = ({ ticket }: { ticket: IssueDetail }) => {
+const IssueMainMenuInner = ({ ticket }: { ticket: IssueDetail }) => {
   const isOptionKeyPressed = useIsOptionKeyPressed()
   const [preferences] = useUserPreferences()
 
-  const { push } = useCommandNavigate()
+  const navigate = useNavigate()
 
   const onSelect = useMemoizedFn(() => {
     if (isOptionKeyPressed) {
       openJiraIssue(ticket.key)
     } else {
-      push('/ticket/details', { ticketKey: ticket.key })
+      navigate(CommandRoutes.IssueDetails(ticket.key))
     }
   })
 
@@ -111,10 +101,7 @@ const TicketActionsMenuInner = ({ ticket }: { ticket: IssueDetail }) => {
       <CommandGroup heading="General">
         <ActionPush
           value="assign-to"
-          target={() => ({
-            path: '/ticket/assign',
-            state: { ticketKey: ticket.key }
-          })}
+          target={CommandRoutes.IssueDetails(ticket.key)}
           icon={UserPen}
           title="Assign to..."
           shortcut={{
@@ -127,10 +114,7 @@ const TicketActionsMenuInner = ({ ticket }: { ticket: IssueDetail }) => {
 
         <ActionPush
           value="change-status"
-          target={() => ({
-            path: '/ticket/status',
-            state: { ticketKey: ticket.key }
-          })}
+          target={CommandRoutes.IssueStatus(ticket.key)}
           icon={Route}
           title="Change status..."
           shortcut={{
@@ -141,10 +125,7 @@ const TicketActionsMenuInner = ({ ticket }: { ticket: IssueDetail }) => {
 
         <ActionPush
           value="change-priority"
-          target={() => ({
-            path: '/ticket/priority',
-            state: { ticketKey: ticket.key }
-          })}
+          target={CommandRoutes.IssuePriority(ticket.key)}
           icon={ChartNoAxesColumnIncreasing}
           title="Change priority..."
           shortcut={{
@@ -293,10 +274,7 @@ function MergeRequestsActions({ ticket }: { ticket: JiraTicket }) {
             macOS: { modifiers: ['cmd', 'shift'], key: 'g' },
             Windows: { modifiers: ['alt', 'shift'], key: 'g' }
           }}
-          target={() => ({
-            path: '/ticket/merge-requests',
-            state: { ticketKey: ticket.key }
-          })}
+          target={CommandRoutes.IssueMergeRequests(ticket.key)}
         />
       )}
     </>

@@ -4,9 +4,9 @@ import {
   useCommandState
 } from '@internal/ui/components/command'
 import { compact } from 'lodash-es'
+import { useNavigate } from 'react-router-dom'
 
 import { ActionLoading } from '@/components/actions'
-import { useCommandNavigate } from '@/components/CommandRouter'
 import { TicketItem } from '@/components/tickets'
 import { useActionShortcut } from '@/hooks/useActionShortcut'
 import { useIssueSuggestions } from '@/hooks/useIssueSuggestions'
@@ -14,6 +14,8 @@ import { useSearchQuery } from '@/hooks/useTicketSearch'
 import { IssueSuggestion } from '@/services/ticket-service'
 import { JiraTicket } from '@/types'
 import { isTicketKey } from '@/utils/jira/issues'
+
+import { CommandRoutes } from '../../routes'
 
 import { SearchResultMenu } from './SearchResultMenu'
 
@@ -67,8 +69,8 @@ function SuggestedTickets({ issues }: SuggestedTicketsProps) {
 }
 
 function useQuickNavigate() {
-  const navigate = useCommandNavigate()
   const ticketKey = useCommandState((s) => s.value)
+  const navigate = useNavigate()
 
   useActionShortcut(
     {
@@ -77,7 +79,7 @@ function useQuickNavigate() {
     },
     () => {
       if (!isTicketKey(ticketKey)) return
-      navigate.push('/ticket/status', { ticketKey })
+      navigate(CommandRoutes.IssueStatus(ticketKey))
     }
   )
 
@@ -88,7 +90,7 @@ function useQuickNavigate() {
     },
     () => {
       if (!isTicketKey(ticketKey)) return
-      navigate.push('/ticket/priority', { ticketKey })
+      navigate(CommandRoutes.IssuePriority(ticketKey))
     }
   )
 
@@ -99,7 +101,7 @@ function useQuickNavigate() {
     },
     () => {
       if (!isTicketKey(ticketKey)) return
-      navigate.push('/ticket/assign', { ticketKey })
+      navigate(CommandRoutes.IssueAssign(ticketKey))
     }
   )
 }

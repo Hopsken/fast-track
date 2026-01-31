@@ -9,6 +9,8 @@ import { Action, ActionPush } from '@/components/actions'
 import { useTemplates } from '@/hooks/useTemplates'
 import { openOptionsPage } from '@/utils'
 
+import { CommandRoutes } from '../../routes'
+
 export function TemplateMenu({ keyword }: { keyword: string }) {
   const { data: templates } = useTemplates()
 
@@ -34,10 +36,7 @@ export function TemplateMenu({ keyword }: { keyword: string }) {
             // TODO: replace icon with issue type icon
             icon={FileText}
             title={template.name}
-            target={() => ({
-              path: '/create-issue',
-              state: { template }
-            })}
+            target={CommandRoutes.CreateIssueFromTemplate(template.id)}
           />
         ))}
       </CommandGroup>

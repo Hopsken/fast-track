@@ -1,5 +1,6 @@
 import { CommandItem } from '@internal/ui/components/command'
 import { useMemoizedFn } from 'ahooks'
+import { useNavigate } from 'react-router-dom'
 
 import { useIsOptionKeyPressed } from '@/hooks/useIsOptionKeyPressed'
 import { projectService } from '@/services'
@@ -13,8 +14,6 @@ import {
   PriorityIcon
 } from '~/components/ui/jira'
 import { HighlightedText } from '~/utils/text-highlighting'
-
-import { useCommandNavigate } from '../CommandRouter'
 
 interface TicketItemProps {
   ticket: JiraTicket
@@ -34,7 +33,7 @@ export function TicketItem({
   showPriority = true,
   showStatus = true
 }: TicketItemProps) {
-  const navigate = useCommandNavigate()
+  const navigate = useNavigate()
   const isOptionKeyPressed = useIsOptionKeyPressed()
 
   const onSelect = useMemoizedFn(() => {
@@ -45,7 +44,7 @@ export function TicketItem({
     if (isOptionKeyPressed) {
       openJiraIssue(ticket.key)
     } else {
-      navigate.push('/ticket/actions', { ticketKey: ticket.key })
+      navigate(`/ticket/${ticket.key}`)
     }
   })
 

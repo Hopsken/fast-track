@@ -1,35 +1,21 @@
-import { useLayoutEffect, useRef } from 'react'
+import { useRef } from '#imports'
+import { useLayoutEffect } from 'react'
 import { Button } from '@internal/ui/components/button'
 import { Command, CommandInput } from '@internal/ui/components/command'
-import { cn } from '@internal/ui/lib/utils'
-import { useCreation, useMemoizedFn } from 'ahooks'
+import { useMemoizedFn } from 'ahooks'
 import { ArrowLeft } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 
-import {
-  CommandRoute,
-  CommandRouter,
-  useCommandRouter
-} from '@/components/CommandRouter'
-import { EmptyAuthNotice } from '@/components/EmptyAuthNotice'
-import { QueryClientProvider } from '@/components/QueryClientProvider'
-import { trackEvent } from '@/services/analytics'
-import {
-  UserContextProvider,
-  useIsAuthConfigured
-} from '@/stores/useCurrentUser'
+import { useCommandRouter } from '@/components/CommandRouter'
+import { cn } from '@/lib/utils'
 import { useIsCommandLoading } from '@/stores/useLoadingStore'
-import { UserPreferencesProvider } from '@/stores/useUserPreferences'
 
-import { MainMenu } from './menus'
-import { CommandMenu } from './menus/CommandMenu'
-import { IssueMenu } from './menus/IssueMenu'
-import { CommandRoutes } from './routes'
+import { Footer } from './Footer'
 
 const COMMAND_CHARS = ['/', '+']
 
-function App() {
+export function CommandMenu() {
   const {
     activePage,
     activeSearch,
@@ -94,56 +80,27 @@ function App() {
   }, [activePage.path])
 
   return (
-    <div className="linear w-xl">
-      <Routes>
-        <Route element={<CommandMenu />}>
-          <Route index element={<MainMenu />} />
+    <Command
+      loop
+      shouldFilter={!isSearchResultPage}
+      value={activeValue}
+      onValueChange={setValue}>
+      <div className={inputContainerClassName}>
+        {previousPageButton}
+        <CommandInput
+          autoFocus
+          ref={inputRef}
+          value={activeSearch}
+          onValueChange={onCommandInputChange}
+          placeholder={'Search tickets...'}
+          aria-label="Search tickets"
+          aria-busy={isCommandLoading}
+        />
+      </div>
 
-          <Route path={CommandRoutes.IssueDef} element={<IssueMenu />} />
-        </Route>
-      </Routes>
-    </div>
+      <Outlet />
+
+      <Footer />
+    </Command>
   )
 }
-
-function AuthenticatedApp() {
-  return (
-    <UserPreferencesProvider>
-      <CommandRouter defaultPage="/">
-        <App />
-      </CommandRouter>
-    </UserPreferencesProvider>
-  )
-}
-
-function AppRouter() {
-  const isAuthConfigured = useIsAuthConfigured()
-
-  if (isAuthConfigured == null) {
-    return null
-  }
-
-  if (!isAuthConfigured) {
-    return <EmptyAuthNotice />
-  }
-
-  return <AuthenticatedApp />
-}
-
-function AppWithProviders() {
-  useCreation(() => {
-    trackEvent('open-popup')
-  }, [])
-
-  return (
-    <QueryClientProvider>
-      <UserContextProvider>
-        <MemoryRouter>
-          <AppRouter />
-        </MemoryRouter>
-      </UserContextProvider>
-    </QueryClientProvider>
-  )
-}
-
-export default AppWithProviders

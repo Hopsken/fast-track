@@ -9,20 +9,12 @@ import { TicketActionHeading } from '@/components'
 import { Action, ActionLoading } from '@/components/actions'
 import { useIssueTransitions } from '@/hooks/useIssueTransitions'
 import { useMutationTransitionIssue } from '@/hooks/useMutationTransitionIssue'
-import { useTicketDetails } from '@/hooks/useTicketDetails'
 import { JiraTicket, JiraTransition } from '@/types'
 
-type Props = {
-  ticketKey: string
-}
+import { useCurrentTicket } from './useCurrentTicket'
 
-declare global {
-  interface RouteMap {
-    '/ticket/status': Props
-  }
-}
-export function TicketStatusMenu({ ticketKey }: Props) {
-  const { data: ticket } = useTicketDetails(ticketKey)
+export function TicketStatusMenu() {
+  const { data: ticket } = useCurrentTicket()
   if (!ticket) return null
   return <TicketStatusMenuInner ticket={ticket} />
 }

@@ -1,10 +1,9 @@
 import { createElement, ReactNode, useCallback } from 'react'
 import { CommandItem } from '@internal/ui/components/command'
 import { LucideIcon } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 import { KeyboardShortcutInput } from '@/lib/keyboard'
-
-import { useCommandNavigate } from '../CommandRouter'
 
 import { ActionShortcut } from './ActionShortcut'
 
@@ -28,13 +27,14 @@ export function Action({
   exitOnSelect = true
 }: ActionProps) {
   const iconEl = icon ? createElement(icon, { size: 16 }) : null
-  const router = useCommandNavigate()
+
+  const navigate = useNavigate()
   const onSelectItem = useCallback(async () => {
     await onSelect?.()
     if (exitOnSelect) {
-      router.pop()
+      navigate(-1)
     }
-  }, [exitOnSelect, onSelect, router])
+  }, [exitOnSelect, navigate, onSelect])
 
   return (
     <CommandItem

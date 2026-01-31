@@ -1,8 +1,2 @@
 export { MainMenu } from './MainMenu'
-export { TicketActionsMenu } from './TicketActionsMenu'
-export { TicketDetailsMenu } from './TicketDetailsMenu'
-export { TicketAssignMenu } from './TicketAssignMenu'
-export { TicketStatusMenu } from './TicketStatusMenu'
-export { TicketPriorityMenu } from './TicketPriorityMenu'
-export { TicketMergeRequestsMenu } from './TicketMergeRequestsMenu'
 export { CreateIssueMenu, FieldInputMenu } from './CreateIssue'
