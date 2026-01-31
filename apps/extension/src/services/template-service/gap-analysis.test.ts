@@ -246,6 +246,106 @@ describe('computeVisibleFields', () => {
     expect(visible.filter((f) => f.fieldId === 'customfield_9')).toHaveLength(1)
   })
 
+  it('shows restricted fields with allowedOptions', () => {
+    const template = createTemplate({
+      fields: {
+        priority: {
+          behavior: 'restricted',
+          allowedOptions: [
+            { id: '1', name: 'High' },
+            { id: '2', name: 'Medium' }
+          ]
+        }
+      }
+    })
+
+    const visible = computeVisibleFields(
+      template,
+      cache([summaryField, priorityField]),
+      []
+    )
+
+    const field = visible.find((f) => f.fieldId === 'priority')
+    expect(field).toMatchObject({
+      fieldId: 'priority',
+      isEditable: true,
+      allowedOptions: [
+        { id: '1', name: 'High' },
+        { id: '2', name: 'Medium' }
+      ]
+    })
+  })
+
+  it('shows restricted fields with conflict and uses conflict metadata', () => {
+    const template = createTemplate({
+      fields: {
+        priority: {
+          behavior: 'restricted',
+          allowedOptions: [
+            { id: '1', name: 'High' },
+            { id: 'gone', name: 'Removed' }
+          ]
+        }
+      }
+    })
+
+    const freshMeta: FieldMetadata = {
+      fieldId: 'priority',
+      key: 'priority',
+      name: 'Priority',
+      required: false,
+      schema: { type: 'priority' },
+      allowedValues: [{ id: '1', name: 'High' }]
+    }
+
+    const conflicts: FieldConflict[] = [
+      {
+        fieldId: 'priority',
+        fieldName: 'Priority',
+        type: 'restricted_option_invalid',
+        message: 'Some restricted options no longer exist',
+        fieldMetadata: freshMeta
+      }
+    ]
+
+    const visible = computeVisibleFields(
+      template,
+      cache([summaryField, priorityField]),
+      conflicts
+    )
+
+    const field = visible.find((f) => f.fieldId === 'priority')
+    expect(field).toMatchObject({
+      fieldId: 'priority',
+      metadata: freshMeta,
+      isEditable: true,
+      conflict: expect.objectContaining({ type: 'restricted_option_invalid' })
+    })
+  })
+
+  it('does not duplicate required fields already restricted', () => {
+    const requiredPriority: FieldMetadata = {
+      ...priorityField,
+      required: true
+    }
+    const template = createTemplate({
+      fields: {
+        priority: {
+          behavior: 'restricted',
+          allowedOptions: [{ id: '1', name: 'High' }]
+        }
+      }
+    })
+
+    const visible = computeVisibleFields(
+      template,
+      cache([summaryField, requiredPriority]),
+      []
+    )
+
+    expect(visible.filter((f) => f.fieldId === 'priority')).toHaveLength(1)
+  })
+
   it('ignores project/issuetype fields', () => {
     const template = createTemplate({
       fields: {

@@ -20,32 +20,12 @@ import { FieldRow } from './FieldRow'
 
 const EXCLUDED = new Set(['project', 'issuetype', 'attachment', 'issuelinks'])
 
-/** Determine if a preset value is effectively empty. */
-function isPresetEmpty(value: unknown): boolean {
-  if (value == null) return true
-  if (typeof value === 'string') return value.trim() === ''
-  if (Array.isArray(value)) return value.length === 0
-  if (typeof value === 'object') {
-    const obj = value as Record<string, unknown>
-    if ('accountId' in obj) return !obj.accountId
-    return Object.keys(obj).length === 0
-  }
-  return false
-}
-
-/** Return a normalized FieldConfig based on whether a preset value is filled. */
-function normalizePreset(presetValue: unknown): FieldConfig {
-  return isPresetEmpty(presetValue)
-    ? { behavior: 'visible', presetValue: undefined }
-    : { behavior: 'preset', presetValue }
-}
-
 /* ------------------------------------------------------------------ */
 /*  Fields section                                                     */
 /* ------------------------------------------------------------------ */
 
 export function FieldsSection() {
-  const { state, actions, meta } = useWizardContext()
+  const { state, actions } = useWizardContext()
   const { availableFields, fieldsConfig, areFieldsLoading, fieldsError } = state
   const [commandOpen, setCommandOpen] = useState(false)
 
@@ -70,15 +50,18 @@ export function FieldsSection() {
 
   const handleAddField = useCallback(
     (fieldId: string) => {
-      actions.setFieldConfig(fieldId, { behavior: 'visible' })
+      actions.setFieldConfig(fieldId, {
+        behavior: 'preset',
+        presetValue: undefined
+      })
       setCommandOpen(false)
     },
     [actions]
   )
 
-  const handlePresetChange = useCallback(
-    (fieldId: string, value: unknown) => {
-      actions.setFieldConfig(fieldId, normalizePreset(value))
+  const handleConfigChange = useCallback(
+    (fieldId: string, config: FieldConfig) => {
+      actions.setFieldConfig(fieldId, config)
     },
     [actions]
   )
@@ -89,8 +72,8 @@ export function FieldsSection() {
         <div>
           <h3 className="text-sm font-medium">Fields</h3>
           <p className="text-muted-foreground text-xs">
-            Add fields and set preset values. Required fields left unconfigured
-            will be prompted during issue creation.
+            Add fields and configure how they behave during issue creation.
+            Required fields left unconfigured will be prompted automatically.
           </p>
         </div>
         {!areFieldsLoading && !fieldsError && (
@@ -127,8 +110,8 @@ export function FieldsSection() {
                 </EmptyTitle>
                 <EmptyDescription>
                   Click &ldquo;Add field&rdquo; to include fields in this
-                  template. Set a value to use it as a preset, or leave it
-                  empty.
+                  template. Choose preset to auto-fill, restrict to limit
+                  options, or show to display all choices.
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>
@@ -139,7 +122,9 @@ export function FieldsSection() {
                   key={field.fieldId}
                   field={field}
                   config={fieldsConfig[field.fieldId]!}
-                  onPresetChange={(v) => handlePresetChange(field.fieldId, v)}
+                  onConfigChange={(config) =>
+                    handleConfigChange(field.fieldId, config)
+                  }
                   onRemove={() => actions.removeFieldConfig(field.fieldId)}
                 />
               ))}

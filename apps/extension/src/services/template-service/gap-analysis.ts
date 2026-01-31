@@ -1,4 +1,5 @@
 import type {
+  AllowedValue,
   CachedFieldMetadata,
   FieldConflict,
   FieldMetadata,
@@ -9,6 +10,8 @@ export interface VisibleField {
   fieldId: string
   metadata?: FieldMetadata
   presetValue?: unknown
+  /** When set, the create-issue form should only show these options (restricted mode). */
+  allowedOptions?: AllowedValue[]
   isEditable: boolean
   conflict?: FieldConflict
 }
@@ -57,6 +60,17 @@ export function computeVisibleFields(
 
     if (config.behavior === 'visible') {
       visible.push({ fieldId, metadata, isEditable: true, conflict })
+      continue
+    }
+
+    if (config.behavior === 'restricted') {
+      visible.push({
+        fieldId,
+        metadata: conflict?.fieldMetadata ?? metadata,
+        allowedOptions: config.allowedOptions,
+        isEditable: true,
+        conflict
+      })
       continue
     }
 

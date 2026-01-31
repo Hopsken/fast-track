@@ -26,25 +26,6 @@ export const IssueTemplateScopeSchema = z.object({
 })
 export type IssueTemplateScope = z.infer<typeof IssueTemplateScopeSchema>
 
-export const FieldConfigSchema = z.object({
-  behavior: z.enum(['preset', 'visible', 'ignore']),
-  presetValue: z.unknown().optional()
-})
-export type FieldConfig = z.infer<typeof FieldConfigSchema>
-
-export const IssueTemplateSchema = z.object({
-  id: z.string().min(1),
-  name: z.string().trim().min(1),
-  icon: z.string().optional(),
-  scope: IssueTemplateScopeSchema,
-  fields: z.record(z.string(), FieldConfigSchema),
-  descriptionTemplate: z.string().optional(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
-  lastUsedAt: z.string().datetime().optional()
-})
-export type IssueTemplate = z.infer<typeof IssueTemplateSchema>
-
 export const JsonTypeSchema = z.object({
   type: z.string(),
   items: z.string().optional(),
@@ -63,6 +44,49 @@ export const AllowedValueSchema = z
   })
   .catchall(z.unknown())
 export type AllowedValue = z.infer<typeof AllowedValueSchema>
+
+/**
+ * Field configuration within a template — discriminated union on `behavior`.
+ *
+ * - preset:     Fixed value, auto-applied at creation (field hidden).
+ * - restricted: User picks from a curated subset of allowed values at creation.
+ *               The field is always visible.
+ * - visible:    Field shown at creation with all available options.
+ * - ignore:     Field omitted entirely.
+ *
+ * `allowedOptions` uses AllowedValue as a universal shape:
+ *   - Select / multi-select: native Jira shape { id, name, ... }
+ *   - User fields: { id: accountId, name: displayName } — name stored for
+ *     display, accountId is the stable reference.
+ *
+ * Phase 2 deferred items (schema is ready, UI not yet implemented):
+ * TODO(phase2): Restricted mode for number fields — store as { id: '5', value: '5' }
+ * TODO(phase2): Restricted mode for user fields — needs user search + accountId picker in wizard
+ * TODO(phase2): Restricted mode for free-text fields — not planned
+ */
+export const FieldConfigSchema = z.discriminatedUnion('behavior', [
+  z.object({ behavior: z.literal('preset'), presetValue: z.unknown() }),
+  z.object({
+    behavior: z.literal('restricted'),
+    allowedOptions: z.array(AllowedValueSchema).min(1)
+  }),
+  z.object({ behavior: z.literal('visible') }),
+  z.object({ behavior: z.literal('ignore') })
+])
+export type FieldConfig = z.infer<typeof FieldConfigSchema>
+
+export const IssueTemplateSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().trim().min(1),
+  icon: z.string().optional(),
+  scope: IssueTemplateScopeSchema,
+  fields: z.record(z.string(), FieldConfigSchema),
+  descriptionTemplate: z.string().optional(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+  lastUsedAt: z.string().datetime().optional()
+})
+export type IssueTemplate = z.infer<typeof IssueTemplateSchema>
 
 export const FieldMetadataSchema = z.object({
   fieldId: z.string(),
@@ -86,6 +110,7 @@ export type CachedFieldMetadata = z.infer<typeof CachedFieldMetadataSchema>
 
 export const ConflictTypeSchema = z.enum([
   'preset_invalid',
+  'restricted_option_invalid',
   'now_required',
   'field_removed',
   'scope_invalid'
