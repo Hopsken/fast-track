@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { CommandList } from '@internal/ui/components/command'
+import { keyBy, merge, unionBy } from 'lodash-es'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useNavigate } from 'react-router-dom'
 
-import { useFieldMetadataCache } from '@/hooks/useFieldMetadataCache'
-import { useTemplateConflicts } from '@/hooks/useTemplateConflicts'
+import { ActionLoading } from '@/components/actions'
+import { useIssueCreateMeta } from '@/hooks/useIssueCreateMeta'
 import {
   computeVisibleFields,
   type VisibleField
@@ -12,12 +13,10 @@ import {
 
 import { CommandRoutes } from '../../routes'
 
-import { ConflictWarning } from './ConflictWarning'
-import { CreateIssueActions } from './CreateIssueActions'
 import { FieldList } from './FieldList'
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 import { useCreateIssueForm } from './useCreateIssueForm'
-import { computeFinalVisibleFields, toCacheKey } from './utils'
+import { computePromotedFields } from './utils'
 
 export function CreateIssueFieldsMenu() {
   const navigate = useNavigate()
@@ -26,30 +25,31 @@ export function CreateIssueFieldsMenu() {
     useCreateIssueDraftStore()
 
   // Metadata & conflicts
-  const cacheKey = useMemo(() => toCacheKey(template), [template])
-  const { data: cache } = useFieldMetadataCache(cacheKey)
-  const { data: conflicts } = useTemplateConflicts(cacheKey)
+  const { projectKey, issueTypeId } = template.scope
+  const { data: fieldsMetadata, isLoading: isLoadingFields } =
+    useIssueCreateMeta(projectKey, issueTypeId)
 
   // Compute visible fields
   const visibleFieldsBase = useMemo(() => {
-    if (!template || !cache) return []
-    return computeVisibleFields(template, cache, conflicts ?? [])
-  }, [template, cache, conflicts])
+    return computeVisibleFields(template, fieldsMetadata ?? [])
+  }, [fieldsMetadata, template])
 
   const visibleFields = useMemo(() => {
-    if (!cache) return visibleFieldsBase
-    return computeFinalVisibleFields({
-      base: visibleFieldsBase,
+    const fieldConfigById = keyBy(visibleFieldsBase, 'fieldId')
+    const promotedFields = computePromotedFields({
       promotedFieldIds,
-      cacheFields: cache.fields
+      fieldsMetadata: fieldsMetadata ?? []
     })
-  }, [visibleFieldsBase, promotedFieldIds, cache])
+
+    return unionBy(visibleFieldsBase, promotedFields, 'fieldId').map((field) =>
+      merge({}, fieldConfigById[field.fieldId], field)
+    )
+  }, [visibleFieldsBase, promotedFieldIds, fieldsMetadata])
 
   // Form submission
   const { submit } = useCreateIssueForm({
-    templateId: template?.id ?? '',
-    template: template!,
-    cache
+    template,
+    fieldsMetadata
   })
 
   // Hotkey
@@ -72,23 +72,18 @@ export function CreateIssueFieldsMenu() {
   }
 
   // Conflict warning state
-  const [showConflictWarning, setShowConflictWarning] = useState(true)
-  const missingFieldNames = useMemo(() => {
-    if (!conflicts || conflicts.length === 0 || !cache) return []
-    return conflicts.map(
-      (c) =>
-        cache.fields.find((f) => f.fieldId === c.fieldId)?.name ?? c.fieldId
-    )
-  }, [conflicts, cache])
+  // const [showConflictWarning, setShowConflictWarning] = useState(true)
 
   return (
     <CommandList>
-      {showConflictWarning && (
+      <ActionLoading isLoading={isLoadingFields} />
+
+      {/* {showConflictWarning && (
         <ConflictWarning
           missingFieldNames={missingFieldNames}
           onDismiss={() => setShowConflictWarning(false)}
         />
-      )}
+      )} */}
 
       <FieldList
         fields={visibleFields}
@@ -96,8 +91,6 @@ export function CreateIssueFieldsMenu() {
         errors={errors}
         onSelectField={handleSelectField}
       />
-
-      <CreateIssueActions onSubmit={submit} />
     </CommandList>
   )
 }

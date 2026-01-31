@@ -4,24 +4,23 @@ import { useNavigate } from 'react-router-dom'
 import { getJiraService } from '@/services/jira-service'
 import { getTemplateService } from '@/services/template-service'
 import { useCommandInput } from '@/stores/useCommandInputStore'
+import { nextTick } from '@/utils/nextTick'
 import { buildCreateIssueFields } from '~/services/template-service/issue-payload'
 import { showToast } from '~/stores/useToastStore'
-import type { CachedFieldMetadata, IssueTemplate } from '~/types/template'
+import type { FieldMetadata, IssueTemplate } from '~/types/template'
 import { formatErrorMessage } from '~/utils/formatError'
 
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 import { extractJiraFieldErrors, pickNonEmptyValues } from './utils'
 
 export interface UseCreateIssueFormOptions {
-  templateId: string
   template: IssueTemplate
-  cache: CachedFieldMetadata | null | undefined
+  fieldsMetadata?: FieldMetadata[]
 }
 
 export function useCreateIssueForm({
-  templateId,
   template,
-  cache
+  fieldsMetadata = []
 }: UseCreateIssueFormOptions) {
   const { setSearch } = useCommandInput()
   const navigate = useNavigate()
@@ -32,7 +31,7 @@ export function useCreateIssueForm({
 
     const fields = buildCreateIssueFields({
       template,
-      cache,
+      fieldsMetadata,
       userInput
     })
 
@@ -51,7 +50,9 @@ export function useCreateIssueForm({
           ? created.key
           : 'created'
 
-      await getTemplateService().markTemplateUsed(templateId)
+      nextTick(() => {
+        getTemplateService().markTemplateUsed(template.id)
+      })
 
       toast.update({
         style: 'success',

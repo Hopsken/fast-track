@@ -3,7 +3,7 @@ import { CommandGroup, CommandList } from '@internal/ui/components/command'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useNavigate } from 'react-router-dom'
 
-import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
+import { useCreateIssueDraftStore } from '../useCreateIssueDraftStore'
 
 export function DescriptionFieldInputMenu() {
   const { values, setValue } = useCreateIssueDraftStore()

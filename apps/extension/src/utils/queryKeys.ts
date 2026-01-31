@@ -24,6 +24,10 @@ export const queryKeys = {
     issueTypes: (projectKey: string) =>
       ['projects', 'issueTypes', projectKey] as const
   },
+  issues: {
+    createMeta: (projectKey: string, issueTypeId: string) =>
+      ['issues/meta', projectKey, issueTypeId] as const
+  },
   tickets: {
     suggestions: ['tickets', 'suggestions'] as const,
     keys: (ticketKey: string) => ['tickets', ticketKey] as const,

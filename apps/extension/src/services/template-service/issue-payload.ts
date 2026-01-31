@@ -1,3 +1,5 @@
+import { keyBy } from 'lodash-es'
+
 import type {
   AllowedValue,
   CachedFieldMetadata,
@@ -26,11 +28,6 @@ export function toAdfDoc(text: string): AdfDoc {
     ]
   }
 }
-
-const getMetadata = (
-  cache: CachedFieldMetadata | undefined | null,
-  fieldId: string
-) => cache?.fields.find((f) => f.fieldId === fieldId)
 
 const asRecord = (v: unknown): Record<string, unknown> | null =>
   v && typeof v === 'object' ? (v as Record<string, unknown>) : null
@@ -119,10 +116,12 @@ export function formatCreateIssueFieldValue(input: {
 
 export function buildCreateIssueFields(input: {
   template: IssueTemplate
-  cache?: CachedFieldMetadata | null
+  fieldsMetadata: FieldMetadata[]
   userInput: Record<string, unknown>
 }): Record<string, unknown> {
-  const { template, cache, userInput } = input
+  const { template, fieldsMetadata, userInput } = input
+
+  const metadataByFieldId = keyBy(fieldsMetadata, 'fieldId')
 
   const fields: Record<string, unknown> = {
     project: { key: template.scope.projectKey },
@@ -134,7 +133,7 @@ export function buildCreateIssueFields(input: {
     if (fieldId === 'project' || fieldId === 'issuetype') continue
     if (config.behavior !== 'preset') continue
 
-    const metadata = getMetadata(cache, fieldId)
+    const metadata = metadataByFieldId[fieldId]
     fields[fieldId] = formatCreateIssueFieldValue({
       fieldId,
       value: config.presetValue,
@@ -142,20 +141,11 @@ export function buildCreateIssueFields(input: {
     })
   }
 
-  // If user didn't provide description, fall back to descriptionTemplate
-  if (userInput['description'] == null && template.descriptionTemplate) {
-    fields['description'] = formatCreateIssueFieldValue({
-      fieldId: 'description',
-      value: template.descriptionTemplate,
-      metadata: getMetadata(cache, 'description')
-    })
-  }
-
   // Apply user input last (can override presets)
   for (const [fieldId, value] of Object.entries(userInput)) {
     if (value === undefined) continue
 
-    const metadata = getMetadata(cache, fieldId)
+    const metadata = metadataByFieldId[fieldId]
     fields[fieldId] = formatCreateIssueFieldValue({ fieldId, value, metadata })
   }
 

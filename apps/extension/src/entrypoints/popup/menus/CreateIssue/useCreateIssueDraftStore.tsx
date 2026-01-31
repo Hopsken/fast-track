@@ -1,4 +1,12 @@
-import { createContext, PropsWithChildren, useContext, useMemo } from 'react'
+import {
+  createContext,
+  PropsWithChildren,
+  useContext,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
+import { Outlet } from 'react-router-dom'
 import { useStore } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { createStore, StoreApi } from 'zustand/vanilla'
@@ -30,13 +38,14 @@ const createIssueDraftStore = (template: IssueTemplate) =>
         errors: {},
         promotedFieldIds: [],
 
-        setValue: (fieldId, value) =>
+        setValue: (fieldId, value) => {
           set((state) => ({
             values: {
               ...state.values,
               [fieldId]: value
             }
-          })),
+          }))
+        },
 
         setErrors: (errors) => set({ errors }),
 
@@ -70,10 +79,7 @@ const IssueDraftStoreContext = createContext<IssueDraftStore | null>(null)
 export const CreateIssueDraftStoreProvider = (
   props: PropsWithChildren<{ template: IssueTemplate }>
 ) => {
-  const store = useMemo(
-    () => createIssueDraftStore(props.template),
-    [props.template]
-  )
+  const [store] = useState(() => createIssueDraftStore(props.template))
 
   return (
     <IssueDraftStoreContext.Provider value={store}>

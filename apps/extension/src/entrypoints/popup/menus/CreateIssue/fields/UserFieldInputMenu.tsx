@@ -9,7 +9,7 @@ import {
 
 import { useAutoCompleteUsers } from '@/hooks/useAutoComplete'
 
-import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
+import { useCreateIssueDraftStore } from '../useCreateIssueDraftStore'
 
 type Props = {
   fieldId: string

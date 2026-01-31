@@ -12,22 +12,11 @@ import { useLocation, useNavigate } from 'react-router-dom'
 
 import { useCommandInput } from '@/stores/useCommandInputStore'
 import { VisibleField } from '~/services/template-service/gap-analysis'
-import type { AllowedValue, FieldMetadata } from '~/types/template'
+import type { AllowedValue } from '~/types/template'
 
-import { DescriptionFieldInputMenu } from './DescriptionFieldInputMenu'
+import { DescriptionFieldInputMenu } from './fields/DescriptionFieldInputMenu'
+import { UserFieldInputMenu } from './fields/UserFieldInputMenu'
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
-import { UserFieldInputMenu } from './UserFieldInputMenu'
-
-type Props = {
-  templateId: string
-  fieldId: string
-}
-
-declare global {
-  interface RouteMap {
-    '/create-issue/field-input': Props
-  }
-}
 
 const asRecord = (v: unknown): Record<string, unknown> | null =>
   v && typeof v === 'object' ? (v as Record<string, unknown>) : null
@@ -61,6 +50,7 @@ export function FieldInputMenu() {
 
   // Pre-fill the global command input for scalar fields.
   useMount(() => {
+    if (!currentValue) return
     if (
       fieldId === 'summary' ||
       schemaType === 'string' ||

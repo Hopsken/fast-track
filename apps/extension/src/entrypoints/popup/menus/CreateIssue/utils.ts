@@ -81,24 +81,16 @@ export function buildInitialValues(args: {
   return initial
 }
 
-export function computeFinalVisibleFields(args: {
-  base: VisibleField[]
+export function computePromotedFields(args: {
+  fieldsMetadata: FieldMetadata[]
   promotedFieldIds: string[]
-  cacheFields: FieldMetadata[]
 }): VisibleField[] {
-  const { base, promotedFieldIds, cacheFields } = args
-  if (promotedFieldIds.length === 0) return base
+  const { promotedFieldIds, fieldsMetadata } = args
 
-  const existing = new Set(base.map((f) => f.fieldId))
-  const promoted: VisibleField[] = []
-
-  for (const fieldId of promotedFieldIds) {
-    if (existing.has(fieldId)) continue
-    const metadata = cacheFields.find((f) => f.fieldId === fieldId)
-    promoted.push({ fieldId, metadata, isEditable: true })
-  }
-
-  return [...base, ...promoted]
+  return promotedFieldIds.map((fieldId) => {
+    const metadata = fieldsMetadata.find((f) => f.fieldId === fieldId)
+    return { fieldId, metadata, isEditable: true }
+  })
 }
 
 export function extractJiraFieldErrors(

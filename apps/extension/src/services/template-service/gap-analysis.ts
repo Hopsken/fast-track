@@ -1,6 +1,5 @@
 import type {
   AllowedValue,
-  CachedFieldMetadata,
   FieldConflict,
   FieldMetadata,
   IssueTemplate
@@ -19,14 +18,14 @@ export interface VisibleField {
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export function computeVisibleFields(
   template: IssueTemplate,
-  cache?: CachedFieldMetadata,
+  fieldsMetadata: FieldMetadata[],
   conflicts?: FieldConflict[]
 ): VisibleField[] {
   const conflictList = conflicts ?? []
   const conflictMap = new Map(conflictList.map((c) => [c.fieldId, c]))
 
   const getMetadata = (fieldId: string) =>
-    cache?.fields.find((f) => f.fieldId === fieldId)
+    fieldsMetadata.find((f) => f.fieldId === fieldId)
 
   const shouldSkipField = (fieldId: string) =>
     fieldId === 'summary' ||
@@ -102,23 +101,21 @@ export function computeVisibleFields(
 
   // Surface required fields from cache that have no template config.
   // These need user input at create-issue time.
-  if (cache) {
-    for (const field of cache.fields) {
-      if (!field.required) continue
-      if (shouldSkipField(field.fieldId)) continue
+  for (const field of fieldsMetadata) {
+    if (!field.required) continue
+    if (shouldSkipField(field.fieldId)) continue
 
-      const alreadyVisible = visible.some((f) => f.fieldId === field.fieldId)
-      if (alreadyVisible) continue
+    const alreadyVisible = visible.some((f) => f.fieldId === field.fieldId)
+    if (alreadyVisible) continue
 
-      // Field is required but has no template config — show it
-      const hasConfig = field.fieldId in template.fields
-      if (!hasConfig) {
-        visible.push({
-          fieldId: field.fieldId,
-          metadata: field,
-          isEditable: true
-        })
-      }
+    // Field is required but has no template config — show it
+    const hasConfig = field.fieldId in template.fields
+    if (!hasConfig) {
+      visible.push({
+        fieldId: field.fieldId,
+        metadata: field,
+        isEditable: true
+      })
     }
   }
 
