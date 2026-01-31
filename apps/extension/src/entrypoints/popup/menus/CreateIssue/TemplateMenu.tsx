@@ -36,7 +36,7 @@ export function TemplateMenu({ keyword }: { keyword: string }) {
             title={template.name}
             target={() => ({
               path: '/create-issue',
-              state: { templateId: template.id }
+              state: { template }
             })}
           />
         ))}

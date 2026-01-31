@@ -52,10 +52,7 @@ describe('InputSearch', () => {
       expect(input.placeholder).toBe('Search projects…')
     })
 
-    expect(onSelect).toHaveBeenCalledWith({
-      value: 'TMP',
-      label: 'TMP — Team Management Kanban'
-    })
+    expect(onSelect).toHaveBeenCalledWith('TMP')
   })
 
   it('keeps showing the selected label even if it came from search results', async () => {
@@ -114,9 +111,6 @@ describe('InputSearch', () => {
       expect(input.value).toBe('TMP — Team Management Kanban')
     })
 
-    expect(onSelect).toHaveBeenCalledWith({
-      value: 'TMP',
-      label: 'TMP — Team Management Kanban'
-    })
+    expect(onSelect).toHaveBeenCalledWith('TMP')
   })
 })

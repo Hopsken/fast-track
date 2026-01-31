@@ -127,10 +127,33 @@ export function InputSearch<T = unknown>({
     [isQueryControlled, onQueryChange]
   )
 
+  const [selectedCache, setSelectedCache] = useState<SearchOption<T> | null>(
+    null
+  )
+
   const selectedOption = useMemo(() => {
     if (value === undefined || value === null) return null
-    return options.find((opt) => opt.data === value) ?? null
-  }, [options, value])
+
+    const fromOptions = options.find((opt) => opt.data === value) ?? null
+    if (fromOptions) return fromOptions
+
+    // Keep showing the last selected label even if options are empty
+    if (selectedCache?.data === value) return selectedCache
+
+    return null
+  }, [options, selectedCache, value])
+
+  useEffect(() => {
+    if (value === undefined || value === null) {
+      if (selectedCache) setSelectedCache(null)
+      return
+    }
+
+    const fromOptions = options.find((opt) => opt.data === value) ?? null
+    if (fromOptions && fromOptions !== selectedCache) {
+      setSelectedCache(fromOptions)
+    }
+  }, [options, selectedCache, value])
 
   const displayLabel = selectedOption?.label
 
@@ -144,6 +167,7 @@ export function InputSearch<T = unknown>({
 
   const handleValueChange = useCallback(
     (next: SearchOption<T> | null) => {
+      setSelectedCache(next)
       onSelect?.(next?.data ?? null)
       // Clear query so next open starts from recommendations.
       setQuery('')
@@ -175,12 +199,24 @@ export function InputSearch<T = unknown>({
     return options.filter((opt) => opt.label.toLowerCase().includes(lowerQuery))
   }, [filter, query, options])
 
+  // Base UI combobox will clear the current selection if the selected value
+  // is not present in `items`. Keep the selected option in the internal items
+  // array so the input can continue to display the selected label even when
+  // the current query yields an empty options list.
+  const comboboxItems = useMemo(() => {
+    if (!selectedOption) return filteredOptions
+    const hasSelected = filteredOptions.some(
+      (o) => o.value === selectedOption.value
+    )
+    return hasSelected ? filteredOptions : [selectedOption, ...filteredOptions]
+  }, [filteredOptions, selectedOption])
+
   const optionRenderer =
     renderOption ?? ((opt: SearchOption<T>) => defaultRenderOption(opt))
 
   return (
     <Combobox<SearchOption<T>>
-      items={filteredOptions}
+      items={comboboxItems}
       value={selectedOption}
       onValueChange={handleValueChange}
       inputValue={inputValue}

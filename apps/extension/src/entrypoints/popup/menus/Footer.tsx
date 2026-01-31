@@ -8,6 +8,7 @@ import {
   X
 } from 'lucide-react'
 
+import { useCommandRouterActivePage } from '@/components/CommandRouter'
 import { openOptionsPage } from '@/utils'
 import { formatErrorMessage } from '@/utils/formatError'
 import logoPNG from '~/assets/logo.png'
@@ -46,6 +47,7 @@ const toastThemes: Record<
 export function Footer() {
   const activeToast = useToastState()
   const hideToast = useToastStore((state) => state.hideToast)
+  const activePage = useCommandRouterActivePage()
 
   const activeToastContainerCls = activeToast
     ? toastThemes[activeToast.style].container
@@ -93,25 +95,33 @@ export function Footer() {
   }
 
   function renderFooter() {
-    return (
-      <button
-        onClick={() => openOptionsPage()}
-        className={cn(
-          'text-foreground group flex cursor-pointer items-center gap-2 text-xs'
-        )}>
-        <img
-          src={logoPNG}
-          alt="Fast Track"
-          className="size-4 rounded grayscale transition group-hover:grayscale-0"
-        />
+    const showSubmitHint = activePage.path === '/create-issue'
 
-        <span className="flex-1 text-xs">
-          <span className="group-hover:hidden">Fast Track</span>
-          <span className="hidden opacity-0 transition group-hover:block group-hover:opacity-100">
-            Settings
+    return (
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => openOptionsPage()}
+          className={cn(
+            'text-foreground group flex cursor-pointer items-center gap-2 text-xs'
+          )}>
+          <img
+            src={logoPNG}
+            alt="Fast Track"
+            className="size-4 rounded grayscale transition group-hover:grayscale-0"
+          />
+
+          <span className="flex-1 text-xs">
+            <span className="group-hover:hidden">Fast Track</span>
+            <span className="hidden opacity-0 transition group-hover:block group-hover:opacity-100">
+              Settings
+            </span>
           </span>
-        </span>
-      </button>
+        </button>
+
+        {showSubmitHint ? (
+          <div className="text-muted-foreground text-xs">⌘ Enter to submit</div>
+        ) : null}
+      </div>
     )
   }
 

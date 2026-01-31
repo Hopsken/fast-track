@@ -28,9 +28,13 @@ import {
   TicketPriorityMenu,
   TicketStatusMenu,
   TicketDetailsMenu,
+  CreateIssueMenu,
+  FieldInputMenu,
   MainMenu
 } from './menus'
 import { Footer } from './menus/Footer'
+
+const COMMAND_CHARS = ['/', '+']
 
 function App() {
   const {
@@ -46,7 +50,8 @@ function App() {
   const isCommandLoading = useIsCommandLoading()
 
   const isSearchResultPage =
-    activePage.path === '/' && !activeSearch.startsWith('/')
+    activePage.path === '/' &&
+    !COMMAND_CHARS.some((char) => activeSearch.startsWith(char))
   const inputContainerClassName = cn(
     'relative flex h-[52px] items-center gap-3 pl-4 pr-4 border-b-2 border-gray-200',
     isCommandLoading && 'command-input-loading'
@@ -117,6 +122,14 @@ function App() {
 
         <CommandRoute path="/">
           <MainMenu />
+        </CommandRoute>
+
+        <CommandRoute path="/create-issue">
+          {(props) => <CreateIssueMenu {...props} />}
+        </CommandRoute>
+
+        <CommandRoute path="/create-issue/field-input">
+          {(props) => <FieldInputMenu {...props} />}
         </CommandRoute>
 
         <CommandRoute path="/ticket/actions">

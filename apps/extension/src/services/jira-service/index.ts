@@ -2,6 +2,12 @@ import { defineProxyService } from '@webext-core/proxy-service'
 
 import { getJiraApi } from '@/lib/jira'
 
+export type JiraCreatedIssue = {
+  id?: string
+  key?: string
+  self?: string
+}
+
 class JiraServiceImpl {
   private jira = getJiraApi()
 
@@ -10,6 +16,16 @@ class JiraServiceImpl {
       url,
       method: 'GET',
       params: { query }
+    })
+  }
+
+  public async createIssue(input: {
+    fields: Record<string, unknown>
+  }): Promise<JiraCreatedIssue> {
+    return this.jira.request<JiraCreatedIssue>({
+      url: '/rest/api/3/issue',
+      method: 'POST',
+      data: input
     })
   }
 }
