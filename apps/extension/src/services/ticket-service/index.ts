@@ -11,6 +11,7 @@ import { difference, keyBy, uniqBy } from 'lodash-es'
 
 import { bucketSuggestionTickets } from '@/lib/tickets/issue-suggestions'
 import {
+  CreateIssuePayload,
   IssueDetail,
   JiraMergeRequest,
   JiraPriority,
@@ -103,6 +104,12 @@ class TicketServiceImpl {
     const fields = parseCreateMetaFields(page)
     if (!isValidCreateMetaFields(fields)) return []
     return fields
+  }
+
+  async createIssue(
+    input: CreateIssuePayload
+  ): Promise<Pick<JiraTicket, 'key'>> {
+    return this.jira.issues.createIssue(input)
   }
 
   async getIssueTransitions(ticket: JiraTicket) {

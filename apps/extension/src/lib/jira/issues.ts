@@ -14,7 +14,9 @@ import {
   JiraMergeRequest,
   JiraPriority,
   JiraTicket,
-  JiraTransition
+  JiraTransition,
+  CreateIssuePayload,
+  CreateIssueFields
 } from '@/types'
 import { isNonNullable } from '@/utils/assert'
 import { isTicketKey, mapPriority, mapTransition } from '@/utils/jira/issues'
@@ -87,6 +89,21 @@ export class JiraIssueService {
     return client.issues.getCreateIssueMetaIssueTypeId({
       projectIdOrKey: input.projectIdOrKey,
       issueTypeId: input.issueTypeId
+    })
+  }
+
+  async createIssue(input: CreateIssuePayload): Promise<{ key: string }> {
+    const client = await this.getClient()
+    return client.issues.createIssue({
+      fields: {
+        project: {
+          key: input.projectKey
+        },
+        issuetype: {
+          id: input.issueTypeId
+        },
+        ...input.fields
+      }
     })
   }
 

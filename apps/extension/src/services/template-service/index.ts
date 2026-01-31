@@ -2,6 +2,8 @@ import { defineProxyService } from '@webext-core/proxy-service'
 import { omit } from 'lodash-es'
 import { nanoid } from 'nanoid'
 
+import { getJiraApi } from '@/lib/jira'
+import { normalizeBaseUrlHost } from '@/utils/normalize-host'
 import { getStorageItem } from '~/lib/storage/schema'
 import {
   IssueTemplateSchema,
@@ -22,9 +24,11 @@ export class TemplateServiceImpl {
   private templatesItem = getStorageItem('IssueTemplates')
   private cacheItem = getStorageItem('FieldMetadataCache')
   private conflictsItem = getStorageItem('TemplateConflicts')
+  private jiraApi = getJiraApi()
 
   // ===== CRUD =====
   async getTemplates(): Promise<IssueTemplate[]> {
+    const currentHost = normalizeBaseUrlHost(this.jiraApi.getHost() ?? '')
     const templates = await this.templatesItem.getValue()
 
     const valid: IssueTemplate[] = []
@@ -33,7 +37,7 @@ export class TemplateServiceImpl {
       if (res.success) valid.push(res.data)
     }
 
-    return valid
+    return valid.filter((t) => t.scope.baseUrlHost === currentHost)
   }
 
   async getTemplate(id: string): Promise<IssueTemplate | null> {

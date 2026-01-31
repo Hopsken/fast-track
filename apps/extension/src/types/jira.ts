@@ -105,3 +105,13 @@ export interface IssueDetail extends JiraTicket {
     avatarUrl?: string
   }
 }
+
+export interface CreateIssuePayload {
+  projectKey: string
+  issueTypeId: string
+  fields: CreateIssueFields
+}
+
+export interface CreateIssueFields extends Record<string, unknown> {
+  summary: string
+}

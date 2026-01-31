@@ -22,10 +22,33 @@ export async function openInNewTab(
   }
 }
 
+const normalizePath = (path: string): string => {
+  if (path.startsWith('#')) return path.slice(1)
+  if (path.startsWith('/')) return path
+  return `/${path}`
+}
+
 /**
- * Opens the extension's options page
+ * Opens the extension's options page.
+ *
+ * If `path` is provided, we open the options page URL directly with a hash route
+ * (Options uses HashRouter), e.g. `/options.html#/templates/new`.
  */
-export function openOptionsPage(): void {
+export function openOptionsPage(path?: string): void {
+  // When navigating to a specific hash route, open the URL directly.
+  if (path) {
+    const manifest = browser.runtime.getManifest()
+    const optionsPage = manifest.options_page || '/options.html'
+    const optionsPageUrl = browser.runtime.getURL(
+      optionsPage as '/options.html'
+    )
+
+    const normalized = normalizePath(path)
+
+    browser.tabs.create({ url: `${optionsPageUrl}#${normalized}` })
+    return
+  }
+
   try {
     browser.runtime.openOptionsPage()
   } catch {
