@@ -8,7 +8,8 @@ export function MainMenu() {
   const { search: searchQuery } = useCommandInput()
 
   const isExtraActionsMenuVisible = searchQuery.startsWith('/')
-  const isTemplateMenuVisible = searchQuery.startsWith('+')
+  const isTemplateMenuVisible =
+    searchQuery.startsWith('+') || searchQuery.startsWith('C')
 
   if (isExtraActionsMenuVisible) return <ExtraActionsMenu />
   if (isTemplateMenuVisible) {

@@ -2,21 +2,16 @@ import { useMemo } from 'react'
 import { Command } from '@internal/ui/components/command'
 import { Outlet, useLocation } from 'react-router-dom'
 
+import { useCommandSearchState } from '@/stores/useCommandController'
 import { useCommandInput } from '@/stores/useCommandInputStore'
 
 import { CommandSearch } from './CommandSearch'
 import { Footer } from './Footer'
 
-const COMMAND_CHARS = ['/', '+']
-
 export function CommandLayout() {
-  const { value, search, setValue } = useCommandInput()
-  const { pathname } = useLocation()
+  const { value, setValue } = useCommandInput()
 
-  const shouldFilter = useMemo(() => {
-    if (pathname !== '/') return true
-    return COMMAND_CHARS.some((char) => search.startsWith(char))
-  }, [pathname, search])
+  const { shouldFilter } = useCommandSearchState()
 
   return (
     <Command

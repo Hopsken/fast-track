@@ -12,6 +12,7 @@ import {
 } from '~/services/template-service/gap-analysis'
 
 import { CommandRoutes } from '../../routes'
+import { CommandMenu } from '../CommandMenu'
 
 import { FieldList } from './FieldList'
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
@@ -75,7 +76,7 @@ export function CreateIssueFieldsMenu() {
   // const [showConflictWarning, setShowConflictWarning] = useState(true)
 
   return (
-    <CommandList>
+    <CommandMenu searchPlaceholder={template.name} searchReadonly>
       <ActionLoading isLoading={isLoadingFields} />
 
       {/* {showConflictWarning && (
@@ -91,6 +92,6 @@ export function CreateIssueFieldsMenu() {
         errors={errors}
         onSelectField={handleSelectField}
       />
-    </CommandList>
+    </CommandMenu>
   )
 }

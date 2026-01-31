@@ -16,6 +16,7 @@ import { JiraTicket } from '@/types'
 import { isTicketKey } from '@/utils/jira/issues'
 
 import { CommandRoutes } from '../../routes'
+import { CommandMenu } from '../CommandMenu'
 
 import { SearchResultMenu } from './SearchResultMenu'
 
@@ -28,14 +29,14 @@ export function TicketListMenu() {
   useQuickNavigate()
 
   return (
-    <CommandList aria-label="Ticket search results">
+    <CommandMenu shouldFilter={false} aria-label="Ticket search results">
       <ActionLoading isLoading={isLoading} />
       {shouldShowSuggestions ? (
         <SuggestedTickets issues={issueSuggestions} />
       ) : (
         <SearchResultMenu suggestions={issueSuggestions} />
       )}
-    </CommandList>
+    </CommandMenu>
   )
 }
 

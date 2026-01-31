@@ -7,7 +7,7 @@ import {
 import { FileText, Settings } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
-import { Action, ActionPush } from '@/components/actions'
+import { Action } from '@/components/actions'
 import { useTemplates } from '@/hooks/useTemplates'
 import { IssueTemplate } from '@/types/template'
 import { openOptionsPage } from '@/utils'
@@ -39,7 +39,7 @@ export function IssueTemplatesMenu() {
         {templates?.map((template) => (
           <Action
             key={template.id}
-            value={`+${template.name}`}
+            value={`C+${template.name}`}
             // TODO: replace icon with issue type icon
             icon={FileText}
             title={template.name}

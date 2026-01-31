@@ -8,11 +8,13 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import { cn } from '@/lib/utils'
+import { useCommandSearchState } from '@/stores/useCommandController'
 import { useCommandInput } from '@/stores/useCommandInputStore'
 import { useIsCommandLoading } from '@/stores/useLoadingStore'
 
 export function CommandSearch() {
   const { search, setSearch } = useCommandInput()
+  const { searchPlaceholder, searchReadonly } = useCommandSearchState()
 
   const inputRef = useRef<HTMLInputElement>(null)
   const isCommandLoading = useIsCommandLoading()
@@ -59,6 +61,7 @@ export function CommandSearch() {
 
   // Focus input when active page changes
   useLayoutEffect(() => {
+    if (searchReadonly) return
     inputRef?.current?.focus()
     const rafId = window.requestAnimationFrame(() => {
       inputRef.current?.select()
@@ -67,6 +70,7 @@ export function CommandSearch() {
     return () => {
       window.cancelAnimationFrame(rafId)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname])
 
   return (
@@ -77,8 +81,9 @@ export function CommandSearch() {
         ref={inputRef}
         value={search}
         onValueChange={onCommandInputChange}
-        placeholder={'Search tickets...'}
-        aria-label="Search tickets"
+        placeholder={searchPlaceholder}
+        aria-label={searchPlaceholder}
+        readOnly={searchReadonly}
         aria-busy={isCommandLoading}
       />
     </div>
