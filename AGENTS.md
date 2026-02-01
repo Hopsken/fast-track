@@ -19,6 +19,7 @@
 
 - Prefer zustand over React context for complex states
 - Prefer lodash-es utils over custom implementations
+- Use `pnpm run lint:fix` to auto fix eslint errors
 
 ## Core Principles
 

@@ -8,15 +8,16 @@ import {
 import { useMount } from 'ahooks'
 import { Check } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 import { useCommandInput } from '@/stores/useCommandInputStore'
 import { VisibleField } from '~/services/template-service/gap-analysis'
 import type { AllowedValue } from '~/types/template'
 
-import { DescriptionFieldInputMenu } from './fields/DescriptionFieldInputMenu'
+import { SummaryDescriptionFieldInputMenu } from './fields/SummaryDescriptionFieldInputMenu'
 import { UserFieldInputMenu } from './fields/UserFieldInputMenu'
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
+import { useWizardNavigation } from './useWizardNavigation'
 
 const asRecord = (v: unknown): Record<string, unknown> | null =>
   v && typeof v === 'object' ? (v as Record<string, unknown>) : null
@@ -37,19 +38,22 @@ export function FieldInputMenu() {
   const schemaType = metadata?.schema.type
   const schemaItems = metadata?.schema.items
 
+  const isCombinedField = fieldId === 'summary' || fieldId === 'description'
+
   const allowedOptions = useMemo<AllowedValue[]>(
     () => field.allowedOptions ?? field.metadata?.allowedValues ?? [],
     [field]
   )
   const title = useMemo(() => field.metadata?.name ?? field.fieldId, [field])
 
-  const navigate = useNavigate()
   const { search, setSearch } = useCommandInput()
   const { values, setValue } = useCreateIssueDraftStore()
+  const { goToNextField } = useWizardNavigation()
   const currentValue = values[field.fieldId]
 
   // Pre-fill the global command input for scalar fields.
   useMount(() => {
+    if (isCombinedField) return // combined component handles its own pre-fill
     if (!currentValue) return
     if (
       fieldId === 'summary' ||
@@ -61,10 +65,10 @@ export function FieldInputMenu() {
     }
   })
 
-  const saveAndBack = (value: unknown) => {
+  const saveAndContinue = (value: unknown) => {
     setValue(fieldId, value)
     setSearch('')
-    navigate(-1)
+    goToNextField()
   }
 
   const enableEnterSave =
@@ -83,12 +87,12 @@ export function FieldInputMenu() {
       if (schemaType === 'number') {
         const trimmed = search.trim()
         if (!trimmed) {
-          saveAndBack(undefined)
+          saveAndContinue(undefined)
           return
         }
         const num = Number(trimmed)
         if (!Number.isFinite(num)) return
-        saveAndBack(num)
+        saveAndContinue(num)
         return
       }
 
@@ -102,16 +106,16 @@ export function FieldInputMenu() {
           .split(',')
           .map((s) => s.trim())
           .filter(Boolean)
-        saveAndBack(parts)
+        saveAndContinue(parts)
         return
       }
 
       if (fieldId === 'summary' || schemaType === 'string' || !schemaType) {
-        saveAndBack(search)
+        saveAndContinue(search)
       }
     },
     {
-      enabled: enableEnterSave,
+      enabled: enableEnterSave && !isCombinedField,
       preventDefault: true,
       enableOnFormTags: true
     },
@@ -120,17 +124,18 @@ export function FieldInputMenu() {
       enableEnterSave,
       allowedOptions.length,
       fieldId,
-      navigate,
-      saveAndBack,
+      saveAndContinue,
       schemaItems,
-      schemaType,
-      setSearch,
-      setValue
+      schemaType
     ]
   )
 
-  if (fieldId === 'description') {
-    return <DescriptionFieldInputMenu />
+  if (isCombinedField) {
+    return (
+      <SummaryDescriptionFieldInputMenu
+        focusField={fieldId as 'summary' | 'description'}
+      />
+    )
   }
 
   if (schemaType === 'user') {
@@ -142,7 +147,7 @@ export function FieldInputMenu() {
         autoCompleteUrl={autoCompleteUrl}
         onDone={() => {
           setSearch('')
-          navigate(-1)
+          goToNextField()
         }}
       />
     )
@@ -161,7 +166,7 @@ export function FieldInputMenu() {
             <CommandItem
               key={opt.id}
               value={opt.name ?? opt.value ?? opt.id}
-              onSelect={() => saveAndBack(opt)}>
+              onSelect={() => saveAndContinue(opt)}>
               <span className="truncate">
                 {opt.name ?? opt.value ?? opt.id}
               </span>
@@ -211,7 +216,7 @@ export function FieldInputMenu() {
             value="done"
             onSelect={() => {
               setSearch('')
-              navigate(-1)
+              goToNextField()
             }}>
             <div className="flex w-full items-center justify-between">
               <span>Done</span>

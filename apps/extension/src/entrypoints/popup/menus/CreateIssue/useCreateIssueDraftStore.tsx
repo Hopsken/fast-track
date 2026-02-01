@@ -1,17 +1,10 @@
-import {
-  createContext,
-  PropsWithChildren,
-  useContext,
-  useMemo,
-  useRef,
-  useState
-} from 'react'
-import { Outlet } from 'react-router-dom'
+import { createContext, PropsWithChildren, useContext, useState } from 'react'
 import { useStore } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { createStore, StoreApi } from 'zustand/vanilla'
 
 import { IssueTemplate } from '@/types/template'
+import type { VisibleField } from '~/services/template-service/gap-analysis'
 
 export interface CreateIssueDraftState {
   template: IssueTemplate
@@ -20,10 +13,18 @@ export interface CreateIssueDraftState {
   errors: Record<string, string>
   promotedFieldIds: string[]
 
+  // Wizard state
+  wizardFields: VisibleField[]
+  wizardIndex: number
+  wizardStarted: boolean
+
   setValue: (fieldId: string, value: unknown) => void
   setErrors: (errors: Record<string, string>) => void
   clearError: (fieldId: string) => void
   promoteFields: (fieldIds: string[]) => void
+  setWizardFields: (fields: VisibleField[]) => void
+  setWizardIndex: (index: number) => void
+  setWizardStarted: (started: boolean) => void
   reset: () => void
 }
 
@@ -37,6 +38,9 @@ const createIssueDraftStore = (template: IssueTemplate) =>
         values: {},
         errors: {},
         promotedFieldIds: [],
+        wizardFields: [],
+        wizardIndex: 0,
+        wizardStarted: false,
 
         setValue: (fieldId, value) => {
           set((state) => ({
@@ -63,11 +67,18 @@ const createIssueDraftStore = (template: IssueTemplate) =>
             return { promotedFieldIds: Array.from(next) }
           }),
 
+        setWizardFields: (fields) => set({ wizardFields: fields }),
+        setWizardIndex: (index) => set({ wizardIndex: index }),
+        setWizardStarted: (started) => set({ wizardStarted: started }),
+
         reset: () =>
           set({
             values: {},
             errors: {},
-            promotedFieldIds: []
+            promotedFieldIds: [],
+            wizardFields: [],
+            wizardIndex: 0,
+            wizardStarted: false
           })
       }),
       { name: 'create-issue-draft-store' }

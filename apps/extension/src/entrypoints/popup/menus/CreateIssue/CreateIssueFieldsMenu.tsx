@@ -1,5 +1,4 @@
-import { useMemo } from 'react'
-import { CommandList } from '@internal/ui/components/command'
+import { useEffect, useMemo } from 'react'
 import { keyBy, merge, unionBy } from 'lodash-es'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useNavigate } from 'react-router-dom'
@@ -17,13 +16,23 @@ import { CommandMenu } from '../CommandMenu'
 import { FieldList } from './FieldList'
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 import { useCreateIssueForm } from './useCreateIssueForm'
-import { computePromotedFields } from './utils'
+import { computePromotedFields, computeWizardSequence } from './utils'
 
 export function CreateIssueFieldsMenu() {
   const navigate = useNavigate()
 
-  const { template, values, errors, promotedFieldIds, clearError } =
-    useCreateIssueDraftStore()
+  const {
+    template,
+    values,
+    errors,
+    promotedFieldIds,
+    clearError,
+    wizardStarted,
+    wizardFields,
+    setWizardFields,
+    setWizardStarted,
+    setWizardIndex
+  } = useCreateIssueDraftStore()
 
   // Metadata & conflicts
   const { projectKey, issueTypeId } = template.scope
@@ -47,6 +56,29 @@ export function CreateIssueFieldsMenu() {
     )
   }, [visibleFieldsBase, promotedFieldIds, fieldsMetadata])
 
+  // Auto-start wizard on first metadata load
+  useEffect(() => {
+    if (!wizardStarted && visibleFields.length > 0) {
+      const sequence = computeWizardSequence(visibleFields)
+      setWizardFields(sequence)
+      setWizardStarted(true)
+
+      if (sequence.length > 0) {
+        setWizardIndex(0)
+        navigate(CommandRoutes.CreateIssueEditField, {
+          state: { field: sequence[0] }
+        })
+      }
+    }
+  }, [
+    visibleFields,
+    wizardStarted,
+    setWizardFields,
+    setWizardStarted,
+    setWizardIndex,
+    navigate
+  ])
+
   // Form submission
   const { submit } = useCreateIssueForm({
     template,
@@ -68,7 +100,17 @@ export function CreateIssueFieldsMenu() {
 
   // Field selection handler
   const handleSelectField = (field: VisibleField) => {
-    clearError(field.fieldId)
+    if (field.fieldId === 'summary' || field.fieldId === 'description') {
+      clearError('summary')
+      clearError('description')
+    } else {
+      clearError(field.fieldId)
+    }
+
+    // Update wizard cursor so Cmd+Enter continues from this point
+    const idx = wizardFields.findIndex((f) => f.fieldId === field.fieldId)
+    if (idx >= 0) setWizardIndex(idx)
+
     navigate(CommandRoutes.CreateIssueEditField, { state: { field } })
   }
 

@@ -111,3 +111,25 @@ export function extractJiraFieldErrors(
   }
   return out
 }
+
+/**
+ * Returns the wizard step order:
+ *   1. Summary (combined with Description — one step)
+ *   2. Required fields (metadata.required === true)
+ *   3. Optional fields
+ * Description is excluded as a standalone step; it's edited alongside Summary.
+ */
+export function computeWizardSequence(
+  visibleFields: VisibleField[]
+): VisibleField[] {
+  const summaryField = visibleFields.find((f) => f.fieldId === 'summary')
+
+  const rest = visibleFields.filter(
+    (f) => f.fieldId !== 'summary' && f.fieldId !== 'description'
+  )
+
+  const required = rest.filter((f) => f.metadata?.required)
+  const optional = rest.filter((f) => !f.metadata?.required)
+
+  return [...(summaryField ? [summaryField] : []), ...required, ...optional]
+}
