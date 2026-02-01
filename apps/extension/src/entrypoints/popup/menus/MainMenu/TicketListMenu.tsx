@@ -11,7 +11,7 @@ import { TicketItem } from '@/components/tickets'
 import { useActionShortcut } from '@/hooks/useActionShortcut'
 import { useIssueSuggestions } from '@/hooks/useIssueSuggestions'
 import { IssueSuggestion } from '@/services/ticket-service'
-import { useCommandSearch } from '@/stores/useCommandInputStore'
+import { useCommandSearch } from '@/stores/command/useCommandInputStore'
 import { JiraTicket } from '@/types'
 import { isTicketKey } from '@/utils/jira/issues'
 

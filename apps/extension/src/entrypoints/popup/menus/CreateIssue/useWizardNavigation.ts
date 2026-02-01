@@ -2,7 +2,7 @@ import { useMemoizedFn } from 'ahooks'
 import { useNavigate } from 'react-router-dom'
 
 import { useIssueCreateMeta } from '@/hooks/useIssueCreateMeta'
-import { useCommandInput } from '@/stores/useCommandInputStore'
+import { useCommandInput } from '@/stores/command/useCommandInputStore'
 
 import { CommandRoutes } from '../../routes'
 

@@ -6,11 +6,11 @@ import {
   shouldAutoAssignOnTransition
 } from '@/lib/tickets/auto-assign'
 import { ticketService } from '@/services'
+import { showToast } from '@/stores/command/useToastStore'
 import { useCurrentUser } from '@/stores/useCurrentUser'
 import { JiraTicket, JiraTransition, UserPreferences } from '@/types'
 import { generateBranchName } from '@/utils/jira/issues'
 import { queryKeys } from '@/utils/queryKeys'
-import { showToast } from '~/stores/useToastStore'
 import { useUserPreferences } from '~/stores/useUserPreferences'
 import { formatErrorMessage } from '~/utils/formatError'
 

@@ -8,9 +8,9 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import { cn } from '@/lib/utils'
-import { useCommandSearchState } from '@/stores/useCommandController'
-import { useCommandInput } from '@/stores/useCommandInputStore'
-import { useIsCommandLoading } from '@/stores/useLoadingStore'
+import { useCommandSearchState } from '@/stores/command/useCommandController'
+import { useCommandInput } from '@/stores/command/useCommandInputStore'
+import { useIsCommandLoading } from '@/stores/command/useLoadingStore'
 
 export function CommandSearch() {
   const { search, setSearch } = useCommandInput()

@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { ticketService } from '@/services'
+import { showToast } from '@/stores/command/useToastStore'
 import { JiraPriority } from '@/types'
 import { queryKeys } from '@/utils/queryKeys'
-import { showToast } from '~/stores/useToastStore'
 import { formatErrorMessage } from '~/utils/formatError'
 
 export function useMutationUpdatePriority() {

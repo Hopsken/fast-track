@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom'
 
 import { getJiraService } from '@/services/jira-service'
 import { getTemplateService } from '@/services/template-service'
-import { useCommandInput } from '@/stores/useCommandInputStore'
+import { useCommandInput } from '@/stores/command/useCommandInputStore'
+import { showToast } from '@/stores/command/useToastStore'
 import { nextTick } from '@/utils/nextTick'
 import { buildCreateIssueFields } from '~/services/template-service/issue-payload'
-import { showToast } from '~/stores/useToastStore'
 import type { FieldMetadata, IssueTemplate } from '~/types/template'
 import { formatErrorMessage } from '~/utils/formatError'
 

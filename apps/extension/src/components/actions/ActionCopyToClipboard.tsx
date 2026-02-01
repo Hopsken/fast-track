@@ -1,6 +1,6 @@
 import log from 'loglevel'
 
-import { showToast } from '../../stores/useToastStore'
+import { showToast } from '@/stores/command/useToastStore'
 
 import { Action, ActionProps } from './Action'
 

@@ -2,7 +2,7 @@ import { ComponentProps } from 'react'
 import { CommandList } from '@internal/ui/components/command'
 import { useMount } from 'ahooks'
 
-import { useCommandControllerStore } from '@/stores/useCommandController'
+import { useCommandControllerStore } from '@/stores/command/useCommandController'
 
 export type CommandMenuProps = ComponentProps<typeof CommandList> & {
   shouldFilter?: boolean

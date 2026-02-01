@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useDebounce, useMemoizedFn } from 'ahooks'
 
 import { ticketService } from '@/services'
-import { useCommandInput } from '@/stores/useCommandInputStore'
+import { useCommandInput } from '@/stores/command/useCommandInputStore'
 import { JiraTicket } from '@/types'
 import { queryKeys } from '@/utils/queryKeys'
 import { rankTickets } from '@/utils/ticket-ranking'

@@ -2,8 +2,8 @@ import { useMemo } from 'react'
 import { Command } from '@internal/ui/components/command'
 import { Outlet, useLocation } from 'react-router-dom'
 
-import { useCommandSearchState } from '@/stores/useCommandController'
-import { useCommandInput } from '@/stores/useCommandInputStore'
+import { useCommandSearchState } from '@/stores/command/useCommandController'
+import { useCommandInput } from '@/stores/command/useCommandInputStore'
 
 import { CommandSearch } from './CommandSearch'
 import { Footer } from './Footer'

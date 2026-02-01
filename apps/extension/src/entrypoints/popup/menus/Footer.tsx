@@ -8,14 +8,14 @@ import {
   X
 } from 'lucide-react'
 
-import { openOptionsPage } from '@/utils'
-import { formatErrorMessage } from '@/utils/formatError'
-import logoPNG from '~/assets/logo.png'
 import {
   ToastStyle,
   useToastState,
   useToastStore
-} from '~/stores/useToastStore'
+} from '@/stores/command/useToastStore'
+import { openOptionsPage } from '@/utils'
+import { formatErrorMessage } from '@/utils/formatError'
+import logoPNG from '~/assets/logo.png'
 
 const toastThemes: Record<
   ToastStyle,

@@ -1,4 +1,4 @@
-import { useCommandInput } from '@/stores/useCommandInputStore'
+import { useCommandInput } from '@/stores/command/useCommandInputStore'
 
 import { ExtraActionsMenu } from './ExtraActionsMenu'
 import { IssueTemplatesMenu } from './IssueTemplatesMenu'

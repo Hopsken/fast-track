@@ -10,7 +10,7 @@ import { Check } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useLocation } from 'react-router-dom'
 
-import { useCommandInput } from '@/stores/useCommandInputStore'
+import { useCommandInput } from '@/stores/command/useCommandInputStore'
 import { VisibleField } from '~/services/template-service/gap-analysis'
 import type { AllowedValue } from '~/types/template'
 
