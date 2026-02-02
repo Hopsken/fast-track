@@ -127,16 +127,8 @@ export function buildCreateIssueFields(input: {
   const metadataByFieldId = keyBy(fieldsMetadata, 'fieldId')
 
   const fields: Record<string, unknown> = {
-    project: { key: template.scope.projectKey },
-    issuetype: { id: template.scope.issueTypeId }
-  }
-
-  if (template.descriptionTemplate) {
-    fields.description = formatCreateIssueFieldValue({
-      fieldId: 'description',
-      value: template.descriptionTemplate,
-      metadata: metadataByFieldId['description']
-    })
+    project: { key: template.scope.project.key },
+    issuetype: { id: template.scope.issueType.id }
   }
 
   // Apply preset fields first

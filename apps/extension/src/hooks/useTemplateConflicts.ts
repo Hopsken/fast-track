@@ -8,8 +8,8 @@ export function useTemplateConflicts(templateId: string | null) {
     enabled: !!templateId,
     queryFn: async () => {
       if (!templateId) return []
-      const svc = getTemplateService()
-      return svc.getTemplateConflicts(templateId)
+
+      throw new Error('Not implemented')
     }
   })
 }

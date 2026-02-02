@@ -15,9 +15,17 @@ function createTemplate(partial?: Partial<IssueTemplate>): IssueTemplate {
     name: 'Template',
     scope: {
       baseUrlHost: 'example.atlassian.net',
-      projectKey: 'PROJ',
-      issueTypeId: '10000',
-      issueTypeName: 'Bug'
+      project: {
+        id: 'p1',
+        key: 'PROJ',
+        name: 'Project'
+      },
+      issueType: {
+        id: '10000',
+        name: 'Bug',
+        iconUrl: '',
+        description: ''
+      }
     },
     fields: {},
     createdAt: now,
@@ -61,8 +69,8 @@ describe('computeVisibleFields', () => {
     expect(visible.some((f) => f.fieldId === 'description')).toBe(true)
   })
 
-  it('includes description if descriptionTemplate exists', () => {
-    const template = createTemplate({ descriptionTemplate: 'Hello' })
+  it('includes description if description exists', () => {
+    const template = createTemplate({ description: 'Hello' })
 
     const visible = computeVisibleFields(template, [], [])
 

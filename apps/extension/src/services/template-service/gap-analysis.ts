@@ -42,11 +42,11 @@ export function computeVisibleFields(
   ]
 
   const descConfig = template.fields['description']
-  if (descConfig?.behavior === 'visible' || template.descriptionTemplate) {
+  if (descConfig?.behavior === 'visible' || template.description) {
     visible.push({
       fieldId: 'description',
       metadata: getMetadata('description'),
-      presetValue: template.descriptionTemplate,
+      presetValue: template.description,
       isEditable: true
     })
   }

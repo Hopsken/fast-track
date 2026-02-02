@@ -1,16 +1,17 @@
 import { Button } from '@internal/ui/components/button'
 import { Link, useNavigate } from 'react-router-dom'
 
+import { LoadingCursor } from '@/components/LoadingCursor'
 import { useCurrentJiraHost } from '~/hooks/useCurrentJiraHost'
 
 import { TemplateWizard } from './template-wizard'
 
 export function TemplateWizardPage() {
   const navigate = useNavigate()
-  const { host: currentHost, isLoading: hostLoading } = useCurrentJiraHost()
+  const { data: currentHost, isLoading: hostLoading } = useCurrentJiraHost()
 
   if (hostLoading) {
-    return <div className="text-sm text-gray-600">Loading…</div>
+    return <LoadingCursor />
   }
 
   if (!currentHost) {
@@ -30,8 +31,8 @@ export function TemplateWizardPage() {
     <TemplateWizard.Provider
       mode="create"
       host={currentHost}
-      onCreated={(id) => {
-        navigate(`/templates/${id}`)
+      onCreated={() => {
+        navigate(`/templates`)
       }}>
       <TemplateWizard.Editor />
     </TemplateWizard.Provider>

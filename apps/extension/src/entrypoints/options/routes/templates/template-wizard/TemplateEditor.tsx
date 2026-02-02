@@ -119,8 +119,8 @@ export function TemplateEditor() {
           autoFocus
         />
         <AutoGrowTextarea
-          value={state.descriptionTemplate}
-          onChange={actions.setDescriptionTemplate}
+          value={state.description}
+          onChange={actions.setDescription}
           placeholder="Add a description…"
           className="text-muted-foreground placeholder:text-muted-foreground/40 block w-full resize-none bg-transparent text-sm outline-none"
         />

@@ -118,7 +118,7 @@ IssueTemplate {
   fields: Record<FieldId, FieldConfig>
 
   // Optional helper for description content
-  descriptionTemplate?: string
+  description?: string
 
   createdAt: ISODateTime
   updatedAt: ISODateTime
@@ -178,8 +178,8 @@ visible = []
 add(summary)
 
 // Description
-if template.descriptionTemplate exists OR template.fields['description'].behavior == 'visible':
-  add(description, presetValue=descriptionTemplate)
+if template.description exists OR template.fields['description'].behavior == 'visible':
+  add(description, presetValue=description)
 
 // Configured fields
 for each (fieldId, config) in template.fields:
@@ -262,12 +262,12 @@ No periodic polling.
 
 ## 6. Error Handling (Contract)
 
-| Situation | Handling |
-| --- | --- |
-| `preset_invalid` | Promote field to visible + warn user |
-| `now_required` | Add field to form + warn user |
-| `field_removed` | Warn + ignore field at submit |
-| `scope_invalid` | Disable form + ask user to edit template scope |
+| Situation         | Handling                                                     |
+| ----------------- | ------------------------------------------------------------ |
+| `preset_invalid`  | Promote field to visible + warn user                         |
+| `now_required`    | Add field to form + warn user                                |
+| `field_removed`   | Warn + ignore field at submit                                |
+| `scope_invalid`   | Disable form + ask user to edit template scope               |
 | Jira 400 `errors` | Parse errors map, promote missing fields, show inline errors |
 
 ---
@@ -275,6 +275,7 @@ No periodic polling.
 ## 7. Scope (MVP)
 
 In scope:
+
 - Template CRUD in Options
 - Trigger templates via `+` / `C`
 - preset / visible / ignore
@@ -284,6 +285,7 @@ In scope:
 - Storage split: sync templates, local cache/conflicts
 
 Out of scope (Phase 2+):
+
 - Date/DateTime, cascading select
 - Import/export
 - Extract-from-issue
@@ -295,6 +297,7 @@ Out of scope (Phase 2+):
 ### 8.1 Field Behavior Model Evolution
 
 **Initial Design (RFC):**
+
 ```typescript
 FieldConfig {
   behavior: 'preset' | 'visible' | 'ignore'
@@ -307,12 +310,14 @@ FieldConfig {
 The initial 3-way model proved insufficient during implementation. Key insight:
 
 > **"Selected field with empty value" has two distinct use cases:**
+>
 > 1. Make non-required field visible (e.g., Description)
 > 2. Restrict field to subset of options (e.g., limit Components)
 
 **Final Model:**
+
 ```typescript
-FieldConfig = 
+FieldConfig =
   | { behavior: 'visible' }                               // Show with all options
   | { behavior: 'preset'; presetValue: unknown }          // Auto-fill value
   | { behavior: 'restricted'; allowedOptions: AllowedValue[] }  // Limit choices
@@ -320,6 +325,7 @@ FieldConfig =
 ```
 
 **Key changes:**
+
 - Added `restricted` behavior for limiting field options
 - Unified `AllowedValue` shape for both Jira-provided and user-defined options
 - Validation: preset must have value, restricted must have ≥1 option
@@ -327,21 +333,23 @@ FieldConfig =
 ### 8.2 User-Facing Design: 3-Way Toggle
 
 **UI Model:**
+
 ```
 [ Show | Fill | Limit ]
 ```
 
-| Mode | Behavior | Backend | Use Case |
-|------|----------|---------|----------|
-| **Show** | All options available | `visible` | Add Description to form |
-| **Fill** | Auto-fill specific value | `preset` | Default Priority = High |
-| **Limit** | Restrict to subset | `restricted` | Only 3 of 20 Components |
+| Mode      | Behavior                 | Backend      | Use Case                |
+| --------- | ------------------------ | ------------ | ----------------------- |
+| **Show**  | All options available    | `visible`    | Add Description to form |
+| **Fill**  | Auto-fill specific value | `preset`     | Default Priority = High |
+| **Limit** | Restrict to subset       | `restricted` | Only 3 of 20 Components |
 
 **Ignore** is handled by not adding the field to template (remove button instead of 4th toggle option).
 
 ### 8.3 Unified Field Option Model
 
 **Problem:** Fields get options from two sources:
+
 1. **Jira-provided:** Select, multi-select, priority → `field.allowedValues`
 2. **User-defined:** Number (story points), text, user → manually entered
 
@@ -349,16 +357,17 @@ FieldConfig =
 
 ```typescript
 type AllowedValue = {
-  id: string;     // Jira's allowedValue.id OR nanoid(8) for user-defined
-  name?: string;  // Display label
-  value?: string; // Simple value storage
+  id: string // Jira's allowedValue.id OR nanoid(8) for user-defined
+  name?: string // Display label
+  value?: string // Simple value storage
   // ... other Jira fields (iconUrl, etc.)
 }
 ```
 
 **Examples:**
 
-*Jira-provided (Priority):*
+_Jira-provided (Priority):_
+
 ```typescript
 { behavior: 'restricted', allowedOptions: [
   { id: '1', name: 'Critical', iconUrl: '...' },
@@ -366,7 +375,8 @@ type AllowedValue = {
 ]}
 ```
 
-*User-defined (Story Points):*
+_User-defined (Story Points):_
+
 ```typescript
 { behavior: 'restricted', allowedOptions: [
   { id: 'sp-k3j5h2', name: '1', value: '1' },
@@ -383,10 +393,12 @@ type AllowedValue = {
 **Principle:** Enforce, don't guess. Block save with clear errors instead of silent corrections.
 
 **Rules:**
+
 1. Preset mode → must have non-empty `presetValue`
 2. Restricted mode → must have ≥1 option in `allowedOptions`
 
 **Error format:**
+
 ```
 Single: "Story Points: Preset value required. Set a value or switch to Show mode."
 
@@ -399,21 +411,23 @@ Multiple:
 
 ### 8.5 Field Type Support Matrix
 
-| Field Type | Jira Options? | Limit Mode UI | Status |
-|------------|---------------|---------------|--------|
-| Select/Multi-select | ✅ Yes | Checkbox grid | ✅ Implemented |
-| Priority | ✅ Yes | Checkbox grid | ✅ Implemented |
-| Number | ❌ No | Chip input (validates numeric) | ✅ Implemented |
-| Text | ❌ No | Chip input (free-text) | ✅ Implemented |
-| User | ❌ No | User search picker | 🚧 Deferred (needs API) |
+| Field Type          | Jira Options? | Limit Mode UI                  | Status                  |
+| ------------------- | ------------- | ------------------------------ | ----------------------- |
+| Select/Multi-select | ✅ Yes        | Checkbox grid                  | ✅ Implemented          |
+| Priority            | ✅ Yes        | Checkbox grid                  | ✅ Implemented          |
+| Number              | ❌ No         | Chip input (validates numeric) | ✅ Implemented          |
+| Text                | ❌ No         | Chip input (free-text)         | ✅ Implemented          |
+| User                | ❌ No         | User search picker             | 🚧 Deferred (needs API) |
 
 ### 8.6 Implementation References
 
 Full design documentation:
+
 - **Design doc:** `apps/extension/docs/template-field-configuration.md`
 - **Quick reference:** `apps/extension/docs/template-field-quick-reference.md`
 
 Key files:
+
 - Type schema: `src/types/template.ts`
 - 3-way toggle: `src/entrypoints/options/routes/templates/template-wizard/FieldRow.tsx`
 - Options input: `src/entrypoints/options/routes/templates/template-wizard/RestrictedOptionsInput.tsx`

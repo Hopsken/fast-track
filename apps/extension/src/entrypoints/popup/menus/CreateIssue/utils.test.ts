@@ -119,12 +119,20 @@ describe('CreateIssue utils', () => {
           name: 'Test',
           scope: {
             baseUrlHost: 'test.atlassian.net',
-            projectKey: 'TEST',
-            issueTypeId: '10001',
-            issueTypeName: 'Bug'
+            project: {
+              id: 'p1',
+              key: 'TEST',
+              name: 'Test Project'
+            },
+            issueType: {
+              id: '10001',
+              name: 'Bug',
+              iconUrl: '',
+              description: ''
+            }
           },
           fields: {},
-          descriptionTemplate: 'Default description',
+          description: 'Default description',
           createdAt: '2024-01-01T00:00:00Z',
           updatedAt: '2024-01-01T00:00:00Z'
         },
@@ -142,9 +150,17 @@ describe('CreateIssue utils', () => {
           name: 'Test',
           scope: {
             baseUrlHost: 'test.atlassian.net',
-            projectKey: 'TEST',
-            issueTypeId: '10001',
-            issueTypeName: 'Bug'
+            project: {
+              id: 'p1',
+              key: 'TEST',
+              name: 'Test Project'
+            },
+            issueType: {
+              id: '10001',
+              name: 'Bug',
+              iconUrl: '',
+              description: ''
+            }
           },
           fields: {},
           createdAt: '2024-01-01T00:00:00Z',

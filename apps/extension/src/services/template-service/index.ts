@@ -1,16 +1,11 @@
 import { defineProxyService } from '@webext-core/proxy-service'
-import { omit } from 'lodash-es'
 import { nanoid } from 'nanoid'
 
 import { getJiraApi } from '@/lib/jira'
+import { IssueTemplateSchema } from '@/repository/schema'
 import { normalizeBaseUrlHost } from '@/utils/normalize-host'
 import { getStorageItem } from '~/lib/storage/schema'
-import {
-  IssueTemplateSchema,
-  type CachedFieldMetadata,
-  type FieldConflict,
-  type IssueTemplate
-} from '~/types/template'
+import { type IssueTemplate } from '~/types/template'
 
 const MAX_TEMPLATES = 50
 
@@ -22,12 +17,13 @@ const MAX_TEMPLATES = 50
  */
 export class TemplateServiceImpl {
   private templatesItem = getStorageItem('IssueTemplates')
-  private cacheItem = getStorageItem('FieldMetadataCache')
-  private conflictsItem = getStorageItem('TemplateConflicts')
   private jiraApi = getJiraApi()
 
   // ===== CRUD =====
-  async getTemplates(): Promise<IssueTemplate[]> {
+  async getTemplates(options?: {
+    includeOtherHosts?: boolean
+  }): Promise<IssueTemplate[]> {
+    const { includeOtherHosts = false } = options ?? {}
     const currentHost = normalizeBaseUrlHost(this.jiraApi.getHost() ?? '')
     const templates = await this.templatesItem.getValue()
 
@@ -37,7 +33,9 @@ export class TemplateServiceImpl {
       if (res.success) valid.push(res.data)
     }
 
-    return valid.filter((t) => t.scope.baseUrlHost === currentHost)
+    return valid.filter(
+      (t) => includeOtherHosts || t.scope.baseUrlHost === currentHost
+    )
   }
 
   async getTemplate(id: string): Promise<IssueTemplate | null> {
@@ -109,11 +107,6 @@ export class TemplateServiceImpl {
   async deleteTemplate(id: string): Promise<void> {
     const templates = await this.getTemplates()
     await this.templatesItem.setValue(templates.filter((t) => t.id !== id))
-
-    const conflicts = await this.conflictsItem.getValue()
-    if (conflicts[id]) {
-      await this.conflictsItem.setValue(omit(conflicts, id))
-    }
   }
 
   // ===== Usage tracking =====
@@ -121,38 +114,6 @@ export class TemplateServiceImpl {
     await this.updateTemplate(id, {
       lastUsedAt: usedAt ?? new Date().toISOString()
     })
-  }
-
-  // ===== Cache/conflicts =====
-  async getFieldMetadataCache(
-    cacheKey: string
-  ): Promise<CachedFieldMetadata | null> {
-    const cache = await this.cacheItem.getValue()
-    return cache[cacheKey] ?? null
-  }
-
-  async updateFieldMetadataCache(
-    cacheKey: string,
-    cacheValue: CachedFieldMetadata
-  ): Promise<void> {
-    const cache = await this.cacheItem.getValue()
-    await this.cacheItem.setValue({
-      ...cache,
-      [cacheKey]: cacheValue
-    })
-  }
-
-  async getTemplateConflicts(templateId: string): Promise<FieldConflict[]> {
-    const all = await this.conflictsItem.getValue()
-    return all[templateId] ?? []
-  }
-
-  async updateTemplateConflicts(
-    templateId: string,
-    conflicts: FieldConflict[]
-  ): Promise<void> {
-    const all = await this.conflictsItem.getValue()
-    await this.conflictsItem.setValue({ ...all, [templateId]: conflicts })
   }
 }
 

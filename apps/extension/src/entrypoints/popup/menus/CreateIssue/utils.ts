@@ -6,7 +6,11 @@ import type {
 } from '~/types/template'
 
 export function toCacheKey(template: IssueTemplate) {
-  const { baseUrlHost, projectKey, issueTypeId } = template.scope
+  const {
+    baseUrlHost,
+    project: { key: projectKey },
+    issueType: { id: issueTypeId }
+  } = template.scope
   return `${baseUrlHost}:${projectKey}:${issueTypeId}`
 }
 
@@ -85,7 +89,7 @@ export function buildInitialValues(args: {
   const { template, visibleFields } = args
   const initial: Record<string, unknown> = {
     summary: '',
-    description: template.descriptionTemplate ?? ''
+    description: template.description ?? ''
   }
 
   for (const f of visibleFields) {

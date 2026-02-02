@@ -49,5 +49,10 @@ export const queryKeys = {
       ['tickets', ticket.key, 'transitions', ticket.status.name] as const,
     createMeta: (projectId: string, issueTypeId: string) =>
       ['tickets', 'createMeta', projectId, issueTypeId] as const
+  },
+  issueTemplates: {
+    list: (showAll: boolean) => {
+      return ['issueTemplates', 'list', showAll] as const
+    }
   }
 }

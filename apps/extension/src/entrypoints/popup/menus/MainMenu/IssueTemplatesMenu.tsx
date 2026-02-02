@@ -7,6 +7,7 @@ import {
 import { FileText, Settings } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
+import { GeneralIcon } from '@/components'
 import { Action } from '@/components/actions'
 import { useTemplates } from '@/hooks/useTemplates'
 import { IssueTemplate } from '@/types/template'
@@ -40,8 +41,14 @@ export function IssueTemplatesMenu() {
           <Action
             key={template.id}
             value={`C+${template.name}`}
-            // TODO: replace icon with issue type icon
-            icon={FileText}
+            prefix={
+              template.icon || (
+                <GeneralIcon
+                  iconUrl={template.scope.issueType.iconUrl}
+                  alt={template.scope.issueType.name}
+                />
+              )
+            }
             title={template.name}
             onSelect={() => onSelect(template)}
             exitOnSelect={false}

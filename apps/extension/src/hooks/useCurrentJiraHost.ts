@@ -1,26 +1,20 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMemo } from 'react'
 
-import { getAuthService } from '~/services/auth-service'
 import { normalizeBaseUrlHost } from '~/utils/normalize-host'
 
-export function useCurrentJiraHost(): {
-  host: string | null
-  isLoading: boolean
-  error: string | null
-} {
-  const query = useQuery({
-    queryKey: ['auth', 'credentials'],
-    queryFn: async () => {
-      const svc = getAuthService()
-      return svc.getCredentials()
-    }
-  })
+import { useStorage } from './useStorage'
 
-  const host = query.data?.host ? normalizeBaseUrlHost(query.data.host) : null
+export function useCurrentJiraHost() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, sonarjs/no-unused-vars
+  const [credentials, _, state] = useStorage('AuthCredentials')
+
+  const data = useMemo(() => {
+    const host = credentials?.host
+    return host ? normalizeBaseUrlHost(host) : null
+  }, [credentials])
 
   return {
-    host: host || null,
-    isLoading: query.isLoading,
-    error: query.error instanceof Error ? query.error.message : null
+    data,
+    isLoading: state === 'pending'
   }
 }

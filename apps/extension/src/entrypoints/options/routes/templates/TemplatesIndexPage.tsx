@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Button } from '@internal/ui/components/button'
+import { partition } from 'lodash-es'
 import { Link } from 'react-router-dom'
 
 import { useCurrentJiraHost } from '~/hooks/useCurrentJiraHost'
@@ -21,21 +22,19 @@ function groupByHost(templates: IssueTemplate[]) {
 }
 
 export function TemplatesIndexPage() {
-  const { host: currentHost, isLoading: hostLoading } = useCurrentJiraHost()
-  const { data: templates, isLoading: templatesLoading } = useTemplates()
+  const { data: currentHost } = useCurrentJiraHost()
+  const { data: templates, isLoading: templatesLoading } = useTemplates({
+    includeOtherHosts: true
+  })
 
   const [showOthers, setShowOthers] = useState(false)
 
-  const all = templates ?? []
-  const matching = useMemo(() => {
-    if (!currentHost) return []
-    return all.filter((t) => t.scope.baseUrlHost === currentHost)
-  }, [all, currentHost])
+  const [matching, others] = useMemo(() => {
+    if (!templates) return [[], []]
+    if (!currentHost) return [[], templates]
 
-  const others = useMemo(() => {
-    if (!currentHost) return all
-    return all.filter((t) => t.scope.baseUrlHost !== currentHost)
-  }, [all, currentHost])
+    return partition(templates, (t) => t.scope.baseUrlHost === currentHost)
+  }, [templates, currentHost])
 
   const canCreate = Boolean(currentHost)
 
@@ -52,20 +51,6 @@ export function TemplatesIndexPage() {
         <Button asChild disabled={!canCreate}>
           <Link to="/templates/new">New template</Link>
         </Button>
-      </div>
-
-      <div className="rounded-md border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
-        {hostLoading ? (
-          <span>Checking connection…</span>
-        ) : currentHost ? (
-          <span>
-            Connected to <span className="font-medium">{currentHost}</span>.
-          </span>
-        ) : (
-          <span>
-            Not connected. Connect Jira in General first to create templates.
-          </span>
-        )}
       </div>
 
       <div className="space-y-3">
@@ -111,7 +96,7 @@ export function TemplatesIndexPage() {
                           {t.name}
                         </div>
                         <div className="truncate text-xs text-gray-600">
-                          {t.scope.projectKey} • {t.scope.issueTypeName}
+                          {t.scope.project.name} • {t.scope.issueType.name}
                         </div>
                       </div>
                     </div>
@@ -129,42 +114,38 @@ export function TemplatesIndexPage() {
             Other Jira sites
           </h3>
 
-          {others.length === 0 ? (
-            <div className="text-sm text-gray-600">No other templates.</div>
-          ) : (
-            <div className="space-y-4">
-              {groupByHost(others).map(([host, items]) => (
-                <div key={host} className="rounded-md border bg-white">
-                  <div className="border-b px-4 py-2 text-xs font-medium text-gray-700">
-                    {host || 'Unknown host'}
-                  </div>
-                  <ul className="divide-y">
-                    {items.map((t) => (
-                      <li key={t.id}>
-                        <Link
-                          to={`/templates/${t.id}`}
-                          className={cn(
-                            'block px-4 py-3 text-sm transition-colors',
-                            'hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
-                          )}>
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="min-w-0">
-                              <div className="truncate font-medium text-gray-900">
-                                {t.name}
-                              </div>
-                              <div className="truncate text-xs text-gray-600">
-                                {t.scope.projectKey} • {t.scope.issueTypeName}
-                              </div>
+          <div className="space-y-4">
+            {groupByHost(others).map(([host, items]) => (
+              <div key={host} className="rounded-md border bg-white">
+                <div className="border-b px-4 py-2 text-xs font-medium text-gray-700">
+                  {host || 'Unknown host'}
+                </div>
+                <ul className="divide-y">
+                  {items.map((t) => (
+                    <li key={t.id}>
+                      <Link
+                        to={`/templates/${t.id}`}
+                        className={cn(
+                          'block px-4 py-3 text-sm transition-colors',
+                          'hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
+                        )}>
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="truncate font-medium text-gray-900">
+                              {t.name}
+                            </div>
+                            <div className="truncate text-xs text-gray-600">
+                              {t.scope.project.name} • {t.scope.issueType.name}
                             </div>
                           </div>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          )}
+                        </div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
       ) : null}
     </div>

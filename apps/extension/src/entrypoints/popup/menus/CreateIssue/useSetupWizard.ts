@@ -12,7 +12,10 @@ export const useSetupWizard = () => {
     useCreateIssueDraftStore()
 
   // Metadata & conflicts
-  const { projectKey, issueTypeId } = template.scope
+  const {
+    project: { key: projectKey },
+    issueType: { id: issueTypeId }
+  } = template.scope
   const { data: fieldsMetadata } = useIssueCreateMeta(projectKey, issueTypeId)
 
   // Compute visible fields

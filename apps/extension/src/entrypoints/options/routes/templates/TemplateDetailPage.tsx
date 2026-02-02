@@ -12,7 +12,7 @@ export function TemplateDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
-  const { host: currentHost, isLoading: hostLoading } = useCurrentJiraHost()
+  const { data: currentHost, isLoading: hostLoading } = useCurrentJiraHost()
 
   const [template, setTemplate] = useState<IssueTemplate | null>(null)
   const [isLoading, setIsLoading] = useState(true)

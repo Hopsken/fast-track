@@ -12,8 +12,9 @@ export function FieldConfirm(props: {
     <CommandFooterSlot>
       <Button
         variant={'ghost'}
+        size={'sm'}
         onClick={props.onClick}
-        className="-mr-4"
+        className="-my-1 -mr-4"
         disabled={props.disabled}>
         <span>{props.text || 'Continue'}</span>
         <ActionShortcut

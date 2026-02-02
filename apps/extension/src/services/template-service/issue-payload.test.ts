@@ -11,9 +11,28 @@ function createTemplate(partial?: Partial<IssueTemplate>): IssueTemplate {
     name: 'Template',
     scope: {
       baseUrlHost: 'example.atlassian.net',
-      projectKey: 'PROJ',
-      issueTypeId: '10000',
-      issueTypeName: 'Bug'
+      project: {
+        id: '1',
+        key: 'PROJ',
+        name: 'Project',
+        avatarUrl: '',
+        issueTypes: [
+          {
+            id: '10000',
+            name: 'Bug',
+            iconUrl: '',
+            description: '',
+            subtask: false
+          }
+        ]
+      },
+      issueType: {
+        id: '10000',
+        name: 'Bug',
+        iconUrl: '',
+        description: '',
+        subtask: false
+      }
     },
     fields: {},
     createdAt: now,
@@ -84,7 +103,7 @@ describe('buildCreateIssueFields', () => {
           presetValue: { id: '1', name: 'High' }
         }
       },
-      descriptionTemplate: 'Preset description'
+      description: 'Preset description'
     })
 
     const fields = buildCreateIssueFields({
@@ -111,22 +130,6 @@ describe('buildCreateIssueFields', () => {
       components: [{ id: '10' }, { id: '11' }],
       assignee: { accountId: 'abc123' }
     })
-  })
-
-  it('uses descriptionTemplate when userInput.description is not provided', () => {
-    const template = createTemplate({
-      descriptionTemplate: 'Preset description'
-    })
-
-    const fields = buildCreateIssueFields({
-      template,
-      fieldsMetadata: baseFields,
-      userInput: {
-        summary: 'Hello'
-      }
-    })
-
-    expect(fields.description).toEqual(toAdfDoc('Preset description'))
   })
 
   it('lets userInput override preset fields when both are present', () => {

@@ -11,6 +11,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useDebounce } from 'ahooks'
 
 import type { SearchOption } from '@/components/ui'
+import { extractLeadingEmoji } from '@/lib/emoji'
 import { JiraIssueType, JiraProject } from '@/types'
 import { formatErrorMessage } from '@/utils/formatError'
 import { queryKeys } from '@/utils/queryKeys'
@@ -50,7 +51,7 @@ export type WizardState = {
 
   // Basics
   name: string
-  descriptionTemplate: string
+  description: string
 
   saveError: string | null
   isSaving: boolean
@@ -66,7 +67,7 @@ export type WizardActions = {
   removeFieldConfig: (fieldId: string) => void
 
   setName: (next: string) => void
-  setDescriptionTemplate: (next: string) => void
+  setDescription: (next: string) => void
 
   save: () => Promise<void>
   deleteTemplate: (() => Promise<void>) | null
@@ -106,28 +107,6 @@ export function useWizardContext() {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                            */
-/* ------------------------------------------------------------------ */
-
-/** Build a synthetic WizardScope from a persisted template. */
-function scopeFromTemplate(template: IssueTemplate): WizardScope {
-  return {
-    project: {
-      id: '',
-      key: template.scope.projectKey,
-      name: template.scope.projectKey,
-      issueTypes: []
-    },
-    issueType: {
-      id: template.scope.issueTypeId,
-      name: template.scope.issueTypeName,
-      iconUrl: '',
-      description: ''
-    }
-  }
-}
-
-/* ------------------------------------------------------------------ */
 /*  Provider                                                           */
 /* ------------------------------------------------------------------ */
 
@@ -153,7 +132,7 @@ export function TemplateWizardProvider(props: ProviderProps) {
   // ------ Scope ------
 
   const [scope, setScope] = useState<WizardScope>(() =>
-    existingTemplate ? scopeFromTemplate(existingTemplate) : {}
+    existingTemplate ? existingTemplate.scope : {}
   )
 
   const [projectQuery, setProjectQuery] = useState('')
@@ -207,18 +186,17 @@ export function TemplateWizardProvider(props: ProviderProps) {
   // --- Fields ---
 
   const hasScope = Boolean(scope.project && scope.issueType)
+  const projectKey = scope.project?.key ?? ''
+  const issueTypeId = scope.issueType?.id ?? ''
 
   const fieldsQuery = useQuery({
-    queryKey: queryKeys.tickets.createMeta(
-      scope.project?.key ?? '',
-      scope.issueType?.id ?? ''
-    ),
+    queryKey: queryKeys.tickets.createMeta(projectKey, issueTypeId),
     queryFn: async () => {
-      if (!scope.project || !scope.issueType) return []
+      if (!projectKey || !issueTypeId) return []
       const svc = getTicketService()
       return svc.getCreateIssueFields({
-        projectIdOrKey: scope.project.key,
-        issueTypeId: scope.issueType.id
+        projectIdOrKey: projectKey,
+        issueTypeId: issueTypeId
       })
     },
     enabled: hasScope,
@@ -261,9 +239,16 @@ export function TemplateWizardProvider(props: ProviderProps) {
 
   // --- Basics ---
 
-  const [name, setName] = useState(() => existingTemplate?.name ?? '')
-  const [descriptionTemplate, setDescriptionTemplate] = useState(
-    () => existingTemplate?.descriptionTemplate ?? ''
+  const [name, setName] = useState(() => {
+    if (existingTemplate) {
+      return existingTemplate.icon
+        ? `${existingTemplate.icon} ${existingTemplate.name}`
+        : existingTemplate.name
+    }
+    return ''
+  })
+  const [description, setDescription] = useState(
+    () => existingTemplate?.description ?? ''
   )
 
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -360,33 +345,29 @@ export function TemplateWizardProvider(props: ProviderProps) {
 
     try {
       const svc = getTemplateService()
+      const { emoji, rest: newName } = extractLeadingEmoji(name.trim())
 
       if (isEdit && existingTemplate) {
         await svc.updateTemplate(existingTemplate.id, {
-          name: name.trim(),
+          name: newName,
+          icon: emoji,
           fields: fieldsConfig,
-          descriptionTemplate: descriptionTemplate.trim()
-            ? descriptionTemplate
-            : undefined
+          description: description.trim()
         })
         props.onSaved()
       } else {
         const created = await svc.createTemplate({
-          name: name.trim(),
-          icon: undefined,
+          name: newName,
+          icon: emoji,
           scope: {
             baseUrlHost: host,
-            projectKey: scope.project.key,
-            issueTypeId: scope.issueType.id,
-            issueTypeName: scope.issueType.name
+            project: scope.project,
+            issueType: scope.issueType
           },
           fields: fieldsConfig,
-          descriptionTemplate: descriptionTemplate.trim()
-            ? descriptionTemplate
-            : undefined,
-          lastUsedAt: undefined
+          description: description.trim()
         })
-        ;(props as { onCreated: (id: string) => void }).onCreated(created.id)
+        ;(props as { onCreated: (id: string) => void })?.onCreated(created.id)
       }
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : String(e))
@@ -395,7 +376,7 @@ export function TemplateWizardProvider(props: ProviderProps) {
     }
   }, [
     availableFields,
-    descriptionTemplate,
+    description,
     existingTemplate,
     fieldsConfig,
     host,
@@ -436,7 +417,7 @@ export function TemplateWizardProvider(props: ProviderProps) {
       fieldsError,
       fieldsConfig,
       name,
-      descriptionTemplate,
+      description: description,
       saveError,
       isSaving,
       isDeleting
@@ -453,7 +434,7 @@ export function TemplateWizardProvider(props: ProviderProps) {
       fieldsError,
       fieldsConfig,
       name,
-      descriptionTemplate,
+      description,
       saveError,
       isSaving,
       isDeleting
@@ -468,7 +449,7 @@ export function TemplateWizardProvider(props: ProviderProps) {
       setFieldConfig,
       removeFieldConfig,
       setName,
-      setDescriptionTemplate,
+      setDescription: setDescription,
       save,
       deleteTemplate: isEdit ? deleteTemplate : null
     }),
@@ -494,8 +475,8 @@ export function TemplateWizardProvider(props: ProviderProps) {
       issueTypeEmptyText,
       scopeDisplay: existingTemplate
         ? {
-            projectKey: existingTemplate.scope.projectKey,
-            issueTypeName: existingTemplate.scope.issueTypeName
+            projectKey: existingTemplate.scope.project.key,
+            issueTypeName: existingTemplate.scope.issueType.name
           }
         : null
     }),

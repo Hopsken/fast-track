@@ -27,14 +27,11 @@ function CreateIssueMenuLayout() {
   const { template, values } = useCreateIssueDraftStore()
 
   const ticket = useMemo<Partial<JiraTicket>>(() => {
-    const { projectKey, issueTypeId, issueTypeName } = template.scope
+    const { project, issueType } = template.scope
     return {
-      key: `${projectKey}-?`,
+      key: `${project.key}-?`,
       summary: values['summary'] as string,
-      issueType: {
-        id: issueTypeId,
-        name: issueTypeName
-      } as JiraIssueType,
+      issueType,
       status: undefined,
       assignee: null,
       priority: null
@@ -48,8 +45,6 @@ function CreateIssueMenuLayout() {
       </CommandGroup>
 
       <Outlet />
-
-      <CommandFooterSlot></CommandFooterSlot>
     </CommandList>
   )
 }

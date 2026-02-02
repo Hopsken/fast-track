@@ -27,9 +27,8 @@ describe('TemplateWizardPage', () => {
     vi.resetAllMocks()
 
     vi.mocked(useCurrentJiraHost).mockReturnValue({
-      host: 'example.atlassian.net',
-      isLoading: false,
-      error: null
+      data: 'example.atlassian.net',
+      isLoading: false
     })
 
     vi.mocked(getTemplateService).mockReturnValue({

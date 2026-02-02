@@ -45,9 +45,18 @@ describe('TemplateServiceImpl', () => {
       icon: '🐞',
       scope: {
         baseUrlHost: 'a.atlassian.net',
-        projectKey: 'PROJ',
-        issueTypeId: '10000',
-        issueTypeName: 'Bug'
+        project: {
+          id: '1',
+          key: 'PROJ',
+          name: 'Project'
+        },
+        issueType: {
+          id: '10000',
+          name: 'Bug',
+          iconUrl: '',
+          description: '',
+          subtask: false
+        }
       },
       fields: { priority: { behavior: 'preset', presetValue: { id: '1' } } }
     })
@@ -71,9 +80,18 @@ describe('TemplateServiceImpl', () => {
       name: 'T',
       scope: {
         baseUrlHost: 'a.atlassian.net',
-        projectKey: 'PROJ',
-        issueTypeId: '10000',
-        issueTypeName: 'Bug'
+        project: {
+          id: '1',
+          key: 'PROJ',
+          name: 'Project'
+        },
+        issueType: {
+          id: '10000',
+          name: 'Bug',
+          iconUrl: '',
+          description: '',
+          subtask: false
+        }
       },
       fields: {}
     })
@@ -90,9 +108,18 @@ describe('TemplateServiceImpl', () => {
       name: 'Valid',
       scope: {
         baseUrlHost: 'a.atlassian.net',
-        projectKey: 'PROJ',
-        issueTypeId: '10000',
-        issueTypeName: 'Bug'
+        project: {
+          id: '1',
+          key: 'PROJ',
+          name: 'Project'
+        },
+        issueType: {
+          id: '10000',
+          name: 'Bug',
+          iconUrl: '',
+          description: '',
+          subtask: false
+        }
       },
       fields: {}
     })
@@ -115,9 +142,18 @@ describe('TemplateServiceImpl', () => {
         trigger: 'b',
         scope: {
           baseUrlHost: 'https://not-host-only.example.com/path',
-          projectKey: 'PROJ',
-          issueTypeId: '10000',
-          issueTypeName: ''
+          project: {
+            id: '1',
+            key: 'PROJ',
+            name: 'Project'
+          },
+          issueType: {
+            id: '10000',
+            name: 'Bug',
+            iconUrl: '',
+            description: '',
+            subtask: false
+          }
         },
         fields: {},
         createdAt: 'not-a-date',
@@ -137,9 +173,18 @@ describe('TemplateServiceImpl', () => {
         name: 'Bad',
         scope: {
           baseUrlHost: 'a.atlassian.net',
-          projectKey: 'PROJ',
-          issueTypeId: '10000',
-          issueTypeName: ''
+          project: {
+            id: '1',
+            key: 'PROJ',
+            name: 'Project'
+          },
+          issueType: {
+            id: '10000',
+            name: 'Bug',
+            iconUrl: '',
+            description: '',
+            subtask: false
+          }
         },
         fields: {}
       })

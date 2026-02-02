@@ -121,10 +121,10 @@ export function Footer() {
   return (
     <div
       className={cn(
-        'bg-linear-to-r border-t border-gray-200 px-5 py-2',
+        'bg-linear-to-r h-11 border-t border-gray-200 px-5 py-2',
         activeToastContainerCls
       )}>
-      <div className="flex items-center justify-between">
+      <div className="flex h-6 items-center justify-between">
         {activeToast ? renderToast() : renderFooter()}
         <CommandFooterContainer />
       </div>

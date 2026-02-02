@@ -19,6 +19,7 @@ export interface AuthService {
   connect(): Promise<string>
   disconnect(): Promise<boolean>
   getCredentials(): Promise<AuthCredentials | null>
+  getCurrentHost(): Promise<string | null>
 }
 
 const tokenSchema = z.object({
@@ -39,6 +40,11 @@ class AuthServiceImpl implements AuthService {
 
   public async getCredentials(): Promise<AuthCredentials | null> {
     return this.credentialsStorage.getValue()
+  }
+
+  public async getCurrentHost(): Promise<string | null> {
+    const creds = await this.credentialsStorage.getValue()
+    return creds?.host || null
   }
 
   public async receiveTokens(

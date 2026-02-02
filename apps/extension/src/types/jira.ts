@@ -1,10 +1,9 @@
-export interface JiraIssueType {
-  id: string
-  name: string
-  iconUrl: string
-  description: string
-  subtask?: boolean
-}
+import type {
+  JiraIssueType,
+  JiraProject as JiraProjectCore
+} from '~/repository/schema'
+
+export type { JiraIssueType }
 
 export interface JiraStatusCategory {
   key: string
@@ -48,12 +47,8 @@ export interface JiraMergeRequest {
 // Projects (minimal shape used by the extension)
 // ─────────────────────────────────────────────────────────────────────────
 
-export interface JiraProject {
-  id: string
-  key: string
-  name: string
+export interface JiraProject extends JiraProjectCore {
   issueTypes: JiraIssueType[]
-  avatarUrl?: string
 }
 
 export type IssueSource = 'history' | 'sprint' | 'sniff' | 'picker' | 'watching'
