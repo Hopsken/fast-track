@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import type {
-  CachedFieldMetadata,
-  FieldMetadata,
-  IssueTemplate
-} from '~/types/template'
+import type { FieldMetadata, IssueTemplate } from '~/types/template'
 
 import { buildCreateIssueFields, toAdfDoc } from './issue-payload'
 
@@ -26,14 +22,6 @@ function createTemplate(partial?: Partial<IssueTemplate>): IssueTemplate {
   }
 }
 
-function cache(fields: FieldMetadata[]): CachedFieldMetadata {
-  return {
-    cacheKey: 'k',
-    lastUpdated: new Date().toISOString(),
-    fields
-  }
-}
-
 describe('toAdfDoc', () => {
   it('wraps plain text into a minimal ADF document', () => {
     expect(toAdfDoc('Hello')).toEqual({
@@ -50,7 +38,7 @@ describe('toAdfDoc', () => {
 })
 
 describe('buildCreateIssueFields', () => {
-  const baseCache = cache([
+  const baseFields: FieldMetadata[] = [
     {
       fieldId: 'summary',
       key: 'summary',
@@ -86,7 +74,7 @@ describe('buildCreateIssueFields', () => {
       required: false,
       schema: { type: 'user' }
     }
-  ])
+  ]
 
   it('merges scope + presets + user input and formats values', () => {
     const template = createTemplate({
@@ -101,7 +89,7 @@ describe('buildCreateIssueFields', () => {
 
     const fields = buildCreateIssueFields({
       template,
-      cache: baseCache,
+      fieldsMetadata: baseFields,
       userInput: {
         summary: 'Hello',
         // user overrides template description
@@ -132,7 +120,7 @@ describe('buildCreateIssueFields', () => {
 
     const fields = buildCreateIssueFields({
       template,
-      cache: baseCache,
+      fieldsMetadata: baseFields,
       userInput: {
         summary: 'Hello'
       }
@@ -153,7 +141,7 @@ describe('buildCreateIssueFields', () => {
 
     const fields = buildCreateIssueFields({
       template,
-      cache: baseCache,
+      fieldsMetadata: baseFields,
       userInput: {
         summary: 'Hello',
         priority: { id: '2', name: 'Low' }

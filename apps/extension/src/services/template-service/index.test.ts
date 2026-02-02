@@ -1,11 +1,27 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { getStorageItem } from '~/lib/storage/schema'
+
 import { TemplateServiceImpl } from './index'
 
 describe('TemplateServiceImpl', () => {
   beforeEach(async () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-01-01T00:00:00.000Z'))
+
+    // Set up auth so getTemplates doesn't filter everything out
+    const authItem = getStorageItem('AuthCredentials')
+    await authItem.setValue({
+      type: 'apiKey',
+      host: 'https://a.atlassian.net',
+      userInfo: {
+        accountId: 'abc',
+        email: 'a@a.com',
+        name: 'A'
+      },
+      oauth: null,
+      apiKey: { email: 'a@a.com', apiKey: 'abc' }
+    })
 
     // Clear persisted storage between tests (WXT fake storage is shared)
     const svc = new TemplateServiceImpl()

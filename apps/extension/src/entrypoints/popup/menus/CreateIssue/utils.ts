@@ -1,5 +1,9 @@
 import type { VisibleField } from '~/services/template-service/gap-analysis'
-import type { FieldMetadata, IssueTemplate } from '~/types/template'
+import type {
+  AllowedValue,
+  FieldMetadata,
+  IssueTemplate
+} from '~/types/template'
 
 export function toCacheKey(template: IssueTemplate) {
   const { baseUrlHost, projectKey, issueTypeId } = template.scope
@@ -12,6 +16,18 @@ export function getFieldName(fieldId: string, metadata?: FieldMetadata) {
 
 export const asRecord = (v: unknown): Record<string, unknown> | null =>
   v && typeof v === 'object' ? (v as Record<string, unknown>) : null
+
+export function isArrayOfAllowedValues(
+  value: unknown
+): value is AllowedValue[] {
+  return (
+    Array.isArray(value) &&
+    value.every((v) => {
+      const rec = asRecord(v)
+      return !!rec && typeof rec.id === 'string'
+    })
+  )
+}
 
 export function isEmptyValue(value: unknown): boolean {
   if (value === undefined || value === null) return true

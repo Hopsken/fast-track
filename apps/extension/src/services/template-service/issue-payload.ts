@@ -128,6 +128,14 @@ export function buildCreateIssueFields(input: {
     issuetype: { id: template.scope.issueTypeId }
   }
 
+  if (template.descriptionTemplate) {
+    fields.description = formatCreateIssueFieldValue({
+      fieldId: 'description',
+      value: template.descriptionTemplate,
+      metadata: metadataByFieldId['description']
+    })
+  }
+
   // Apply preset fields first
   for (const [fieldId, config] of Object.entries(template.fields)) {
     if (fieldId === 'project' || fieldId === 'issuetype') continue

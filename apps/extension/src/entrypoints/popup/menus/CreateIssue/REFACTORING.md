@@ -26,17 +26,30 @@ Extracted all helper functions into testable pure functions:
 - ✅ Reusable across components
 - ✅ Type-safe with explicit return types
 
-### 2. **Custom Hook** (`useCreateIssueForm.ts`)
+### 2. **Custom Hooks**
+
+#### `useCreateIssueForm.ts`
 Extracted form submission logic into a reusable hook:
 - Handles API calls to create issue
 - Manages loading/success/error states via toast
 - Handles error parsing and field promotion
 - Manages navigation after submit
 
+#### `useSetupWizard.ts`
+Computes and maintains the wizard field sequence:
+- Derives `visibleFields` from template config + promoted fields
+- Recomputes `wizardFields` whenever `visibleFields` changes (e.g. after error recovery promotes new fields)
+
+#### `useWizardNavigation.ts`
+Handles step-by-step wizard navigation:
+- Scans forward for the next unfilled field using `isEmptyValue` from `utils.ts` (single source of truth for empty-value checks, consistent with submit-time filtering in `pickNonEmptyValues`)
+- Navigates to the review screen when all fields are filled
+
 **Benefits:**
 - ✅ Separates business logic from UI
 - ✅ Can be tested independently
 - ✅ Single source of truth for submission logic
+- ✅ Wizard setup and navigation are decoupled — each hook depends only on the store, not on each other
 
 ### 3. **Presentational Components**
 
@@ -69,19 +82,24 @@ Now a lean ~180 lines that:
 ```
 CreateIssue/
 ├── index.ts                        # Public exports
-├── CreateIssueMenu.tsx             # Main orchestrator (~180 lines)
-├── FieldInputMenu.tsx              # Field value input (unchanged)
-├── TemplateMenu.tsx                # Template picker (unchanged)
+├── CreateIssueMenu.tsx             # Main orchestrator
+├── CreateIssueFieldsMenu.tsx       # Fields review screen
+├── FieldInputMenu.tsx              # Field value input (routing hub)
 ├── useCreateIssueForm.ts           # Form submission hook
-├── useCreateIssueDraftStore.ts     # Zustand store
+├── useCreateIssueDraftStore.tsx    # Zustand store (React Context)
+├── useScalarFieldEnter.ts          # Enter key handler for scalar fields
+├── useSetupWizard.ts               # Wizard field sequence setup
+├── useWizardNavigation.ts          # Step-by-step wizard navigation
 ├── utils.ts                        # Pure helper functions
-├── utils.test.ts                   # ✅ 20 passing tests
+├── utils.test.ts                   # Unit tests
 ├── FieldList.tsx                   # Field group component
 ├── FieldListItem.tsx               # Individual field row
 ├── ConflictWarning.tsx             # Conflict banner
-├── CreateIssueActions.tsx          # Submit button
-├── DescriptionFieldInputMenu.tsx   # Description editor
-└── UserFieldInputMenu.tsx          # User picker
+└── fields/
+    ├── MultiSelectFieldInput.tsx             # Multi-select option picker
+    ├── SingleSelectFieldInput.tsx            # Single-select option picker
+    ├── SummaryDescriptionFieldInputMenu.tsx  # Summary + description editor
+    └── UserFieldInputMenu.tsx               # User picker
 ```
 
 ## Testing Strategy

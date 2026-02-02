@@ -9,13 +9,8 @@ import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 import { isEmptyValue } from './utils'
 
 export function useWizardNavigation() {
-  const {
-    values,
-    wizardFields,
-    wizardIndex,
-    setWizardIndex,
-    clearError
-  } = useCreateIssueDraftStore()
+  const { values, wizardFields, wizardIndex, setWizardIndex, clearError } =
+    useCreateIssueDraftStore()
 
   const navigate = useNavigate()
   const { setSearch } = useCommandInput()

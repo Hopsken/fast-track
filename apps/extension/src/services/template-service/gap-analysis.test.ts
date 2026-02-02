@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
 import type {
-  CachedFieldMetadata,
   FieldConflict,
   FieldMetadata,
   IssueTemplate
@@ -27,14 +26,6 @@ function createTemplate(partial?: Partial<IssueTemplate>): IssueTemplate {
   }
 }
 
-function cache(fields: FieldMetadata[]): CachedFieldMetadata {
-  return {
-    cacheKey: 'k',
-    lastUpdated: new Date().toISOString(),
-    fields
-  }
-}
-
 const summaryField: FieldMetadata = {
   fieldId: 'summary',
   key: 'summary',
@@ -55,7 +46,7 @@ const priorityField: FieldMetadata = {
 describe('computeVisibleFields', () => {
   it('always includes summary', () => {
     const template = createTemplate({ fields: {} })
-    const visible = computeVisibleFields(template, cache([summaryField]), [])
+    const visible = computeVisibleFields(template, [summaryField], [])
 
     expect(visible.some((f) => f.fieldId === 'summary')).toBe(true)
   })
@@ -65,7 +56,7 @@ describe('computeVisibleFields', () => {
       fields: { description: { behavior: 'visible' } }
     })
 
-    const visible = computeVisibleFields(template, undefined, [])
+    const visible = computeVisibleFields(template, [], [])
 
     expect(visible.some((f) => f.fieldId === 'description')).toBe(true)
   })
@@ -73,7 +64,7 @@ describe('computeVisibleFields', () => {
   it('includes description if descriptionTemplate exists', () => {
     const template = createTemplate({ descriptionTemplate: 'Hello' })
 
-    const visible = computeVisibleFields(template, undefined, [])
+    const visible = computeVisibleFields(template, [], [])
 
     expect(visible.some((f) => f.fieldId === 'description')).toBe(true)
   })
@@ -85,7 +76,7 @@ describe('computeVisibleFields', () => {
 
     const visible = computeVisibleFields(
       template,
-      cache([summaryField, priorityField]),
+      [summaryField, priorityField],
       []
     )
 
@@ -103,7 +94,7 @@ describe('computeVisibleFields', () => {
 
     const visible = computeVisibleFields(
       template,
-      cache([summaryField, priorityField]),
+      [summaryField, priorityField],
       []
     )
 
@@ -129,7 +120,7 @@ describe('computeVisibleFields', () => {
 
     const visible = computeVisibleFields(
       template,
-      cache([summaryField, priorityField]),
+      [summaryField, priorityField],
       conflicts
     )
 
@@ -162,7 +153,7 @@ describe('computeVisibleFields', () => {
       }
     ]
 
-    const visible = computeVisibleFields(template, undefined, conflicts)
+    const visible = computeVisibleFields(template, [], conflicts)
 
     expect(visible).toEqual(
       expect.arrayContaining([
@@ -186,7 +177,7 @@ describe('computeVisibleFields', () => {
 
     const visible = computeVisibleFields(
       template,
-      cache([summaryField, priorityField, requiredCustomField]),
+      [summaryField, priorityField, requiredCustomField],
       []
     )
 
@@ -216,7 +207,7 @@ describe('computeVisibleFields', () => {
 
     const visible = computeVisibleFields(
       template,
-      cache([summaryField, requiredField]),
+      [summaryField, requiredField],
       []
     )
 
@@ -238,7 +229,7 @@ describe('computeVisibleFields', () => {
 
     const visible = computeVisibleFields(
       template,
-      cache([summaryField, requiredField]),
+      [summaryField, requiredField],
       []
     )
 
@@ -261,7 +252,7 @@ describe('computeVisibleFields', () => {
 
     const visible = computeVisibleFields(
       template,
-      cache([summaryField, priorityField]),
+      [summaryField, priorityField],
       []
     )
 
@@ -310,7 +301,7 @@ describe('computeVisibleFields', () => {
 
     const visible = computeVisibleFields(
       template,
-      cache([summaryField, priorityField]),
+      [summaryField, priorityField],
       conflicts
     )
 
@@ -339,7 +330,7 @@ describe('computeVisibleFields', () => {
 
     const visible = computeVisibleFields(
       template,
-      cache([summaryField, requiredPriority]),
+      [summaryField, requiredPriority],
       []
     )
 
@@ -354,7 +345,7 @@ describe('computeVisibleFields', () => {
       }
     })
 
-    const visible = computeVisibleFields(template, undefined, [])
+    const visible = computeVisibleFields(template, [], [])
 
     expect(visible.some((f) => f.fieldId === 'project')).toBe(false)
     expect(visible.some((f) => f.fieldId === 'issuetype')).toBe(false)

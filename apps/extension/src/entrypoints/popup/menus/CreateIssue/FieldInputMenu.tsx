@@ -2,33 +2,22 @@ import { useMemo } from 'react'
 import {
   CommandEmpty,
   CommandGroup,
-  CommandList,
-  CommandItem
+  CommandList
 } from '@internal/ui/components/command'
 import { useMount } from 'ahooks'
-import { Check } from 'lucide-react'
-import { useHotkeys } from 'react-hotkeys-hook'
 import { useLocation } from 'react-router-dom'
 
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 import { VisibleField } from '~/services/template-service/gap-analysis'
 import type { AllowedValue } from '~/types/template'
 
+import { MultiSelectFieldInput } from './fields/MultiSelectFieldInput'
+import { SingleSelectFieldInput } from './fields/SingleSelectFieldInput'
 import { SummaryDescriptionFieldInputMenu } from './fields/SummaryDescriptionFieldInputMenu'
 import { UserFieldInputMenu } from './fields/UserFieldInputMenu'
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
+import { useScalarFieldEnter } from './useScalarFieldEnter'
 import { useWizardNavigation } from './useWizardNavigation'
-import { asRecord } from './utils'
-
-function isArrayOfAllowedValues(value: unknown): value is AllowedValue[] {
-  return (
-    Array.isArray(value) &&
-    value.every((v) => {
-      const rec = asRecord(v)
-      return !!rec && typeof rec.id === 'string'
-    })
-  )
-}
 
 export function FieldInputMenu() {
   const { field } = useLocation().state as { field: VisibleField }
@@ -44,7 +33,7 @@ export function FieldInputMenu() {
   )
   const title = useMemo(() => field.metadata?.name ?? field.fieldId, [field])
 
-  const { search, setSearch } = useCommandInput()
+  const { setSearch } = useCommandInput()
   const { values, setValue } = useCreateIssueDraftStore()
   const { goToNextField } = useWizardNavigation()
   const currentValue = values[field.fieldId]
@@ -69,64 +58,14 @@ export function FieldInputMenu() {
     goToNextField()
   }
 
-  const enableEnterSave =
-    fieldId === 'summary' ||
-    schemaType === 'string' ||
-    schemaType === 'number' ||
-    (schemaType === 'array' &&
-      schemaItems === 'string' &&
-      allowedOptions.length === 0) ||
-    !schemaType
-
-  // Text / number fields: press Enter to save.
-  useHotkeys(
-    'enter',
-    () => {
-      if (schemaType === 'number') {
-        const trimmed = search.trim()
-        if (!trimmed) {
-          saveAndContinue(undefined)
-          return
-        }
-        const num = Number(trimmed)
-        if (!Number.isFinite(num)) return
-        saveAndContinue(num)
-        return
-      }
-
-      // labels-style fallback: array<string> (comma separated)
-      if (
-        schemaType === 'array' &&
-        schemaItems === 'string' &&
-        allowedOptions.length === 0
-      ) {
-        const parts = search
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean)
-        saveAndContinue(parts)
-        return
-      }
-
-      if (fieldId === 'summary' || schemaType === 'string' || !schemaType) {
-        saveAndContinue(search)
-      }
-    },
-    {
-      enabled: enableEnterSave && !isCombinedField,
-      preventDefault: true,
-      enableOnFormTags: true
-    },
-    [
-      search,
-      enableEnterSave,
-      allowedOptions.length,
-      fieldId,
-      saveAndContinue,
-      schemaItems,
-      schemaType
-    ]
-  )
+  useScalarFieldEnter({
+    fieldId,
+    schemaType,
+    schemaItems,
+    hasAllowedOptions: allowedOptions.length > 0,
+    isCombinedField,
+    onSubmit: saveAndContinue
+  })
 
   if (isCombinedField) {
     return (
@@ -158,71 +97,26 @@ export function FieldInputMenu() {
     schemaType === 'resolution'
   ) {
     return (
-      <CommandList>
-        <CommandGroup heading={title}>
-          {allowedOptions.map((opt) => (
-            <CommandItem
-              key={opt.id}
-              value={opt.name ?? opt.value ?? opt.id}
-              onSelect={() => saveAndContinue(opt)}>
-              <span className="truncate">
-                {opt.name ?? opt.value ?? opt.id}
-              </span>
-            </CommandItem>
-          ))}
-
-          {allowedOptions.length === 0 ? (
-            <CommandEmpty>No options available</CommandEmpty>
-          ) : null}
-        </CommandGroup>
-      </CommandList>
+      <SingleSelectFieldInput
+        title={title}
+        allowedOptions={allowedOptions}
+        onSelect={saveAndContinue}
+      />
     )
   }
 
   // Multi-select option fields
   if (schemaType === 'array' && allowedOptions.length > 0) {
-    const selected = isArrayOfAllowedValues(currentValue) ? currentValue : []
-    const selectedIds = new Set(selected.map((o) => o.id))
-
-    const toggle = (opt: AllowedValue) => {
-      const next = selectedIds.has(opt.id)
-        ? selected.filter((o) => o.id !== opt.id)
-        : [...selected, opt]
-      setValue(fieldId, next)
-    }
-
     return (
-      <CommandList>
-        <CommandGroup heading={title}>
-          {allowedOptions.map((opt) => {
-            const isSelected = selectedIds.has(opt.id)
-            const label = opt.name ?? opt.value ?? opt.id
-            return (
-              <CommandItem
-                key={opt.id}
-                value={label}
-                onSelect={() => toggle(opt)}>
-                <div className="flex w-full items-center justify-between">
-                  <span className="truncate">{label}</span>
-                  {isSelected ? <Check className="size-4" /> : null}
-                </div>
-              </CommandItem>
-            )
-          })}
-
-          <CommandItem
-            value="done"
-            onSelect={() => {
-              setSearch('')
-              goToNextField()
-            }}>
-            <div className="flex w-full items-center justify-between">
-              <span>Done</span>
-              <span className="text-muted-foreground text-[10px]">Enter</span>
-            </div>
-          </CommandItem>
-        </CommandGroup>
-      </CommandList>
+      <MultiSelectFieldInput
+        fieldId={fieldId}
+        title={title}
+        allowedOptions={allowedOptions}
+        onDone={() => {
+          setSearch('')
+          goToNextField()
+        }}
+      />
     )
   }
 

@@ -8,11 +8,8 @@ import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 import { computePromotedFields, computeWizardSequence } from './utils'
 
 export const useSetupWizard = () => {
-  const {
-    template,
-    promotedFieldIds,
-    setWizardFields
-  } = useCreateIssueDraftStore()
+  const { template, promotedFieldIds, setWizardFields } =
+    useCreateIssueDraftStore()
 
   // Metadata & conflicts
   const { projectKey, issueTypeId } = template.scope

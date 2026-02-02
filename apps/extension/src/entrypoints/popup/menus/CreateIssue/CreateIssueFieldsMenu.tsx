@@ -15,14 +15,8 @@ import { useCreateIssueForm } from './useCreateIssueForm'
 export function CreateIssueFieldsMenu() {
   const navigate = useNavigate()
 
-  const {
-    template,
-    values,
-    errors,
-    clearError,
-    wizardFields,
-    setWizardIndex
-  } = useCreateIssueDraftStore()
+  const { template, values, errors, clearError, wizardFields, setWizardIndex } =
+    useCreateIssueDraftStore()
 
   // Metadata & conflicts
   const { projectKey, issueTypeId } = template.scope

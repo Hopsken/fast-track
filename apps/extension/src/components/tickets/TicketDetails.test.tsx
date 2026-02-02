@@ -2,6 +2,7 @@ import React from 'react'
 import { Command } from '@internal/ui/components/command'
 import { UseQueryResult } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useTicketDetails } from '@/hooks/useTicketDetails'
@@ -39,9 +40,11 @@ describe('TicketDetails', () => {
     } as unknown as UseQueryResult<IssueDetail>)
 
     render(
-      <Command>
-        <TicketDetails ticketKey={mockTicket.key} />
-      </Command>
+      <MemoryRouter>
+        <Command>
+          <TicketDetails ticketKey={mockTicket.key} />
+        </Command>
+      </MemoryRouter>
     )
 
     await waitFor(() => {
