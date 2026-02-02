@@ -10,7 +10,7 @@ export function getFieldName(fieldId: string, metadata?: FieldMetadata) {
   return metadata?.name ?? fieldId
 }
 
-const asRecord = (v: unknown): Record<string, unknown> | null =>
+export const asRecord = (v: unknown): Record<string, unknown> | null =>
   v && typeof v === 'object' ? (v as Record<string, unknown>) : null
 
 export function isEmptyValue(value: unknown): boolean {

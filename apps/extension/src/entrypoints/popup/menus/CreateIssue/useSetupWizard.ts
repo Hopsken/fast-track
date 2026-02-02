@@ -1,25 +1,17 @@
-import { useMemo, useEffect } from '#imports'
-import { keyBy, unionBy, merge } from 'lodash-es'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo } from 'react'
+import { keyBy, merge, unionBy } from 'lodash-es'
 
 import { useIssueCreateMeta } from '@/hooks/useIssueCreateMeta'
 import { computeVisibleFields } from '@/services/template-service/gap-analysis'
-
-import { CommandRoutes } from '../../routes'
 
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 import { computePromotedFields, computeWizardSequence } from './utils'
 
 export const useSetupWizard = () => {
-  const navigate = useNavigate()
-
   const {
     template,
     promotedFieldIds,
-    wizardStarted,
-    setWizardFields,
-    setWizardStarted,
-    setWizardIndex
+    setWizardFields
   } = useCreateIssueDraftStore()
 
   // Metadata & conflicts
@@ -43,19 +35,10 @@ export const useSetupWizard = () => {
     )
   }, [visibleFieldsBase, promotedFieldIds, fieldsMetadata])
 
-  // Auto-start wizard on first metadata load
+  // Recompute wizard fields whenever visibleFields changes
   useEffect(() => {
-    if (!wizardStarted && visibleFields.length > 0) {
-      const sequence = computeWizardSequence(visibleFields)
-      setWizardFields(sequence)
-      setWizardStarted(true)
+    if (visibleFields.length > 0) {
+      setWizardFields(computeWizardSequence(visibleFields))
     }
-  }, [
-    visibleFields,
-    wizardStarted,
-    setWizardFields,
-    setWizardStarted,
-    setWizardIndex,
-    navigate
-  ])
+  }, [visibleFields, setWizardFields])
 }

@@ -18,9 +18,7 @@ import { SummaryDescriptionFieldInputMenu } from './fields/SummaryDescriptionFie
 import { UserFieldInputMenu } from './fields/UserFieldInputMenu'
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 import { useWizardNavigation } from './useWizardNavigation'
-
-const asRecord = (v: unknown): Record<string, unknown> | null =>
-  v && typeof v === 'object' ? (v as Record<string, unknown>) : null
+import { asRecord } from './utils'
 
 function isArrayOfAllowedValues(value: unknown): value is AllowedValue[] {
   return (

@@ -27,21 +27,19 @@ function FieldInputMenuRouter() {
 function CreateIssueMenuLayout() {
   const { template, values } = useCreateIssueDraftStore()
 
-  const ticket = useMemo(() => {
+  const ticket = useMemo<Partial<JiraTicket>>(() => {
     const { projectKey, issueTypeId, issueTypeName } = template.scope
     return {
-      __typename: 'JiraTicket',
-      id: '',
       key: `${projectKey}-?`,
       summary: values['summary'] as string,
       issueType: {
         id: issueTypeId,
         name: issueTypeName
       } as JiraIssueType,
-      status: null,
+      status: undefined,
       assignee: null,
       priority: null
-    } as any satisfies JiraTicket
+    }
   }, [template, values])
 
   return (

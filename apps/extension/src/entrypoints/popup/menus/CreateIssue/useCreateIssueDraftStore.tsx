@@ -16,7 +16,6 @@ export interface CreateIssueDraftState {
   // Wizard state
   wizardFields: VisibleField[]
   wizardIndex: number
-  wizardStarted: boolean
 
   setValue: (fieldId: string, value: unknown) => void
   setErrors: (errors: Record<string, string>) => void
@@ -24,7 +23,6 @@ export interface CreateIssueDraftState {
   promoteFields: (fieldIds: string[]) => void
   setWizardFields: (fields: VisibleField[]) => void
   setWizardIndex: (index: number) => void
-  setWizardStarted: (started: boolean) => void
   reset: () => void
 }
 
@@ -41,7 +39,6 @@ const createIssueDraftStore = (template: IssueTemplate) =>
 
         wizardFields: [],
         wizardIndex: 0,
-        wizardStarted: false,
 
         setValue: (fieldId, value) => {
           set((state) => ({
@@ -70,7 +67,6 @@ const createIssueDraftStore = (template: IssueTemplate) =>
 
         setWizardFields: (fields) => set({ wizardFields: fields }),
         setWizardIndex: (index) => set({ wizardIndex: index }),
-        setWizardStarted: (started) => set({ wizardStarted: started }),
 
         reset: () =>
           set({
@@ -78,8 +74,7 @@ const createIssueDraftStore = (template: IssueTemplate) =>
             errors: {},
             promotedFieldIds: [],
             wizardFields: [],
-            wizardIndex: 0,
-            wizardStarted: false
+            wizardIndex: 0
           })
       }),
       { name: 'create-issue-draft-store' }

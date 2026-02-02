@@ -14,7 +14,7 @@ const chipTransition = {
 export function TicketMetadataChips({
   ticket
 }: {
-  ticket: JiraTicket | IssueDetail
+  ticket: Partial<JiraTicket> | IssueDetail
 }) {
   const labels = (ticket as IssueDetail).labels || []
 
