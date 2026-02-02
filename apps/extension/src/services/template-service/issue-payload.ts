@@ -3,7 +3,8 @@ import { keyBy } from 'lodash-es'
 import type {
   AllowedValue,
   FieldMetadata,
-  IssueTemplate
+  IssueTemplate,
+  JiraSchemaItemType
 } from '~/types/template'
 
 type AdfDoc = {
@@ -60,7 +61,10 @@ function formatUser(value: unknown): unknown {
   return value
 }
 
-function formatArray(value: unknown, items: string | undefined): unknown {
+function formatArray(
+  value: unknown,
+  items: JiraSchemaItemType | undefined
+): unknown {
   if (!Array.isArray(value)) return value
 
   if (

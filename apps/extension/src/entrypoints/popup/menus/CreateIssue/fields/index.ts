@@ -1,4 +1,7 @@
+export * from './ArrayFieldInput'
 export * from './MultiSelectFieldInput'
+export * from './NumberFieldInput'
 export * from './SingleSelectFieldInput'
+export * from './StringFieldInput'
 export * from './SummaryDescriptionFieldInput'
 export * from './UserFieldInputMenu'

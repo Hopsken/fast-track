@@ -1,35 +1,40 @@
 import {
   CommandEmpty,
   CommandGroup,
+  CommandItem,
   CommandList,
   CommandLoading,
-  useCommandState,
-  CommandItem
+  useCommandState
 } from '@internal/ui/components/command'
 
 import { useAutoCompleteUsers } from '@/hooks/useAutoComplete'
 
-import { useCreateIssueDraftStore } from '../useCreateIssueDraftStore'
+export type UserValue = {
+  accountId?: string
+  displayName?: string
+  emailAddress?: string
+}
 
 type Props = {
-  fieldId: string
   title: string
   autoCompleteUrl: string
-  onDone: () => void
+  onConfirm: (value: UserValue) => void
 }
 
 export function UserFieldInputMenu({
-  fieldId,
   title,
   autoCompleteUrl,
-  onDone
+  onConfirm
 }: Props) {
   const query = useCommandState((s) => s.search)
   const { data: users, isLoading } = useAutoCompleteUsers(
     autoCompleteUrl,
     query
   )
-  const { setValue } = useCreateIssueDraftStore()
+
+  const handleSelectUser = (user: UserValue) => {
+    onConfirm(user)
+  }
 
   return (
     <CommandList>
@@ -40,18 +45,17 @@ export function UserFieldInputMenu({
           const displayName =
             user.displayName || user.name || user.emailAddress || 'Anonymous'
 
+          const userValue: UserValue = {
+            accountId: user.accountId,
+            displayName: user.displayName,
+            emailAddress: user.emailAddress
+          }
+
           return (
             <CommandItem
               key={user.accountId ?? displayName}
               value={displayName}
-              onSelect={() => {
-                setValue(fieldId, {
-                  accountId: user.accountId,
-                  displayName: user.displayName,
-                  emailAddress: user.emailAddress
-                })
-                onDone()
-              }}>
+              onSelect={() => handleSelectUser(userValue)}>
               <span className="truncate">{displayName}</span>
             </CommandItem>
           )

@@ -7,16 +7,16 @@ import {
 
 import type { AllowedValue } from '~/types/template'
 
-type Props = {
+export type Props = {
   title: string
   allowedOptions: AllowedValue[]
-  onSelect: (value: AllowedValue) => void
+  onConfirm: (value: AllowedValue) => void
 }
 
 export function SingleSelectFieldInput({
   title,
   allowedOptions,
-  onSelect
+  onConfirm
 }: Props) {
   return (
     <CommandList>
@@ -25,7 +25,7 @@ export function SingleSelectFieldInput({
           <CommandItem
             key={opt.id}
             value={opt.name ?? opt.value ?? opt.id}
-            onSelect={() => onSelect(opt)}>
+            onSelect={() => onConfirm(opt)}>
             <span className="truncate">{opt.name ?? opt.value ?? opt.id}</span>
           </CommandItem>
         ))}

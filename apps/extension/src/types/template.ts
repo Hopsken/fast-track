@@ -26,9 +26,53 @@ export const IssueTemplateScopeSchema = z.object({
 })
 export type IssueTemplateScope = z.infer<typeof IssueTemplateScopeSchema>
 
+/**
+ * Known Jira field schema `type` values.
+ *
+ * The `(string & {})` tail preserves autocomplete for known literals while
+ * still accepting any string the Jira API might return in the future.
+ */
+export type JiraSchemaType =
+  | 'string'
+  | 'number'
+  | 'array'
+  | 'option'
+  | 'priority'
+  | 'resolution'
+  | 'user'
+  | 'date'
+  | 'datetime'
+  | 'issuetype'
+  | 'project'
+  | 'status'
+  | 'securitylevel'
+  | 'component'
+  | 'version'
+  | 'group'
+  | 'issuelink'
+  | 'timetracking'
+  | 'any'
+  | (string & {})
+
+/**
+ * Known Jira field schema `items` values (element type when `type` is `'array'`).
+ */
+export type JiraSchemaItemType =
+  | 'option'
+  | 'component'
+  | 'version'
+  | 'priority'
+  | 'resolution'
+  | 'string'
+  | 'user'
+  | 'group'
+  | 'json'
+  | 'issuelinks'
+  | (string & {})
+
 export const JsonTypeSchema = z.object({
-  type: z.string(),
-  items: z.string().optional(),
+  type: z.string() as z.ZodType<JiraSchemaType>,
+  items: (z.string() as z.ZodType<JiraSchemaItemType>).optional(),
   system: z.string().optional(),
   custom: z.string().optional(),
   customId: z.number().optional()

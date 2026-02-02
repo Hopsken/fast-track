@@ -7,25 +7,24 @@ import { Check } from 'lucide-react'
 
 import type { AllowedValue } from '~/types/template'
 
-import { useCreateIssueDraftStore } from '../useCreateIssueDraftStore'
+import { useFieldConfirm } from '../useFieldConfirm'
 import { isArrayOfAllowedValues } from '../utils'
 
 type Props = {
-  fieldId: string
   title: string
+  currentValue: unknown
   allowedOptions: AllowedValue[]
-  onDone: () => void
+  onChange: (value: AllowedValue[]) => void
+  onConfirm?: (value: AllowedValue[]) => void
 }
 
 export function MultiSelectFieldInput({
-  fieldId,
   title,
+  currentValue,
   allowedOptions,
-  onDone
+  onChange,
+  onConfirm
 }: Props) {
-  const { values, setValue } = useCreateIssueDraftStore()
-  const currentValue = values[fieldId]
-
   const selected = isArrayOfAllowedValues(currentValue) ? currentValue : []
   const selectedIds = new Set(selected.map((o) => o.id))
 
@@ -33,8 +32,16 @@ export function MultiSelectFieldInput({
     const next = selectedIds.has(opt.id)
       ? selected.filter((o) => o.id !== opt.id)
       : [...selected, opt]
-    setValue(fieldId, next)
+    onChange(next)
   }
+
+  // Multi-select uses meta+enter to confirm selection
+  useFieldConfirm<AllowedValue[]>({
+    getValue: () => selected,
+    onConfirm: onConfirm ?? (() => {}),
+    keys: 'meta+enter',
+    enabled: !!onConfirm
+  })
 
   return (
     <CommandList>
@@ -54,13 +61,6 @@ export function MultiSelectFieldInput({
             </CommandItem>
           )
         })}
-
-        <CommandItem value="done" onSelect={onDone}>
-          <div className="flex w-full items-center justify-between">
-            <span>Done</span>
-            <span className="text-muted-foreground text-[10px]">Enter</span>
-          </div>
-        </CommandItem>
       </CommandGroup>
     </CommandList>
   )

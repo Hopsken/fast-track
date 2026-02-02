@@ -1,10 +1,4 @@
 import { useMemo } from 'react'
-import {
-  CommandEmpty,
-  CommandGroup,
-  CommandList
-} from '@internal/ui/components/command'
-import { useMount } from 'ahooks'
 import { useLocation } from 'react-router-dom'
 
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
@@ -12,13 +6,15 @@ import { VisibleField } from '~/services/template-service/gap-analysis'
 import type { AllowedValue } from '~/types/template'
 
 import {
+  ArrayFieldInput,
   MultiSelectFieldInput,
+  NumberFieldInput,
   SingleSelectFieldInput,
+  StringFieldInput,
   SummaryDescriptionFieldInput,
   UserFieldInputMenu
 } from './fields'
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
-import { useScalarFieldEnter } from './useScalarFieldEnter'
 import { useWizardNavigation } from './useWizardNavigation'
 
 export function FieldInputMenu() {
@@ -26,8 +22,6 @@ export function FieldInputMenu() {
   const { fieldId, metadata } = field
   const schemaType = metadata?.schema.type
   const schemaItems = metadata?.schema.items
-
-  const isCombinedField = fieldId === 'summary' || fieldId === 'description'
 
   const allowedOptions = useMemo<AllowedValue[]>(
     () => field.allowedOptions ?? field.metadata?.allowedValues ?? [],
@@ -40,54 +34,46 @@ export function FieldInputMenu() {
   const { goToNextField } = useWizardNavigation()
   const currentValue = values[field.fieldId]
 
-  // Pre-fill the global command input for scalar fields.
-  useMount(() => {
-    if (isCombinedField) return // combined component handles its own pre-fill
-    if (!currentValue) return
-    if (
-      fieldId === 'summary' ||
-      schemaType === 'string' ||
-      schemaType === 'number'
-    ) {
-      const next = String(currentValue)
-      setSearch(next)
-    }
-  })
-
-  const saveAndContinue = (value: unknown) => {
+  const handleConfirm = (value: unknown) => {
     setValue(fieldId, value)
     setSearch('')
     goToNextField()
   }
 
-  useScalarFieldEnter({
-    fieldId,
-    schemaType,
-    schemaItems,
-    hasAllowedOptions: allowedOptions.length > 0,
-    isCombinedField,
-    onSubmit: saveAndContinue
-  })
-
-  if (isCombinedField) {
+  // Summary + Description combined field
+  if (fieldId === 'summary' || fieldId === 'description') {
     return (
       <SummaryDescriptionFieldInput
         focusField={fieldId as 'summary' | 'description'}
+        onConfirm={(value) => {
+          const typedValue = value as { summary: string; description: string }
+          setValue('summary', typedValue.summary)
+          setValue('description', typedValue.description)
+          setSearch('')
+          goToNextField()
+        }}
       />
     )
   }
 
+  // User field with autocomplete
   if (schemaType === 'user') {
-    const autoCompleteUrl = metadata?.autoCompleteUrl ?? ''
     return (
       <UserFieldInputMenu
-        fieldId={fieldId}
         title={title}
-        autoCompleteUrl={autoCompleteUrl}
-        onDone={() => {
-          setSearch('')
-          goToNextField()
-        }}
+        autoCompleteUrl={metadata?.autoCompleteUrl ?? ''}
+        onConfirm={handleConfirm}
+      />
+    )
+  }
+
+  // Number field
+  if (schemaType === 'number') {
+    return (
+      <NumberFieldInput
+        title={title}
+        currentValue={currentValue}
+        onConfirm={handleConfirm}
       />
     )
   }
@@ -102,7 +88,7 @@ export function FieldInputMenu() {
       <SingleSelectFieldInput
         title={title}
         allowedOptions={allowedOptions}
-        onSelect={saveAndContinue}
+        onConfirm={handleConfirm}
       />
     )
   }
@@ -111,40 +97,36 @@ export function FieldInputMenu() {
   if (schemaType === 'array' && allowedOptions.length > 0) {
     return (
       <MultiSelectFieldInput
-        fieldId={fieldId}
         title={title}
+        currentValue={currentValue}
         allowedOptions={allowedOptions}
-        onDone={() => {
-          setSearch('')
-          goToNextField()
-        }}
+        onChange={(value) => setValue(fieldId, value)}
+        onConfirm={handleConfirm}
       />
     )
   }
 
-  // labels-style fallback: array<string> (comma separated)
+  // Array of strings (comma-separated, like labels)
   if (
     schemaType === 'array' &&
     schemaItems === 'string' &&
     allowedOptions.length === 0
   ) {
     return (
-      <CommandList>
-        <CommandGroup heading={title}>
-          <CommandEmpty>
-            Type comma-separated values in the search box and press Enter
-          </CommandEmpty>
-        </CommandGroup>
-      </CommandList>
+      <ArrayFieldInput
+        title={title}
+        currentValue={currentValue}
+        onConfirm={handleConfirm}
+      />
     )
   }
 
-  // Default: plain text
+  // Default: string field
   return (
-    <CommandList>
-      <CommandGroup heading={title}>
-        <CommandEmpty>Type a value and press Enter</CommandEmpty>
-      </CommandGroup>
-    </CommandList>
+    <StringFieldInput
+      title={title}
+      currentValue={currentValue}
+      onConfirm={handleConfirm}
+    />
   )
 }

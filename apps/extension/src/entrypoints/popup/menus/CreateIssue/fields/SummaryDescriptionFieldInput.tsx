@@ -1,19 +1,25 @@
 import { useRef, useState } from 'react'
 import { CommandGroup } from '@internal/ui/components/command'
 import { useMount } from 'ahooks'
-import { useHotkeys } from 'react-hotkeys-hook'
 
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 
 import { CommandMenu } from '../../CommandMenu'
 import { useCreateIssueDraftStore } from '../useCreateIssueDraftStore'
+import { useFieldConfirm } from '../useFieldConfirm'
 import { useWizardNavigation } from '../useWizardNavigation'
+
+interface SummaryDescriptionValue {
+  summary: string
+  description: string
+}
 
 interface Props {
   focusField: 'summary' | 'description'
+  onConfirm?: (value: SummaryDescriptionValue) => void
 }
 
-export function SummaryDescriptionFieldInput({ focusField }: Props) {
+export function SummaryDescriptionFieldInput({ focusField, onConfirm }: Props) {
   const { values, setValue } = useCreateIssueDraftStore()
   const { search, setSearch } = useCommandInput()
   const { goToNextField } = useWizardNavigation()
@@ -36,19 +42,21 @@ export function SummaryDescriptionFieldInput({ focusField }: Props) {
     }
   })
 
-  const saveAndContinue = () => {
-    setValue('summary', search)
-    setValue('description', description)
+  const saveAndContinue = (value: SummaryDescriptionValue) => {
+    setValue('summary', value.summary)
+    setValue('description', value.description)
     setSearch('')
     goToNextField()
   }
 
-  useHotkeys(
-    'meta+enter',
-    saveAndContinue,
-    { preventDefault: true, enableOnFormTags: true },
-    [search, description]
-  )
+  useFieldConfirm<SummaryDescriptionValue>({
+    getValue: () => ({
+      summary: search,
+      description
+    }),
+    onConfirm: onConfirm ?? saveAndContinue,
+    keys: 'meta+enter'
+  })
 
   return (
     <CommandMenu
