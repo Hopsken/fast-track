@@ -40,6 +40,7 @@ export function useWizardNavigation() {
    * or auto-submits if every field has a value.
    */
   const goToNextField = useMemoizedFn(() => {
+    console.log({ wizardFields })
     // Fallback: if wizard never initialized, just go back
     if (wizardFields.length === 0) {
       setSearch('')
@@ -47,33 +48,27 @@ export function useWizardNavigation() {
       return
     }
 
-    // Scan forward for next field needing input
+    // Submit if is last field
+    if (wizardIndex === wizardFields.length - 1) {
+      // Every field has a value → submit
+      setSearch('')
+      submit()
+      return
+    }
+
+    // Scan forward for next valid field
     for (let i = wizardIndex + 1; i < wizardFields.length; i++) {
       const field = wizardFields[i]
       if (!field) continue
 
-      if (!hasValue(values[field.fieldId])) {
-        setWizardIndex(i)
-
-        // Clear stale errors for the target field
-        if (field.fieldId === 'summary' || field.fieldId === 'description') {
-          clearError('summary')
-          clearError('description')
-        } else {
-          clearError(field.fieldId)
-        }
-
-        setSearch('')
-        navigate(CommandRoutes.CreateIssueEditField, {
-          state: { field }
-        })
-        return
-      }
+      setWizardIndex(i)
+      setSearch('')
+      clearError(field.fieldId)
+      navigate(CommandRoutes.CreateIssueEditField, {
+        state: { field }
+      })
+      return
     }
-
-    // Every field has a value → submit
-    setSearch('')
-    submit()
   })
 
   return {

@@ -1,11 +1,22 @@
-import { Route, Routes, useLocation } from 'react-router-dom'
+import { useMemo } from 'react'
+import { CommandGroup, CommandList } from '@internal/ui/components/command'
+import { Outlet, Route, Routes, useLocation } from 'react-router-dom'
 
+import { TicketBasicFields } from '@/components'
+import { CommandFooterSlot } from '@/stores/command/useCommandFooterSlot'
+import { JiraIssueType, JiraTicket } from '@/types'
 import type { VisibleField } from '~/services/template-service/gap-analysis'
 import type { IssueTemplate } from '~/types/template'
 
 import { CreateIssueFieldsMenu } from './CreateIssueFieldsMenu'
 import { FieldInputMenu } from './FieldInputMenu'
-import { CreateIssueDraftStoreProvider } from './useCreateIssueDraftStore'
+import { SummaryDescriptionFieldInputMenu } from './fields/SummaryDescriptionFieldInputMenu'
+import {
+  CreateIssueDraftStoreProvider,
+  useCreateIssueDraftStore
+} from './useCreateIssueDraftStore'
+import { useCreateIssueForm } from './useCreateIssueForm'
+import { useSetupWizard } from './useSetupWizard'
 
 function FieldInputMenuRouter() {
   const { field } = useLocation().state as { field: VisibleField }
@@ -13,15 +24,65 @@ function FieldInputMenuRouter() {
   return <FieldInputMenu key={field.fieldId} />
 }
 
+function CreateIssueMenuLayout() {
+  const { template, values } = useCreateIssueDraftStore()
+
+  const ticket = useMemo(() => {
+    const { projectKey, issueTypeId, issueTypeName } = template.scope
+    return {
+      __typename: 'JiraTicket',
+      id: '',
+      key: `${projectKey}-?`,
+      summary: values['summary'] as string,
+      issueType: {
+        id: issueTypeId,
+        name: issueTypeName
+      } as JiraIssueType,
+      status: null,
+      assignee: null,
+      priority: null
+    } as any satisfies JiraTicket
+  }, [template, values])
+
+  return (
+    <CommandList>
+      <CommandGroup>
+        <TicketBasicFields ticket={ticket} />
+      </CommandGroup>
+
+      <Outlet />
+
+      <CommandFooterSlot>⌘ Enter to continue</CommandFooterSlot>
+    </CommandList>
+  )
+}
+
+function CreateIssueMenuInner() {
+  useSetupWizard()
+
+  return (
+    <Routes>
+      <Route
+        index
+        element={<SummaryDescriptionFieldInputMenu focusField="summary" />}
+      />
+
+      <Route element={<CreateIssueMenuLayout />}>
+        <Route path="edit" element={<FieldInputMenuRouter />} />
+        <Route path="review" element={<CreateIssueFieldsMenu />} />
+      </Route>
+    </Routes>
+  )
+}
+
 export function CreateIssueMenu() {
-  const { template } = useLocation().state as { template: IssueTemplate }
+  const { template } = (useLocation().state ?? {}) as {
+    template: IssueTemplate
+  }
 
   return (
     <CreateIssueDraftStoreProvider template={template}>
-      <Routes>
-        <Route index element={<CreateIssueFieldsMenu />} />
-        <Route path="edit-field" element={<FieldInputMenuRouter />} />
-      </Routes>
+      <CreateIssueMenuInner />
     </CreateIssueDraftStoreProvider>
   )
 }

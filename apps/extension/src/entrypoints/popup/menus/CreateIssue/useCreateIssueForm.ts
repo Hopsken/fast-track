@@ -10,6 +10,8 @@ import { buildCreateIssueFields } from '~/services/template-service/issue-payloa
 import type { FieldMetadata, IssueTemplate } from '~/types/template'
 import { formatErrorMessage } from '~/utils/formatError'
 
+import { CommandRoutes } from '../../routes'
+
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 import { extractJiraFieldErrors, pickNonEmptyValues } from './utils'
 
@@ -71,6 +73,9 @@ export function useCreateIssueForm({
       if (errorsMap) {
         setErrors(errorsMap)
         promoteFields(Object.keys(errorsMap))
+
+        // TD: clear fields navigate histories
+        navigate(CommandRoutes.CreateIssueReview)
 
         toast.update({
           style: 'failure',

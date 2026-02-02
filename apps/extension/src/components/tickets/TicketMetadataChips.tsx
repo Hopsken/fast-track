@@ -22,19 +22,21 @@ export function TicketMetadataChips({
     <div className="flex flex-wrap items-center gap-2 text-xs">
       {/* Status */}
       <AnimatePresence mode="wait">
-        <motion.div
-          key={ticket.status.name}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={chipTransition}>
-          <Badge variant="outline">
-            <div
-              className={`size-2 rounded-full ${getStatusDotColor(ticket.status)}`}
-            />
-            {ticket.status.name}
-          </Badge>
-        </motion.div>
+        {ticket.status && (
+          <motion.div
+            key={ticket.status.name}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={chipTransition}>
+            <Badge variant="outline">
+              <div
+                className={`size-2 rounded-full ${getStatusDotColor(ticket.status)}`}
+              />
+              {ticket.status.name}
+            </Badge>
+          </motion.div>
+        )}
       </AnimatePresence>
 
       {/* Priority */}

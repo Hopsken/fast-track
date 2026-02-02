@@ -3,6 +3,7 @@ import { CommandGroup } from '@internal/ui/components/command'
 import { useMount } from 'ahooks'
 import { useHotkeys } from 'react-hotkeys-hook'
 
+import { CommandFooterSlot } from '@/stores/command/useCommandFooterSlot'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 
 import { CommandMenu } from '../../CommandMenu'
@@ -64,9 +65,6 @@ export function SummaryDescriptionFieldInputMenu({ focusField }: Props) {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Type description…"
           />
-          <p className="text-muted-foreground mt-2 text-center text-[10px]">
-            ⌘ Enter to continue ({currentStep}/{totalSteps})
-          </p>
         </div>
       </CommandGroup>
     </CommandMenu>

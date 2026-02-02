@@ -38,6 +38,7 @@ const createIssueDraftStore = (template: IssueTemplate) =>
         values: {},
         errors: {},
         promotedFieldIds: [],
+
         wizardFields: [],
         wizardIndex: 0,
         wizardStarted: false,

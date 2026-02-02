@@ -1,18 +1,20 @@
-import { ComponentProps } from 'react'
+import { ComponentProps, PropsWithChildren } from 'react'
 import { CommandList } from '@internal/ui/components/command'
 import { useMount } from 'ahooks'
 
 import { useCommandControllerStore } from '@/stores/command/useCommandController'
 
-export type CommandMenuProps = ComponentProps<typeof CommandList> & {
+export type CommandControllerProps = PropsWithChildren<{
   shouldFilter?: boolean
   searchPlaceholder?: string
   searchReadonly?: boolean
-}
+}>
 
-export const CommandMenu = (props: CommandMenuProps) => {
-  const { shouldFilter, searchPlaceholder, searchReadonly, ...restProps } =
-    props
+export type CommandMenuProps = ComponentProps<typeof CommandList> &
+  CommandControllerProps
+
+export const CommandControl = (props: CommandControllerProps) => {
+  const { shouldFilter, searchPlaceholder, searchReadonly } = props
 
   useMount(() => {
     const restoreShouldFilter =
@@ -37,5 +39,25 @@ export const CommandMenu = (props: CommandMenuProps) => {
     }
   })
 
-  return <CommandList {...restProps}>{props.children}</CommandList>
+  return props.children
+}
+
+export const CommandMenu = (props: CommandMenuProps) => {
+  const {
+    shouldFilter,
+    searchPlaceholder,
+    searchReadonly,
+    children,
+    ...restProps
+  } = props
+  return (
+    <CommandList {...restProps}>
+      <CommandControl
+        shouldFilter={shouldFilter}
+        searchPlaceholder={searchPlaceholder}
+        searchReadonly={searchReadonly}>
+        {children}
+      </CommandControl>
+    </CommandList>
+  )
 }

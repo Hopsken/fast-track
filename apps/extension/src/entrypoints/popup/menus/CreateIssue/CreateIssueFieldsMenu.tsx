@@ -11,7 +11,7 @@ import {
 } from '~/services/template-service/gap-analysis'
 
 import { CommandRoutes } from '../../routes'
-import { CommandMenu } from '../CommandMenu'
+import { CommandControl } from '../CommandMenu'
 
 import { FieldList } from './FieldList'
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
@@ -38,46 +38,6 @@ export function CreateIssueFieldsMenu() {
   const { projectKey, issueTypeId } = template.scope
   const { data: fieldsMetadata, isLoading: isLoadingFields } =
     useIssueCreateMeta(projectKey, issueTypeId)
-
-  // Compute visible fields
-  const visibleFieldsBase = useMemo(() => {
-    return computeVisibleFields(template, fieldsMetadata ?? [])
-  }, [fieldsMetadata, template])
-
-  const visibleFields = useMemo(() => {
-    const fieldConfigById = keyBy(visibleFieldsBase, 'fieldId')
-    const promotedFields = computePromotedFields({
-      promotedFieldIds,
-      fieldsMetadata: fieldsMetadata ?? []
-    })
-
-    return unionBy(visibleFieldsBase, promotedFields, 'fieldId').map((field) =>
-      merge({}, fieldConfigById[field.fieldId], field)
-    )
-  }, [visibleFieldsBase, promotedFieldIds, fieldsMetadata])
-
-  // Auto-start wizard on first metadata load
-  useEffect(() => {
-    if (!wizardStarted && visibleFields.length > 0) {
-      const sequence = computeWizardSequence(visibleFields)
-      setWizardFields(sequence)
-      setWizardStarted(true)
-
-      if (sequence.length > 0) {
-        setWizardIndex(0)
-        navigate(CommandRoutes.CreateIssueEditField, {
-          state: { field: sequence[0] }
-        })
-      }
-    }
-  }, [
-    visibleFields,
-    wizardStarted,
-    setWizardFields,
-    setWizardStarted,
-    setWizardIndex,
-    navigate
-  ])
 
   // Form submission
   const { submit } = useCreateIssueForm({
@@ -118,7 +78,7 @@ export function CreateIssueFieldsMenu() {
   // const [showConflictWarning, setShowConflictWarning] = useState(true)
 
   return (
-    <CommandMenu searchPlaceholder={template.name} searchReadonly>
+    <CommandControl searchPlaceholder={template.name} searchReadonly>
       <ActionLoading isLoading={isLoadingFields} />
 
       {/* {showConflictWarning && (
@@ -129,11 +89,11 @@ export function CreateIssueFieldsMenu() {
       )} */}
 
       <FieldList
-        fields={visibleFields}
+        fields={wizardFields}
         values={values}
         errors={errors}
         onSelectField={handleSelectField}
       />
-    </CommandMenu>
+    </CommandControl>
   )
 }

@@ -8,6 +8,7 @@ import {
   X
 } from 'lucide-react'
 
+import { useCommandFooterSlot } from '@/stores/command/useCommandFooterSlot'
 import {
   ToastStyle,
   useToastState,
@@ -46,6 +47,7 @@ const toastThemes: Record<
 export function Footer() {
   const activeToast = useToastState()
   const hideToast = useToastStore((state) => state.hideToast)
+  const slot = useCommandFooterSlot()
 
   const activeToastContainerCls = activeToast
     ? toastThemes[activeToast.style].container
@@ -123,7 +125,10 @@ export function Footer() {
         'bg-linear-to-r border-t border-gray-200 px-5 py-2',
         activeToastContainerCls
       )}>
-      {activeToast ? renderToast() : renderFooter()}
+      <div className="flex items-center justify-between">
+        {activeToast ? renderToast() : renderFooter()}
+        <div>{slot}</div>
+      </div>
     </div>
   )
 }
