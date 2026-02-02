@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useState } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,46 +14,11 @@ import { Button } from '@internal/ui/components/button'
 import { Separator } from '@internal/ui/components/separator'
 import { Link } from 'react-router-dom'
 
+import { AutoGrowTextarea } from '@/components/ui/AutoGrowTextArea'
+
 import { useWizardContext } from './context'
 import { FieldsSection } from './FieldsSection'
 import { ScopeSection } from './ScopeSection'
-
-/* ------------------------------------------------------------------ */
-/*  Auto-growing textarea (borderless, for inline editing)             */
-/* ------------------------------------------------------------------ */
-
-function AutoGrowTextarea({
-  value,
-  onChange,
-  placeholder,
-  className
-}: {
-  value: string
-  onChange: (value: string) => void
-  placeholder: string
-  className?: string
-}) {
-  const ref = useRef<HTMLTextAreaElement>(null)
-
-  const handleInput = useCallback(() => {
-    const el = ref.current
-    if (!el) return
-    el.style.height = 'auto'
-    el.style.height = `${el.scrollHeight}px`
-  }, [])
-
-  return (
-    <textarea
-      ref={ref}
-      rows={1}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      onInput={handleInput}
-      placeholder={placeholder}
-      className={className}
-    />
-  )
-}
 
 /* ------------------------------------------------------------------ */
 /*  Delete confirmation dialog                                         */

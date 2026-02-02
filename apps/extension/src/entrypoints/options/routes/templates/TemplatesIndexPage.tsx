@@ -3,10 +3,12 @@ import { Button } from '@internal/ui/components/button'
 import { partition } from 'lodash-es'
 import { Link } from 'react-router-dom'
 
+import { LoadingCursor } from '@/components/LoadingCursor'
 import { useCurrentJiraHost } from '~/hooks/useCurrentJiraHost'
 import { useTemplates } from '~/hooks/useTemplates'
-import { cn } from '~/lib/utils'
 import type { IssueTemplate } from '~/types/template'
+
+import { TemplateListItem } from './TemplateListItem'
 
 function groupByHost(templates: IssueTemplate[]) {
   const groups = new Map<string, IssueTemplate[]>()
@@ -68,9 +70,7 @@ export function TemplatesIndexPage() {
         </div>
 
         <div className="rounded-md border bg-white">
-          {templatesLoading ? (
-            <div className="p-4 text-sm text-gray-600">Loading…</div>
-          ) : null}
+          {templatesLoading && <LoadingCursor />}
 
           {!templatesLoading && matching.length === 0 ? (
             <div className="p-4 text-sm text-gray-600">
@@ -83,25 +83,7 @@ export function TemplatesIndexPage() {
           {!templatesLoading && matching.length > 0 ? (
             <ul className="divide-y">
               {matching.map((t) => (
-                <li key={t.id}>
-                  <Link
-                    to={`/templates/${t.id}`}
-                    className={cn(
-                      'block px-4 py-3 text-sm transition-colors',
-                      'hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
-                    )}>
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="truncate font-medium text-gray-900">
-                          {t.name}
-                        </div>
-                        <div className="truncate text-xs text-gray-600">
-                          {t.scope.project.name} • {t.scope.issueType.name}
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                </li>
+                <TemplateListItem key={t.id} template={t} />
               ))}
             </ul>
           ) : null}
@@ -122,25 +104,7 @@ export function TemplatesIndexPage() {
                 </div>
                 <ul className="divide-y">
                   {items.map((t) => (
-                    <li key={t.id}>
-                      <Link
-                        to={`/templates/${t.id}`}
-                        className={cn(
-                          'block px-4 py-3 text-sm transition-colors',
-                          'hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
-                        )}>
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="min-w-0">
-                            <div className="truncate font-medium text-gray-900">
-                              {t.name}
-                            </div>
-                            <div className="truncate text-xs text-gray-600">
-                              {t.scope.project.name} • {t.scope.issueType.name}
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    </li>
+                    <TemplateListItem key={t.id} template={t} />
                   ))}
                 </ul>
               </div>

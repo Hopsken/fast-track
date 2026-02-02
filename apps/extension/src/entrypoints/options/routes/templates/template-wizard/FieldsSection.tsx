@@ -8,6 +8,7 @@ import {
 } from '@internal/ui/components/empty'
 import { PlusIcon } from 'lucide-react'
 
+import { LoadingCursor } from '@/components/LoadingCursor'
 import type { FieldConfig, FieldMetadata } from '~/types/template'
 
 import { AddFieldDialog } from './AddFieldDialog'
@@ -85,11 +86,7 @@ export function FieldsSection() {
         )}
       </div>
 
-      {areFieldsLoading && (
-        <div className="text-muted-foreground py-8 text-center text-sm">
-          Loading fields…
-        </div>
-      )}
+      {areFieldsLoading && <LoadingCursor />}
 
       {!areFieldsLoading && fieldsError && (
         <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
