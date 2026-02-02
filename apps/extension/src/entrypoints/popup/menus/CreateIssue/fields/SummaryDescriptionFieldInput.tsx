@@ -9,17 +9,11 @@ import { useCreateIssueDraftStore } from '../useCreateIssueDraftStore'
 import { useFieldConfirm } from '../useFieldConfirm'
 import { useWizardNavigation } from '../useWizardNavigation'
 
-interface SummaryDescriptionValue {
-  summary: string
-  description: string
-}
-
 interface Props {
   focusField: 'summary' | 'description'
-  onConfirm?: (value: SummaryDescriptionValue) => void
 }
 
-export function SummaryDescriptionFieldInput({ focusField, onConfirm }: Props) {
+export function SummaryDescriptionFieldInput({ focusField }: Props) {
   const { values, setValue } = useCreateIssueDraftStore()
   const { search, setSearch } = useCommandInput()
   const { goToNextField } = useWizardNavigation()
@@ -42,21 +36,12 @@ export function SummaryDescriptionFieldInput({ focusField, onConfirm }: Props) {
     }
   })
 
-  const saveAndContinue = (value: SummaryDescriptionValue) => {
-    setValue('summary', value.summary)
-    setValue('description', value.description)
+  const saveAndContinue = () => {
+    setValue('summary', search)
+    setValue('description', description)
     setSearch('')
     goToNextField()
   }
-
-  useFieldConfirm<SummaryDescriptionValue>({
-    getValue: () => ({
-      summary: search,
-      description
-    }),
-    onConfirm: onConfirm ?? saveAndContinue,
-    keys: 'meta+enter'
-  })
 
   return (
     <CommandMenu
@@ -74,6 +59,11 @@ export function SummaryDescriptionFieldInput({ focusField, onConfirm }: Props) {
           />
         </div>
       </CommandGroup>
+
+      {useFieldConfirm({
+        onConfirm: saveAndContinue,
+        keys: 'meta+enter'
+      })}
     </CommandMenu>
   )
 }

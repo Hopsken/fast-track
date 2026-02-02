@@ -3,11 +3,14 @@ import {
   CommandGroup,
   CommandItem,
   CommandList,
-  CommandLoading,
-  useCommandState
+  CommandLoading
 } from '@internal/ui/components/command'
+import { useMount } from 'ahooks'
 
 import { useAutoCompleteUsers } from '@/hooks/useAutoComplete'
+import { useCommandInput } from '@/stores/command/useCommandInputStore'
+
+import { useFieldConfirm } from '../useFieldConfirm'
 
 export type UserValue = {
   accountId?: string
@@ -17,20 +20,31 @@ export type UserValue = {
 
 type Props = {
   title: string
+  selected?: UserValue
   autoCompleteUrl: string
   onConfirm: (value: UserValue) => void
 }
 
+const toUserId = (user: UserValue) => user.accountId ?? user.emailAddress ?? ''
+
 export function UserFieldInputMenu({
   title,
+  selected,
   autoCompleteUrl,
   onConfirm
 }: Props) {
-  const query = useCommandState((s) => s.search)
+  const { value, setValue, search, setSearch } = useCommandInput()
   const { data: users, isLoading } = useAutoCompleteUsers(
     autoCompleteUrl,
-    query
+    search
   )
+
+  useMount(() => {
+    if (selected) {
+      setSearch('')
+      setValue(toUserId(selected))
+    }
+  })
 
   const handleSelectUser = (user: UserValue) => {
     onConfirm(user)
@@ -42,6 +56,7 @@ export function UserFieldInputMenu({
         {isLoading ? <CommandLoading>Loading...</CommandLoading> : null}
 
         {(users ?? []).map((user) => {
+          const userId = toUserId(user)
           const displayName =
             user.displayName || user.name || user.emailAddress || 'Anonymous'
 
@@ -53,8 +68,13 @@ export function UserFieldInputMenu({
 
           return (
             <CommandItem
-              key={user.accountId ?? displayName}
-              value={displayName}
+              key={userId}
+              value={userId}
+              keywords={[
+                user.displayName ?? '',
+                user.emailAddress ?? '',
+                user.name ?? ''
+              ]}
               onSelect={() => handleSelectUser(userValue)}>
               <span className="truncate">{displayName}</span>
             </CommandItem>
@@ -65,6 +85,18 @@ export function UserFieldInputMenu({
           <CommandEmpty>Type to search users...</CommandEmpty>
         ) : null}
       </CommandGroup>
+
+      {useFieldConfirm({
+        onConfirm: () => {
+          if (value) {
+            const user = users?.find((u) => toUserId(u) === value)
+            if (user) {
+              onConfirm(user)
+            }
+          }
+        },
+        keys: 'meta+enter'
+      })}
     </CommandList>
   )
 }

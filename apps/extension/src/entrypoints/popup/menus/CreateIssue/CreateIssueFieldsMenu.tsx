@@ -1,4 +1,3 @@
-import { useHotkeys } from 'react-hotkeys-hook'
 import { useNavigate } from 'react-router-dom'
 
 import { ActionLoading } from '@/components/actions'
@@ -8,6 +7,7 @@ import type { VisibleField } from '~/services/template-service/gap-analysis'
 import { CommandRoutes } from '../../routes'
 import { CommandControl } from '../CommandMenu'
 
+import { FieldConfirm } from './FieldConfirm'
 import { FieldList } from './FieldList'
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 import { useCreateIssueForm } from './useCreateIssueForm'
@@ -28,19 +28,6 @@ export function CreateIssueFieldsMenu() {
     template,
     fieldsMetadata
   })
-
-  // Hotkey
-  useHotkeys(
-    'meta+enter',
-    () => {
-      submit()
-    },
-    {
-      preventDefault: true,
-      enableOnFormTags: true
-    },
-    [submit]
-  )
 
   // Field selection handler
   const handleSelectField = (field: VisibleField) => {
@@ -68,6 +55,8 @@ export function CreateIssueFieldsMenu() {
         errors={errors}
         onSelectField={handleSelectField}
       />
+
+      <FieldConfirm onClick={submit} text="Create Issue" />
     </CommandControl>
   )
 }

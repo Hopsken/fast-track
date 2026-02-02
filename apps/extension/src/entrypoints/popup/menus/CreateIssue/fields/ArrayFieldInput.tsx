@@ -3,7 +3,7 @@ import {
   CommandGroup,
   CommandList
 } from '@internal/ui/components/command'
-import { useMount } from 'ahooks'
+import { useMemoizedFn, useMount } from 'ahooks'
 
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 
@@ -36,16 +36,12 @@ export function ArrayFieldInput({
     }
   })
 
-  useFieldConfirm<string[]>({
-    getValue: () => {
-      const parts = search
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean)
-      return parts
-    },
-    onConfirm,
-    keys: 'enter'
+  const handleConfirm = useMemoizedFn(() => {
+    const parts = search
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+    onConfirm(parts)
   })
 
   return (
@@ -53,6 +49,11 @@ export function ArrayFieldInput({
       <CommandGroup heading={title}>
         <CommandEmpty>{placeholder}</CommandEmpty>
       </CommandGroup>
+
+      {useFieldConfirm({
+        onConfirm: handleConfirm,
+        keys: 'enter'
+      })}
     </CommandList>
   )
 }

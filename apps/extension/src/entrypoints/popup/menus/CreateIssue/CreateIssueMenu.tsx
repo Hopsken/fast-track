@@ -49,7 +49,7 @@ function CreateIssueMenuLayout() {
 
       <Outlet />
 
-      <CommandFooterSlot>⌘ Enter to continue</CommandFooterSlot>
+      <CommandFooterSlot></CommandFooterSlot>
     </CommandList>
   )
 }

@@ -31,17 +31,16 @@ export function StringFieldInput({
     }
   })
 
-  useFieldConfirm<string>({
-    getValue: () => search,
-    onConfirm,
-    keys: 'enter'
-  })
-
   return (
     <CommandList>
       <CommandGroup heading={title}>
         <CommandEmpty>{placeholder}</CommandEmpty>
       </CommandGroup>
+
+      {useFieldConfirm({
+        onConfirm: () => onConfirm(search),
+        keys: 'enter'
+      })}
     </CommandList>
   )
 }

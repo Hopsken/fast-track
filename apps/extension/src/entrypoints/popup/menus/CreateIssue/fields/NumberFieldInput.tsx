@@ -24,6 +24,18 @@ export function NumberFieldInput({
 }: Props) {
   const { search, setSearch } = useCommandInput()
 
+  const handleConfirm = () => {
+    const trimmed = search.trim()
+    if (!trimmed) return onConfirm(undefined)
+
+    const num = Number(trimmed)
+    if (!Number.isFinite(num)) {
+      return
+    }
+
+    onConfirm(num)
+  }
+
   // Pre-fill the search box with current value
   useMount(() => {
     if (typeof currentValue === 'number') {
@@ -31,27 +43,16 @@ export function NumberFieldInput({
     }
   })
 
-  useFieldConfirm<number | undefined>({
-    getValue: () => {
-      const trimmed = search.trim()
-      if (!trimmed) return undefined
-
-      const num = Number(trimmed)
-      if (!Number.isFinite(num)) {
-        return { skip: true } // Invalid number, don't confirm
-      }
-
-      return num
-    },
-    onConfirm,
-    keys: 'enter'
-  })
-
   return (
     <CommandList>
       <CommandGroup heading={title}>
         <CommandEmpty>{placeholder}</CommandEmpty>
       </CommandGroup>
+
+      {useFieldConfirm({
+        onConfirm: handleConfirm,
+        keys: 'enter'
+      })}
     </CommandList>
   )
 }

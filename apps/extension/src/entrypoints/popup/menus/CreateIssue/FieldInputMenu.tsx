@@ -45,13 +45,6 @@ export function FieldInputMenu() {
     return (
       <SummaryDescriptionFieldInput
         focusField={fieldId as 'summary' | 'description'}
-        onConfirm={(value) => {
-          const typedValue = value as { summary: string; description: string }
-          setValue('summary', typedValue.summary)
-          setValue('description', typedValue.description)
-          setSearch('')
-          goToNextField()
-        }}
       />
     )
   }

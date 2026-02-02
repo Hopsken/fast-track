@@ -2,6 +2,7 @@ import { CommandGroup } from '@internal/ui/components/command'
 
 import type { VisibleField } from '~/services/template-service/gap-analysis'
 
+import { FieldConfirm } from './FieldConfirm'
 import { FieldListItem } from './FieldListItem'
 
 export interface FieldListProps {

@@ -3,6 +3,7 @@ import {
   CommandItem,
   CommandList
 } from '@internal/ui/components/command'
+import { useMemoizedFn } from 'ahooks'
 import { Check } from 'lucide-react'
 
 import type { AllowedValue } from '~/types/template'
@@ -35,12 +36,8 @@ export function MultiSelectFieldInput({
     onChange(next)
   }
 
-  // Multi-select uses meta+enter to confirm selection
-  useFieldConfirm<AllowedValue[]>({
-    getValue: () => selected,
-    onConfirm: onConfirm ?? (() => {}),
-    keys: 'meta+enter',
-    enabled: !!onConfirm
+  const handleConfirm = useMemoizedFn(() => {
+    onConfirm?.(selected)
   })
 
   return (
@@ -62,6 +59,12 @@ export function MultiSelectFieldInput({
           )
         })}
       </CommandGroup>
+
+      {useFieldConfirm({
+        onConfirm: handleConfirm,
+        keys: 'meta+enter',
+        enabled: !!onConfirm
+      })}
     </CommandList>
   )
 }
