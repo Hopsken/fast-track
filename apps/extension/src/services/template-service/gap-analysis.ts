@@ -41,16 +41,6 @@ export function computeVisibleFields(
     }
   ]
 
-  const descConfig = template.fields['description']
-  if (descConfig?.behavior === 'visible' || template.description) {
-    visible.push({
-      fieldId: 'description',
-      metadata: getMetadata('description'),
-      presetValue: template.description,
-      isEditable: true
-    })
-  }
-
   for (const [fieldId, config] of Object.entries(template.fields)) {
     if (shouldSkipField(fieldId)) continue
 

@@ -29,19 +29,18 @@ function CreateIssueMenuLayout() {
   const ticket = useMemo<Partial<JiraTicket>>(() => {
     const { project, issueType } = template.scope
     return {
-      key: `${project.key}-?`,
-      summary: values['summary'] as string,
+      key: `${project.key}`,
       issueType,
-      status: undefined,
-      assignee: null,
-      priority: null
+      ...values
     }
   }, [template, values])
 
   return (
     <CommandList>
       <CommandGroup>
-        <TicketBasicFields ticket={ticket} />
+        <div className="outline-hidden relative flex min-h-[44px] cursor-default select-none items-center gap-2 rounded-sm p-3 text-sm">
+          <TicketBasicFields ticket={ticket} />
+        </div>
       </CommandGroup>
 
       <Outlet />

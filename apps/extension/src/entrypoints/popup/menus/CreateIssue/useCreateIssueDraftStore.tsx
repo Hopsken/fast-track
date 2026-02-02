@@ -6,6 +6,8 @@ import { createStore, StoreApi } from 'zustand/vanilla'
 import { IssueTemplate } from '@/types/template'
 import type { VisibleField } from '~/services/template-service/gap-analysis'
 
+import { buildInitialValues } from './utils'
+
 export interface CreateIssueDraftState {
   template: IssueTemplate
 
@@ -33,7 +35,7 @@ const createIssueDraftStore = (template: IssueTemplate) =>
     devtools(
       (set) => ({
         template,
-        values: {},
+        values: buildInitialValues(template),
         errors: {},
         promotedFieldIds: [],
 
@@ -70,7 +72,7 @@ const createIssueDraftStore = (template: IssueTemplate) =>
 
         reset: () =>
           set({
-            values: {},
+            values: buildInitialValues(template),
             errors: {},
             promotedFieldIds: [],
             wizardFields: [],

@@ -82,19 +82,16 @@ export function pickNonEmptyValues(values: Record<string, unknown>) {
   return out
 }
 
-export function buildInitialValues(args: {
-  template: IssueTemplate
-  visibleFields: VisibleField[]
-}) {
-  const { template, visibleFields } = args
+export function buildInitialValues(template: IssueTemplate) {
   const initial: Record<string, unknown> = {
     summary: '',
-    description: template.description ?? ''
+    description: ''
   }
 
-  for (const f of visibleFields) {
-    if (f.presetValue !== undefined) {
-      initial[f.fieldId] = f.presetValue
+  // Extract all preset values directly from template config
+  for (const [fieldId, config] of Object.entries(template.fields)) {
+    if (config.behavior === 'preset') {
+      initial[fieldId] = config.presetValue
     }
   }
 

@@ -13,6 +13,7 @@ export function useIssueCreateMeta(project: string, issueTypeId: string) {
         issueTypeId
       })
     },
-    staleTime: minutes(1)
+    staleTime: minutes(1),
+    gcTime: Infinity
   })
 }

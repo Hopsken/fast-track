@@ -114,68 +114,105 @@ describe('CreateIssue utils', () => {
   describe('buildInitialValues', () => {
     it('includes summary and description', () => {
       const result = buildInitialValues({
-        template: {
-          id: '1',
-          name: 'Test',
-          scope: {
-            baseUrlHost: 'test.atlassian.net',
-            project: {
-              id: 'p1',
-              key: 'TEST',
-              name: 'Test Project'
-            },
-            issueType: {
-              id: '10001',
-              name: 'Bug',
-              iconUrl: '',
-              description: ''
-            }
+        id: '1',
+        name: 'Test',
+        scope: {
+          baseUrlHost: 'test.atlassian.net',
+          project: {
+            id: 'p1',
+            key: 'TEST',
+            name: 'Test Project'
           },
-          fields: {},
-          description: 'Default description',
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-01T00:00:00Z'
+          issueType: {
+            id: '10001',
+            name: 'Bug',
+            iconUrl: '',
+            description: ''
+          }
         },
-        visibleFields: []
+        fields: {},
+        description: 'Default description',
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z'
       })
 
       expect(result.summary).toBe('')
       expect(result.description).toBe('Default description')
     })
 
-    it('includes preset values from visible fields', () => {
+    it('includes preset values from template fields', () => {
       const result = buildInitialValues({
-        template: {
-          id: '1',
-          name: 'Test',
-          scope: {
-            baseUrlHost: 'test.atlassian.net',
-            project: {
-              id: 'p1',
-              key: 'TEST',
-              name: 'Test Project'
-            },
-            issueType: {
-              id: '10001',
-              name: 'Bug',
-              iconUrl: '',
-              description: ''
-            }
+        id: '1',
+        name: 'Test',
+        scope: {
+          baseUrlHost: 'test.atlassian.net',
+          project: {
+            id: 'p1',
+            key: 'TEST',
+            name: 'Test Project'
           },
-          fields: {},
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-01T00:00:00Z'
-        },
-        visibleFields: [
-          {
-            fieldId: 'priority',
-            isEditable: true,
-            presetValue: { id: '1', name: 'High' }
+          issueType: {
+            id: '10001',
+            name: 'Bug',
+            iconUrl: '',
+            description: ''
           }
-        ]
+        },
+        fields: {
+          priority: {
+            behavior: 'preset',
+            presetValue: { id: '1', name: 'High' }
+          },
+          labels: {
+            behavior: 'preset',
+            presetValue: ['backend', 'urgent']
+          }
+        },
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z'
       })
 
       expect(result.priority).toEqual({ id: '1', name: 'High' })
+      expect(result.labels).toEqual(['backend', 'urgent'])
+    })
+
+    it('ignores non-preset fields', () => {
+      const result = buildInitialValues({
+        id: '1',
+        name: 'Test',
+        scope: {
+          baseUrlHost: 'test.atlassian.net',
+          project: {
+            id: 'p1',
+            key: 'TEST',
+            name: 'Test Project'
+          },
+          issueType: {
+            id: '10001',
+            name: 'Bug',
+            iconUrl: '',
+            description: ''
+          }
+        },
+        fields: {
+          priority: {
+            behavior: 'visible'
+          },
+          assignee: {
+            behavior: 'restricted',
+            allowedOptions: [{ id: '1', name: 'Alice' }]
+          },
+          component: {
+            behavior: 'ignore'
+          }
+        },
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z'
+      })
+
+      expect(result.priority).toBeUndefined()
+      expect(result.assignee).toBeUndefined()
+      expect(result.component).toBeUndefined()
     })
   })
 })
