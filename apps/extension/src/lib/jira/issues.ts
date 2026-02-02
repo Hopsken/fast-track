@@ -15,8 +15,7 @@ import {
   JiraPriority,
   JiraTicket,
   JiraTransition,
-  CreateIssuePayload,
-  CreateIssueFields
+  CreateIssuePayload
 } from '@/types'
 import { isNonNullable } from '@/utils/assert'
 import { isTicketKey, mapPriority, mapTransition } from '@/utils/jira/issues'

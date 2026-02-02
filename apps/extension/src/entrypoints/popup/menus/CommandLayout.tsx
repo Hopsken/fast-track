@@ -1,6 +1,5 @@
-import { useMemo } from 'react'
 import { Command } from '@internal/ui/components/command'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 
 import { useCommandSearchState } from '@/stores/command/useCommandController'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'

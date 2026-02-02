@@ -2,7 +2,6 @@ import { keyBy } from 'lodash-es'
 
 import type {
   AllowedValue,
-  CachedFieldMetadata,
   FieldMetadata,
   IssueTemplate
 } from '~/types/template'

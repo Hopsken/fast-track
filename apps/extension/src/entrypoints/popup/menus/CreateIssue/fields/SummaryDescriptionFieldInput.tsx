@@ -3,7 +3,6 @@ import { CommandGroup } from '@internal/ui/components/command'
 import { useMount } from 'ahooks'
 import { useHotkeys } from 'react-hotkeys-hook'
 
-import { CommandFooterSlot } from '@/stores/command/useCommandFooterSlot'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 
 import { CommandMenu } from '../../CommandMenu'
@@ -14,10 +13,10 @@ interface Props {
   focusField: 'summary' | 'description'
 }
 
-export function SummaryDescriptionFieldInputMenu({ focusField }: Props) {
+export function SummaryDescriptionFieldInput({ focusField }: Props) {
   const { values, setValue } = useCreateIssueDraftStore()
   const { search, setSearch } = useCommandInput()
-  const { goToNextField, currentStep, totalSteps } = useWizardNavigation()
+  const { goToNextField } = useWizardNavigation()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const [description, setDescription] = useState<string>(

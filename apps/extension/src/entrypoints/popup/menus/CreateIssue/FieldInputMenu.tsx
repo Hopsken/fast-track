@@ -11,10 +11,12 @@ import { useCommandInput } from '@/stores/command/useCommandInputStore'
 import { VisibleField } from '~/services/template-service/gap-analysis'
 import type { AllowedValue } from '~/types/template'
 
-import { MultiSelectFieldInput } from './fields/MultiSelectFieldInput'
-import { SingleSelectFieldInput } from './fields/SingleSelectFieldInput'
-import { SummaryDescriptionFieldInputMenu } from './fields/SummaryDescriptionFieldInputMenu'
-import { UserFieldInputMenu } from './fields/UserFieldInputMenu'
+import {
+  MultiSelectFieldInput,
+  SingleSelectFieldInput,
+  SummaryDescriptionFieldInput,
+  UserFieldInputMenu
+} from './fields'
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 import { useScalarFieldEnter } from './useScalarFieldEnter'
 import { useWizardNavigation } from './useWizardNavigation'
@@ -69,7 +71,7 @@ export function FieldInputMenu() {
 
   if (isCombinedField) {
     return (
-      <SummaryDescriptionFieldInputMenu
+      <SummaryDescriptionFieldInput
         focusField={fieldId as 'summary' | 'description'}
       />
     )

@@ -10,12 +10,11 @@ import type { IssueTemplate } from '~/types/template'
 
 import { CreateIssueFieldsMenu } from './CreateIssueFieldsMenu'
 import { FieldInputMenu } from './FieldInputMenu'
-import { SummaryDescriptionFieldInputMenu } from './fields/SummaryDescriptionFieldInputMenu'
+import { SummaryDescriptionFieldInput } from './fields'
 import {
   CreateIssueDraftStoreProvider,
   useCreateIssueDraftStore
 } from './useCreateIssueDraftStore'
-import { useCreateIssueForm } from './useCreateIssueForm'
 import { useSetupWizard } from './useSetupWizard'
 
 function FieldInputMenuRouter() {
@@ -62,7 +61,7 @@ function CreateIssueMenuInner() {
     <Routes>
       <Route
         index
-        element={<SummaryDescriptionFieldInputMenu focusField="summary" />}
+        element={<SummaryDescriptionFieldInput focusField="summary" />}
       />
 
       <Route element={<CreateIssueMenuLayout />}>
