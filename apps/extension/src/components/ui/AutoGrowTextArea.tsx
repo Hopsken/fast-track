@@ -8,11 +8,13 @@ export function AutoGrowTextarea({
   value,
   onChange,
   placeholder,
+  readOnly,
   className
 }: {
   value: string
   onChange: (value: string) => void
   placeholder: string
+  readOnly?: boolean
   className?: string
 }) {
   const ref = useRef<HTMLTextAreaElement>(null)
@@ -32,6 +34,7 @@ export function AutoGrowTextarea({
       onChange={(e) => onChange(e.target.value)}
       onInput={handleInput}
       placeholder={placeholder}
+      readOnly={readOnly}
       className={className}
     />
   )

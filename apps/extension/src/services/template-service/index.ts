@@ -38,8 +38,14 @@ export class TemplateServiceImpl {
     )
   }
 
-  async getTemplate(id: string): Promise<IssueTemplate | null> {
-    const templates = await this.getTemplates()
+  async getTemplate(
+    id: string,
+    options?: {
+      includeOtherHosts?: boolean
+    }
+  ): Promise<IssueTemplate | null> {
+    const { includeOtherHosts = false } = options ?? {}
+    const templates = await this.getTemplates({ includeOtherHosts })
     return templates.find((t) => t.id === id) ?? null
   }
 
@@ -105,7 +111,7 @@ export class TemplateServiceImpl {
   }
 
   async deleteTemplate(id: string): Promise<void> {
-    const templates = await this.getTemplates()
+    const templates = await this.getTemplates({ includeOtherHosts: true })
     await this.templatesItem.setValue(templates.filter((t) => t.id !== id))
   }
 

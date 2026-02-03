@@ -127,6 +127,12 @@ export function formatCreateIssueFieldValue(input: {
 
   const type = metadata?.schema.type
   const items = metadata?.schema.items
+  const custom = metadata?.schema.custom
+
+  // well known custom fields
+  if (custom === 'com.pyxis.greenhopper.jira:gh-sprint' && value) {
+    return asRecord(value)?.id
+  }
 
   switch (type) {
     // Visual entity types - extract ID only

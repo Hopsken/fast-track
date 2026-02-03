@@ -11,6 +11,13 @@ export type JiraCreatedIssue = {
 class JiraServiceImpl {
   private jira = getJiraApi()
 
+  public agile = {
+    getBoards: (projectKeyOrId: string) =>
+      this.jira.agile.getBoards(projectKeyOrId),
+    getSprints: (projectKeyOrId: string) =>
+      this.jira.agile.getSprints(projectKeyOrId)
+  }
+
   public async autoComplete<T>(
     url: string,
     params?: Record<string, unknown>

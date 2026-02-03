@@ -6,7 +6,7 @@
  *   const ticket = await jira.issues.getIssue('KEY-123')
  */
 
-import { Config, Version3Client } from 'jira.js'
+import { AgileClient, Config, Version3Client } from 'jira.js'
 
 import { AuthCredentials, JiraUserInfo } from '@/types'
 import { isValidCredentials } from '@/utils/auth'
@@ -14,6 +14,7 @@ import { getLogger } from '@/utils/logger'
 
 import { fromStorage$, getStorageItem } from '../storage'
 
+import { JiraAgileService } from './agile'
 import { AuthApi } from './auth-api'
 import { JiraIssueService } from './issues'
 import { JiraProjectService } from './projects'
@@ -95,11 +96,14 @@ class JiraAPIImpl {
 
   private credentials: AuthCredentials | null = null
   private v3Client: Version3Client | null = null
+  private agileClient: AgileClient | null = null
+
   private clientCredentialsSignature: string | null = null
   private refreshTimeoutId: number | null = null
   private refreshPromise: Promise<void> | null = null
   private issueService: JiraIssueService | null = null
   private projectService: JiraProjectService | null = null
+  private agileService: JiraAgileService | null = null
 
   constructor() {
     this.setupAuthSubscription()
@@ -263,7 +267,10 @@ class JiraAPIImpl {
    * Uses cached credentials from subscription.
    * Falls back to storage read if subscription hasn't emitted yet.
    */
-  private async getClient(): Promise<Version3Client> {
+  private async getClients(): Promise<{
+    coreClient: Version3Client
+    agileClient: AgileClient
+  }> {
     // Fallback to storage if subscription hasn't emitted yet
     let credentials = this.credentials
     if (!credentials) {
@@ -287,17 +294,39 @@ class JiraAPIImpl {
 
     // Return cached client if credentials haven't changed
     const signature = this.computeSignature(credentials)
-    if (this.v3Client && this.clientCredentialsSignature === signature) {
-      return this.v3Client
+    if (
+      this.v3Client &&
+      this.agileClient &&
+      this.clientCredentialsSignature === signature
+    ) {
+      return {
+        coreClient: this.v3Client,
+        agileClient: this.agileClient
+      }
     }
 
     // Create new client
-    this.v3Client = new Version3Client(await buildClientConfig(credentials))
+    const clientConfig = await buildClientConfig(credentials)
+    this.v3Client = new Version3Client(clientConfig)
+    this.agileClient = new AgileClient(clientConfig)
     this.clientCredentialsSignature = signature
     this.issueService = null // Will be recreated with new client
     log.debug('Created new jira.js client')
 
-    return this.v3Client
+    return {
+      coreClient: this.v3Client,
+      agileClient: this.agileClient
+    }
+  }
+
+  private async getClient(): Promise<Version3Client> {
+    const { coreClient } = await this.getClients()
+    return coreClient
+  }
+
+  private async getAgileClient(): Promise<AgileClient> {
+    const { agileClient } = await this.getClients()
+    return agileClient
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -325,6 +354,18 @@ class JiraAPIImpl {
       this.projectService = new JiraProjectService(async () => this.getClient())
     }
     return this.projectService
+  }
+
+  /**
+   * Project operations (list/search, issue types)
+   */
+  get agile(): JiraAgileService {
+    if (!this.agileService) {
+      this.agileService = new JiraAgileService(async () =>
+        this.getAgileClient()
+      )
+    }
+    return this.agileService
   }
 
   /**

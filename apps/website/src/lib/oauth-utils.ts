@@ -102,7 +102,14 @@ export function buildJiraOAuthUrl(
     codeChallenge: string
   }
 ): string {
-  const scopes = ['read:jira-user', 'read:jira-work', 'write:jira-work']
+  const scopes = [
+    'read:jira-user',
+    'read:jira-work',
+    'write:jira-work',
+    'read:sprint:jira-software',
+    'read:project:jira',
+    'read:board-scope:jira-software'
+  ]
   const url = new URL('https://auth.atlassian.com/authorize')
   url.searchParams.set('audience', 'api.atlassian.com')
   url.searchParams.set('client_id', clientId)

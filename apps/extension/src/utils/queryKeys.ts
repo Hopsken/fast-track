@@ -15,6 +15,10 @@ export const queryKeys = {
     search: (projectKey: string, query: string) =>
       ['users', 'search', projectKey, query] as const
   },
+  agile: {
+    projectSprints: (projectKeyOrId: string) =>
+      ['agile', 'sprints', projectKeyOrId] as const
+  },
   projects: {
     frequent: ['projects', 'frequent'] as const,
     recent: ['projects', 'recent'] as const,

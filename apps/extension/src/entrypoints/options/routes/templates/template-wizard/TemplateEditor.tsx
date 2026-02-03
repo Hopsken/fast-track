@@ -17,50 +17,9 @@ import { Link } from 'react-router-dom'
 import { AutoGrowTextarea } from '@/components/ui/AutoGrowTextArea'
 
 import { useWizardContext } from './context'
+import { DeleteTemplateButton } from './DeleteTemplateButton'
 import { FieldsSection } from './FieldsSection'
 import { ScopeSection } from './ScopeSection'
-
-/* ------------------------------------------------------------------ */
-/*  Delete confirmation dialog                                         */
-/* ------------------------------------------------------------------ */
-
-function DeleteDialog({
-  onConfirm,
-  isDeleting
-}: {
-  onConfirm: () => void
-  isDeleting: boolean
-}) {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button variant="destructive" disabled={isDeleting}>
-          {isDeleting ? 'Deleting…' : 'Delete'}
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete template?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action can&apos;t be undone.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel asChild>
-            <Button variant="secondary">Cancel</Button>
-          </AlertDialogCancel>
-          <AlertDialogAction asChild>
-            <Button variant="destructive" onClick={onConfirm}>
-              Delete
-            </Button>
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  )
-}
 
 /* ------------------------------------------------------------------ */
 /*  Template editor                                                    */
@@ -120,7 +79,7 @@ export function TemplateEditor() {
       <div className="flex items-center gap-2 pt-4">
         {/* Delete button (edit mode only, left-aligned) */}
         {isEdit && actions.deleteTemplate && (
-          <DeleteDialog
+          <DeleteTemplateButton
             onConfirm={() => {
               actions.deleteTemplate?.()
             }}

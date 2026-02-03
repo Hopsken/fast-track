@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@internal/ui/components/button'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
+import { templateService } from '@/services'
 import { useCurrentJiraHost } from '~/hooks/useCurrentJiraHost'
 import { getTemplateService } from '~/services/template-service'
 import type { IssueTemplate } from '~/types/template'
 
 import { TemplateWizard } from './template-wizard'
+import { DeleteTemplateButton } from './template-wizard/DeleteTemplateButton'
 
 export function TemplateDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -18,6 +20,13 @@ export function TemplateDetailPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const onDeleteTemplate = useCallback(() => {
+    if (id) {
+      templateService.deleteTemplate(id)
+      navigate('/templates')
+    }
+  }, [id, navigate])
+
   useEffect(() => {
     let cancelled = false
 
@@ -28,7 +37,7 @@ export function TemplateDetailPage() {
 
       try {
         const svc = getTemplateService()
-        const t = await svc.getTemplate(id)
+        const t = await svc.getTemplate(id, { includeOtherHosts: true })
         if (cancelled) return
         setTemplate(t)
       } catch (e) {
@@ -79,23 +88,39 @@ export function TemplateDetailPage() {
   if (!currentHost || template.scope.baseUrlHost !== currentHost) {
     return (
       <div className="space-y-4">
-        <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          This template belongs to{' '}
-          <span className="font-medium">{template.scope.baseUrlHost}</span>.
-          {currentHost ? (
-            <span>
-              {' '}
-              You are currently connected to{' '}
-              <span className="font-medium">{currentHost}</span>.
-            </span>
-          ) : (
-            <span> You are not currently connected.</span>
-          )}{' '}
-          Editing is disabled.
+        <div className="space-y-1">
+          <h2 className="text-foreground placeholder:text-muted-foreground/50 block w-full bg-transparent text-xl font-semibold outline-none">
+            {template.name}
+          </h2>
+
+          <p className="text-muted-foreground placeholder:text-muted-foreground/40 block w-full resize-none bg-transparent text-sm outline-none">
+            {template.description || 'No description'}
+          </p>
         </div>
-        <Button asChild variant="secondary">
-          <Link to="/templates">Back to templates</Link>
-        </Button>
+
+        <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <div>
+            This template belongs to{' '}
+            <span className="font-medium">{template.scope.baseUrlHost}</span>.
+            {currentHost ? (
+              <span>
+                {' '}
+                You are currently connected to{' '}
+                <span className="font-medium">{currentHost}</span>.
+              </span>
+            ) : (
+              <span> You are not currently connected.</span>
+            )}{' '}
+            Editing is disabled.
+          </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <Button asChild variant="secondary">
+            <Link to="/templates">Back to templates</Link>
+          </Button>
+
+          <DeleteTemplateButton onConfirm={onDeleteTemplate} />
+        </div>
       </div>
     )
   }

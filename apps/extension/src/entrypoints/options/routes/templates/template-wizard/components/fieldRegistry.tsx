@@ -4,7 +4,7 @@ import { FieldMetadata } from '@/repository/schema'
 
 import { FieldInputBaseProps } from '../types'
 
-import { LabelsInput, ProjectUserInput } from './fields'
+import { LabelsInput, ProjectUserInput, SprintInput } from './fields'
 import { ParentInput } from './fields/ParentInput'
 import { NumberInput, TextAreaInput, TextInput } from './primitive'
 import { DateInput } from './primitive/DateInput'
@@ -34,7 +34,7 @@ const componentByFieldKey: Record<string, ComponentType<any>> = {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const componentBySchemaCustomType: Record<string, ComponentType<any>> = {
-  'com.pyxis.greenhopper.jira:gh-sprint': UnsupportedField,
+  'com.pyxis.greenhopper.jira:gh-sprint': SprintInput,
   'com.atlassian.jira.plugin.system.customfieldtypes:textfield': TextInput,
   'com.atlassian.jira.plugin.system.customfieldtypes:textarea': TextAreaInput
 }
