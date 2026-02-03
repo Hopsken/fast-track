@@ -2,6 +2,8 @@ import { ComponentType } from 'react'
 
 import { FieldMetadata } from '@/repository/schema'
 
+import { FieldInputBaseProps } from '../types'
+
 import { NumberInput, TextAreaInput, TextInput } from './primitive'
 import { DateInput } from './primitive/DateInput'
 import { DateTimeInput } from './primitive/DateTimeInput'
@@ -9,8 +11,8 @@ import { MultiSelectChips } from './primitive/MultiSelectChips'
 import { SingleSelectField } from './primitive/SingleSelectField'
 import { UserFieldInput } from './primitive/UserFieldInput'
 
-const UnsupportedField = () => {
-  return <span>Not implemented</span>
+const UnsupportedField = ({ field }: FieldInputBaseProps) => {
+  return <span>Field {field.name} is not supported</span>
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

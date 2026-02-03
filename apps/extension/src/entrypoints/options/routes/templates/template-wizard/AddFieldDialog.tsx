@@ -41,7 +41,7 @@ export function AddFieldDialog({
       onOpenChange={onOpenChange}
       title="Add field"
       description="Search and select a field to add to the template.">
-      <CommandInput placeholder="Search fields…" />
+      <CommandInput className="border-b pl-4" placeholder="Search fields…" />
       <CommandList>
         <CommandEmpty>No fields found.</CommandEmpty>
 
