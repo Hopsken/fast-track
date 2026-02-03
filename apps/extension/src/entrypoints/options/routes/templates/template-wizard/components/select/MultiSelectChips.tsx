@@ -8,6 +8,34 @@ interface MultiSelectChipsProps {
   onChange: (v: unknown) => void
 }
 
+/**
+ * Multi-select input displayed as toggleable chips.
+ * Allows selecting multiple values from a predefined list with visual feedback.
+ * Selected chips are highlighted and can be toggled on/off. Includes a clear all button.
+ *
+ * @component
+ * @example
+ * ```tsx
+ * <MultiSelectChips
+ *   allowedValues={[
+ *     { id: '1', name: 'Frontend' },
+ *     { id: '2', name: 'Backend' },
+ *     { id: '3', name: 'Database' }
+ *   ]}
+ *   value={[
+ *     { id: '1', name: 'Frontend' },
+ *     { id: '2', name: 'Backend' }
+ *   ]}
+ *   onChange={setComponents}
+ * />
+ * ```
+ *
+ * @param {MultiSelectChipsProps} props - Component props
+ * @param {NonNullable<FieldMetadata['allowedValues']>} props.allowedValues - Array of allowed values from field metadata
+ * @param {unknown} props.value - Currently selected values (array of objects)
+ * @param {(v: unknown) => void} props.onChange - Callback when selection changes, returns array of selected values
+ * @returns {JSX.Element} Multi-select chip component with clear button
+ */
 export function MultiSelectChips({
   allowedValues,
   value,
