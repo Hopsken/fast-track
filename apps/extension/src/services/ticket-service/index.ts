@@ -7,6 +7,7 @@
 
 import { defineProxyService } from '@webext-core/proxy-service'
 import { UserDetails } from 'jira.js/version3/models/userDetails'
+import type { GetIssuePickerResource } from 'jira.js/version3/parameters/getIssuePickerResource'
 import { difference, keyBy, uniqBy } from 'lodash-es'
 
 import { bucketSuggestionTickets } from '@/lib/tickets/issue-suggestions'
@@ -66,6 +67,10 @@ class TicketServiceImpl {
 
   private async getRecentHistoryTickets(limit = 7): Promise<JiraTicket[]> {
     return this.jira.issues.getRecentHistoryIssues(limit)
+  }
+
+  async getSuggestedIssues(params: GetIssuePickerResource) {
+    return this.jira.issues.getIssuePickerSuggestions(params)
   }
 
   async searchTickets(

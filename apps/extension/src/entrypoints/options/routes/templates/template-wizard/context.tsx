@@ -174,13 +174,15 @@ export function TemplateWizardProvider(props: ProviderProps) {
     const { project } = scope
     if (!project) return []
 
-    return project.issueTypes
-      .filter((i) => !i.subtask)
-      .map((issueType) => ({
-        value: issueType.id,
-        label: issueType.name,
-        data: issueType
-      }))
+    return (
+      project.issueTypes
+        ?.filter((i) => !i.subtask)
+        .map((issueType) => ({
+          value: issueType.id,
+          label: issueType.name,
+          data: issueType
+        })) ?? []
+    )
   }, [scope])
 
   // --- Fields ---

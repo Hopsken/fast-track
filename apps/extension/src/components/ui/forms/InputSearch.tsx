@@ -11,6 +11,7 @@ import {
   ComboboxList
 } from '@internal/ui/components/combobox'
 import { InputGroupAddon } from '@internal/ui/components/input-group'
+import { isEqual } from 'lodash-es'
 
 export interface SearchOption<T = unknown> {
   /** Unique identifier for the option */
@@ -63,6 +64,8 @@ export interface InputSearchProps<T = unknown> {
   /** Callback when selection changes */
   onSelect?: (option: T | null) => void
 
+  isSameValue?: (a: T, b: T) => boolean
+
   /** Whether the search input is disabled */
   disabled?: boolean
   /** Additional className for the input */
@@ -100,6 +103,7 @@ export function InputSearch<T = unknown>({
   filter = true,
   value,
   onSelect,
+  isSameValue = isEqual,
   disabled = false,
   className,
   id,
@@ -134,14 +138,16 @@ export function InputSearch<T = unknown>({
   const selectedOption = useMemo(() => {
     if (value === undefined || value === null) return null
 
-    const fromOptions = options.find((opt) => opt.data === value) ?? null
+    const fromOptions =
+      options.find((opt) => isSameValue(opt.data, value)) ?? null
     if (fromOptions) return fromOptions
 
     // Keep showing the last selected label even if options are empty
-    if (selectedCache?.data === value) return selectedCache
+    if (selectedCache && isSameValue(selectedCache.data, value))
+      return selectedCache
 
     return null
-  }, [options, selectedCache, value])
+  }, [options, selectedCache, value, isSameValue])
 
   useEffect(() => {
     if (value === undefined || value === null) {

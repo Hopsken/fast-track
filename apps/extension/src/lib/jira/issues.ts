@@ -6,6 +6,7 @@
 import { Version3Client } from 'jira.js'
 import type { Issue } from 'jira.js/version3/models/issue'
 import type { PageOfCreateMetaIssueTypeWithField } from 'jira.js/version3/models/pageOfCreateMetaIssueTypeWithField'
+import type { GetIssuePickerResource } from 'jira.js/version3/parameters/getIssuePickerResource'
 import { chunk, compact, flatMap, map, orderBy, uniqBy } from 'lodash-es'
 
 import {
@@ -308,6 +309,13 @@ export class JiraIssueService {
       'issue in issueHistory() ORDER BY lastViewed DESC, updated DESC',
       { source: 'history', limit }
     )
+  }
+
+  async getIssuePickerSuggestions(params: GetIssuePickerResource) {
+    const client = await this.getClient()
+    const result = await client.issueSearch.getIssuePickerResource(params)
+
+    return flatMap(result.sections, (section) => section.issues)
   }
 
   /**

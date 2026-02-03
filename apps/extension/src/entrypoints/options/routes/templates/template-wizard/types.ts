@@ -1,4 +1,5 @@
-import type { JiraIssueType, JiraProject, JiraStatus } from '@/types/jira'
+import { JiraProject } from '@/repository/schema'
+import type { JiraIssueType, JiraStatus } from '@/types/jira'
 import type { AllowedValue, FieldMetadata } from '~/types/template'
 
 export type WizardScope = {
@@ -10,6 +11,8 @@ export type WizardScope = {
  * Base props shared by all field input components.
  */
 export interface FieldInputBaseProps<T = unknown> {
+  project: JiraProject
+  issueType: JiraIssueType
   field: FieldMetadata
   value?: T
   onChange: (v?: T) => void

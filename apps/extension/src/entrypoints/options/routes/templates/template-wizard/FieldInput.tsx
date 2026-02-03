@@ -1,8 +1,7 @@
 import { createElement, useMemo } from 'react'
 
-import type { FieldMetadata } from '~/types/template'
-
 import { getFieldEditor } from './components/fieldRegistry'
+import { FieldInputBaseProps } from './types'
 
 /* ------------------------------------------------------------------ */
 /*  Field input (type-appropriate router)                              */
@@ -15,16 +14,7 @@ import { getFieldEditor } from './components/fieldRegistry'
  * This component receives `unknown` types from template state and
  * casts to concrete types when passing to specific components.
  */
-export function FieldInput({
-  field,
-  value,
-  onChange
-}: {
-  field: FieldMetadata
-  value: unknown
-  onChange: (v: unknown) => void
-}) {
-  const FieldEditor = useMemo(() => getFieldEditor(field), [field])
-
-  return createElement(FieldEditor, { value, onChange, field })
+export function FieldInput(props: FieldInputBaseProps) {
+  const FieldEditor = useMemo(() => getFieldEditor(props.field), [props.field])
+  return createElement(FieldEditor, props)
 }

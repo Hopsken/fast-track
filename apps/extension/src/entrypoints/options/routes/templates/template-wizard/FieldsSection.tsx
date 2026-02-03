@@ -27,7 +27,13 @@ const EXCLUDED = new Set(['project', 'issuetype', 'attachment', 'issuelinks'])
 
 export function FieldsSection() {
   const { state, actions } = useWizardContext()
-  const { availableFields, fieldsConfig, areFieldsLoading, fieldsError } = state
+  const {
+    scope,
+    availableFields,
+    fieldsConfig,
+    areFieldsLoading,
+    fieldsError
+  } = state
   const [commandOpen, setCommandOpen] = useState(false)
 
   const { configuredFields, unconfiguredFields } = useMemo(() => {
@@ -63,6 +69,8 @@ export function FieldsSection() {
     },
     [actions]
   )
+
+  if (!scope.issueType || !scope.project) return null
 
   return (
     <section className="space-y-3">
@@ -114,6 +122,8 @@ export function FieldsSection() {
               {configuredFields.map((field) => (
                 <FieldRow
                   key={field.fieldId}
+                  project={scope.project!}
+                  issueType={scope.issueType!}
                   field={field}
                   config={fieldsConfig[field.fieldId]!}
                   onConfigChange={(config) =>

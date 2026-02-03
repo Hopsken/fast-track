@@ -2,7 +2,7 @@ import { Input } from '@internal/ui/components/input'
 import { Label } from '@internal/ui/components/label'
 
 import { GeneralIcon, InputSearch } from '@/components/ui'
-import { JiraIssueType, JiraProject } from '@/types'
+import { JiraIssueType, JiraProject } from '@/repository/schema'
 
 import { useWizardContext } from './context'
 

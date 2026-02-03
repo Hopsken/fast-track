@@ -4,6 +4,7 @@ import { FieldMetadata } from '@/repository/schema'
 
 import { FieldInputBaseProps } from '../types'
 
+import { ParentInput } from './fields/ParentInput'
 import { NumberInput, TextAreaInput, TextInput } from './primitive'
 import { DateInput } from './primitive/DateInput'
 import { DateTimeInput } from './primitive/DateTimeInput'
@@ -19,7 +20,7 @@ const UnsupportedField = ({ field }: FieldInputBaseProps) => {
 const componentByFieldKey: Record<string, ComponentType<any>> = {
   summary: TextInput,
   description: TextAreaInput,
-  parent: SingleSelectField,
+  parent: ParentInput,
   assignee: UserFieldInput,
   reporter: UserFieldInput,
   priority: SingleSelectField,
@@ -46,7 +47,7 @@ const componentBySchemaType: Record<string, ComponentType<any>> = {
   date: DateInput,
   datetime: DateTimeInput,
   option: SingleSelectField,
-  team: SingleSelectField,
+  // team: SingleSelectField,
   array: MultiSelectChips
 }
 

@@ -11,11 +11,14 @@ export type JiraCreatedIssue = {
 class JiraServiceImpl {
   private jira = getJiraApi()
 
-  public async autoComplete<T>(url: string, query: string): Promise<T> {
+  public async autoComplete<T>(
+    url: string,
+    params?: Record<string, unknown>
+  ): Promise<T> {
     return this.jira.request<T>({
       url,
       method: 'GET',
-      params: { query }
+      params
     })
   }
 

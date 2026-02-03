@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 import { Badge } from '@internal/ui/components/badge'
 import { Trash2Icon } from 'lucide-react'
 
+import { JiraIssueType, JiraProject } from '@/repository/schema'
 import type { AllowedValue, FieldConfig, FieldMetadata } from '~/types/template'
 
 import { FieldInput } from './FieldInput'
@@ -68,9 +69,13 @@ function ModeToggle({
 export function FieldRow({
   field,
   config,
+  project,
+  issueType,
   onConfigChange,
   onRemove
 }: {
+  project: JiraProject
+  issueType: JiraIssueType
   field: FieldMetadata
   config: FieldConfig
   onConfigChange: (config: FieldConfig) => void
@@ -147,6 +152,8 @@ export function FieldRow({
         {/* Input area — depends on mode */}
         {currentMode === 'preset' && (
           <FieldInput
+            project={project}
+            issueType={issueType}
             field={field}
             value={
               config.behavior === 'preset' ? config.presetValue : undefined
