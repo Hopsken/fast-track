@@ -257,7 +257,7 @@ const storageItems: Record<
   // Other storage items without versioning
   ...Object.entries(STORAGE_DEFAULTS).reduce(
     (acc, [key, value]) => {
-      const storageArea = key === 'IssueTemplates' ? 'sync' : 'local'
+      const storageArea = 'local'
 
       acc[key as Exclude<StorageKey, 'AuthCredentials'>] = storage.defineItem(
         `${storageArea}:${key}`,

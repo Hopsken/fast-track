@@ -27,7 +27,7 @@ const componentByFieldKey: Record<string, ComponentType<any>> = {
   priority: SingleSelectField,
   labels: LabelsInput,
   components: MultiSelectChips,
-  fixVersions: SingleSelectField,
+  fixVersions: MultiSelectChips,
   duedate: DateInput,
   resolution: SingleSelectField
 }
