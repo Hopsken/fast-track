@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -71,6 +71,13 @@ export function TemplateEditor() {
 
   const isEdit = meta.mode === 'edit'
 
+  const buttonText = useMemo(() => {
+    if (state.isSaving) {
+      return isEdit ? 'Saving…' : 'Creating…'
+    }
+    return isEdit ? 'Save' : 'Create'
+  }, [state.isSaving, isEdit])
+
   return (
     <div className="space-y-8">
       {/* Inline name + description (Linear-style) */}
@@ -114,7 +121,9 @@ export function TemplateEditor() {
         {/* Delete button (edit mode only, left-aligned) */}
         {isEdit && actions.deleteTemplate && (
           <DeleteDialog
-            onConfirm={() => void actions.deleteTemplate!()}
+            onConfirm={() => {
+              actions.deleteTemplate?.()
+            }}
             isDeleting={state.isDeleting}
           />
         )}
@@ -127,13 +136,7 @@ export function TemplateEditor() {
         <Button
           onClick={() => actions.save().catch(() => {})}
           disabled={!meta.canSave || state.isSaving}>
-          {state.isSaving
-            ? isEdit
-              ? 'Saving…'
-              : 'Creating…'
-            : isEdit
-              ? 'Save'
-              : 'Create'}
+          {buttonText}
         </Button>
       </div>
     </div>
