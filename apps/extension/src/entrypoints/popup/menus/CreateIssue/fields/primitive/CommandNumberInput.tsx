@@ -7,22 +7,18 @@ import { useMount } from 'ahooks'
 
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 
-import { useFieldConfirm } from '../useFieldConfirm'
+import { useFieldConfirm } from '../hooks/useFieldConfirm'
+import { getFieldTitle, prefillNumberValue } from '../utils'
 
-type Props = {
-  title: string
-  currentValue: unknown
-  onConfirm: (value: number | undefined) => void
-  placeholder?: string
-}
+import { FieldInputProps } from './types'
 
-export function NumberFieldInput({
-  title,
+export function CommandNumberInput({
+  field,
   currentValue,
-  onConfirm,
-  placeholder = 'Type a number and press Enter'
-}: Props) {
+  onConfirm
+}: FieldInputProps) {
   const { search, setSearch } = useCommandInput()
+  const title = getFieldTitle(field)
 
   const handleConfirm = () => {
     const trimmed = search.trim()
@@ -38,15 +34,13 @@ export function NumberFieldInput({
 
   // Pre-fill the search box with current value
   useMount(() => {
-    if (typeof currentValue === 'number') {
-      setSearch(String(currentValue))
-    }
+    prefillNumberValue(currentValue, setSearch)
   })
 
   return (
     <CommandList>
       <CommandGroup heading={title}>
-        <CommandEmpty>{placeholder}</CommandEmpty>
+        <CommandEmpty>Type a number and press Enter</CommandEmpty>
       </CommandGroup>
 
       {useFieldConfirm({

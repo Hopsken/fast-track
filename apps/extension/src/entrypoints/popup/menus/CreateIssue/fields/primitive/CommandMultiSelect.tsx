@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import {
   CommandGroup,
   CommandItem,
@@ -8,24 +9,23 @@ import { Check } from 'lucide-react'
 
 import type { AllowedValue } from '~/types/template'
 
-import { useFieldConfirm } from '../useFieldConfirm'
-import { isArrayOfAllowedValues } from '../utils'
+import { useFieldConfirm } from '../hooks/useFieldConfirm'
+import { getFieldTitle, isArrayOfAllowedValues } from '../utils'
 
-type Props = {
-  title: string
-  currentValue: unknown
-  allowedOptions: AllowedValue[]
-  onChange: (value: AllowedValue[]) => void
-  onConfirm?: (value: AllowedValue[]) => void
-}
+import { FieldInputProps } from './types'
 
-export function MultiSelectFieldInput({
-  title,
+export function CommandMultiSelect({
+  field,
   currentValue,
-  allowedOptions,
-  onChange,
   onConfirm
-}: Props) {
+}: FieldInputProps) {
+  const title = getFieldTitle(field)
+
+  const allowedOptions = useMemo<AllowedValue[]>(
+    () => field.allowedOptions ?? field.metadata?.allowedValues ?? [],
+    [field]
+  )
+
   const selected = isArrayOfAllowedValues(currentValue) ? currentValue : []
   const selectedIds = new Set(selected.map((o) => o.id))
 
@@ -33,11 +33,11 @@ export function MultiSelectFieldInput({
     const next = selectedIds.has(opt.id)
       ? selected.filter((o) => o.id !== opt.id)
       : [...selected, opt]
-    onChange(next)
+    onConfirm(next)
   }
 
   const handleConfirm = useMemoizedFn(() => {
-    onConfirm?.(selected)
+    onConfirm(selected)
   })
 
   return (
@@ -62,8 +62,7 @@ export function MultiSelectFieldInput({
 
       {useFieldConfirm({
         onConfirm: handleConfirm,
-        keys: 'meta+enter',
-        enabled: !!onConfirm
+        keys: 'meta+enter'
       })}
     </CommandList>
   )

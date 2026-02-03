@@ -4,16 +4,16 @@ import { useMount } from 'ahooks'
 
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 
-import { CommandMenu } from '../../CommandMenu'
-import { useCreateIssueDraftStore } from '../useCreateIssueDraftStore'
-import { useFieldConfirm } from '../useFieldConfirm'
-import { useWizardNavigation } from '../useWizardNavigation'
+import { CommandMenu } from '../../../CommandMenu'
+import { useCreateIssueDraftStore } from '../../useCreateIssueDraftStore'
+import { useWizardNavigation } from '../../useWizardNavigation'
+import { useFieldConfirm } from '../hooks/useFieldConfirm'
 
 interface Props {
   focusField: 'summary' | 'description'
 }
 
-export function SummaryDescriptionFieldInput({ focusField }: Props) {
+export function SummaryDescriptionInput({ focusField }: Props) {
   const { values, setValue } = useCreateIssueDraftStore()
   const { search, setSearch } = useCommandInput()
   const { goToNextField } = useWizardNavigation()

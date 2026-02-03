@@ -38,6 +38,17 @@ const isAllowedValue = (v: unknown): v is AllowedValue => {
   return typeof rec.id === 'string'
 }
 
+function formatIssue(value: unknown): null | { key: string } {
+  if (!value) return null
+
+  const rec = asRecord(value)
+  if (rec && typeof rec.key === 'string') {
+    return { key: rec.key }
+  }
+
+  return null
+}
+
 function formatOption(value: unknown): unknown {
   if (!value) return value
   if (isAllowedValue(value)) return { id: value.id }
@@ -169,6 +180,9 @@ export function formatCreateIssueFieldValue(input: {
     case 'issuelink': {
       const rec = asRecord(value)
       if (!rec) return value
+
+      const issue = formatIssue(value)
+      if (issue) return issue
 
       const typeObj = asRecord(rec.type)
       const outwardIssue = asRecord(rec.outwardIssue)

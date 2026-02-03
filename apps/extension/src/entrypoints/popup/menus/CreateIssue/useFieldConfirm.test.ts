@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { useFieldConfirm } from './useFieldConfirm'
+import { useFieldConfirm } from './fields/hooks/useFieldConfirm'
 
 // Extend globalThis for test hotkey handlers
 declare global {

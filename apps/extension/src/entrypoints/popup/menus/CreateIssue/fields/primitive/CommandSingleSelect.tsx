@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import {
   CommandEmpty,
   CommandGroup,
@@ -10,23 +11,31 @@ import { useMount } from 'ahooks'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 import type { AllowedValue } from '~/types/template'
 
-import { useFieldConfirm } from '../useFieldConfirm'
+import { useFieldConfirm } from '../hooks/useFieldConfirm'
+import { asRecord, getFieldTitle } from '../utils'
 
-export type Props = {
-  title: string
-  selected?: AllowedValue
-  allowedOptions: AllowedValue[]
-  onConfirm: (value: AllowedValue) => void
-}
+import { FieldInputProps } from './types'
 
-export function SingleSelectFieldInput({
-  title,
-  selected,
-  allowedOptions,
+export function CommandSingleSelect({
+  field,
+  currentValue,
   onConfirm
-}: Props) {
+}: FieldInputProps) {
   const value = useCommandState((state) => state.value)
   const { setValue } = useCommandInput()
+  const title = getFieldTitle(field)
+
+  const allowedOptions = useMemo<AllowedValue[]>(
+    () => field.allowedOptions ?? field.metadata?.allowedValues ?? [],
+    [field]
+  )
+
+  // Extract selected option from currentValue
+  const selected = useMemo(() => {
+    const rec = asRecord(currentValue)
+    if (!rec || typeof rec.id !== 'string') return undefined
+    return allowedOptions.find((opt) => opt.id === rec.id)
+  }, [currentValue, allowedOptions])
 
   useMount(() => {
     if (selected) {

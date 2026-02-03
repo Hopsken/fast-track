@@ -1,11 +1,6 @@
-import { Button } from '@internal/ui/components/button'
-import { CommandShortcut } from '@internal/ui/components/command'
 import { useHotkeys } from 'react-hotkeys-hook'
 
-import { CommandFooterSlot } from '@/stores/command/useCommandFooterSlot'
-
-import { FieldConfirm } from './FieldConfirm'
-import { WizardProgressBar } from './WizardProgressBar'
+import { FieldConfirm } from '../../FieldConfirm'
 
 /**
  * Hotkey patterns for field confirmation.

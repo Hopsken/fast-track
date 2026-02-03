@@ -6,7 +6,7 @@ import { createStore, StoreApi } from 'zustand/vanilla'
 import { IssueTemplate } from '@/types/template'
 import type { VisibleField } from '~/services/template-service/gap-analysis'
 
-import { buildInitialValues } from './utils'
+import { buildInitialValues } from './fields/utils'
 
 export interface CreateIssueDraftState {
   template: IssueTemplate

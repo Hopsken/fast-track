@@ -5,8 +5,8 @@ import { useCommandInput } from '@/stores/command/useCommandInputStore'
 
 import { CommandRoutes } from '../../routes'
 
+import { isEmptyValue } from './fields/utils'
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
-import { isEmptyValue } from './utils'
 
 export function useWizardNavigation() {
   const { values, wizardFields, wizardIndex, setWizardIndex, clearError } =

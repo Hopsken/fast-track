@@ -4,7 +4,7 @@ import { AlertCircle, Check, ChevronRight } from 'lucide-react'
 
 import type { VisibleField } from '~/services/template-service/gap-analysis'
 
-import { formatValuePreview, getFieldName, isEmptyValue } from './utils'
+import { formatValuePreview, getFieldName, isEmptyValue } from './fields/utils'
 
 export interface FieldListItemProps {
   field: VisibleField

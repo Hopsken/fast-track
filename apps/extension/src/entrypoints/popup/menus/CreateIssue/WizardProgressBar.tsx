@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import { cn } from '@internal/ui/lib/utils'
 
+import { isEmptyValue } from './fields/utils'
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
-import { isEmptyValue } from './utils'
 
 export function WizardProgressBar() {
   const { wizardFields, values } = useCreateIssueDraftStore()

@@ -12,8 +12,8 @@ import { formatErrorMessage } from '~/utils/formatError'
 
 import { CommandRoutes } from '../../routes'
 
+import { extractJiraFieldErrors, pickNonEmptyValues } from './fields/utils'
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
-import { extractJiraFieldErrors, pickNonEmptyValues } from './utils'
 
 export interface UseCreateIssueFormOptions {
   template: IssueTemplate

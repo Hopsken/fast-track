@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import {
   CommandEmpty,
   CommandGroup,
@@ -10,7 +11,10 @@ import { useMount } from 'ahooks'
 import { useAutoCompleteUsers } from '@/hooks/useAutoComplete'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 
-import { useFieldConfirm } from '../useFieldConfirm'
+import { useFieldConfirm } from '../hooks/useFieldConfirm'
+import { asRecord, getFieldTitle } from '../utils'
+
+import { FieldInputProps } from './types'
 
 export type UserValue = {
   accountId?: string
@@ -18,26 +22,34 @@ export type UserValue = {
   emailAddress?: string
 }
 
-type Props = {
-  title: string
-  selected?: UserValue
-  autoCompleteUrl: string
-  onConfirm: (value: UserValue) => void
-}
-
 const toUserId = (user: UserValue) => user.accountId ?? user.emailAddress ?? ''
 
-export function UserFieldInputMenu({
-  title,
-  selected,
-  autoCompleteUrl,
+export function CommandUserSelect({
+  field,
+  currentValue,
   onConfirm
-}: Props) {
+}: FieldInputProps) {
   const { value, setValue, search, setSearch } = useCommandInput()
+  const title = getFieldTitle(field)
+  const autoCompleteUrl = field.metadata?.autoCompleteUrl ?? ''
+
   const { data: users, isLoading } = useAutoCompleteUsers(
     autoCompleteUrl,
     search
   )
+
+  // Extract selected user from currentValue
+  const selected = useMemo((): UserValue | undefined => {
+    const rec = asRecord(currentValue)
+    if (!rec) return undefined
+    return {
+      accountId: typeof rec.accountId === 'string' ? rec.accountId : undefined,
+      displayName:
+        typeof rec.displayName === 'string' ? rec.displayName : undefined,
+      emailAddress:
+        typeof rec.emailAddress === 'string' ? rec.emailAddress : undefined
+    }
+  }, [currentValue])
 
   useMount(() => {
     if (selected) {

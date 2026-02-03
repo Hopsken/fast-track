@@ -7,34 +7,28 @@ import { useMount } from 'ahooks'
 
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 
-import { useFieldConfirm } from '../useFieldConfirm'
+import { useFieldConfirm } from '../hooks/useFieldConfirm'
+import { getFieldTitle, prefillStringValue } from '../utils'
 
-type Props = {
-  title: string
-  currentValue: unknown
-  onConfirm: (value: string) => void
-  placeholder?: string
-}
+import { FieldInputProps } from './types'
 
-export function StringFieldInput({
-  title,
+export function CommandStringInput({
+  field,
   currentValue,
-  onConfirm,
-  placeholder = 'Type a value and press Enter'
-}: Props) {
+  onConfirm
+}: FieldInputProps) {
   const { search, setSearch } = useCommandInput()
+  const title = getFieldTitle(field)
 
   // Pre-fill the search box with current value
   useMount(() => {
-    if (currentValue && typeof currentValue === 'string') {
-      setSearch(currentValue)
-    }
+    prefillStringValue(currentValue, setSearch)
   })
 
   return (
     <CommandList>
       <CommandGroup heading={title}>
-        <CommandEmpty>{placeholder}</CommandEmpty>
+        <CommandEmpty>Type a value and press Enter</CommandEmpty>
       </CommandGroup>
 
       {useFieldConfirm({

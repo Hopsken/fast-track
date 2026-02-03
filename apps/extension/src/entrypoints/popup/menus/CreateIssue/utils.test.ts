@@ -5,7 +5,7 @@ import {
   formatValuePreview,
   isEmptyValue,
   pickNonEmptyValues
-} from './utils'
+} from './fields/utils'
 
 describe('CreateIssue utils', () => {
   describe('isEmptyValue', () => {
