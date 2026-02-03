@@ -8,6 +8,7 @@ export type TicketSearchKey = {
 }
 
 export const queryKeys = {
+  labels: ['labels'],
   autoComplete: (url: string, query: string) => ['autoComplete', url, query],
   priorities: ['priorities'],
   projects: {

@@ -95,7 +95,7 @@ export class JiraProjectService {
     if (!normalized) return []
 
     const project = await this.getProject(normalized)
-    return project.issueTypes
+    return project.issueTypes ?? []
   }
 
   async getRecentProjects(): Promise<JiraProject[]> {

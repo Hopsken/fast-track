@@ -31,6 +31,10 @@ class JiraServiceImpl {
       data: input
     })
   }
+
+  async getLabels() {
+    return this.jira.getLabels()
+  }
 }
 
 export type JiraService = InstanceType<typeof JiraServiceImpl>

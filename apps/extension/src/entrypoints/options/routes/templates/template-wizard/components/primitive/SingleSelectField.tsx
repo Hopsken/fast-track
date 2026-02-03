@@ -1,9 +1,7 @@
-import { useMemo } from 'react'
+import { useState } from 'react'
 
-import {
-  InputSearch,
-  type SearchOption
-} from '@/components/ui/forms/InputSearch'
+import { GeneralIcon } from '@/components'
+import { AutoComplete } from '@/components/ui/AutoComplete'
 
 import { FieldInputBaseProps, IconOption } from '../../types'
 
@@ -19,24 +17,24 @@ export function SingleSelectField<T extends IconOption>({
   value,
   onChange
 }: FieldInputBaseProps<T>) {
-  const options = useFieldOptions<T>(field, '')
-  const searchOptions = useMemo<SearchOption<T>[]>(
-    () =>
-      options.map((opt) => ({
-        value: opt.id,
-        label: opt.name ?? opt.value ?? opt.id,
-        data: opt
-      })),
-    [options]
-  )
+  const [query, setQuery] = useState('')
+  const options = useFieldOptions<T>(field, query)
 
   return (
-    <InputSearch<T>
-      placeholder={`Select ${field?.name}…`}
-      options={searchOptions}
+    <AutoComplete<T, false>
+      multiple={false}
       value={value}
-      onSelect={(val) => onChange(val as T)}
-      filter
+      onValueChange={(val) => onChange(val ?? undefined)}
+      query={query}
+      onQueryChange={setQuery}
+      options={options}
+      getOptionValue={(opt) => opt.id}
+      getOptionLabel={(opt) => opt.name ?? opt.value ?? opt.id}
+      renderOptionIcon={(opt) =>
+        opt.iconUrl ? (
+          <GeneralIcon alt={opt.name ?? ''} iconUrl={opt.iconUrl} />
+        ) : null
+      }
     />
   )
 }

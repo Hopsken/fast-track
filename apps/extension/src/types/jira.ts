@@ -48,7 +48,7 @@ export interface JiraMergeRequest {
 // ─────────────────────────────────────────────────────────────────────────
 
 export interface JiraProject extends JiraProjectCore {
-  issueTypes: JiraIssueType[]
+  issueTypes?: JiraIssueType[]
 }
 
 export type IssueSource = 'history' | 'sprint' | 'sniff' | 'picker' | 'watching'

@@ -9,6 +9,12 @@
 - **Build output**: `apps/extension/.output/`; zips via `pnpm zip`
 - **Shared configs**: `packages/eslint-config`, `packages/typescript-config`, `packages/tailwind-config`.
 
+### Package names
+
+- `pnpm run --filter extensions` owns extension code
+- `pnpm run --filter website` owns website code
+- `pnpm run --filter @internal/ui` owns Shadcn components; add new ones via Shadcn CLI from there.
+
 ## Tech Stack
 
 - **Frontend**: React 19 + TypeScript (strict), Tailwind (tw-animate-css configured) + Shadcn

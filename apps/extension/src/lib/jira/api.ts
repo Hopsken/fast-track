@@ -341,6 +341,12 @@ class JiraAPIImpl {
     }
   }
 
+  async getLabels() {
+    const client = await this.getClient()
+    const result = await client.labels.getAllLabels()
+    return result.values ?? []
+  }
+
   /**
    * Send a raw request to Jira API
    */
