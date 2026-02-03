@@ -5,6 +5,7 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import { CommandFooterSlot } from '@/stores/command/useCommandFooterSlot'
 
 import { FieldConfirm } from './FieldConfirm'
+import { WizardProgressBar } from './WizardProgressBar'
 
 /**
  * Hotkey patterns for field confirmation.

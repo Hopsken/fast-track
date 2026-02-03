@@ -53,6 +53,7 @@ export function CreateIssueFieldsMenu() {
       <ActionLoading isLoading={isLoadingFields} />
 
       <FieldList
+        heading="Review"
         fields={wizardFields}
         values={values}
         errors={errors}

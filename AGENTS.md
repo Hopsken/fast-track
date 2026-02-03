@@ -30,7 +30,8 @@
 
 ## Quality Gates
 
-- `pnpm lint`, `pnpm typecheck`, `pnpm test` must pass
+- `pnpm lint`, `pnpm typecheck`, `pnpm test` must pass.
+- For lint issues, don't worry about style/format issues, they can be autofixed. Focus on functional ones.
 - No `any`, `@ts-ignore`, or disabled lint rules without justification
 - UI changes: reuse `packages/ui`, verify across surfaces + browsers
 - Performance: 100ms target for most actions; declare budgets; include debounce/cache strategies

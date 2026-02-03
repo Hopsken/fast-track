@@ -3,8 +3,7 @@ import { CommandGroup, CommandList } from '@internal/ui/components/command'
 import { Outlet, Route, Routes, useLocation } from 'react-router-dom'
 
 import { TicketBasicFields } from '@/components'
-import { CommandFooterSlot } from '@/stores/command/useCommandFooterSlot'
-import { JiraIssueType, JiraTicket } from '@/types'
+import type { JiraTicket } from '@/types'
 import type { VisibleField } from '~/services/template-service/gap-analysis'
 import type { IssueTemplate } from '~/types/template'
 
@@ -29,9 +28,12 @@ function CreateIssueMenuLayout() {
   const ticket = useMemo<Partial<JiraTicket>>(() => {
     const { project, issueType } = template.scope
     return {
-      key: `${project.key}`,
+      key: `${project.key}-?`,
+      summary: values['summary'] as string,
       issueType,
-      ...values
+      status: undefined,
+      assignee: null,
+      priority: null
     }
   }, [template, values])
 
