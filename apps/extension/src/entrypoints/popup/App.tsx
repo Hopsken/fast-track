@@ -25,6 +25,7 @@ import {
   TicketActionsMenu,
   TicketAssignMenu,
   TicketMergeRequestsMenu,
+  TicketCommentsMenu,
   TicketPriorityMenu,
   TicketStatusMenu,
   TicketDetailsMenu,
@@ -129,6 +130,10 @@ function App() {
 
         <CommandRoute path="/ticket/merge-requests">
           {(props) => <TicketMergeRequestsMenu {...props} />}
+        </CommandRoute>
+
+        <CommandRoute path="/ticket/comments">
+          {(props) => <TicketCommentsMenu {...props} />}
         </CommandRoute>
 
         <CommandRoute path="/ticket/status">

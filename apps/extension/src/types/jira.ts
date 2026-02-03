@@ -42,6 +42,14 @@ export interface JiraMergeRequest {
   provider: 'github' | 'gitlab'
 }
 
+export interface JiraComment {
+  id: string
+  author: JiraAssignee | null
+  created: string
+  updated: string | null
+  text: string
+}
+
 export type IssueSource = 'history' | 'sprint' | 'sniff' | 'picker' | 'watching'
 
 export interface JiraTicket {

@@ -30,6 +30,8 @@ export const queryKeys = {
       ['tickets', ticketKey, 'editMeta'] as const,
     mergeRequests: (ticketKey: string) =>
       ['tickets', ticketKey, 'mergeRequests'] as const,
+    comments: (ticketKey: string) =>
+      ['tickets', ticketKey, 'comments'] as const,
     transitions: (ticket: JiraTicket) =>
       ['tickets', ticket.key, 'transitions', ticket.status.name] as const
   }

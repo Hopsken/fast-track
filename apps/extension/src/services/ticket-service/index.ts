@@ -12,6 +12,7 @@ import { difference, keyBy, uniqBy } from 'lodash-es'
 import { bucketSuggestionTickets } from '@/lib/tickets/issue-suggestions'
 import {
   IssueDetail,
+  JiraComment,
   JiraMergeRequest,
   JiraPriority,
   JiraTicket,
@@ -87,6 +88,10 @@ class TicketServiceImpl {
 
   async getIssueMergeRequests(issueKey: string): Promise<JiraMergeRequest[]> {
     return this.jira.issues.getIssueMergeRequests(issueKey)
+  }
+
+  async getIssueComments(issueKey: string): Promise<JiraComment[]> {
+    return this.jira.issues.getIssueComments(issueKey)
   }
 
   async getIssueEditMetadata(ticketKey: string) {
