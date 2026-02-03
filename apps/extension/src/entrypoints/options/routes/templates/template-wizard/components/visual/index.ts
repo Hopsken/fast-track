@@ -1,5 +1,0 @@
-export { PriorityFieldInput } from './PriorityFieldInput'
-export { IssueTypeFieldInput } from './IssueTypeFieldInput'
-export { ProjectFieldInput } from './ProjectFieldInput'
-export { StatusFieldInput } from './StatusFieldInput'
-export { ResolutionFieldInput } from './ResolutionFieldInput'

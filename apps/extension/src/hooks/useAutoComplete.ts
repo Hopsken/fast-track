@@ -13,7 +13,7 @@ export function useAutoCompleteQuery<T>(url: string, query: string) {
       const result = await jiraService.autoComplete<T>(url, query)
       return result
     },
-    enabled: z.url().safeParse(url).success
+    enabled: !!url && z.url().safeParse(url).success
   })
 }
 

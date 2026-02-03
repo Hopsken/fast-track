@@ -1,12 +1,8 @@
 import { useMemo } from 'react'
 
-import type { FieldMetadata } from '~/types/template'
+import { FieldInputBaseProps, IconOption } from '../../types'
 
-interface MultiSelectChipsProps {
-  allowedValues: NonNullable<FieldMetadata['allowedValues']>
-  value: unknown
-  onChange: (v: unknown) => void
-}
+import { useFieldOptions } from './useFieldOptions'
 
 /**
  * Multi-select input displayed as toggleable chips.
@@ -29,35 +25,20 @@ interface MultiSelectChipsProps {
  *   onChange={setComponents}
  * />
  * ```
- *
- * @param {MultiSelectChipsProps} props - Component props
- * @param {NonNullable<FieldMetadata['allowedValues']>} props.allowedValues - Array of allowed values from field metadata
- * @param {unknown} props.value - Currently selected values (array of objects)
- * @param {(v: unknown) => void} props.onChange - Callback when selection changes, returns array of selected values
- * @returns {JSX.Element} Multi-select chip component with clear button
+
  */
-export function MultiSelectChips({
-  allowedValues,
+export function MultiSelectChips<T extends IconOption>({
+  field,
   value,
   onChange
-}: MultiSelectChipsProps) {
-  const options = useMemo(
-    () =>
-      allowedValues.map((av) => ({
-        value: String(av.id ?? av.value ?? av.name),
-        label: av.name ?? av.value ?? av.id ?? 'Unknown',
-        data: av as Record<string, unknown>
-      })),
-    [allowedValues]
-  )
+}: FieldInputBaseProps<T[]>) {
+  const options = useFieldOptions<T>(field, '')
 
   const selectedIds = useMemo(
     () =>
       new Set(
         Array.isArray(value)
-          ? (value as Array<Record<string, unknown>>).map((v) =>
-              String(v.id ?? v.value ?? v)
-            )
+          ? (value as T[]).map((v) => String(v.id ?? v.value ?? v))
           : []
       ),
     [value]
@@ -66,20 +47,16 @@ export function MultiSelectChips({
   return (
     <div className="flex flex-wrap gap-1.5">
       {options.map((opt) => {
-        const selected = selectedIds.has(opt.value)
+        const selected = selectedIds.has(opt.id)
         return (
           <button
-            key={opt.value}
+            key={opt.id}
             type="button"
             onClick={() => {
-              const current = Array.isArray(value)
-                ? (value as Array<Record<string, unknown>>)
-                : []
+              const current = Array.isArray(value) ? (value as T[]) : []
               const next = selected
-                ? current.filter(
-                    (v) => String(v.id ?? v.value ?? v) !== opt.value
-                  )
-                : [...current, opt.data]
+                ? current.filter((v) => String(v.id ?? v.value ?? v) !== opt.id)
+                : [...current, opt]
               onChange(next)
             }}
             className={`rounded-full border px-2.5 py-1 text-xs transition-colors ${
@@ -87,7 +64,7 @@ export function MultiSelectChips({
                 ? 'border-primary bg-primary/10 text-primary'
                 : 'text-muted-foreground hover:border-foreground/30 border-transparent bg-transparent'
             }`}>
-            {opt.label}
+            {opt.name ?? opt.value ?? opt.id}
           </button>
         )
       })}

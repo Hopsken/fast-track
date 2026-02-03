@@ -1,3 +1,4 @@
+import { FC } from 'react'
 import { Input } from '@internal/ui/components/input'
 
 import type { TextInputProps } from '../../types'
@@ -23,12 +24,12 @@ import type { TextInputProps } from '../../types'
  * @param {FieldMetadata} [props.field] - Field metadata for auto-generating placeholder
  * @returns {JSX.Element} Text input component
  */
-export function TextInput({
+export const TextInput: FC<TextInputProps> = ({
   value,
   onChange,
   placeholder,
   field
-}: TextInputProps) {
+}) => {
   return (
     <Input
       type="text"
