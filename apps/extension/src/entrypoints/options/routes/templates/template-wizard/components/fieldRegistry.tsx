@@ -4,7 +4,7 @@ import { FieldMetadata } from '@/repository/schema'
 
 import { FieldInputBaseProps } from '../types'
 
-import { LabelsInput } from './fields'
+import { LabelsInput, ProjectUserInput } from './fields'
 import { ParentInput } from './fields/ParentInput'
 import { NumberInput, TextAreaInput, TextInput } from './primitive'
 import { DateInput } from './primitive/DateInput'
@@ -23,7 +23,7 @@ const componentByFieldKey: Record<string, ComponentType<any>> = {
   description: TextAreaInput,
   parent: ParentInput,
   assignee: UserFieldInput,
-  reporter: UserFieldInput,
+  reporter: ProjectUserInput,
   priority: SingleSelectField,
   labels: LabelsInput,
   components: MultiSelectChips,

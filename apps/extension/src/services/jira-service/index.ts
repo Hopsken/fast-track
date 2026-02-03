@@ -35,6 +35,10 @@ class JiraServiceImpl {
   async getLabels() {
     return this.jira.getLabels()
   }
+
+  async searchUserOfProject(projectKey: string, query: string) {
+    return this.jira.searchUserOfProject(projectKey, query)
+  }
 }
 
 export type JiraService = InstanceType<typeof JiraServiceImpl>

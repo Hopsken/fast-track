@@ -11,6 +11,10 @@ export const queryKeys = {
   labels: ['labels'],
   autoComplete: (url: string, query: string) => ['autoComplete', url, query],
   priorities: ['priorities'],
+  users: {
+    search: (projectKey: string, query: string) =>
+      ['users', 'search', projectKey, query] as const
+  },
   projects: {
     frequent: ['projects', 'frequent'] as const,
     recent: ['projects', 'recent'] as const,

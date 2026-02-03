@@ -347,6 +347,15 @@ class JiraAPIImpl {
     return result.values ?? []
   }
 
+  async searchUserOfProject(projectKey: string, query: string) {
+    const client = await this.getClient()
+    const result = await client.userSearch.findUsersWithBrowsePermission({
+      projectKey,
+      query
+    })
+    return result.filter((user) => user.accountType === 'atlassian')
+  }
+
   /**
    * Send a raw request to Jira API
    */

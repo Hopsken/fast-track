@@ -206,17 +206,21 @@ export function AutoComplete<T, Multiple extends boolean = false>({
     [isQueryControlled, onQueryChange]
   )
 
+  const toInternalOption = useCallback(
+    (option: T): InternalOption<T> => ({
+      value: getOptionValue(option),
+      label: getOptionLabel(option),
+      description: getOptionDescription?.(option),
+      data: option,
+      disabled: false
+    }),
+    [getOptionValue, getOptionLabel, getOptionDescription]
+  )
+
   // Convert user options to internal format
   const internalOptions = useMemo<InternalOption<T>[]>(
-    () =>
-      options.map((option) => ({
-        value: getOptionValue(option),
-        label: getOptionLabel(option),
-        description: getOptionDescription?.(option),
-        data: option,
-        disabled: false
-      })),
-    [options, getOptionValue, getOptionLabel, getOptionDescription]
+    () => options.map(toInternalOption),
+    [options, toInternalOption]
   )
 
   // Cache to maintain display of selected options when they temporarily disappear from options list
@@ -234,7 +238,7 @@ export function AutoComplete<T, Multiple extends boolean = false>({
           return (
             internalOptions.find((opt) => opt.value === key) ||
             selectedCache.get(key) ||
-            null
+            toInternalOption(v)
           )
         })
         .filter((opt): opt is InternalOption<T> => opt !== null)
@@ -245,10 +249,17 @@ export function AutoComplete<T, Multiple extends boolean = false>({
       return (
         internalOptions.find((opt) => opt.value === key) ||
         selectedCache.get(key) ||
-        null
+        toInternalOption(v)
       )
     }
-  }, [multiple, value, internalOptions, selectedCache, getOptionValue])
+  }, [
+    multiple,
+    value,
+    internalOptions,
+    selectedCache,
+    getOptionValue,
+    toInternalOption
+  ])
 
   // Update cache with latest selected options from internalOptions
   useEffect(() => {

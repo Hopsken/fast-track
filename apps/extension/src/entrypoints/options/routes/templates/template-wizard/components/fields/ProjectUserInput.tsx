@@ -1,25 +1,20 @@
 import { useState } from 'react'
-import { useDebounce } from 'ahooks'
 import { UserDetails } from 'jira.js/version3/models/userDetails'
 
 import { AutoComplete } from '@/components/ui/AutoComplete'
 import { UserAvatar } from '@/components/ui/UserAvatar'
-import { useAutoCompleteUsers } from '~/hooks/useAutoComplete'
+import { useProjectUsers } from '@/hooks/useProjectUsers'
 
 import { FieldInputBaseProps } from '../../types'
 
-export function UserFieldInput({
-  field,
+export function ProjectUserInput({
+  project,
   value,
   onChange
 }: FieldInputBaseProps<UserDetails>) {
   const [query, setQuery] = useState('')
-  const debouncedQuery = useDebounce(query, { wait: 300 })
 
-  const { data: users, isLoading } = useAutoCompleteUsers(
-    field.autoCompleteUrl!,
-    debouncedQuery
-  )
+  const { data: users, isLoading } = useProjectUsers(project.key, query)
 
   return (
     <AutoComplete<UserDetails>
