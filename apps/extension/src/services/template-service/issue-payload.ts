@@ -67,19 +67,44 @@ function formatArray(
 ): unknown {
   if (!Array.isArray(value)) return value
 
+  // Collection types and option-like types - extract ID only
   if (
     items === 'option' ||
     items === 'component' ||
     items === 'version' ||
     items === 'priority' ||
-    items === 'resolution'
+    items === 'resolution' ||
+    items === 'group'
   ) {
     return value.map((v) => formatOption(v))
   }
 
-  // labels are usually string[]
+  // User arrays - extract accountId only
+  if (items === 'user') {
+    return value.map((v) => formatUser(v))
+  }
+
+  // Labels and other string arrays
   if (items === 'string') {
     return value
+  }
+
+  // Issue links array
+  if (items === 'issuelinks') {
+    return value.map((v) => {
+      const rec = asRecord(v)
+      if (!rec) return v
+
+      const typeObj = asRecord(rec.type)
+      const outwardIssue = asRecord(rec.outwardIssue)
+
+      if (!typeObj) return v
+
+      return {
+        type: { id: typeObj.id },
+        outwardIssue: outwardIssue ? { key: outwardIssue.key } : undefined
+      }
+    })
   }
 
   return value
@@ -92,6 +117,7 @@ export function formatCreateIssueFieldValue(input: {
 }): unknown {
   const { fieldId, value, metadata } = input
 
+  // Description field - convert to ADF
   if (fieldId === 'description') {
     if (typeof value === 'string' && value.trim().length > 0) {
       return toAdfDoc(value)
@@ -100,16 +126,56 @@ export function formatCreateIssueFieldValue(input: {
   }
 
   const type = metadata?.schema.type
+  const items = metadata?.schema.items
 
   switch (type) {
+    // Visual entity types - extract ID only
     case 'option':
     case 'priority':
     case 'resolution':
+    case 'issuetype':
+    case 'project':
+    case 'status':
+    case 'securitylevel':
       return formatOption(value)
+
+    // User type - extract accountId only
     case 'user':
       return formatUser(value)
+
+    // Array types - format based on items type
     case 'array':
-      return formatArray(value, metadata?.schema.items)
+      return formatArray(value, items)
+
+    // Date type - pass through (already in YYYY-MM-DD format)
+    case 'date':
+      return value
+
+    // DateTime type - should already be in ISO 8601 format from DateTimeInput
+    case 'datetime':
+      return value
+
+    // Time tracking - pass through (Jira accepts "2w 3d 4h" format)
+    case 'timetracking':
+      return value
+
+    // Issue link - format for Jira API
+    case 'issuelink': {
+      const rec = asRecord(value)
+      if (!rec) return value
+
+      const typeObj = asRecord(rec.type)
+      const outwardIssue = asRecord(rec.outwardIssue)
+
+      if (!typeObj) return value
+
+      return {
+        type: { id: typeObj.id },
+        outwardIssue: outwardIssue ? { key: outwardIssue.key } : undefined
+      }
+    }
+
+    // Basic scalar types
     case 'string':
     case 'number':
     default:

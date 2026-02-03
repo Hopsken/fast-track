@@ -1,0 +1,1 @@
+export { GenericInput } from './GenericInput'
