@@ -33,7 +33,10 @@ export function FieldInputMenu() {
   const isSummaryField = fieldId === 'summary' || fieldId === 'description'
 
   useHotkey('field.confirm-complex', onConfirm, {
-    enabled: !isSummaryField
+    enabled: !isSummaryField,
+    eventListenerOptions: {
+      capture: true
+    }
   })
 
   // Summary + Description combined field (special case)

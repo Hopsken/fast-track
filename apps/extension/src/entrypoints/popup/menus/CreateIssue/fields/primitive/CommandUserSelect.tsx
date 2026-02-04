@@ -49,7 +49,6 @@ export function CommandUserSelect({
 
   useMount(() => {
     if (selected) {
-      setSearch('')
       setValue(toUserId(selected))
     }
   })

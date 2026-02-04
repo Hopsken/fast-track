@@ -45,7 +45,6 @@ export function ProjectUserSelect({
 
   useMount(() => {
     if (selected) {
-      setSearch('')
       setValue(toUserId(selected))
     }
   })

@@ -6,7 +6,6 @@ import {
   CommandList,
   CommandLoading
 } from '@internal/ui/components/command'
-import { useMount } from 'ahooks'
 import { uniq } from 'lodash-es'
 import { Check } from 'lucide-react'
 
@@ -15,7 +14,7 @@ import { useHotkey } from '@/lib/hotkeys'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 
 import { FieldInputProps } from '../primitive/types'
-import { getFieldTitle, parseCommaSeparated, prefillArrayValue } from '../utils'
+import { getFieldTitle, parseCommaSeparated } from '../utils'
 
 export function LabelsInput({
   field,
@@ -41,11 +40,6 @@ export function LabelsInput({
   const allOptions = useMemo(() => {
     return uniq([...(existingLabels ?? []), ...newLabels])
   }, [existingLabels, newLabels])
-
-  // Pre-fill the search box with current value
-  useMount(() => {
-    prefillArrayValue(currentValue, setSearch)
-  })
 
   // Filter options based on search
   const filteredOptions = useMemo(() => {

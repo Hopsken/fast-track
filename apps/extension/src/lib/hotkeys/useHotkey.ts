@@ -2,6 +2,7 @@ import { useState, DependencyList } from 'react'
 import {
   useHotkeys,
   Keys,
+  Options,
   HotkeyCallback as ReactHotkeyCallback
 } from 'react-hotkeys-hook'
 
@@ -22,7 +23,7 @@ export type HotkeyCallback = ReactHotkeyCallback
 /**
  * Options for useHotkey hook.
  */
-export interface UseHotkeyOptions {
+export interface UseHotkeyOptions extends Options {
   /** Enable or disable the hotkey (default: true) */
   enabled?: boolean
   /** Dependencies for the callback (like useCallback deps) */
@@ -89,7 +90,7 @@ export function useHotkey(
   callback: HotkeyCallback,
   options: UseHotkeyOptions = {}
 ): void {
-  const { enabled = true } = options
+  const { deps, ...restOptions } = options
 
   // Get hotkey definition from registry
   const definition = getHotkeyDefinition(hotkeyId)
@@ -103,10 +104,15 @@ export function useHotkey(
   const keys = mapKeyboardShortcutToReactHotkeys(shortcut)
 
   // Register hotkey with react-hotkeys-hook
-  useHotkeys(keys, callback, {
-    enabled,
-    preventDefault: definition.preventDefault ?? true,
-    enableOnFormTags: definition.enableOnFormTags ?? false,
-    scopes: definition.scopes as string[]
-  })
+  useHotkeys(
+    keys,
+    callback,
+    {
+      ...restOptions,
+      preventDefault: definition.preventDefault ?? true,
+      enableOnFormTags: definition.enableOnFormTags ?? false,
+      scopes: definition.scopes as string[]
+    },
+    deps
+  )
 }
