@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { ActionLoading } from '@/components/actions'
 import { useIssueCreateMeta } from '@/hooks/useIssueCreateMeta'
+import { useHotkey } from '@/lib/hotkeys'
 import type { VisibleField } from '~/services/template-service/gap-analysis'
 
 import { CommandRoutes } from '../../routes'
@@ -30,6 +31,12 @@ export function CreateIssueFieldsMenu() {
   const { submit } = useCreateIssueForm({
     template,
     fieldsMetadata
+  })
+
+  useHotkey('issue.create.proceed', submit, {
+    eventListenerOptions: {
+      capture: true
+    }
   })
 
   // Field selection handler

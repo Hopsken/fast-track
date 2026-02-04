@@ -99,6 +99,20 @@ export const HOTKEY_REGISTRY = {
     enableOnFormTags: true
   },
 
+  'issue.create.proceed': {
+    id: 'issue.create.proceed',
+    shortcut: {
+      macOS: { modifiers: ['cmd'], key: 'enter' },
+      Windows: { modifiers: ['ctrl'], key: 'enter' }
+    },
+    scopes: ['create-issue'],
+    category: 'field-input',
+    description: 'Confirm fields value and proceed to create issue',
+    priority: 4,
+    preventDefault: true,
+    enableOnFormTags: true
+  },
+
   // ============================================================================
   // Issue Actions
   // ============================================================================
