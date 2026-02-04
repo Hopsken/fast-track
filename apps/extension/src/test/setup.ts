@@ -9,6 +9,14 @@ vi.mock('@wxt-dev/analytics', () => ({
   })
 }))
 
+vi.mock('wxt/browser', () => ({
+  browser: {
+    runtime: {
+      getManifest: vi.fn().mockReturnValue({ version: '0.0.0' })
+    }
+  }
+}))
+
 // Fix Uint8Array issue in jsdom/happy-dom for esbuild
 if (typeof window !== 'undefined' && typeof window.Uint8Array !== 'undefined') {
   global.Uint8Array = window.Uint8Array

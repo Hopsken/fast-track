@@ -38,6 +38,11 @@ export function computeVisibleFields(
       fieldId: 'summary',
       metadata: getMetadata('summary'),
       isEditable: true
+    },
+    {
+      fieldId: 'description',
+      metadata: getMetadata('description'),
+      isEditable: true
     }
   ]
 
@@ -46,11 +51,6 @@ export function computeVisibleFields(
 
     const metadata = getMetadata(fieldId)
     const conflict = conflictMap.get(fieldId)
-
-    if (config.behavior === 'visible') {
-      visible.push({ fieldId, metadata, isEditable: true, conflict })
-      continue
-    }
 
     if (config.behavior === 'restricted') {
       visible.push({
@@ -63,10 +63,10 @@ export function computeVisibleFields(
       continue
     }
 
-    if (config.behavior === 'preset' && conflict) {
+    if (config.behavior === 'preset') {
       visible.push({
         fieldId,
-        metadata: conflict.fieldMetadata ?? metadata,
+        metadata: conflict?.fieldMetadata ?? metadata,
         presetValue: config.presetValue,
         isEditable: true,
         conflict

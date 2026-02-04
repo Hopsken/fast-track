@@ -116,8 +116,10 @@ export type AllowedValue = z.infer<typeof AllowedValueSchema>
  * The model doesn't distinguish source — only the config UI branches on field.allowedValues.
  */
 export const FieldConfigSchema = z.discriminatedUnion('behavior', [
-  z.object({ behavior: z.literal('visible') }),
-  z.object({ behavior: z.literal('preset'), presetValue: z.unknown() }),
+  z.object({
+    behavior: z.literal('preset'),
+    presetValue: z.unknown().optional()
+  }),
   z.object({
     behavior: z.literal('restricted'),
     allowedOptions: z.array(AllowedValueSchema).min(1)

@@ -59,9 +59,9 @@ describe('computeVisibleFields', () => {
     expect(visible.some((f) => f.fieldId === 'summary')).toBe(true)
   })
 
-  it('includes description if behavior=visible', () => {
+  it('includes description if behavior=preset', () => {
     const template = createTemplate({
-      fields: { description: { behavior: 'visible' } }
+      fields: { description: { behavior: 'preset', presetValue: 'Hello' } }
     })
 
     const visible = computeVisibleFields(template, [], [])
@@ -77,9 +77,9 @@ describe('computeVisibleFields', () => {
     expect(visible.some((f) => f.fieldId === 'description')).toBe(true)
   })
 
-  it('shows fields with behavior=visible', () => {
+  it('shows fields with behavior=preset', () => {
     const template = createTemplate({
-      fields: { priority: { behavior: 'visible' } }
+      fields: { priority: { behavior: 'preset', presetValue: { id: '1' } } }
     })
 
     const visible = computeVisibleFields(
@@ -93,20 +93,6 @@ describe('computeVisibleFields', () => {
         expect.objectContaining({ fieldId: 'priority', isEditable: true })
       ])
     )
-  })
-
-  it('hides preset fields when no conflict', () => {
-    const template = createTemplate({
-      fields: { priority: { behavior: 'preset', presetValue: { id: '1' } } }
-    })
-
-    const visible = computeVisibleFields(
-      template,
-      [summaryField, priorityField],
-      []
-    )
-
-    expect(visible.some((f) => f.fieldId === 'priority')).toBe(false)
   })
 
   it('shows preset fields when conflict exists for that field', () => {
@@ -219,8 +205,7 @@ describe('computeVisibleFields', () => {
       []
     )
 
-    // preset hides it, and the auto-surface should NOT re-add it
-    expect(visible.filter((f) => f.fieldId === 'priority')).toHaveLength(0)
+    expect(visible.filter((f) => f.fieldId === 'priority')).toHaveLength(1)
   })
 
   it('does not duplicate required fields already visible via template config', () => {
@@ -232,7 +217,9 @@ describe('computeVisibleFields', () => {
       schema: { type: 'string' }
     }
     const template = createTemplate({
-      fields: { customfield_9: { behavior: 'visible' } }
+      fields: {
+        customfield_9: { behavior: 'preset', presetValue: { id: '1' } }
+      }
     })
 
     const visible = computeVisibleFields(
@@ -348,8 +335,8 @@ describe('computeVisibleFields', () => {
   it('ignores project/issuetype fields', () => {
     const template = createTemplate({
       fields: {
-        project: { behavior: 'visible' },
-        issuetype: { behavior: 'visible' }
+        project: { behavior: 'preset', presetValue: { id: '1' } },
+        issuetype: { behavior: 'preset', presetValue: { id: '1' } }
       }
     })
 

@@ -12,12 +12,12 @@ import { RestrictedOptionsInput } from './RestrictedOptionsInput'
 /*  Mode helpers                                                       */
 /* ------------------------------------------------------------------ */
 
-type FieldMode = 'visible' | 'preset' | 'restricted'
+type FieldMode = 'preset' | 'restricted'
 
 function getModeFromConfig(config: FieldConfig): FieldMode {
   if (config.behavior === 'preset') return 'preset'
   if (config.behavior === 'restricted') return 'restricted'
-  return 'visible'
+  return 'preset'
 }
 
 /* ------------------------------------------------------------------ */
@@ -25,8 +25,10 @@ function getModeFromConfig(config: FieldConfig): FieldMode {
 /* ------------------------------------------------------------------ */
 
 const MODE_META: Record<FieldMode, { label: string; title: string }> = {
-  visible: { label: 'Show', title: 'Field appears with all options' },
-  preset: { label: 'Fill', title: 'Auto-fill value at creation' },
+  preset: {
+    label: 'Fill',
+    title: 'Auto-fill value with default value '
+  },
   restricted: { label: 'Limit', title: 'Restrict to subset of options' }
 }
 
@@ -39,7 +41,7 @@ function ModeToggle({
 }) {
   return (
     <div className="bg-muted flex gap-0.5 rounded-md p-0.5" role="radiogroup">
-      {(['visible', 'preset', 'restricted'] as const).map((m) => {
+      {(['preset', 'restricted'] as const).map((m) => {
         const isActive = mode === m
         return (
           <button
@@ -86,9 +88,6 @@ export function FieldRow({
   const handleModeChange = useCallback(
     (mode: FieldMode) => {
       switch (mode) {
-        case 'visible':
-          onConfigChange({ behavior: 'visible' })
-          break
         case 'preset':
           onConfigChange({ behavior: 'preset', presetValue: undefined })
           break
@@ -170,7 +169,6 @@ export function FieldRow({
             onChange={handleRestrictedChange}
           />
         )}
-        {/* visible: no input needed */}
       </div>
     </div>
   )

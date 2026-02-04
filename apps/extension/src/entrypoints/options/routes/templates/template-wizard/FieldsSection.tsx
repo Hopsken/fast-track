@@ -57,7 +57,7 @@ export function FieldsSection() {
 
   const handleAddField = useCallback(
     (fieldId: string) => {
-      actions.setFieldConfig(fieldId, { behavior: 'visible' })
+      actions.setFieldConfig(fieldId, { behavior: 'preset' })
       setCommandOpen(false)
     },
     [actions]

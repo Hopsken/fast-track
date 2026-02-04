@@ -171,19 +171,13 @@ describe('TemplateServiceImpl', () => {
     await expect(
       svc.createTemplate({
         name: 'Bad',
+        //@ts-expect-error - testing invalid input
         scope: {
           baseUrlHost: 'a.atlassian.net',
           project: {
             id: '1',
             key: 'PROJ',
             name: 'Project'
-          },
-          issueType: {
-            id: '10000',
-            name: 'Bug',
-            iconUrl: '',
-            description: '',
-            subtask: false
           }
         },
         fields: {}

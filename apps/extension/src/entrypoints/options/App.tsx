@@ -1,4 +1,3 @@
-import { browser } from '#imports'
 import {
   HashRouter,
   Navigate,
@@ -6,6 +5,7 @@ import {
   Routes,
   useNavigate
 } from 'react-router-dom'
+import { browser } from 'wxt/browser'
 
 import { QueryClientProvider } from '@/components/QueryClientProvider'
 import { UserPreferencesProvider } from '~/stores/useUserPreferences'

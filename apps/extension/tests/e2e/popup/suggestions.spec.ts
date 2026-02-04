@@ -1,8 +1,8 @@
 import { dehydrate, QueryClient } from '@tanstack/query-core'
 
-import { expect, test } from '../fixtures'
-
 import type { IssueSuggestion } from '@/services/ticket-service'
+
+import { expect, test } from '../fixtures'
 
 const MOCK_AUTH_CREDENTIALS = {
   type: 'apiKey' as const,
@@ -90,6 +90,7 @@ test.describe('Popup - Suggested tickets', () => {
     // Set up auth + seed React Query offline cache so the popup can render
     // suggestions deterministically without hitting the real Jira network.
     const manifestVersion = await serviceWorker.evaluate(() => {
+      // @ts-expect-error - chrome is available in the service worker context
       return chrome.runtime.getManifest().version
     })
 

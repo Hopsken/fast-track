@@ -137,7 +137,7 @@ describe('CreateIssue utils', () => {
       })
 
       expect(result.summary).toBe('')
-      expect(result.description).toBe('Default description')
+      expect(result.description).toBe('')
     })
 
     it('includes preset values from template fields', () => {
@@ -174,45 +174,6 @@ describe('CreateIssue utils', () => {
 
       expect(result.priority).toEqual({ id: '1', name: 'High' })
       expect(result.labels).toEqual(['backend', 'urgent'])
-    })
-
-    it('ignores non-preset fields', () => {
-      const result = buildInitialValues({
-        id: '1',
-        name: 'Test',
-        scope: {
-          baseUrlHost: 'test.atlassian.net',
-          project: {
-            id: 'p1',
-            key: 'TEST',
-            name: 'Test Project'
-          },
-          issueType: {
-            id: '10001',
-            name: 'Bug',
-            iconUrl: '',
-            description: ''
-          }
-        },
-        fields: {
-          priority: {
-            behavior: 'visible'
-          },
-          assignee: {
-            behavior: 'restricted',
-            allowedOptions: [{ id: '1', name: 'Alice' }]
-          },
-          component: {
-            behavior: 'ignore'
-          }
-        },
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z'
-      })
-
-      expect(result.priority).toBeUndefined()
-      expect(result.assignee).toBeUndefined()
-      expect(result.component).toBeUndefined()
     })
   })
 })
