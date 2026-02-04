@@ -34,7 +34,7 @@ export function useCreateIssueForm({
     const fields = buildCreateIssueFields({
       template,
       fieldsMetadata,
-      userInput
+      input: userInput
     })
 
     const toast = showToast({

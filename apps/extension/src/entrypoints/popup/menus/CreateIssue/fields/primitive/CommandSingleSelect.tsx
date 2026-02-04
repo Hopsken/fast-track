@@ -17,7 +17,8 @@ import { FieldInputProps } from './types'
 export function CommandSingleSelect({
   field,
   currentValue,
-  onChange
+  onChange,
+  onConfirm
 }: FieldInputProps) {
   const { setValue } = useCommandInput()
   const title = getFieldTitle(field)
@@ -40,6 +41,11 @@ export function CommandSingleSelect({
     }
   })
 
+  const onSelect = (opt: AllowedValue) => {
+    onChange(opt)
+    onConfirm?.()
+  }
+
   return (
     <CommandList>
       <CommandGroup heading={title}>
@@ -48,7 +54,7 @@ export function CommandSingleSelect({
             key={opt.id}
             value={opt.id}
             keywords={[opt.name ?? '', opt.value ?? '']}
-            onSelect={() => onChange(opt)}>
+            onSelect={() => onSelect(opt)}>
             <span className="truncate">{opt.name ?? opt.value ?? opt.id}</span>
           </CommandItem>
         ))}

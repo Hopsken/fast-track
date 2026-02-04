@@ -1,4 +1,5 @@
 import { keyBy } from 'lodash-es'
+import { Primitive } from 'zod/v3'
 
 import type {
   AllowedValue,
@@ -36,6 +37,18 @@ const isAllowedValue = (v: unknown): v is AllowedValue => {
   const rec = asRecord(v)
   if (!rec) return false
   return typeof rec.id === 'string'
+}
+
+function toPrimitive(value: unknown): Primitive {
+  const rec = asRecord(value)
+  if (rec && rec.value) {
+    return rec.value as Primitive
+  }
+  return value as Primitive
+}
+
+function toNumber(value: unknown): number | undefined {
+  return Number(toPrimitive(value))
 }
 
 function formatIssue(value: unknown): null | { key: string } {
@@ -97,7 +110,12 @@ function formatArray(
 
   // Labels and other string arrays
   if (items === 'string') {
-    return value
+    return value.map((v) => toPrimitive(v))
+  }
+
+  // Labels and other string arrays
+  if (items === 'number') {
+    return value.map((v) => toNumber(v))
   }
 
   // Issue links array
@@ -166,11 +184,11 @@ export function formatCreateIssueFieldValue(input: {
 
     // Date type - pass through (already in YYYY-MM-DD format)
     case 'date':
-      return value
+      return toPrimitive(value)
 
     // DateTime type - should already be in ISO 8601 format from DateTimeInput
     case 'datetime':
-      return value
+      return toPrimitive(value)
 
     // Time tracking - pass through (Jira accepts "2w 3d 4h" format)
     case 'timetracking':
@@ -197,7 +215,9 @@ export function formatCreateIssueFieldValue(input: {
 
     // Basic scalar types
     case 'string':
+      return toPrimitive(value)
     case 'number':
+      return toNumber(value)
     default:
       return value
   }
@@ -206,9 +226,9 @@ export function formatCreateIssueFieldValue(input: {
 export function buildCreateIssueFields(input: {
   template: IssueTemplate
   fieldsMetadata: FieldMetadata[]
-  userInput: Record<string, unknown>
+  input: Record<string, unknown>
 }): Record<string, unknown> {
-  const { template, fieldsMetadata, userInput } = input
+  const { template, fieldsMetadata, input: userInput } = input
 
   const metadataByFieldId = keyBy(fieldsMetadata, 'fieldId')
 

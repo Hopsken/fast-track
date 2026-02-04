@@ -109,7 +109,7 @@ describe('buildCreateIssueFields', () => {
     const fields = buildCreateIssueFields({
       template,
       fieldsMetadata: baseFields,
-      userInput: {
+      input: {
         summary: 'Hello',
         // user overrides template description
         description: 'User description',
@@ -145,7 +145,7 @@ describe('buildCreateIssueFields', () => {
     const fields = buildCreateIssueFields({
       template,
       fieldsMetadata: baseFields,
-      userInput: {
+      input: {
         summary: 'Hello',
         priority: { id: '2', name: 'Low' }
       }

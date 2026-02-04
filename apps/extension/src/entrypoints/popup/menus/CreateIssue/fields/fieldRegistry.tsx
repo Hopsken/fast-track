@@ -108,6 +108,11 @@ export function getFieldInputComponent(
 ): ComponentType<FieldInputProps> {
   const { fieldId, metadata } = field
   const schema = metadata?.schema
+  const schemaType = metadata?.schema.type
+
+  if (field.config?.behavior === 'restricted') {
+    return schemaType === 'array' ? CommandMultiSelect : CommandSingleSelect
+  }
 
   // Level 1: Field key (system fields + special cases)
   const byFieldKey = componentByFieldKey[fieldId]
