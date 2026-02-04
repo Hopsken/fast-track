@@ -51,3 +51,7 @@
 
 - Never commit tokens/secrets; Jira tokens in typed storage only
 - Minimal permissions (`storage`, `tabs`, Atlassian hosts); document changes in `wxt.config.ts`
+
+## Documents
+
+- `apps/extension/docs/FIELD_ARCHITECTURE.md` - Extension Jira field architecture guide
