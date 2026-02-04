@@ -9,10 +9,10 @@ import {
 import { useMount } from 'ahooks'
 
 import { useProjectUsers } from '@/hooks/useProjectUsers'
+import { useFieldConfirm } from '@/lib/hotkeys'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 import { UserDetails } from '@/types'
 
-import { useFieldConfirm } from '../hooks/useFieldConfirm'
 import { FieldInputProps } from '../primitive'
 import { asRecord, getFieldTitle } from '../utils'
 

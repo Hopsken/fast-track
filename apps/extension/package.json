@@ -16,7 +16,8 @@
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --project extension",
-    "test:e2e": "playwright test --config=playwright.config.ts"
+    "test:e2e": "playwright test --config=playwright.config.ts",
+    "generate-hotkey-docs": "tsx src/lib/hotkeys/generate-docs.ts > ../../docs/HOTKEYS.md"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -78,6 +79,7 @@
     "postcss": "^8.5.6",
     "rimraf": "^6.0.1",
     "tailwindcss": "^4.1.17",
+    "tsx": "^4.21.0",
     "typescript": "5.9.2",
     "vite": "^7.2.4"
   }

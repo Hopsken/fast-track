@@ -10,11 +10,11 @@ import { useMount } from 'ahooks'
 
 import { useSprints } from '@/hooks/useSprints'
 import { formatDateToISO } from '@/lib/date'
+import { useFieldConfirm } from '@/lib/hotkeys'
 import type { AgileSprint } from '@/lib/jira/agile'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 
 import { useCreateIssueDraftStore } from '../../useCreateIssueDraftStore'
-import { useFieldConfirm } from '../hooks/useFieldConfirm'
 import { FieldInputProps } from '../primitive/types'
 import { asRecord, getFieldTitle } from '../utils'
 

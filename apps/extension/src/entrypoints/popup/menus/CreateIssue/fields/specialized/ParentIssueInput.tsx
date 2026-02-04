@@ -8,11 +8,11 @@ import {
 } from '@internal/ui/components/command'
 
 import { useIssuePickerSuggestions } from '@/hooks/useIssuePickerSuggestions'
+import { useFieldConfirm } from '@/lib/hotkeys'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 import { isNonNullable } from '@/utils/assert'
 
 import { useCreateIssueDraftStore } from '../../useCreateIssueDraftStore'
-import { useFieldConfirm } from '../hooks/useFieldConfirm'
 import { FieldInputProps } from '../primitive/types'
 import { getFieldTitle } from '../utils'
 

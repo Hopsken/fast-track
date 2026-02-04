@@ -1,4 +1,4 @@
-import { Fragment, useMemo } from 'react'
+import { useMemo } from 'react'
 import { CommandGroup, CommandSeparator } from '@internal/ui/components/command'
 import {
   ChartNoAxesColumnIncreasing,
@@ -13,6 +13,7 @@ import {
 import { AssigneeAvatar } from '@/components'
 import { Action, ActionCopyToClipboard, ActionPush } from '@/components/actions'
 import { useMutationAssignMyself } from '@/hooks/useMutationAssignIssue'
+import { HotkeysScopeProvider } from '@/lib/hotkeys'
 import { useCurrentUser } from '@/stores/useCurrentUser'
 import { useUserPreferences } from '@/stores/useUserPreferences'
 import { JiraTicket } from '@/types'
@@ -35,7 +36,7 @@ export const TicketActionsMenu = () => {
   )
 
   return (
-    <Fragment>
+    <HotkeysScopeProvider scope="issue-actions">
       <CommandGroup heading="General">
         <ActionPush
           value="assign-to"
@@ -137,7 +138,7 @@ export const TicketActionsMenu = () => {
           }}
         />
       </CommandGroup>
-    </Fragment>
+    </HotkeysScopeProvider>
   )
 }
 

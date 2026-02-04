@@ -8,10 +8,10 @@ import {
 } from '@internal/ui/components/command'
 import { useMount } from 'ahooks'
 
+import { useFieldConfirm } from '@/lib/hotkeys'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 import type { AllowedValue } from '~/types/template'
 
-import { useFieldConfirm } from '../hooks/useFieldConfirm'
 import { asRecord, getFieldTitle } from '../utils'
 
 import { FieldInputProps } from './types'

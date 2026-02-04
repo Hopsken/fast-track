@@ -2,12 +2,12 @@ import { useRef, useState } from 'react'
 import { CommandGroup } from '@internal/ui/components/command'
 import { useMount } from 'ahooks'
 
+import { useFieldConfirm } from '@/lib/hotkeys'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 
 import { CommandMenu } from '../../../CommandMenu'
 import { useCreateIssueDraftStore } from '../../useCreateIssueDraftStore'
 import { useWizardNavigation } from '../../useWizardNavigation'
-import { useFieldConfirm } from '../hooks/useFieldConfirm'
 
 interface Props {
   focusField: 'summary' | 'description'

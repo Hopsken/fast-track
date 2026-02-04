@@ -7,9 +7,9 @@ import {
 import { useMemoizedFn } from 'ahooks'
 import { Check } from 'lucide-react'
 
+import { useFieldConfirm } from '@/lib/hotkeys'
 import type { AllowedValue } from '~/types/template'
 
-import { useFieldConfirm } from '../hooks/useFieldConfirm'
 import { getFieldTitle, isArrayOfAllowedValues } from '../utils'
 
 import { FieldInputProps } from './types'

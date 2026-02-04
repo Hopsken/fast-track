@@ -11,9 +11,9 @@ import { uniq } from 'lodash-es'
 import { Check } from 'lucide-react'
 
 import { useLabels } from '@/hooks/useLabels'
+import { useFieldConfirm } from '@/lib/hotkeys'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 
-import { useFieldConfirm } from '../hooks/useFieldConfirm'
 import { FieldInputProps } from '../primitive/types'
 import { getFieldTitle, parseCommaSeparated, prefillArrayValue } from '../utils'
 

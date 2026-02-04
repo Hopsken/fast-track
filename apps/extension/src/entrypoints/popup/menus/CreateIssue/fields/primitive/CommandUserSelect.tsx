@@ -9,10 +9,10 @@ import {
 import { useMount } from 'ahooks'
 
 import { useAutoCompleteUsers } from '@/hooks/useAutoComplete'
+import { useFieldConfirm } from '@/lib/hotkeys'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 import { UserDetails } from '@/types/jira'
 
-import { useFieldConfirm } from '../hooks/useFieldConfirm'
 import { asRecord, getFieldTitle } from '../utils'
 
 import { FieldInputProps } from './types'

@@ -3,6 +3,7 @@ import { CommandGroup, CommandList } from '@internal/ui/components/command'
 import { Outlet, Route, Routes, useLocation } from 'react-router-dom'
 
 import { TicketBasicFields } from '@/components'
+import { HotkeysScopeProvider } from '@/lib/hotkeys'
 import type { JiraTicket } from '@/types'
 import type { VisibleField } from '~/services/template-service/gap-analysis'
 import type { IssueTemplate } from '~/types/template'
@@ -19,7 +20,11 @@ import { useSetupWizard } from './useSetupWizard'
 function FieldInputMenuRouter() {
   const { field } = useLocation().state as { field: VisibleField }
   // Key forces full remount when wizard moves to a different field
-  return <FieldInputMenu key={field.fieldId} />
+  return (
+    <HotkeysScopeProvider scope="field-input">
+      <FieldInputMenu key={field.fieldId} />
+    </HotkeysScopeProvider>
+  )
 }
 
 function CreateIssueMenuLayout() {
@@ -71,8 +76,10 @@ export function CreateIssueMenu() {
   }
 
   return (
-    <CreateIssueDraftStoreProvider template={template}>
-      <CreateIssueMenuInner />
-    </CreateIssueDraftStoreProvider>
+    <HotkeysScopeProvider scope="create-issue">
+      <CreateIssueDraftStoreProvider template={template}>
+        <CreateIssueMenuInner />
+      </CreateIssueDraftStoreProvider>
+    </HotkeysScopeProvider>
   )
 }

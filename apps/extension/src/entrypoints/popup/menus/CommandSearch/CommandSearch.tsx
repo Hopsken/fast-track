@@ -4,9 +4,9 @@ import { Button } from '@internal/ui/components/button'
 import { CommandInput } from '@internal/ui/components/command'
 import { useMemoizedFn } from 'ahooks'
 import { ArrowLeft } from 'lucide-react'
-import { useHotkeys } from 'react-hotkeys-hook'
 import { useLocation, useNavigate } from 'react-router-dom'
 
+import { useHotkey } from '@/lib/hotkeys'
 import { cn } from '@/lib/utils'
 import { useCommandSearchState } from '@/stores/command/useCommandController'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
@@ -39,25 +39,18 @@ export function CommandSearch() {
     </Button>
   ) : null
 
-  useHotkeys(
-    'esc',
-    () => {
-      if (search) {
-        // clear input value when esc is pressed
-        onCommandInputChange('')
-      } else if (isRoot) {
-        // close popup when esc is pressed on root page and input value is empty
-        window.close()
-      } else {
-        // pop to previous page when esc is pressed on other pages and input value is empty
-        navigate(-1)
-      }
-    },
-    {
-      preventDefault: true,
-      enableOnFormTags: true
+  useHotkey('global.escape', () => {
+    if (search) {
+      // clear input value when esc is pressed
+      onCommandInputChange('')
+    } else if (isRoot) {
+      // close popup when esc is pressed on root page and input value is empty
+      window.close()
+    } else {
+      // pop to previous page when esc is pressed on other pages and input value is empty
+      navigate(-1)
     }
-  )
+  })
 
   // Focus input when active page changes
   useLayoutEffect(() => {

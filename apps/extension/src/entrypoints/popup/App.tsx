@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 
 import { EmptyAuthNotice } from '@/components/EmptyAuthNotice'
 import { QueryClientProvider } from '@/components/QueryClientProvider'
+import { HotkeysProvider } from '@/lib/hotkeys'
 import { trackEvent } from '@/services/analytics'
 import {
   UserContextProvider,
@@ -38,7 +39,9 @@ function App() {
 function AuthenticatedApp() {
   return (
     <UserPreferencesProvider>
-      <App />
+      <HotkeysProvider>
+        <App />
+      </HotkeysProvider>
     </UserPreferencesProvider>
   )
 }
