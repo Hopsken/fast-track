@@ -3,7 +3,7 @@ import { CommandItem } from '@internal/ui/components/command'
 import { LucideIcon } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
-import { KeyboardShortcutInput } from '@/lib/keyboard'
+import { HotkeyId } from '@/lib/hotkeys'
 
 import { ActionShortcut } from './ActionShortcut'
 
@@ -13,7 +13,7 @@ export interface ActionProps {
   prefix?: ReactNode
   title: ReactNode
   onSelect?: () => void
-  shortcut?: KeyboardShortcutInput
+  hotkeyId?: HotkeyId
   exitOnSelect?: boolean
 }
 
@@ -23,7 +23,7 @@ export function Action({
   prefix,
   title,
   onSelect,
-  shortcut,
+  hotkeyId,
   exitOnSelect = true
 }: ActionProps) {
   const iconEl = icon ? createElement(icon, { size: 16 }) : null
@@ -48,8 +48,8 @@ export function Action({
         {title}
       </div>
 
-      {shortcut && (
-        <ActionShortcut shortcut={shortcut} onSelect={onSelectItem} />
+      {hotkeyId && (
+        <ActionShortcut hotkeyId={hotkeyId} onSelect={onSelectItem} />
       )}
     </CommandItem>
   )

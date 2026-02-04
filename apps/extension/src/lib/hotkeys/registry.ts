@@ -144,6 +144,34 @@ export const HOTKEY_REGISTRY = {
     enableOnFormTags: true
   },
 
+  'issue.assign-myself': {
+    id: 'issue.assign-myself',
+    shortcut: {
+      macOS: { modifiers: ['cmd', 'shift'], key: 'm' },
+      Windows: { modifiers: ['alt', 'shift'], key: 'm' }
+    },
+    scopes: ['issue-actions'],
+    category: 'issue-actions',
+    description: 'Assign issue to myself',
+    priority: 5,
+    preventDefault: true,
+    enableOnFormTags: true
+  },
+
+  'issue.unassign-myself': {
+    id: 'issue.unassign-myself',
+    shortcut: {
+      macOS: { modifiers: ['cmd', 'shift'], key: 'u' },
+      Windows: { modifiers: ['alt', 'shift'], key: 'u' }
+    },
+    scopes: ['issue-actions'],
+    category: 'issue-actions',
+    description: 'Unassign issue from myself',
+    priority: 5,
+    preventDefault: true,
+    enableOnFormTags: true
+  },
+
   // ============================================================================
   // Clipboard Operations
   // ============================================================================
@@ -226,20 +254,6 @@ export const HOTKEY_REGISTRY = {
     scopes: ['issue-menu', 'issue-actions'],
     category: 'clipboard',
     description: 'Copy issue URL as markdown link',
-    priority: 5,
-    preventDefault: true,
-    enableOnFormTags: true
-  },
-
-  'clipboard.copy-description': {
-    id: 'clipboard.copy-description',
-    shortcut: {
-      macOS: { modifiers: ['cmd', 'shift'], key: 'm' },
-      Windows: { modifiers: ['alt', 'shift'], key: 'm' }
-    },
-    scopes: ['issue-menu', 'issue-actions'],
-    category: 'clipboard',
-    description: 'Copy issue description to clipboard',
     priority: 5,
     preventDefault: true,
     enableOnFormTags: true

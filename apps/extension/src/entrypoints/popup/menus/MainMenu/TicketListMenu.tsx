@@ -1,15 +1,11 @@
-import {
-  CommandGroup,
-  CommandList,
-  useCommandState
-} from '@internal/ui/components/command'
+import { CommandGroup, useCommandState } from '@internal/ui/components/command'
 import { compact } from 'lodash-es'
 import { useNavigate } from 'react-router-dom'
 
 import { ActionLoading } from '@/components/actions'
 import { TicketItem } from '@/components/tickets'
-import { useActionShortcut } from '@/hooks/useActionShortcut'
 import { useIssueSuggestions } from '@/hooks/useIssueSuggestions'
+import { useHotkey } from '@/lib/hotkeys'
 import { IssueSuggestion } from '@/services/ticket-service'
 import { useCommandSearch } from '@/stores/command/useCommandInputStore'
 import { JiraTicket } from '@/types'
@@ -73,36 +69,18 @@ function useQuickNavigate() {
   const ticketKey = useCommandState((s) => s.value)
   const navigate = useNavigate()
 
-  useActionShortcut(
-    {
-      Windows: { modifiers: ['alt', 'shift'], key: 's' },
-      macOS: { modifiers: ['cmd', 'shift'], key: 's' }
-    },
-    () => {
-      if (!isTicketKey(ticketKey)) return
-      navigate(CommandRoutes.IssueStatus(ticketKey))
-    }
-  )
+  useHotkey('issue.status', () => {
+    if (!isTicketKey(ticketKey)) return
+    navigate(CommandRoutes.IssueStatus(ticketKey))
+  })
 
-  useActionShortcut(
-    {
-      Windows: { modifiers: ['alt', 'shift'], key: 'p' },
-      macOS: { modifiers: ['cmd', 'shift'], key: 'p' }
-    },
-    () => {
-      if (!isTicketKey(ticketKey)) return
-      navigate(CommandRoutes.IssuePriority(ticketKey))
-    }
-  )
+  useHotkey('issue.priority', () => {
+    if (!isTicketKey(ticketKey)) return
+    navigate(CommandRoutes.IssuePriority(ticketKey))
+  })
 
-  useActionShortcut(
-    {
-      Windows: { modifiers: ['alt', 'shift'], key: 'a' },
-      macOS: { modifiers: ['cmd', 'shift'], key: 'a' }
-    },
-    () => {
-      if (!isTicketKey(ticketKey)) return
-      navigate(CommandRoutes.IssueAssign(ticketKey))
-    }
-  )
+  useHotkey('issue.assign', () => {
+    if (!isTicketKey(ticketKey)) return
+    navigate(CommandRoutes.IssueAssign(ticketKey))
+  })
 }

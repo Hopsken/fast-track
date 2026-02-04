@@ -24,6 +24,8 @@ This document is auto-generated from the hotkey registry.
 | `Cmd+Shift+A` | Assign issue to user | `main-menu`, `issue-menu` |
 | `Cmd+Shift+S` | Change issue status | `main-menu`, `issue-menu` |
 | `Cmd+Shift+P` | Change issue priority | `main-menu`, `issue-menu` |
+| `Cmd+Shift+M` | Assign issue to myself | `issue-actions` |
+| `Cmd+Shift+U` | Unassign issue from myself | `issue-actions` |
 
 ### Clipboard
 
@@ -35,7 +37,6 @@ This document is auto-generated from the hotkey registry.
 | `Cmd+Shift+B` | Copy git branch name to clipboard | `issue-menu`, `issue-actions` |
 | `Cmd+Shift+C` | Copy issue as markdown link | `issue-menu`, `issue-actions` |
 | `Cmd+Opt+L` | Copy issue URL as markdown link | `issue-menu`, `issue-actions` |
-| `Cmd+Shift+M` | Copy issue description to clipboard | `issue-menu`, `issue-actions` |
 
 
 
@@ -61,6 +62,8 @@ This document is auto-generated from the hotkey registry.
 | `Alt+Shift+A` | Assign issue to user | `main-menu`, `issue-menu` |
 | `Alt+Shift+S` | Change issue status | `main-menu`, `issue-menu` |
 | `Alt+Shift+P` | Change issue priority | `main-menu`, `issue-menu` |
+| `Alt+Shift+M` | Assign issue to myself | `issue-actions` |
+| `Alt+Shift+U` | Unassign issue from myself | `issue-actions` |
 
 ### Clipboard
 
@@ -72,6 +75,5 @@ This document is auto-generated from the hotkey registry.
 | `Alt+Shift+B` | Copy git branch name to clipboard | `issue-menu`, `issue-actions` |
 | `Alt+Shift+C` | Copy issue as markdown link | `issue-menu`, `issue-actions` |
 | `Alt+Ctrl+L` | Copy issue URL as markdown link | `issue-menu`, `issue-actions` |
-| `Alt+Shift+M` | Copy issue description to clipboard | `issue-menu`, `issue-actions` |
 
 

@@ -43,9 +43,11 @@ The registry is a centralized, compile-time validated configuration containing a
 
 ### 2. Scope Layer (Context-Aware Activation)
 
-**Location**: `apps/extension/src/lib/hotkeys/useScopeManager.ts`
+**Primary Method**: Component-based scope activation via `HotkeysScope`
 
-Scopes control when hotkeys are active based on the current route/context.
+**Location**: `apps/extension/src/lib/hotkeys/HotkeysScopeProvider.tsx`
+
+Scopes control when hotkeys are active. Rather than using centralized route-based mapping, scopes are activated using the `HotkeysScope` component which leverages React component lifecycle.
 
 **Available Scopes**:
 - `global` - Always active (escape, help)
@@ -55,17 +57,39 @@ Scopes control when hotkeys are active based on the current route/context.
 - `create-issue` - Create issue flow
 - `field-input` - Field-level inputs
 
-**Route-to-Scope Mapping**:
-Routes are automatically mapped to scopes based on patterns. The scope manager:
-1. Monitors route changes via `useLocation()`
-2. Determines active scopes from route patterns
-3. Enables/disables scopes via react-hotkeys-hook context
-4. Cleans up on unmount/route change
+**Component-Based Scope Activation**:
+The `HotkeysScope` component automatically manages scope lifecycle:
+1. Component mounts → scope is enabled via react-hotkeys-hook context
+2. Component unmounts → scope is disabled
+3. Clean separation of concerns (each component owns its scope)
+4. No central route mapping needed (more scalable)
+
+**Example Usage**:
+```typescript
+function TicketActionsMenu() {
+  return (
+    <HotkeysScope scope="issue-actions">
+      {/* Hotkeys registered here will be active when this component is mounted */}
+      <ActionPush hotkeyId="issue.assign" ... />
+      <ActionPush hotkeyId="issue.status" ... />
+    </HotkeysScope>
+  )
+}
+```
+
+**Benefits**:
+- No central route-to-scope mapping file to maintain
+- Scopes automatically tied to component lifecycle
+- More scalable for growing applications
+- Clear ownership of scopes
+
+**Legacy Support**:
+The `useScopeManager` hook (route-based approach) is still available for backwards compatibility or route-based scenarios, but `HotkeysScope` is the recommended pattern.
 
 **Scope Hierarchy**:
 - Multiple scopes can be active simultaneously
 - More specific scopes take precedence (field-input > create-issue > global)
-- Scopes are additive (route can activate multiple)
+- Scopes are additive (multiple components can activate different scopes)
 
 ### 3. API Layer (Developer Interface)
 
@@ -132,7 +156,7 @@ User presses key
     ↓
 react-hotkeys-hook captures event
     ↓
-Checks active scopes (from useScopeManager)
+Checks active scopes (from HotkeysScope components)
     ↓
 Finds matching hotkey in active scopes
     ↓
@@ -150,7 +174,21 @@ Executes callback via useHotkey
 </HotkeysProvider>
 ```
 
-### Route-Based Scope Management
+### Component-Based Scope Management (Recommended)
+
+```typescript
+// TicketActionsMenu.tsx
+function TicketActionsMenu() {
+  return (
+    <HotkeysScope scope="issue-actions">
+      {/* Hotkeys in this scope active only when component mounted */}
+      <ActionPush hotkeyId="issue.assign" ... />
+    </HotkeysScope>
+  )
+}
+```
+
+### Route-Based Scope Management (Legacy)
 
 ```typescript
 // CommandLayout.tsx
@@ -174,9 +212,13 @@ useHotkey('global.escape', handleEscape)
 
 ### Adding New Scopes
 
-1. Add to `HotkeyScope` type
-2. Update `ROUTE_SCOPE_MAP` in useScopeManager
-3. Define route pattern for automatic activation
+1. Add to `HotkeyScope` type in registry.ts
+2. Wrap component with `<HotkeysScope scope="new-scope">`
+3. Scope activates automatically when component mounts
+
+For route-based approach (legacy):
+1. Update `ROUTE_SCOPE_MAP` in useScopeManager
+2. Define route pattern for automatic activation
 
 ### Cross-Platform Keys
 
@@ -220,7 +262,7 @@ The system was designed for **incremental migration**:
 - ✅ Providers integrated
 - ✅ CommandSearch migrated
 - ✅ All field components migrated
-- ⏳ TicketActionsMenu (future)
+- ✅ TicketActionsMenu migrated
 - ⏳ TicketListMenu (future)
 
 ## Benefits Summary
@@ -244,15 +286,16 @@ The system was designed for **incremental migration**:
 
 ```
 apps/extension/src/lib/hotkeys/
-├── index.ts                 # Public API exports
-├── registry.ts              # Central hotkey definitions
-├── conflict-detector.ts     # Build-time validation
-├── HotkeysProvider.tsx      # React provider wrapper
-├── useScopeManager.ts       # Route-based scope activation
-├── useHotkey.ts            # Main developer API
-├── useFieldConfirm.tsx     # Field confirmation helper
-├── registry.test.ts        # Conflict detection tests
-└── generate-docs.ts        # Documentation generator
+├── index.ts                    # Public API exports
+├── registry.ts                 # Central hotkey definitions
+├── conflict-detector.ts        # Build-time validation
+├── HotkeysProvider.tsx         # React provider wrapper
+├── HotkeysScopeProvider.tsx    # Component-based scope activation (recommended)
+├── useScopeManager.ts          # Route-based scope activation (legacy)
+├── useHotkey.ts               # Main developer API
+├── useFieldConfirm.tsx        # Field confirmation helper
+├── registry.test.ts           # Conflict detection tests
+└── generate-docs.ts           # Documentation generator
 ```
 
 ## Future Enhancements
@@ -267,10 +310,10 @@ apps/extension/src/lib/hotkeys/
 
 ### Migration TODO
 
-- Migrate `TicketActionsMenu.tsx` (~10 hotkeys)
-- Migrate `TicketListMenu.tsx` (~3 hotkeys)
-- Update `ActionShortcut.tsx` to accept `hotkeyId` prop
-- Remove `useActionShortcut.ts` after migration
+- ✅ Migrate `TicketActionsMenu.tsx` (~10 hotkeys) - Complete
+- ✅ Update `ActionShortcut.tsx` to accept `hotkeyId` prop - Complete
+- ⏳ Migrate `TicketListMenu.tsx` (~3 hotkeys) - Future
+- ⏳ Remove `useActionShortcut.ts` after 100% migration - Future
 
 ## References
 

@@ -2,10 +2,9 @@ import { CommandShortcut } from '@internal/ui/components/command'
 import { Kbd, KbdGroup } from '@internal/ui/components/kbd'
 import { noop } from 'lodash-es'
 
-import { useActionShortcut } from '@/hooks/useActionShortcut'
+import { getHotkeyDefinition, HotkeyId, useHotkey } from '@/lib/hotkeys'
 import {
   detectPlatformOS,
-  KeyboardShortcutInput,
   KeyModifier,
   PlatformOS,
   resolvePlatformShortcut
@@ -60,16 +59,22 @@ const mapKey = (key: string): string => {
 }
 
 export function ActionShortcut({
-  shortcut,
+  hotkeyId,
   onSelect
 }: {
-  shortcut: KeyboardShortcutInput
+  hotkeyId: HotkeyId
   onSelect?: () => void
 }) {
   const platform = detectPlatformOS()
-  const resolvedShortcut = resolvePlatformShortcut(shortcut, platform)
+  const definition = getHotkeyDefinition(hotkeyId)
+  const resolvedShortcut = resolvePlatformShortcut(
+    definition.shortcut,
+    platform
+  )
 
-  useActionShortcut(resolvedShortcut, onSelect ? onSelect : noop, !!onSelect)
+  // Register hotkey from registry
+  useHotkey(hotkeyId, onSelect ? onSelect : noop, { enabled: !!onSelect })
+
   return (
     <CommandShortcut>
       <KbdGroup>

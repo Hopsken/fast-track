@@ -21,12 +21,7 @@ export function FieldConfirm(props: {
           className="-my-1 -mr-4"
           disabled={props.disabled}>
           <span>{props.text || 'Continue'}</span>
-          <ActionShortcut
-            shortcut={{
-              modifiers: ['cmd'],
-              key: 'enter'
-            }}
-          />
+          <ActionShortcut hotkeyId="field.confirm-complex" />
         </Button>
       </div>
     </CommandFooterSlot>
