@@ -14,7 +14,7 @@ export function FieldInputMenu() {
   const { fieldId } = field
 
   const { setSearch } = useCommandInput()
-  const { values, setValue } = useCreateIssueDraftStore()
+  const { template, values, setValue } = useCreateIssueDraftStore()
   const { goToNextField } = useWizardNavigation()
   const currentValue = values[field.fieldId]
 
@@ -37,6 +37,8 @@ export function FieldInputMenu() {
   const FieldComponent = getFieldInputComponent(field)
   return createElement(FieldComponent, {
     field,
+    project: template.scope.project,
+    issueType: template.scope.issueType,
     currentValue,
     onConfirm: handleConfirm
   })

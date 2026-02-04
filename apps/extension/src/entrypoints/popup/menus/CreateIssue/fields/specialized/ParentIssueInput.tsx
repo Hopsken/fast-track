@@ -6,7 +6,6 @@ import {
   CommandList,
   CommandLoading
 } from '@internal/ui/components/command'
-import type { SuggestedIssue } from 'jira.js/version3/models/suggestedIssue'
 
 import { useIssuePickerSuggestions } from '@/hooks/useIssuePickerSuggestions'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
@@ -15,13 +14,9 @@ import { isNonNullable } from '@/utils/assert'
 import { useCreateIssueDraftStore } from '../../useCreateIssueDraftStore'
 import { useFieldConfirm } from '../hooks/useFieldConfirm'
 import { FieldInputProps } from '../primitive/types'
-import { asRecord, getFieldTitle } from '../utils'
+import { getFieldTitle } from '../utils'
 
-export function ParentIssueInput({
-  field,
-  currentValue,
-  onConfirm
-}: FieldInputProps) {
+export function ParentIssueInput({ field, onConfirm }: FieldInputProps) {
   const { search, value, setValue } = useCommandInput()
   const title = getFieldTitle(field)
   const { template } = useCreateIssueDraftStore()

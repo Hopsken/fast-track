@@ -1,17 +1,7 @@
-import { useMemo, useState } from 'react'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger
-} from '@internal/ui/components/alert-dialog'
+import { useMemo } from 'react'
 import { Button } from '@internal/ui/components/button'
 import { Separator } from '@internal/ui/components/separator'
+import { ChevronLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { AutoGrowTextarea } from '@/components/ui/AutoGrowTextArea'
@@ -38,7 +28,15 @@ export function TemplateEditor() {
   }, [state.isSaving, isEdit])
 
   return (
-    <div className="space-y-8">
+    <div className="-mt-2 space-y-8">
+      {/* Header */}
+      <Button size={'sm'} variant={'ghost'} className="-ml-3 mb-4" asChild>
+        <Link to="/templates">
+          <ChevronLeft />
+          <span>Issue templates</span>
+        </Link>
+      </Button>
+
       {/* Inline name + description (Linear-style) */}
       <div className="space-y-1">
         <input

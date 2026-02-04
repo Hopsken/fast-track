@@ -1,9 +1,11 @@
+import type { UserDetails } from 'jira.js/version3/models/userDetails'
+
 import type {
   JiraIssueType,
   JiraProject as JiraProjectCore
 } from '~/repository/schema'
 
-export type { JiraIssueType }
+export type { JiraIssueType, UserDetails }
 
 export interface JiraStatusCategory {
   key: string

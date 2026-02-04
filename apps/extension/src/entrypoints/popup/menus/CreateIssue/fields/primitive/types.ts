@@ -1,3 +1,4 @@
+import { JiraIssueType, JiraProject } from '@/repository/schema'
 import type { VisibleField } from '~/services/template-service/gap-analysis'
 
 /**
@@ -5,6 +6,8 @@ import type { VisibleField } from '~/services/template-service/gap-analysis'
  * Each field component receives the field metadata, current value, and confirmation handler.
  */
 export interface FieldInputProps {
+  project: JiraProject
+  issueType: JiraIssueType
   field: VisibleField
   currentValue: unknown
   onConfirm: (value: unknown) => void

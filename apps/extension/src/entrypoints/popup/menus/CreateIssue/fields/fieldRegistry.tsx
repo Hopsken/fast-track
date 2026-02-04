@@ -11,7 +11,12 @@ import {
   CommandUserSelect,
   FieldInputProps
 } from './primitive'
-import { LabelsInput, ParentIssueInput, SprintInput } from './specialized'
+import {
+  LabelsInput,
+  ParentIssueInput,
+  ProjectUserSelect,
+  SprintInput
+} from './specialized'
 
 /**
  * Fallback component for unsupported field types.
@@ -42,7 +47,8 @@ const componentByFieldKey: Record<
   ComponentType<FieldInputProps> | undefined
 > = {
   labels: LabelsInput,
-  parent: ParentIssueInput
+  parent: ParentIssueInput,
+  reporter: ProjectUserSelect
 }
 
 /**

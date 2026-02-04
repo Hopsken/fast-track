@@ -8,31 +8,27 @@ import {
 } from '@internal/ui/components/command'
 import { useMount } from 'ahooks'
 
-import { useAutoCompleteUsers } from '@/hooks/useAutoComplete'
+import { useProjectUsers } from '@/hooks/useProjectUsers'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
-import { UserDetails } from '@/types/jira'
+import { UserDetails } from '@/types'
 
 import { useFieldConfirm } from '../hooks/useFieldConfirm'
+import { FieldInputProps } from '../primitive'
 import { asRecord, getFieldTitle } from '../utils'
-
-import { FieldInputProps } from './types'
 
 const toUserId = (user: UserDetails) =>
   user.accountId ?? user.emailAddress ?? ''
 
-export function CommandUserSelect({
+export function ProjectUserSelect({
+  project,
   field,
   currentValue,
   onConfirm
 }: FieldInputProps) {
   const { value, setValue, search, setSearch } = useCommandInput()
   const title = getFieldTitle(field)
-  const autoCompleteUrl = field.metadata?.autoCompleteUrl ?? ''
 
-  const { data: users, isLoading } = useAutoCompleteUsers(
-    autoCompleteUrl,
-    search
-  )
+  const { data: users, isLoading } = useProjectUsers(project.key, search)
 
   // Extract selected user from currentValue
   const selected = useMemo((): UserDetails | undefined => {
