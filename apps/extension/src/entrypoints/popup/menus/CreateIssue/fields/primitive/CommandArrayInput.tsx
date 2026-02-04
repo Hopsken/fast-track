@@ -3,9 +3,9 @@ import {
   CommandGroup,
   CommandList
 } from '@internal/ui/components/command'
-import { useMemoizedFn, useMount } from 'ahooks'
+import { useMount } from 'ahooks'
 
-import { useFieldConfirm } from '@/lib/hotkeys'
+import { useHotkey } from '@/lib/hotkeys'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 
 import { getFieldTitle, parseCommaSeparated, prefillArrayValue } from '../utils'
@@ -15,6 +15,7 @@ import { FieldInputProps } from './types'
 export function CommandArrayInput({
   field,
   currentValue,
+  onChange,
   onConfirm
 }: FieldInputProps) {
   const { search, setSearch } = useCommandInput()
@@ -25,9 +26,10 @@ export function CommandArrayInput({
     prefillArrayValue(currentValue, setSearch)
   })
 
-  const handleConfirm = useMemoizedFn(() => {
+  useHotkey('field.confirm-simple', () => {
     const parts = parseCommaSeparated(search)
-    onConfirm(parts)
+    onChange(parts)
+    onConfirm()
   })
 
   return (
@@ -35,11 +37,6 @@ export function CommandArrayInput({
       <CommandGroup heading={title}>
         <CommandEmpty>Type comma-separated values and press Enter</CommandEmpty>
       </CommandGroup>
-
-      {useFieldConfirm({
-        onConfirm: handleConfirm,
-        keys: 'enter'
-      })}
     </CommandList>
   )
 }

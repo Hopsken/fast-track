@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import {
   CommandEmpty,
   CommandGroup,
@@ -6,9 +6,9 @@ import {
   CommandList,
   CommandLoading
 } from '@internal/ui/components/command'
+import { SuggestedIssue } from 'jira.js/version3/models/suggestedIssue'
 
 import { useIssuePickerSuggestions } from '@/hooks/useIssuePickerSuggestions'
-import { useFieldConfirm } from '@/lib/hotkeys'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 import { isNonNullable } from '@/utils/assert'
 
@@ -16,8 +16,12 @@ import { useCreateIssueDraftStore } from '../../useCreateIssueDraftStore'
 import { FieldInputProps } from '../primitive/types'
 import { getFieldTitle } from '../utils'
 
-export function ParentIssueInput({ field, onConfirm }: FieldInputProps) {
-  const { search, value, setValue } = useCommandInput()
+export function ParentIssueInput({
+  field,
+  onChange,
+  onConfirm
+}: FieldInputProps) {
+  const { search } = useCommandInput()
   const title = getFieldTitle(field)
   const { template } = useCreateIssueDraftStore()
 
@@ -35,6 +39,14 @@ export function ParentIssueInput({ field, onConfirm }: FieldInputProps) {
     [suggestions]
   )
 
+  const handleSelect = useCallback(
+    (issue: SuggestedIssue) => {
+      onChange(issue)
+      onConfirm()
+    },
+    [onChange, onConfirm]
+  )
+
   return (
     <CommandList>
       <CommandGroup heading={title}>
@@ -49,10 +61,7 @@ export function ParentIssueInput({ field, onConfirm }: FieldInputProps) {
               key={issueKey}
               value={issueKey}
               keywords={[issueKey, displayText]}
-              onSelect={() => {
-                setValue(issueKey)
-                onConfirm(issue)
-              }}>
+              onSelect={() => handleSelect(issue)}>
               <div className="flex w-full flex-col">
                 <span className="truncate font-medium">{issueKey}</span>
                 {displayText !== issueKey ? (
@@ -73,20 +82,6 @@ export function ParentIssueInput({ field, onConfirm }: FieldInputProps) {
           <CommandEmpty>Type to search for parent issue...</CommandEmpty>
         ) : null}
       </CommandGroup>
-
-      {useFieldConfirm({
-        onConfirm: () => {
-          if (value) {
-            const issue = issues.find(
-              (i) => i.key === value || String(i.id) === value
-            )
-            if (issue) {
-              onConfirm(issue)
-            }
-          }
-        },
-        keys: 'meta+enter'
-      })}
     </CommandList>
   )
 }

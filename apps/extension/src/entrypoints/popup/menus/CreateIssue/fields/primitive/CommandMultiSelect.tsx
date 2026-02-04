@@ -4,10 +4,8 @@ import {
   CommandItem,
   CommandList
 } from '@internal/ui/components/command'
-import { useMemoizedFn } from 'ahooks'
 import { Check } from 'lucide-react'
 
-import { useFieldConfirm } from '@/lib/hotkeys'
 import type { AllowedValue } from '~/types/template'
 
 import { getFieldTitle, isArrayOfAllowedValues } from '../utils'
@@ -17,7 +15,7 @@ import { FieldInputProps } from './types'
 export function CommandMultiSelect({
   field,
   currentValue,
-  onConfirm
+  onChange
 }: FieldInputProps) {
   const title = getFieldTitle(field)
 
@@ -33,12 +31,8 @@ export function CommandMultiSelect({
     const next = selectedIds.has(opt.id)
       ? selected.filter((o) => o.id !== opt.id)
       : [...selected, opt]
-    onConfirm(next)
+    onChange(next)
   }
-
-  const handleConfirm = useMemoizedFn(() => {
-    onConfirm(selected)
-  })
 
   return (
     <CommandList>
@@ -59,11 +53,6 @@ export function CommandMultiSelect({
           )
         })}
       </CommandGroup>
-
-      {useFieldConfirm({
-        onConfirm: handleConfirm,
-        keys: 'meta+enter'
-      })}
     </CommandList>
   )
 }

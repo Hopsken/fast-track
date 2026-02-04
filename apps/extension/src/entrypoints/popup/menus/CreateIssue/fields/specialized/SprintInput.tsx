@@ -10,7 +10,6 @@ import { useMount } from 'ahooks'
 
 import { useSprints } from '@/hooks/useSprints'
 import { formatDateToISO } from '@/lib/date'
-import { useFieldConfirm } from '@/lib/hotkeys'
 import type { AgileSprint } from '@/lib/jira/agile'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 
@@ -21,6 +20,7 @@ import { asRecord, getFieldTitle } from '../utils'
 export function SprintInput({
   field,
   currentValue,
+  onChange,
   onConfirm
 }: FieldInputProps) {
   const { setValue } = useCommandInput()
@@ -43,6 +43,11 @@ export function SprintInput({
     }
   })
 
+  const onSelect = (sprint: AgileSprint) => {
+    onChange(sprint)
+    onConfirm()
+  }
+
   return (
     <CommandList>
       <CommandGroup heading={title}>
@@ -59,7 +64,9 @@ export function SprintInput({
               key={sprint.id}
               value={String(sprint.id)}
               keywords={[sprint.name, dateRange]}
-              onSelect={() => onConfirm(sprint)}>
+              onSelect={() => {
+                onSelect(sprint)
+              }}>
               <div className="flex w-full flex-col">
                 <span className="truncate">{sprint.name}</span>
                 {dateRange ? (
@@ -76,15 +83,6 @@ export function SprintInput({
           <CommandEmpty>No sprints available</CommandEmpty>
         ) : null}
       </CommandGroup>
-
-      {useFieldConfirm({
-        onConfirm: () => {
-          if (selected) {
-            onConfirm(selected)
-          }
-        },
-        keys: 'meta+enter'
-      })}
     </CommandList>
   )
 }

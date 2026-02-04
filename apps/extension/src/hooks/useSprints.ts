@@ -8,7 +8,6 @@ export function useSprints(projectKeyOrId: string) {
     queryKey: queryKeys.agile.projectSprints(projectKeyOrId),
     queryFn: async () => {
       const result = await jiraService.agile.getSprints(projectKeyOrId)
-      console.log('useSprints', result)
       return result
     }
   })

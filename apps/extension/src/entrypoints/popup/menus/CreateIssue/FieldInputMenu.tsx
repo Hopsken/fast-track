@@ -1,9 +1,12 @@
-import { createElement } from 'react'
+import { createElement, Fragment } from 'react'
+import { useMemoizedFn } from 'ahooks'
 import { useLocation } from 'react-router-dom'
 
+import { useHotkey } from '@/lib/hotkeys'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 import { VisibleField } from '~/services/template-service/gap-analysis'
 
+import { FieldConfirm } from './FieldConfirm'
 import { getFieldInputComponent } from './fields/fieldRegistry'
 import { SummaryDescriptionInput } from './fields/specialized'
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
@@ -18,28 +21,43 @@ export function FieldInputMenu() {
   const { goToNextField } = useWizardNavigation()
   const currentValue = values[field.fieldId]
 
-  const handleConfirm = (value: unknown) => {
+  const onChange = useMemoizedFn((value: unknown) => {
     setValue(fieldId, value)
+  })
+
+  const onConfirm = useMemoizedFn(() => {
     setSearch('')
     goToNextField()
-  }
+  })
+
+  const isSummaryField = fieldId === 'summary' || fieldId === 'description'
+
+  useHotkey('field.confirm-complex', onConfirm, {
+    enabled: !isSummaryField
+  })
 
   // Summary + Description combined field (special case)
-  if (fieldId === 'summary' || fieldId === 'description') {
-    return (
-      <SummaryDescriptionInput
-        focusField={fieldId as 'summary' | 'description'}
-      />
-    )
+  if (isSummaryField) {
+    return <SummaryDescriptionInput focusField={fieldId} />
   }
+
+  const fieldConfirmBtn = <FieldConfirm onClick={onConfirm} />
 
   // Get component from registry
   const FieldComponent = getFieldInputComponent(field)
-  return createElement(FieldComponent, {
+  const fieldElement = createElement(FieldComponent, {
     field,
     project: template.scope.project,
     issueType: template.scope.issueType,
     currentValue,
-    onConfirm: handleConfirm
+    onChange,
+    onConfirm
   })
+
+  return (
+    <Fragment>
+      {fieldElement}
+      {fieldConfirmBtn}
+    </Fragment>
+  )
 }

@@ -1,5 +1,6 @@
 import { CommandShortcut } from '@internal/ui/components/command'
 import { Kbd, KbdGroup } from '@internal/ui/components/kbd'
+import { useMemoizedFn } from 'ahooks'
 import { noop } from 'lodash-es'
 
 import { getHotkeyDefinition, HotkeyId, useHotkey } from '@/lib/hotkeys'
@@ -72,8 +73,12 @@ export function ActionShortcut({
     platform
   )
 
+  const onAction = useMemoizedFn(() => {
+    onSelect?.()
+  })
+
   // Register hotkey from registry
-  useHotkey(hotkeyId, onSelect ? onSelect : noop, { enabled: !!onSelect })
+  useHotkey(hotkeyId, onAction, { enabled: !!onSelect })
 
   return (
     <CommandShortcut>

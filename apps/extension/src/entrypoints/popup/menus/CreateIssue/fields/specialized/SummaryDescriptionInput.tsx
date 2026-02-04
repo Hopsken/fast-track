@@ -2,10 +2,11 @@ import { useRef, useState } from 'react'
 import { CommandGroup } from '@internal/ui/components/command'
 import { useMount } from 'ahooks'
 
-import { useFieldConfirm } from '@/lib/hotkeys'
+import { HotkeysScopeProvider, useHotkey } from '@/lib/hotkeys'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 
 import { CommandMenu } from '../../../CommandMenu'
+import { FieldConfirm } from '../../FieldConfirm'
 import { useCreateIssueDraftStore } from '../../useCreateIssueDraftStore'
 import { useWizardNavigation } from '../../useWizardNavigation'
 
@@ -13,10 +14,11 @@ interface Props {
   focusField: 'summary' | 'description'
 }
 
-export function SummaryDescriptionInput({ focusField }: Props) {
+function SummaryDescriptionInputInner({ focusField }: Props) {
   const { values, setValue } = useCreateIssueDraftStore()
   const { search, setSearch } = useCommandInput()
   const { goToNextField } = useWizardNavigation()
+
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const [description, setDescription] = useState<string>(
@@ -43,6 +45,8 @@ export function SummaryDescriptionInput({ focusField }: Props) {
     goToNextField()
   }
 
+  useHotkey('field.confirm-complex', saveAndContinue)
+
   return (
     <CommandMenu
       searchPlaceholder="Summary"
@@ -60,10 +64,15 @@ export function SummaryDescriptionInput({ focusField }: Props) {
         </div>
       </CommandGroup>
 
-      {useFieldConfirm({
-        onConfirm: saveAndContinue,
-        keys: 'meta+enter'
-      })}
+      <FieldConfirm onClick={saveAndContinue} />
     </CommandMenu>
+  )
+}
+
+export function SummaryDescriptionInput({ focusField }: Props) {
+  return (
+    <HotkeysScopeProvider scope="field-input">
+      <SummaryDescriptionInputInner focusField={focusField} />
+    </HotkeysScopeProvider>
   )
 }

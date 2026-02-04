@@ -89,7 +89,7 @@ export function useHotkey(
   callback: HotkeyCallback,
   options: UseHotkeyOptions = {}
 ): void {
-  const { enabled = true, deps = [] } = options
+  const { enabled = true } = options
 
   // Get hotkey definition from registry
   const definition = getHotkeyDefinition(hotkeyId)
@@ -103,15 +103,10 @@ export function useHotkey(
   const keys = mapKeyboardShortcutToReactHotkeys(shortcut)
 
   // Register hotkey with react-hotkeys-hook
-  useHotkeys(
-    keys,
-    callback,
-    {
-      enabled,
-      preventDefault: definition.preventDefault ?? true,
-      enableOnFormTags: definition.enableOnFormTags ?? false,
-      scopes: definition.scopes as string[]
-    },
-    deps
-  )
+  useHotkeys(keys, callback, {
+    enabled,
+    preventDefault: definition.preventDefault ?? true,
+    enableOnFormTags: definition.enableOnFormTags ?? false,
+    scopes: definition.scopes as string[]
+  })
 }

@@ -6,10 +6,9 @@ import {
   CommandList,
   CommandLoading
 } from '@internal/ui/components/command'
-import { useMount } from 'ahooks'
+import { useMemoizedFn, useMount } from 'ahooks'
 
 import { useAutoCompleteUsers } from '@/hooks/useAutoComplete'
-import { useFieldConfirm } from '@/lib/hotkeys'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 import { UserDetails } from '@/types/jira'
 
@@ -23,9 +22,10 @@ const toUserId = (user: UserDetails) =>
 export function CommandUserSelect({
   field,
   currentValue,
+  onChange,
   onConfirm
 }: FieldInputProps) {
-  const { value, setValue, search, setSearch } = useCommandInput()
+  const { setValue, search, setSearch } = useCommandInput()
   const title = getFieldTitle(field)
   const autoCompleteUrl = field.metadata?.autoCompleteUrl ?? ''
 
@@ -54,9 +54,10 @@ export function CommandUserSelect({
     }
   })
 
-  const handleSelectUser = (user: UserDetails) => {
-    onConfirm(user)
-  }
+  const handleSelectUser = useMemoizedFn((user: UserDetails) => {
+    onChange(user)
+    onConfirm()
+  })
 
   return (
     <CommandList>
@@ -93,18 +94,6 @@ export function CommandUserSelect({
           <CommandEmpty>Type to search users...</CommandEmpty>
         ) : null}
       </CommandGroup>
-
-      {useFieldConfirm({
-        onConfirm: () => {
-          if (value) {
-            const user = users?.find((u) => toUserId(u) === value)
-            if (user) {
-              onConfirm(user)
-            }
-          }
-        },
-        keys: 'meta+enter'
-      })}
     </CommandList>
   )
 }

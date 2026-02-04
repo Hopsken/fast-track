@@ -11,7 +11,7 @@ import { uniq } from 'lodash-es'
 import { Check } from 'lucide-react'
 
 import { useLabels } from '@/hooks/useLabels'
-import { useFieldConfirm } from '@/lib/hotkeys'
+import { useHotkey } from '@/lib/hotkeys'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 
 import { FieldInputProps } from '../primitive/types'
@@ -20,7 +20,7 @@ import { getFieldTitle, parseCommaSeparated, prefillArrayValue } from '../utils'
 export function LabelsInput({
   field,
   currentValue,
-  onConfirm
+  onChange
 }: FieldInputProps) {
   const { search, setSearch } = useCommandInput()
   const title = getFieldTitle(field)
@@ -61,9 +61,9 @@ export function LabelsInput({
       const next = selectedSet.has(label)
         ? selectedLabels.filter((l) => l !== label)
         : [...selectedLabels, label]
-      onConfirm(next)
+      onChange(next)
     },
-    [selectedLabels, selectedSet, onConfirm]
+    [selectedLabels, selectedSet, onChange]
   )
 
   const handleCreateNew = useCallback(() => {
@@ -81,18 +81,28 @@ export function LabelsInput({
 
     // Add to selected
     const next = uniq([...selectedLabels, ...validLabels])
-    onConfirm(next)
+    onChange(next)
     setSearch('')
-  }, [search, selectedLabels, onConfirm, setSearch])
+  }, [search, selectedLabels, onChange, setSearch])
 
-  const handleConfirm = useCallback(() => {
-    // If there's text in search, create new labels first
-    if (search.trim()) {
-      handleCreateNew()
-    } else {
-      onConfirm(selectedLabels)
-    }
-  }, [search, selectedLabels, onConfirm, handleCreateNew])
+  const handleConfirm = useCallback(
+    (event: KeyboardEvent) => {
+      const fromInput = event.target instanceof HTMLInputElement
+      if (!fromInput) {
+        return
+      }
+
+      // If there's text in search, create new labels first
+      if (search.trim()) {
+        handleCreateNew()
+      } else {
+        onChange(selectedLabels)
+      }
+    },
+    [search, selectedLabels, onChange, handleCreateNew]
+  )
+
+  useHotkey('field.confirm-simple', handleConfirm)
 
   return (
     <CommandList>
@@ -118,7 +128,7 @@ export function LabelsInput({
         filteredOptions.length === 0 &&
         search.trim().length > 0 ? (
           <CommandEmpty>
-            Press Cmd+Enter to create "{search.trim()}"
+            Press Cmd+Enter to create &quot;{search.trim()}&quot;
           </CommandEmpty>
         ) : null}
 
@@ -128,11 +138,6 @@ export function LabelsInput({
           <CommandEmpty>Type to search or create labels</CommandEmpty>
         ) : null}
       </CommandGroup>
-
-      {useFieldConfirm({
-        onConfirm: handleConfirm,
-        keys: 'meta+enter'
-      })}
     </CommandList>
   )
 }

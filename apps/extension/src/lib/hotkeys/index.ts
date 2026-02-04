@@ -23,11 +23,7 @@ export {
 // Provider and scope management
 export { HotkeysProvider } from './HotkeysProvider'
 export { HotkeysScope as HotkeysScopeProvider } from './HotkeysScopeProvider'
-export { useScopeManager } from './useScopeManager'
 
 // Developer API
 export type { HotkeyCallback, UseHotkeyOptions } from './useHotkey'
 export { useHotkey } from './useHotkey'
-
-// Field confirmation helper
-export { useFieldConfirm } from './useFieldConfirm'

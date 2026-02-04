@@ -37,80 +37,82 @@ export const TicketActionsMenu = () => {
 
   return (
     <HotkeysScopeProvider scope="issue-actions">
-      <CommandGroup heading="General">
-        <ActionPush
-          value="assign-to"
-          target={CommandRoutes.IssueDetails(ticket.key)}
-          icon={UserPen}
-          title="Assign to..."
-          hotkeyId="issue.assign"
-        />
+      <HotkeysScopeProvider scope="issue-menu">
+        <CommandGroup heading="General">
+          <ActionPush
+            value="assign-to"
+            target={CommandRoutes.IssueDetails(ticket.key)}
+            icon={UserPen}
+            title="Assign to..."
+            hotkeyId="issue.assign"
+          />
 
-        <AssignOrUnassignMySelf ticket={ticket} />
+          <AssignOrUnassignMySelf ticket={ticket} />
 
-        <ActionPush
-          value="change-status"
-          target={CommandRoutes.IssueStatus(ticket.key)}
-          icon={Route}
-          title="Change status..."
-          hotkeyId="issue.status"
-        />
+          <ActionPush
+            value="change-status"
+            target={CommandRoutes.IssueStatus(ticket.key)}
+            icon={Route}
+            title="Change status..."
+            hotkeyId="issue.status"
+          />
 
-        <ActionPush
-          value="change-priority"
-          target={CommandRoutes.IssuePriority(ticket.key)}
-          icon={ChartNoAxesColumnIncreasing}
-          title="Change priority..."
-          hotkeyId="issue.priority"
-        />
-      </CommandGroup>
+          <ActionPush
+            value="change-priority"
+            target={CommandRoutes.IssuePriority(ticket.key)}
+            icon={ChartNoAxesColumnIncreasing}
+            title="Change priority..."
+            hotkeyId="issue.priority"
+          />
+        </CommandGroup>
 
-      <CommandSeparator />
+        <CommandSeparator />
 
-      <CommandGroup heading="Misc">
-        <ActionCopyToClipboard
-          value="copy-issue-key"
-          icon={Clipboard}
-          content={ticket.key}
-          title="Copy issue key"
-          hotkeyId="clipboard.copy-key"
-        />
-        <ActionCopyToClipboard
-          value="copy-issue-link"
-          icon={Link2}
-          content={ticket.url}
-          title="Copy issue link"
-          hotkeyId="clipboard.copy-url"
-        />
-        <ActionCopyToClipboard
-          value="copy-issue-title"
-          icon={Clipboard}
-          content={ticket.summary}
-          title="Copy issue title"
-          hotkeyId="clipboard.copy-summary"
-        />
-        <ActionCopyToClipboard
-          value="copy-issue-key-and-title"
-          icon={Clipboard}
-          content={`${ticket.key}: ${ticket.summary}`}
-          title="Copy issue key and title"
-          hotkeyId="clipboard.copy-markdown"
-        />
-        <ActionCopyToClipboard
-          value="copy-issue-title-link"
-          icon={Link2}
-          content={formatted.issueTitleLink}
-          title="Copy issue title as link"
-          hotkeyId="clipboard.copy-markdown-url"
-        />
-        <ActionCopyToClipboard
-          value="copy-git-branch-name"
-          icon={GitBranch}
-          content={formatted.branchName}
-          title="Copy git branch name"
-          hotkeyId="clipboard.copy-branch"
-        />
-      </CommandGroup>
+        <CommandGroup heading="Misc">
+          <ActionCopyToClipboard
+            value="copy-issue-key"
+            icon={Clipboard}
+            content={ticket.key}
+            title="Copy issue key"
+            hotkeyId="clipboard.copy-key"
+          />
+          <ActionCopyToClipboard
+            value="copy-issue-link"
+            icon={Link2}
+            content={ticket.url}
+            title="Copy issue link"
+            hotkeyId="clipboard.copy-url"
+          />
+          <ActionCopyToClipboard
+            value="copy-issue-title"
+            icon={Clipboard}
+            content={ticket.summary}
+            title="Copy issue title"
+            hotkeyId="clipboard.copy-summary"
+          />
+          <ActionCopyToClipboard
+            value="copy-issue-key-and-title"
+            icon={Clipboard}
+            content={`${ticket.key}: ${ticket.summary}`}
+            title="Copy issue key and title"
+            hotkeyId="clipboard.copy-markdown"
+          />
+          <ActionCopyToClipboard
+            value="copy-issue-title-link"
+            icon={Link2}
+            content={formatted.issueTitleLink}
+            title="Copy issue title as link"
+            hotkeyId="clipboard.copy-markdown-url"
+          />
+          <ActionCopyToClipboard
+            value="copy-git-branch-name"
+            icon={GitBranch}
+            content={formatted.branchName}
+            title="Copy git branch name"
+            hotkeyId="clipboard.copy-branch"
+          />
+        </CommandGroup>
+      </HotkeysScopeProvider>
     </HotkeysScopeProvider>
   )
 }

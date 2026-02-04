@@ -9,7 +9,6 @@ import {
 import { useMount } from 'ahooks'
 
 import { useProjectUsers } from '@/hooks/useProjectUsers'
-import { useFieldConfirm } from '@/lib/hotkeys'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 import { UserDetails } from '@/types'
 
@@ -23,9 +22,10 @@ export function ProjectUserSelect({
   project,
   field,
   currentValue,
+  onChange,
   onConfirm
 }: FieldInputProps) {
-  const { value, setValue, search, setSearch } = useCommandInput()
+  const { setValue, search, setSearch } = useCommandInput()
   const title = getFieldTitle(field)
 
   const { data: users, isLoading } = useProjectUsers(project.key, search)
@@ -51,7 +51,8 @@ export function ProjectUserSelect({
   })
 
   const handleSelectUser = (user: UserDetails) => {
-    onConfirm(user)
+    onChange(user)
+    onConfirm()
   }
 
   return (
@@ -89,18 +90,6 @@ export function ProjectUserSelect({
           <CommandEmpty>Type to search users...</CommandEmpty>
         ) : null}
       </CommandGroup>
-
-      {useFieldConfirm({
-        onConfirm: () => {
-          if (value) {
-            const user = users?.find((u) => toUserId(u) === value)
-            if (user) {
-              onConfirm(user)
-            }
-          }
-        },
-        keys: 'meta+enter'
-      })}
     </CommandList>
   )
 }
