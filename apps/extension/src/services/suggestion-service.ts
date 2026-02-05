@@ -1,8 +1,26 @@
 import { defineProxyService } from '@webext-core/proxy-service'
-import { compact, countBy, flatMap, orderBy } from 'lodash-es'
+import {
+  compact,
+  countBy,
+  difference,
+  flatMap,
+  keyBy,
+  orderBy,
+  uniqBy
+} from 'lodash-es'
 
+import { JiraAPI } from '@/lib/jira'
 import { getStorageItem } from '@/lib/storage'
-import { IssueSuggestion } from '@/services/ticket-service'
+import { bucketSuggestionTickets } from '@/lib/tickets/issue-suggestions'
+import { JiraTicket } from '@/types'
+
+export type IssueSuggestion = {
+  tickets: Record<string, JiraTicket>
+  inProgress: string[]
+  todo: string[]
+  done: string[]
+  recommend: string[]
+}
 
 export type ProjectClickInfo = {
   count: number
@@ -51,6 +69,37 @@ const collectSuggestionProjects = (suggestions?: IssueSuggestion) => {
 }
 
 export class SuggestionService {
+  private jira = JiraAPI.getInstance()
+
+  async getIssueSuggestions(): Promise<IssueSuggestion> {
+    const [tickets, historyTickets] = await Promise.all([
+      this.getMySuggestedTickets(),
+      this.getRecentHistoryTickets()
+    ])
+
+    const { inProgress, todo, done } = bucketSuggestionTickets(tickets)
+    const recommend = difference(
+      historyTickets.map((ticket) => ticket.key),
+      tickets.map((ticket) => ticket.key)
+    )
+
+    return {
+      tickets: keyBy(uniqBy([...tickets, ...historyTickets], 'key'), 'key'),
+      inProgress,
+      todo,
+      done,
+      recommend
+    }
+  }
+
+  private async getMySuggestedTickets(limit = 50): Promise<JiraTicket[]> {
+    return this.jira.issues.getMySuggestedIssues(limit)
+  }
+
+  private async getRecentHistoryTickets(limit = 7): Promise<JiraTicket[]> {
+    return this.jira.issues.getRecentHistoryIssues(limit)
+  }
+
   private scoreProjects(suggestionProjects: string[], clicks: ProjectClicks) {
     const suggestionCounts = countBy(
       suggestionProjects.map(normalizeProjectKey).filter(Boolean)

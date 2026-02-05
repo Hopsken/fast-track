@@ -5,10 +5,10 @@
 
 import { Version3Client } from 'jira.js'
 import type { Issue } from 'jira.js/version3/models/issue'
-import type { PageOfCreateMetaIssueTypeWithField } from 'jira.js/version3/models/pageOfCreateMetaIssueTypeWithField'
 import type { GetIssuePickerResource } from 'jira.js/version3/parameters/getIssuePickerResource'
 import { chunk, compact, flatMap, map, orderBy, uniqBy } from 'lodash-es'
 
+import { FieldMetadata } from '@/repository/schema'
 import {
   IssueDetail,
   IssueSource,
@@ -16,7 +16,8 @@ import {
   JiraPriority,
   JiraTicket,
   JiraTransition,
-  CreateIssuePayload
+  CreateIssuePayload,
+  UserDetails
 } from '@/types'
 import { isNonNullable } from '@/utils/assert'
 import { isTicketKey, mapPriority, mapTransition } from '@/utils/jira/issues'
@@ -25,6 +26,8 @@ import { normalizeProjects } from '@/utils/ticket-search'
 import { getLogger } from '~/utils/logger'
 
 import { toISODateString } from '../date'
+
+import { parseCreateMetaFields, isValidCreateMetaFields } from './create-meta'
 
 const issueFields = [
   'id',
@@ -78,14 +81,16 @@ export class JiraIssueService {
   async getCreateIssueMetaFields(input: {
     projectIdOrKey: string
     issueTypeId: string
-  }): Promise<PageOfCreateMetaIssueTypeWithField> {
+  }): Promise<FieldMetadata[]> {
     const client = await this.getClient()
 
-    // jira.js provides a dedicated wrapper for this endpoint
-    return client.issues.getCreateIssueMetaIssueTypeId({
+    const page = await client.issues.getCreateIssueMetaIssueTypeId({
       projectIdOrKey: input.projectIdOrKey,
       issueTypeId: input.issueTypeId
     })
+    const fields = parseCreateMetaFields(page)
+    if (!isValidCreateMetaFields(fields)) return []
+    return fields
   }
 
   async createIssue(input: CreateIssuePayload): Promise<{ key: string }> {
@@ -109,6 +114,8 @@ export class JiraIssueService {
       issueIdOrKey: issueKey,
       accountId
     })
+
+    return this.getIssue(issueKey)
   }
 
   async getPriorities(): Promise<JiraPriority[]> {
@@ -133,21 +140,39 @@ export class JiraIssueService {
 
   async transitionIssue(
     issueKey: string,
-    transitionId: string
+    transition: JiraTransition,
+    options?: {
+      autoAssign?: {
+        assignee: UserDetails
+      }
+    }
   ): Promise<JiraTicket> {
     const client = await this.getClient()
+
     await client.issues.doTransition({
       issueIdOrKey: issueKey,
-      transition: { id: transitionId }
+      transition: { id: transition.id }
     })
+
+    const { assignee: { accountId } = {} } = options?.autoAssign || {}
+
+    if (accountId) {
+      return this.assignIssue(issueKey, accountId)
+    }
 
     return this.getIssue(issueKey)
   }
 
   async updateIssuePriority(
     issueKey: string,
-    priorityId: string
+    priority: JiraPriority
   ): Promise<JiraTicket> {
+    const normalizedPriority = mapPriority(priority)
+    const { id: priorityId } = normalizedPriority
+    if (!priorityId) {
+      throw new Error('updateTicketPriority: priority id is required')
+    }
+
     const client = await this.getClient()
     await client.issues.editIssue({
       issueIdOrKey: issueKey,
@@ -217,7 +242,8 @@ export class JiraIssueService {
       .join(' OR ')
 
     const jql = `${jqlParts} ORDER BY updated DESC`
-    return this.searchIssuesUsingJql(jql, { limit: maxResults })
+    const issues = await this.searchIssuesUsingJql(jql, { limit: maxResults })
+    return uniqBy(issues, 'key')
   }
 
   private searchIssuesUsingJql = async (

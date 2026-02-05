@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { suggestionService } from '@/services'
-import { IssueSuggestion } from '@/services/ticket-service'
+import { IssueSuggestion } from '@/services/suggestion-service'
 import { queryKeys } from '@/utils/queryKeys'
 import { minutes } from '@/utils/time'
 

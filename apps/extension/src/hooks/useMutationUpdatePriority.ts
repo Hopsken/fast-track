@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { ticketService } from '@/services'
+import { jiraService } from '@/services'
 import { showToast } from '@/stores/command/useToastStore'
 import { JiraPriority } from '@/types'
 import { queryKeys } from '@/utils/queryKeys'
@@ -14,7 +14,7 @@ export function useMutationUpdatePriority() {
       ticketKey: string
       priority: JiraPriority
     }) => {
-      return ticketService.updateTicketPriority(
+      return jiraService.issues.updateIssuePriority(
         params.ticketKey,
         params.priority
       )

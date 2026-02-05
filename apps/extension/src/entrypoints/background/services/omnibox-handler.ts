@@ -5,7 +5,7 @@
 import { Browser, browser } from '#imports'
 import { escape } from 'lodash-es'
 
-import { getTicketService } from '@/services/ticket-service'
+import { jiraService } from '@/services'
 import { JiraTicket } from '@/types'
 import { isTicketKey } from '@/utils/jira/issues'
 import { getLogger } from '~/utils/logger'
@@ -120,8 +120,7 @@ export class OmniboxHandlerService {
   }
 
   private static async searchRemoteTickets(query: string) {
-    const ticketService = getTicketService()
-    const tickets = await ticketService.searchTickets(query)
+    const tickets = await jiraService.issues.searchIssuesByText(query)
     return tickets
   }
 

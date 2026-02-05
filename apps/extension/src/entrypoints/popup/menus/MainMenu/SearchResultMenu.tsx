@@ -6,7 +6,7 @@ import { ActionLoading } from '@/components/actions'
 import { TicketList } from '@/components/tickets'
 import { useFrequentProjects } from '@/hooks/useFrequentProjects'
 import { useSearchQuery, useTicketSearch } from '@/hooks/useTicketSearch'
-import { IssueSuggestion } from '@/services/ticket-service'
+import { IssueSuggestion } from '@/services/suggestion-service'
 import { filterTicketsByQuery } from '@/utils/ticket-ranking'
 
 export function SearchResultMenu(props: { suggestions?: IssueSuggestion }) {

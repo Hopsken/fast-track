@@ -5,7 +5,7 @@ import {
   mapCurrentUserToAssignee,
   shouldAutoAssignOnTransition
 } from '@/lib/tickets/auto-assign'
-import { ticketService } from '@/services'
+import { jiraService } from '@/services'
 import { showToast } from '@/stores/command/useToastStore'
 import { useCurrentUser } from '@/stores/useCurrentUser'
 import { JiraTicket, JiraTransition, UserPreferences } from '@/types'
@@ -32,8 +32,8 @@ export function useMutationTransitionIssue() {
           params.transition
         )
 
-      const updated = await ticketService.transitionTicket(
-        params.ticket,
+      const updated = await jiraService.issues.transitionIssue(
+        params.ticket.key,
         params.transition,
         shouldAutoAssign ? { autoAssign: { assignee: currentUser } } : undefined
       )

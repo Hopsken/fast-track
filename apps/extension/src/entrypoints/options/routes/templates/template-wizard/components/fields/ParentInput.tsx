@@ -1,12 +1,9 @@
 import { useMemo, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { SuggestedIssue } from 'jira.js/version3/models/suggestedIssue'
 
 import { InputSearch, SearchOption } from '@/components/ui'
 import { useIssuePickerSuggestions } from '@/hooks/useIssuePickerSuggestions'
-import { ticketService } from '@/services'
 import { isNonNullable } from '@/utils/assert'
-import { minutes } from '@/utils/time'
 
 import { FieldInputBaseProps } from '../../types'
 

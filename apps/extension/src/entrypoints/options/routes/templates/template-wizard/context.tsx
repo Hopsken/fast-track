@@ -18,7 +18,6 @@ import { formatErrorMessage } from '@/utils/formatError'
 import { queryKeys } from '@/utils/queryKeys'
 import { minutes } from '@/utils/time'
 import { getTemplateService } from '~/services/template-service'
-import { getTicketService } from '~/services/ticket-service'
 import type {
   FieldConfig,
   FieldMetadata,
@@ -197,8 +196,7 @@ export function TemplateWizardProvider(props: ProviderProps) {
     queryKey: queryKeys.tickets.createMeta(projectKey, issueTypeId),
     queryFn: async () => {
       if (!projectKey || !issueTypeId) return []
-      const svc = getTicketService()
-      return svc.getCreateIssueFields({
+      return jiraService.issues.getCreateIssueMetaFields({
         projectIdOrKey: projectKey,
         issueTypeId: issueTypeId
       })

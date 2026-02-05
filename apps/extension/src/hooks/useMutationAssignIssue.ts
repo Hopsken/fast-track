@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { UserDetails } from 'jira.js/version3/models/userDetails'
 
-import { ticketService } from '@/services'
+import { jiraService } from '@/services'
 import { showToast } from '@/stores/command/useToastStore'
 import { useCurrentUser } from '@/stores/useCurrentUser'
 import { JiraUserInfo } from '@/types'
@@ -15,9 +15,9 @@ export function useMutationAssignIssue() {
       ticketKey: string
       assignee: UserDetails | null
     }) => {
-      const updated = await ticketService.assignTicket(
+      const updated = await jiraService.issues.assignIssue(
         params.ticketKey,
-        params.assignee
+        params.assignee?.accountId ?? null
       )
       // Return updated ticket for normy to normalize
       return (
@@ -95,9 +95,9 @@ export function useMutationAssignMyself() {
       if (!myself)
         throw new Error('useMutationAssignMyself: myself is required')
 
-      const updated = await ticketService.assignTicket(
+      const updated = await jiraService.issues.assignIssue(
         params.ticketKey,
-        params.assign ? myself : null
+        params.assign ? myself.accountId : null
       )
       // Return updated ticket for normy to normalize
       return (
