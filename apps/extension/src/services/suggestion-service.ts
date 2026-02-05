@@ -3,8 +3,6 @@ import { compact, countBy, flatMap, orderBy } from 'lodash-es'
 
 import { getStorageItem } from '@/lib/storage'
 import { IssueSuggestion } from '@/services/ticket-service'
-import { JiraIssueType, JiraProject } from '@/types'
-import { JiraAPI } from '~/lib/jira'
 
 export type ProjectClickInfo = {
   count: number
@@ -52,9 +50,7 @@ const collectSuggestionProjects = (suggestions?: IssueSuggestion) => {
   )
 }
 
-export class ProjectServiceImpl {
-  private jira = JiraAPI.getInstance()
-
+export class SuggestionService {
   private scoreProjects(suggestionProjects: string[], clicks: ProjectClicks) {
     const suggestionCounts = countBy(
       suggestionProjects.map(normalizeProjectKey).filter(Boolean)
@@ -116,42 +112,10 @@ export class ProjectServiceImpl {
 
     return this.scoreProjects(suggestionProjects, clicks ?? {})
   }
-
-  async searchProjects(query: string): Promise<JiraProject[]> {
-    const normalized = query.trim()
-
-    const { values } = await this.jira.projects.searchProjects(normalized, {
-      maxResults: 7
-    })
-
-    return values
-  }
-
-  async getProject(projectIdOrKey: string) {
-    const normalized = projectIdOrKey.trim()
-    if (!normalized) throw new Error('Project key is required')
-
-    return this.jira.projects.getProject(normalized)
-  }
-
-  async getRecentProjects() {
-    return this.jira.projects.getRecentProjects()
-  }
-
-  async getProjectsByKeys(keys: string[]) {
-    if (!keys || keys.length === 0) return []
-    const { values } = await this.jira.projects.searchProjects('', { keys })
-    return values ?? []
-  }
-
-  async getProjectIssueTypes(projectId: string): Promise<JiraIssueType[]> {
-    return this.jira.projects.getProjectIssueTypes(projectId)
-  }
 }
 
-export type ProjectService = InstanceType<typeof ProjectServiceImpl>
-
-export const [registerProjectService, getProjectService] = defineProxyService<
-  ProjectService,
-  []
->('ProjectService', () => new ProjectServiceImpl())
+export const [registerSuggestionService, getSuggestionService] =
+  defineProxyService<SuggestionService, []>(
+    'SuggestionService',
+    () => new SuggestionService()
+  )

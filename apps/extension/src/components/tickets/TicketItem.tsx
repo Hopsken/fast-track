@@ -3,7 +3,7 @@ import { useMemoizedFn } from 'ahooks'
 import { useNavigate } from 'react-router-dom'
 
 import { useIsOptionKeyPressed } from '@/hooks/useIsOptionKeyPressed'
-import { projectService } from '@/services'
+import { suggestionService } from '@/services'
 import { JiraTicket } from '@/types'
 import { openJiraIssue } from '@/utils/open-jira-issue'
 import {
@@ -38,7 +38,7 @@ export function TicketItem({
 
   const onSelect = useMemoizedFn(() => {
     Promise.resolve().then(() =>
-      projectService.recordProjectClick(ticket.projectKey)
+      suggestionService.recordProjectClick(ticket.projectKey)
     )
 
     if (isOptionKeyPressed) {

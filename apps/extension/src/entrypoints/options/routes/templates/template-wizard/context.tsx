@@ -12,11 +12,11 @@ import { useDebounce } from 'ahooks'
 
 import type { SearchOption } from '@/components/ui'
 import { extractLeadingEmoji } from '@/lib/emoji'
+import { jiraService } from '@/services'
 import { JiraIssueType, JiraProject } from '@/types'
 import { formatErrorMessage } from '@/utils/formatError'
 import { queryKeys } from '@/utils/queryKeys'
 import { minutes } from '@/utils/time'
-import { getProjectService } from '~/services/project-service'
 import { getTemplateService } from '~/services/template-service'
 import { getTicketService } from '~/services/ticket-service'
 import type {
@@ -147,8 +147,10 @@ export function TemplateWizardProvider(props: ProviderProps) {
     queryKey: queryKeys.projects.recentOrSearch(debouncedProjectQuery),
     queryFn: async ({ queryKey }) => {
       const q = String(queryKey[2] ?? '').trim()
-      const svc = getProjectService()
-      return q.length === 0 ? svc.getRecentProjects() : svc.searchProjects(q)
+      const projectService = jiraService.projects
+      return q.length === 0
+        ? projectService.getRecentProjects()
+        : projectService.searchProjects(q)
     },
     staleTime: minutes(1),
     gcTime: minutes(5),

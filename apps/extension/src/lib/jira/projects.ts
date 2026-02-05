@@ -53,13 +53,13 @@ export class JiraProjectService {
       maxResults?: number
       keys?: string[]
     }
-  ): Promise<JiraProjectPage> {
+  ): Promise<JiraProject[]> {
     const client = await this.getClient()
 
     const page = await client.projects.searchProjects({
       query,
       startAt: params?.startAt,
-      maxResults: params?.maxResults,
+      maxResults: params?.maxResults ?? 7,
       keys: params?.keys,
       expand: 'issueTypes'
     })
@@ -69,7 +69,7 @@ export class JiraProjectService {
       values: (page.values ?? []).map(toJiraProject)
     }
 
-    return mapped
+    return mapped.values
   }
 
   /**

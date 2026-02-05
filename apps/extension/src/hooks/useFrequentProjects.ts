@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { projectService } from '@/services'
+import { suggestionService } from '@/services'
 import { IssueSuggestion } from '@/services/ticket-service'
 import { queryKeys } from '@/utils/queryKeys'
 import { minutes } from '@/utils/time'
@@ -14,7 +14,7 @@ export function useFrequentProjects() {
       const suggestions = queryClient.getQueryData<IssueSuggestion>(
         queryKeys.tickets.suggestions
       )
-      return projectService.getFrequentProjectKeys(suggestions)
+      return suggestionService.getFrequentProjectKeys(suggestions)
     },
     staleTime: minutes(1),
     gcTime: minutes(5)
