@@ -6,7 +6,7 @@ import { Switch } from '@internal/ui/components/switch'
 import { JiraTicket } from '@/types'
 import { generateBranchName } from '@/utils/jira/issues'
 import { useStorage } from '~/hooks'
-import { authService } from '~/services'
+import { getAuthService } from '~/services'
 import { useUserPreferences } from '~/stores/useUserPreferences'
 
 import { ConfigureAuth, JiraConnectionCard } from '../auth'
@@ -26,7 +26,7 @@ export function GeneralTab() {
       'Disconnect from Jira? You will need to reconnect to use the extension.'
     )
     if (!confirmed) return
-    authService.disconnect()
+    getAuthService().disconnect()
   }, [])
 
   const handleAnalyticsChange = useCallback(

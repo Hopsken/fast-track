@@ -12,7 +12,7 @@ import { useDebounce } from 'ahooks'
 
 import type { SearchOption } from '@/components/ui'
 import { extractLeadingEmoji } from '@/lib/emoji'
-import { jiraService } from '@/services'
+import { getJiraService } from '@/services'
 import { JiraIssueType, JiraProject } from '@/types'
 import { formatErrorMessage } from '@/utils/formatError'
 import { queryKeys } from '@/utils/queryKeys'
@@ -146,7 +146,7 @@ export function TemplateWizardProvider(props: ProviderProps) {
     queryKey: queryKeys.projects.recentOrSearch(debouncedProjectQuery),
     queryFn: async ({ queryKey }) => {
       const q = String(queryKey[2] ?? '').trim()
-      const projectService = jiraService.projects
+      const projectService = getJiraService().projects
       return q.length === 0
         ? projectService.getRecentProjects()
         : projectService.searchProjects(q)
@@ -196,7 +196,7 @@ export function TemplateWizardProvider(props: ProviderProps) {
     queryKey: queryKeys.tickets.createMeta(projectKey, issueTypeId),
     queryFn: async () => {
       if (!projectKey || !issueTypeId) return []
-      return jiraService.issues.getCreateIssueMetaFields({
+      return getJiraService().issues.getCreateIssueMetaFields({
         projectIdOrKey: projectKey,
         issueTypeId: issueTypeId
       })

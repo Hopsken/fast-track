@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useDebounce } from 'ahooks'
 import { UserDetails } from 'jira.js/version2/models/userDetails'
 
-import { jiraService } from '@/services'
+import { getJiraService } from '@/services'
 import { queryKeys } from '@/utils/queryKeys'
 
 export function useProjectUsers(projectKey: string, query: string) {
@@ -11,7 +11,7 @@ export function useProjectUsers(projectKey: string, query: string) {
     queryKey: queryKeys.users.search(projectKey, debouncedQuery),
     queryFn: async () => {
       try {
-        const result = await jiraService.searchUserOfProject(
+        const result = await getJiraService().searchUserOfProject(
           projectKey,
           debouncedQuery
         )

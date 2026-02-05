@@ -8,7 +8,7 @@ import {
 import { useMemoizedFn } from 'ahooks'
 
 import { useStorage } from '@/hooks'
-import { authService } from '@/services'
+import { getAuthService } from '@/services'
 import { trackEvent } from '@/services/analytics'
 import { AuthType } from '@/types'
 import { logger } from '@/utils'
@@ -46,7 +46,7 @@ export function ConfigureAuth() {
     setError(null)
 
     try {
-      const nextUrl = await authService.connect()
+      const nextUrl = await getAuthService().connect()
       window.open(nextUrl, '_blank')
     } catch (err) {
       logger.error('Error connecting to Jira:', err)
@@ -68,7 +68,7 @@ export function ConfigureAuth() {
       setError(null)
 
       try {
-        await authService.connectWithApiKey(payload)
+        await getAuthService().connectWithApiKey(payload)
         trackEvent('connect_success', { method: 'apiKey' })
       } catch (err) {
         logger.error('Error connecting with API key:', err)

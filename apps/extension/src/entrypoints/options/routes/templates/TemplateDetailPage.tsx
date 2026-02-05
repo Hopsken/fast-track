@@ -2,9 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@internal/ui/components/button'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
-import { templateService } from '@/services'
+import { getTemplateService } from '@/services'
 import { useCurrentJiraHost } from '~/hooks/useCurrentJiraHost'
-import { getTemplateService } from '~/services/template-service'
 import type { IssueTemplate } from '~/types/template'
 
 import { TemplateWizard } from './template-wizard'
@@ -22,7 +21,7 @@ export function TemplateDetailPage() {
 
   const onDeleteTemplate = useCallback(() => {
     if (id) {
-      templateService.deleteTemplate(id)
+      getTemplateService().deleteTemplate(id)
       navigate('/templates')
     }
   }, [id, navigate])

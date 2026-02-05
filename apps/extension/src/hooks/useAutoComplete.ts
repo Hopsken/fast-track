@@ -3,7 +3,7 @@ import { useDebounce } from 'ahooks'
 import { UserDetails } from 'jira.js/version3/models/userDetails'
 import { z } from 'zod'
 
-import { jiraService } from '@/services'
+import { getJiraService } from '@/services'
 import { queryKeys } from '@/utils/queryKeys'
 
 export function useAutoComplete<T>(
@@ -13,7 +13,7 @@ export function useAutoComplete<T>(
   return useQuery({
     queryKey: queryKeys.autoComplete(url, JSON.stringify(params ?? {})),
     queryFn: async () => {
-      const result = await jiraService.autoComplete(url, params)
+      const result = await getJiraService().autoComplete(url, params)
       return result as T
     },
     enabled: !!url && z.url().safeParse(url).success

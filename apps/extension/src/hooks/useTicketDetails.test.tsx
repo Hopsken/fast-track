@@ -4,13 +4,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { jiraService } from '@/services'
+import { getJiraService } from '@/services'
 import { JiraTicket } from '@/types'
 
 import { useTicketDetails } from './useTicketDetails'
 
 vi.mock('@/services', () => ({
-  jiraService: {
+  getJiraService: {
     issues: {
       getIssueDetail: vi.fn()
     }
@@ -37,7 +37,9 @@ describe('useTicketDetails', () => {
       key: 'TEST-1',
       summary: 'Test Issue'
     } as unknown as JiraTicket
-    vi.mocked(jiraService.issues.getIssueDetail).mockResolvedValue(mockDetail)
+    vi.mocked(getJiraService().issues.getIssueDetail).mockResolvedValue(
+      mockDetail
+    )
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <QueryNormalizerProvider queryClient={queryClient}>
@@ -54,6 +56,8 @@ describe('useTicketDetails', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockDetail)
-    expect(jiraService.issues.getIssueDetail).toHaveBeenCalledWith('TEST-1')
+    expect(getJiraService().issues.getIssueDetail).toHaveBeenCalledWith(
+      'TEST-1'
+    )
   })
 })

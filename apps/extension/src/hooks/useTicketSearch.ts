@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useDebounce, useMemoizedFn } from 'ahooks'
 
-import { jiraService } from '@/services'
+import { getJiraService } from '@/services'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 import { JiraTicket } from '@/types'
 import { queryKeys } from '@/utils/queryKeys'
@@ -34,7 +34,7 @@ export const useTicketSearch = (options: TicketSearchOptions = {}) => {
   const enabled = (options.enabled ?? true) && debouncedQuery.length > 1
 
   const searchTickets = useMemoizedFn(async (search: string) => {
-    const tickets = await jiraService.issues.searchIssuesByText(search, {
+    const tickets = await getJiraService().issues.searchIssuesByText(search, {
       projectKeys: projects,
       limit
     })

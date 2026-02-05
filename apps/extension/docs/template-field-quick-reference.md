@@ -7,28 +7,28 @@
 ```typescript
 // Core discriminated union
 type FieldConfig =
-  | { behavior: 'visible' }                           // Show with all options
-  | { behavior: 'preset'; presetValue: unknown }      // Auto-fill value
-  | { behavior: 'restricted'; allowedOptions: AllowedValue[] }  // Limit choices
-  | { behavior: 'ignore' }                            // Omit field
+  | { behavior: 'visible' } // Show with all options
+  | { behavior: 'preset'; presetValue: unknown } // Auto-fill value
+  | { behavior: 'restricted'; allowedOptions: AllowedValue[] } // Limit choices
+  | { behavior: 'ignore' } // Omit field
 
 // Unified option shape (Jira-provided OR user-defined)
 type AllowedValue = {
-  id: string;     // Jira's ID or nanoid
-  name?: string;  // Display label
-  value?: string; // Simple value
+  id: string // Jira's ID or nanoid
+  name?: string // Display label
+  value?: string // Simple value
   // ... other Jira fields
 }
 ```
 
 ## Mode Mapping
 
-| User-Facing Label | Internal Behavior | Data Shape |
-|-------------------|-------------------|------------|
-| **Show** | `visible` | `{ behavior: 'visible' }` |
-| **Fill** | `preset` | `{ behavior: 'preset', presetValue: T }` |
-| **Limit** | `restricted` | `{ behavior: 'restricted', allowedOptions: [...] }` |
-| *(removed)* | `ignore` | *(field not in template)* |
+| User-Facing Label | Internal Behavior | Data Shape                                          |
+| ----------------- | ----------------- | --------------------------------------------------- |
+| **Show**          | `visible`         | `{ behavior: 'visible' }`                           |
+| **Fill**          | `preset`          | `{ behavior: 'preset', presetValue: T }`            |
+| **Limit**         | `restricted`      | `{ behavior: 'restricted', allowedOptions: [...] }` |
+| _(removed)_       | `ignore`          | _(field not in template)_                           |
 
 ## Field Type Decision Tree
 
@@ -51,8 +51,8 @@ Has field.allowedValues?
 if (config.behavior === 'preset') {
   assert(
     config.presetValue !== undefined &&
-    config.presetValue !== null &&
-    config.presetValue !== ''
+      config.presetValue !== null &&
+      config.presetValue !== ''
   )
 }
 
@@ -94,11 +94,11 @@ actions.setFieldConfig(fieldId, {
 
 // User toggles options in UI
 const toggleOption = (option: AllowedValue) => {
-  const selected = new Set(config.allowedOptions.map(o => o.id))
+  const selected = new Set(config.allowedOptions.map((o) => o.id))
   const next = selected.has(option.id)
-    ? config.allowedOptions.filter(o => o.id !== option.id)
+    ? config.allowedOptions.filter((o) => o.id !== option.id)
     : [...config.allowedOptions, option]
-  
+
   actions.setFieldConfig(fieldId, {
     behavior: 'restricted',
     allowedOptions: next
@@ -119,13 +119,13 @@ actions.setFieldConfig(fieldId, {
 const addOption = (value: string) => {
   const num = Number(value)
   if (!Number.isFinite(num)) return // validate
-  
+
   const newOption: AllowedValue = {
     id: nanoid(8),
     name: value,
     value: value
   }
-  
+
   actions.setFieldConfig(fieldId, {
     behavior: 'restricted',
     allowedOptions: [...config.allowedOptions, newOption]
@@ -158,7 +158,7 @@ FieldRow.tsx
    └─ return (block save)
 
 3. If valid:
-   └─ Call templateService.createTemplate() or updateTemplate()
+   └─ Call getTemplateService().createTemplate() or updateTemplate()
 ```
 
 ## Troubleshooting
@@ -255,14 +255,14 @@ FieldRow.tsx
 
 ## Related Files
 
-| Purpose | Path |
-|---------|------|
-| Type definitions | `src/types/template.ts` |
-| Field row (toggle) | `src/entrypoints/options/routes/templates/template-wizard/FieldRow.tsx` |
-| Value input | `src/entrypoints/options/routes/templates/template-wizard/FieldInput.tsx` |
-| Options input | `src/entrypoints/options/routes/templates/template-wizard/RestrictedOptionsInput.tsx` |
-| Validation & save | `src/entrypoints/options/routes/templates/template-wizard/context.tsx` |
-| Fields list | `src/entrypoints/options/routes/templates/template-wizard/FieldsSection.tsx` |
+| Purpose            | Path                                                                                  |
+| ------------------ | ------------------------------------------------------------------------------------- |
+| Type definitions   | `src/types/template.ts`                                                               |
+| Field row (toggle) | `src/entrypoints/options/routes/templates/template-wizard/FieldRow.tsx`               |
+| Value input        | `src/entrypoints/options/routes/templates/template-wizard/FieldInput.tsx`             |
+| Options input      | `src/entrypoints/options/routes/templates/template-wizard/RestrictedOptionsInput.tsx` |
+| Validation & save  | `src/entrypoints/options/routes/templates/template-wizard/context.tsx`                |
+| Fields list        | `src/entrypoints/options/routes/templates/template-wizard/FieldsSection.tsx`          |
 
 ---
 

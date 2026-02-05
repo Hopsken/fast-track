@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { jiraService } from '@/services'
+import { getJiraService } from '@/services'
 import { queryKeys } from '@/utils/queryKeys'
 import { minutes } from '@/utils/time'
 
@@ -8,7 +8,7 @@ export function useIssueCreateMeta(project: string, issueTypeId: string) {
   return useQuery({
     queryKey: queryKeys.issues.createMeta(project, issueTypeId),
     queryFn: () => {
-      return jiraService.issues.getCreateIssueMetaFields({
+      return getJiraService().issues.getCreateIssueMetaFields({
         projectIdOrKey: project,
         issueTypeId
       })

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { templateService } from '@/services'
+import { getTemplateService } from '@/services'
 import { queryKeys } from '@/utils/queryKeys'
 
 export function useTemplates(options?: { includeOtherHosts?: boolean }) {
@@ -8,7 +8,7 @@ export function useTemplates(options?: { includeOtherHosts?: boolean }) {
   return useQuery({
     queryKey: queryKeys.issueTemplates.list(includeOtherHosts),
     queryFn: async () => {
-      return templateService.getTemplates({ includeOtherHosts })
+      return getTemplateService().getTemplates({ includeOtherHosts })
     }
   })
 }

@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { UserDetails } from 'jira.js/version3/models/userDetails'
 
-import { jiraService } from '@/services'
+import { getJiraService } from '@/services'
 import { showToast } from '@/stores/command/useToastStore'
 import { useCurrentUser } from '@/stores/useCurrentUser'
 import { JiraUserInfo } from '@/types'
@@ -15,7 +15,7 @@ export function useMutationAssignIssue() {
       ticketKey: string
       assignee: UserDetails | null
     }) => {
-      const updated = await jiraService.issues.assignIssue(
+      const updated = await getJiraService().issues.assignIssue(
         params.ticketKey,
         params.assignee?.accountId ?? null
       )
@@ -95,7 +95,7 @@ export function useMutationAssignMyself() {
       if (!myself)
         throw new Error('useMutationAssignMyself: myself is required')
 
-      const updated = await jiraService.issues.assignIssue(
+      const updated = await getJiraService().issues.assignIssue(
         params.ticketKey,
         params.assign ? myself.accountId : null
       )

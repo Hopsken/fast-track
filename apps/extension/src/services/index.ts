@@ -1,14 +1,7 @@
-import { AuthService, getAuthService } from './auth-service'
-import { getJiraService, JiraService } from './jira-service'
-import {
+export { type AuthService, getAuthService } from './auth-service'
+export { getJiraService, type JiraService } from './jira-service'
+export {
   getSuggestionService,
   type SuggestionService
 } from './suggestion-service'
-import { getTemplateService, TemplateService } from './template-service'
-
-export type { AuthService, JiraService, SuggestionService, TemplateService }
-
-export const suggestionService = getSuggestionService()
-export const jiraService = getJiraService()
-export const authService = getAuthService()
-export const templateService = getTemplateService()
+export { getTemplateService, type TemplateService } from './template-service'

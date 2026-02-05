@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { JiraIssueType, JiraProject } from '@/repository/schema'
-import { jiraService } from '@/services'
+import { getJiraService } from '@/services'
 import { minutes } from '@/utils/time'
 
 export function useIssuePickerSuggestions({
@@ -17,7 +17,7 @@ export function useIssuePickerSuggestions({
   return useQuery({
     queryKey: ['issues/suggestions', project.id, query, epicsOnly],
     queryFn: () => {
-      return jiraService.issues.getIssuePickerSuggestions({
+      return getJiraService().issues.getIssuePickerSuggestions({
         query,
         currentProjectId: project.id,
         showSubTasks: false,

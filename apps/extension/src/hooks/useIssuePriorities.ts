@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { usePrefetchOptionsIfApplicable } from '@/components/PrefetchQuery'
-import { jiraService } from '@/services'
+import { getJiraService } from '@/services'
 import { isNonNullable } from '@/utils/assert'
 import { queryKeys } from '@/utils/queryKeys'
 
@@ -12,7 +12,7 @@ export function useIssuePriorities() {
     queryKey: queryKeys.priorities,
     staleTime: Infinity,
     queryFn: async () => {
-      const result = await jiraService.issues.getPriorities()
+      const result = await getJiraService().issues.getPriorities()
       return result.filter(isNonNullable)
     }
   })
