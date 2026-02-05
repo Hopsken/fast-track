@@ -12,7 +12,7 @@ import { useTicketDetails } from './useTicketDetails'
 vi.mock('@/services', () => ({
   jiraService: {
     issues: {
-      getTicketDetails: vi.fn()
+      getIssueDetail: vi.fn()
     }
   }
 }))
