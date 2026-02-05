@@ -2,9 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getStorageItem } from '~/lib/storage/schema'
 
-import { TemplateServiceImpl } from './index'
+import { TemplateService } from './index'
 
-describe('TemplateServiceImpl', () => {
+describe('TemplateService', () => {
   beforeEach(async () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-01-01T00:00:00.000Z'))
@@ -24,7 +24,7 @@ describe('TemplateServiceImpl', () => {
     })
 
     // Clear persisted storage between tests (WXT fake storage is shared)
-    const svc = new TemplateServiceImpl()
+    const svc = new TemplateService()
     const templatesItem = (
       svc as unknown as {
         templatesItem: { setValue: (v: unknown[]) => Promise<void> }
@@ -38,7 +38,7 @@ describe('TemplateServiceImpl', () => {
   })
 
   it('CRUD: create/get/update/delete', async () => {
-    const svc = new TemplateServiceImpl()
+    const svc = new TemplateService()
 
     const created = await svc.createTemplate({
       name: 'Frontend Bug',
@@ -74,7 +74,7 @@ describe('TemplateServiceImpl', () => {
   })
 
   it('markTemplateUsed updates lastUsedAt', async () => {
-    const svc = new TemplateServiceImpl()
+    const svc = new TemplateService()
 
     const t = await svc.createTemplate({
       name: 'T',
@@ -102,7 +102,7 @@ describe('TemplateServiceImpl', () => {
   })
 
   it('getTemplates skips invalid entries in storage', async () => {
-    const svc = new TemplateServiceImpl()
+    const svc = new TemplateService()
 
     await svc.createTemplate({
       name: 'Valid',
@@ -166,7 +166,7 @@ describe('TemplateServiceImpl', () => {
   })
 
   it('createTemplate validates input (rejects empty issueTypeName)', async () => {
-    const svc = new TemplateServiceImpl()
+    const svc = new TemplateService()
 
     await expect(
       svc.createTemplate({

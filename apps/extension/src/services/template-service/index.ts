@@ -15,7 +15,7 @@ const MAX_TEMPLATES = 50
  * Matches the pattern used by `ticket-service`: holds WXT storage items and JiraAPI instance
  * as fields, no dependency-injection in the runtime implementation.
  */
-export class TemplateServiceImpl {
+export class TemplateService {
   private templatesItem = getStorageItem('IssueTemplates')
   private jiraApi = JiraAPI.getInstance()
 
@@ -124,9 +124,7 @@ export class TemplateServiceImpl {
   }
 }
 
-export type TemplateService = InstanceType<typeof TemplateServiceImpl>
-
 export const [registerTemplateService, getTemplateService] = defineProxyService<
   TemplateService,
   []
->('TemplateService', () => new TemplateServiceImpl())
+>('TemplateService', () => new TemplateService())

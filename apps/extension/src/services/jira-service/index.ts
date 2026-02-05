@@ -9,7 +9,7 @@ export type JiraCreatedIssue = {
   self?: string
 }
 
-class JiraServiceImpl {
+export class JiraService {
   private jira = JiraAPI.getInstance()
 
   public agile = autoBind(this.jira.agile)
@@ -46,9 +46,7 @@ class JiraServiceImpl {
   }
 }
 
-export type JiraService = InstanceType<typeof JiraServiceImpl>
-
 export const [registerJiraService, getJiraService] = defineProxyService<
-  JiraServiceImpl,
+  JiraService,
   []
->('JiraService', () => new JiraServiceImpl())
+>('JiraService', () => new JiraService())
