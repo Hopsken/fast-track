@@ -7,20 +7,12 @@
 
 import { defineProxyService } from '@webext-core/proxy-service'
 import { UserDetails } from 'jira.js/version3/models/userDetails'
-import type { GetIssuePickerResource } from 'jira.js/version3/parameters/getIssuePickerResource'
 import { difference, keyBy, uniqBy } from 'lodash-es'
 
 import { bucketSuggestionTickets } from '@/lib/tickets/issue-suggestions'
-import {
-  CreateIssuePayload,
-  IssueDetail,
-  JiraMergeRequest,
-  JiraPriority,
-  JiraTicket,
-  JiraTransition
-} from '@/types'
+import { JiraPriority, JiraTicket, JiraTransition } from '@/types'
 import { mapPriority } from '@/utils/jira/issues'
-import { getJiraApi } from '~/lib/jira'
+import { JiraAPI } from '~/lib/jira'
 import { getLogger } from '~/utils/logger'
 
 import { isValidCreateMetaFields, parseCreateMetaFields } from './create-meta'
@@ -38,7 +30,7 @@ export type IssueSuggestion = {
  */
 class TicketServiceImpl {
   private log = getLogger('ticket-service')
-  private jira = getJiraApi()
+  private jira = JiraAPI.getInstance()
 
   async getIssueSuggestions(): Promise<IssueSuggestion> {
     const [tickets, historyTickets] = await Promise.all([
@@ -69,10 +61,6 @@ class TicketServiceImpl {
     return this.jira.issues.getRecentHistoryIssues(limit)
   }
 
-  async getSuggestedIssues(params: GetIssuePickerResource) {
-    return this.jira.issues.getIssuePickerSuggestions(params)
-  }
-
   async searchTickets(
     query: string,
     options?: { projectKeys?: string[]; limit?: number }
@@ -89,18 +77,6 @@ class TicketServiceImpl {
     return uniqBy(results, 'key')
   }
 
-  async getTicketDetails(ticketKey: string): Promise<IssueDetail> {
-    return this.jira.issues.getIssueDetail(ticketKey)
-  }
-
-  async getIssueMergeRequests(issueKey: string): Promise<JiraMergeRequest[]> {
-    return this.jira.issues.getIssueMergeRequests(issueKey)
-  }
-
-  async getIssueEditMetadata(ticketKey: string) {
-    return this.jira.issues.getIssueEditMetadata(ticketKey)
-  }
-
   async getCreateIssueFields(input: {
     projectIdOrKey: string
     issueTypeId: string
@@ -109,24 +85,6 @@ class TicketServiceImpl {
     const fields = parseCreateMetaFields(page)
     if (!isValidCreateMetaFields(fields)) return []
     return fields
-  }
-
-  async createIssue(
-    input: CreateIssuePayload
-  ): Promise<Pick<JiraTicket, 'key'>> {
-    return this.jira.issues.createIssue(input)
-  }
-
-  async getIssueTransitions(ticket: JiraTicket) {
-    return this.jira.issues.getIssueTransitions(ticket)
-  }
-
-  async getPriorities() {
-    return this.jira.issues.getPriorities()
-  }
-
-  async isConfigured(): Promise<boolean> {
-    return this.jira.isConfigured()
   }
 
   async assignTicket(

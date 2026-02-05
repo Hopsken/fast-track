@@ -3,7 +3,7 @@ import { defineProxyService } from '@webext-core/proxy-service'
 import { z } from 'zod'
 
 import { JiraAPI } from '@/lib/jira'
-import { AuthApi } from '@/lib/jira/auth-api'
+import { AuthManager } from '@/lib/jira/authManager'
 import { getStorageItem } from '@/lib/storage'
 import { AuthCredentials, ReceivedTokenPayload, JiraUserInfo } from '@/types'
 
@@ -36,7 +36,7 @@ const apiKeySchema = z.object({
 
 class AuthServiceImpl implements AuthService {
   private credentialsStorage = getStorageItem('AuthCredentials')
-  private authApi = new AuthApi()
+  private authManager = AuthManager.getInstance()
 
   public async getCredentials(): Promise<AuthCredentials | null> {
     return this.credentialsStorage.getValue()
@@ -53,7 +53,7 @@ class AuthServiceImpl implements AuthService {
     const parsedTokens = tokenSchema.parse(tokens)
 
     const oauthConfig =
-      await this.authApi.getOAuthConfigFromAccessToken(parsedTokens)
+      await AuthManager.getOAuthConfigFromAccessToken(parsedTokens)
 
     // Build credentials for validation
     const credentials: AuthCredentials = {

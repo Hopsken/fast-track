@@ -1,7 +1,7 @@
 import { defineProxyService } from '@webext-core/proxy-service'
 import { nanoid } from 'nanoid'
 
-import { getJiraApi } from '@/lib/jira'
+import { JiraAPI } from '@/lib/jira'
 import { IssueTemplateSchema } from '@/repository/schema'
 import { normalizeBaseUrlHost } from '@/utils/normalize-host'
 import { getStorageItem } from '~/lib/storage/schema'
@@ -17,14 +17,15 @@ const MAX_TEMPLATES = 50
  */
 export class TemplateServiceImpl {
   private templatesItem = getStorageItem('IssueTemplates')
-  private jiraApi = getJiraApi()
+  private jiraApi = JiraAPI.getInstance()
 
   // ===== CRUD =====
   async getTemplates(options?: {
     includeOtherHosts?: boolean
   }): Promise<IssueTemplate[]> {
+    const host = await this.jiraApi.getHost()
     const { includeOtherHosts = false } = options ?? {}
-    const currentHost = normalizeBaseUrlHost(this.jiraApi.getHost() ?? '')
+    const currentHost = normalizeBaseUrlHost(host ?? '')
     const templates = await this.templatesItem.getValue()
 
     const valid: IssueTemplate[] = []

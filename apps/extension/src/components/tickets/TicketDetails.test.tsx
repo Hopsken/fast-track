@@ -13,8 +13,10 @@ import { TicketDetails } from './TicketDetails'
 vi.mock('@/hooks/useTicketDetails')
 vi.mock('@/components/CommandRouter')
 vi.mock('@/services', () => ({
-  ticketService: {
-    getTicketDetails: vi.fn()
+  jiraService: {
+    issues: {
+      getTicketDetails: vi.fn()
+    }
   }
 }))
 

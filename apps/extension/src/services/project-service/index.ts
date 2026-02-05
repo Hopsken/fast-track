@@ -4,7 +4,7 @@ import { compact, countBy, flatMap, orderBy } from 'lodash-es'
 import { getStorageItem } from '@/lib/storage'
 import { IssueSuggestion } from '@/services/ticket-service'
 import { JiraIssueType, JiraProject } from '@/types'
-import { getJiraApi } from '~/lib/jira'
+import { JiraAPI } from '~/lib/jira'
 
 export type ProjectClickInfo = {
   count: number
@@ -53,7 +53,7 @@ const collectSuggestionProjects = (suggestions?: IssueSuggestion) => {
 }
 
 export class ProjectServiceImpl {
-  private jira = getJiraApi()
+  private jira = JiraAPI.getInstance()
 
   private scoreProjects(suggestionProjects: string[], clicks: ProjectClicks) {
     const suggestionCounts = countBy(

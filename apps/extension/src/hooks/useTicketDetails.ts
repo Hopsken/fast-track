@@ -1,7 +1,7 @@
 import { useQueryNormalizer } from '@normy/react-query'
 import { useQuery } from '@tanstack/react-query'
 
-import { jiraService, ticketService } from '@/services'
+import { jiraService } from '@/services'
 import { IssueDetail } from '@/types'
 import { queryKeys } from '@/utils/queryKeys'
 import { minutes } from '@/utils/time'

@@ -22,8 +22,7 @@ describe('JiraIssueService searchIssuesByText', () => {
   it('should generate project-scoped numeric search OR project-scoped summary search', async () => {
     const { client, searchMock } = createMockClient()
     const getClient = vi.fn().mockResolvedValue(client)
-    const getWebBaseUrl = vi.fn().mockReturnValue('')
-    const service = new JiraIssueService(getClient, getWebBaseUrl)
+    const service = new JiraIssueService(getClient)
 
     await service.searchIssuesByText('123', { projectKeys: ['PROJ'] })
 
@@ -40,8 +39,7 @@ describe('JiraIssueService searchIssuesByText', () => {
   it('should generate global exact key search', async () => {
     const { client, searchMock } = createMockClient()
     const getClient = vi.fn().mockResolvedValue(client)
-    const getWebBaseUrl = vi.fn().mockReturnValue('')
-    const service = new JiraIssueService(getClient, getWebBaseUrl)
+    const service = new JiraIssueService(getClient)
 
     await service.searchIssuesByText('PROJ-123', { projectKeys: ['PROJ'] })
 
@@ -59,8 +57,7 @@ describe('JiraIssueService searchIssuesByText', () => {
   it('should handle mixed tokens', async () => {
     const { client, searchMock } = createMockClient()
     const getClient = vi.fn().mockResolvedValue(client)
-    const getWebBaseUrl = vi.fn().mockReturnValue('')
-    const service = new JiraIssueService(getClient, getWebBaseUrl)
+    const service = new JiraIssueService(getClient)
 
     await service.searchIssuesByText('foo 123', { projectKeys: ['PROJ'] })
 
@@ -81,8 +78,7 @@ describe('JiraIssueService searchIssuesByText', () => {
   it('should handle search without project keys', async () => {
     const { client, searchMock } = createMockClient()
     const getClient = vi.fn().mockResolvedValue(client)
-    const getWebBaseUrl = vi.fn().mockReturnValue('')
-    const service = new JiraIssueService(getClient, getWebBaseUrl)
+    const service = new JiraIssueService(getClient)
 
     await service.searchIssuesByText('123', { projectKeys: [] })
 
@@ -100,8 +96,7 @@ describe('JiraIssueService getMySuggestedIssues', () => {
   it('should generate separate in-progress and open sprint JQL', async () => {
     const { client, searchMock } = createMockClient()
     const getClient = vi.fn().mockResolvedValue(client)
-    const getWebBaseUrl = vi.fn().mockReturnValue('')
-    const service = new JiraIssueService(getClient, getWebBaseUrl)
+    const service = new JiraIssueService(getClient)
 
     await service.getMySuggestedIssues(25)
 
@@ -125,8 +120,7 @@ describe('JiraIssueService getMySuggestedIssues', () => {
   it('should return in-progress tickets when sprint query fails', async () => {
     const { client, searchMock } = createMockClient()
     const getClient = vi.fn().mockResolvedValue(client)
-    const getWebBaseUrl = vi.fn().mockReturnValue('')
-    const service = new JiraIssueService(getClient, getWebBaseUrl)
+    const service = new JiraIssueService(getClient)
 
     const inProgressIssue = {
       id: '1',
@@ -172,8 +166,7 @@ describe('JiraIssueService getMySuggestedIssues', () => {
   it('should order tickets by updated across sources before applying the limit', async () => {
     const { client, searchMock } = createMockClient()
     const getClient = vi.fn().mockResolvedValue(client)
-    const getWebBaseUrl = vi.fn().mockReturnValue('')
-    const service = new JiraIssueService(getClient, getWebBaseUrl)
+    const service = new JiraIssueService(getClient)
 
     const inProgressIssue = {
       id: '1',

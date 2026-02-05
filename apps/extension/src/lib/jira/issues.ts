@@ -45,17 +45,13 @@ const normalizeJqlValue = (value: string) => value.replace(/["\\]/g, '')
 const log = getLogger('jira-issues')
 
 type ClientGetter = () => Promise<Version3Client>
-type WebBaseUrlGetter = () => string
 
 /**
  * Service for issue-related operations.
  * Uses getter functions to lazily obtain the client, enabling transparent auth refresh.
  */
 export class JiraIssueService {
-  constructor(
-    private getClient: ClientGetter,
-    private getWebBaseUrl: WebBaseUrlGetter
-  ) {}
+  constructor(private getClient: ClientGetter) {}
 
   /**
    * Fetches a single issue by key
@@ -381,11 +377,6 @@ export class JiraIssueService {
    * Converts a jira.js Issue to internal ticket format
    */
   private convertToTicket(issue: Issue, source?: IssueSource): JiraTicket {
-    const browseBaseUrl = this.getWebBaseUrl()
-    const jiraWebUrl = browseBaseUrl
-      ? `${browseBaseUrl}/browse/${issue.key}`
-      : (issue.self ?? '')
-
     const statusName = issue.fields?.status?.name?.toLowerCase?.() || ''
     const statusKey =
       issue.fields?.status?.statusCategory?.key?.toLowerCase?.() || ''
@@ -425,7 +416,7 @@ export class JiraIssueService {
         : null,
       projectKey: issue.fields?.project?.key || '',
       boardName: issue.fields?.project?.name || '',
-      url: jiraWebUrl,
+      url: issue.self ?? '',
       isInProgress,
       sources: source ? [source] : [],
       lastViewed: issue.fields.lastViewed
