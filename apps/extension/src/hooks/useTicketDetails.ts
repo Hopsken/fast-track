@@ -1,7 +1,7 @@
 import { useQueryNormalizer } from '@normy/react-query'
 import { useQuery } from '@tanstack/react-query'
 
-import { ticketService } from '@/services'
+import { jiraService, ticketService } from '@/services'
 import { IssueDetail } from '@/types'
 import { queryKeys } from '@/utils/queryKeys'
 import { minutes } from '@/utils/time'
@@ -12,7 +12,7 @@ export const useTicketDetails = (key: string) => {
   return useQuery<IssueDetail>({
     queryKey: queryKeys.tickets.detail(key),
     enabled: !!key,
-    queryFn: () => ticketService.getTicketDetails(key),
+    queryFn: () => jiraService.issues.getIssueDetail(key),
     staleTime: minutes(1),
     placeholderData: () => {
       // Try to get the latest normalized data for this ticket from the cache

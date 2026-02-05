@@ -1,6 +1,7 @@
 import { defineProxyService } from '@webext-core/proxy-service'
 
 import { getJiraApi } from '@/lib/jira'
+import { autoBind } from '@/utils/auto-bind'
 
 export type JiraCreatedIssue = {
   id?: string
@@ -11,12 +12,8 @@ export type JiraCreatedIssue = {
 class JiraServiceImpl {
   private jira = getJiraApi()
 
-  public agile = {
-    getBoards: (projectKeyOrId: string) =>
-      this.jira.agile.getBoards(projectKeyOrId),
-    getSprints: (projectKeyOrId: string) =>
-      this.jira.agile.getSprints(projectKeyOrId)
-  }
+  public agile = autoBind(this.jira.agile)
+  public issues = autoBind(this.jira.issues)
 
   public async autoComplete<T>(
     url: string,
