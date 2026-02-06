@@ -4,6 +4,7 @@ import { useDebounce } from 'ahooks'
 import { z, ZodType } from 'zod'
 
 import { FieldConfig } from '@/repository/schema'
+import { isNonNullable } from '@/utils/assert'
 
 import { FieldAdapter, JiraFieldContext } from '../types'
 
@@ -20,7 +21,8 @@ export const useFieldOptions = <Schema extends ZodType>(params: {
 
   // 3. 判断是否需要服务端搜索
   // 如果是 'limit' 模式，我们不需要发请求，直接用本地数据
-  const isServerSearch = config.behavior !== 'restricted'
+  const isServerSearch =
+    config.behavior !== 'restricted' && !context.metadata.allowedValues
 
   const queryResult = useQuery({
     // 关键点：将 debouncedQuery 加入缓存 Key
@@ -34,7 +36,12 @@ export const useFieldOptions = <Schema extends ZodType>(params: {
       debouncedQuery
     ],
 
-    queryFn: () => adapter.fetchOptions!(context, debouncedQuery),
+    queryFn: async () => {
+      if (adapter.fetchOptions) {
+        return adapter.fetchOptions(context, debouncedQuery)
+      }
+      return []
+    },
 
     enabled: isServerSearch && !!adapter.fetchOptions,
 
@@ -46,6 +53,13 @@ export const useFieldOptions = <Schema extends ZodType>(params: {
   const options = useMemo(() => {
     if (isServerSearch) {
       return queryResult.data || []
+    }
+
+    // 如果 field 本身就有 allowedValues，直接使用
+    if (context.metadata.allowedValues) {
+      return context.metadata.allowedValues
+        .map((val) => adapter.fromDTO(val))
+        .filter(isNonNullable)
     }
 
     // Limit 模式：使用配置的 allowedValues，并在前端做简单的本地过滤
@@ -66,6 +80,7 @@ export const useFieldOptions = <Schema extends ZodType>(params: {
   }, [
     adapter,
     config.allowedOptions,
+    context.metadata.allowedValues,
     debouncedQuery,
     isServerSearch,
     queryResult.data

@@ -1,3 +1,4 @@
+import { M } from 'vitest/dist/chunks/reporters.d.BFLkQcL6.js'
 import { z } from 'zod'
 
 import { JiraAvatarUrlSchema } from './user'
@@ -73,6 +74,15 @@ export const JiraIssueComponentSchema = z
   .strip()
 
 export type JiraIssueComponent = z.infer<typeof JiraIssueComponentSchema>
+
+export const JiraIssueResolutionSchema = z
+  .object({
+    id: z.string(),
+    name: z.string()
+  })
+  .strip()
+
+export type JiraIssueResolution = z.infer<typeof JiraIssueResolutionSchema>
 
 export const JiraSubtaskFieldsSchema = z
   .object({

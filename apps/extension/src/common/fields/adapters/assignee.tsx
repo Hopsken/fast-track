@@ -1,6 +1,6 @@
-import { JiraUser, JiraUserSchema } from '@/repository/schema'
-import { getJiraService } from '@/services'
-import { isNonNullable } from '@/utils/assert'
+import { JiraUserSchema } from '@/repository/schema'
+
+import { fetchAutoCompleteOptions } from '../utils'
 
 import { createSelectFieldAdapter } from './shared/select'
 
@@ -11,23 +11,8 @@ export const JiraAssigneeAdapter = createSelectFieldAdapter(
     keyOf: (val) => val.accountId,
     labelOf: (val) => val.displayName ?? val.emailAddress ?? '',
 
-    fetchOptions: async ({ project, metadata }, query) => {
-      const svc = getJiraService()
-      const { autoCompleteUrl } = metadata
-
-      if (autoCompleteUrl) {
-        const result = await svc.autoComplete(autoCompleteUrl, { query })
-        if (!Array.isArray(result)) return []
-        return result
-          .map((item) => JiraUserSchema.safeParse(item).data)
-          .filter(isNonNullable)
-      }
-
-      if (project) {
-        return svc.searchUserOfProject(project.key, query ?? '')
-      }
-
-      return []
+    fetchOptions: ({ metadata }, query) => {
+      return fetchAutoCompleteOptions(metadata, JiraUserSchema, query)
     },
 
     toDTO: (val) => ({ accountId: val.accountId }),

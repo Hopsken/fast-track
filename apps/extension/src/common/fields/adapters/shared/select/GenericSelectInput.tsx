@@ -1,6 +1,7 @@
-import { ZodType } from 'zod'
+import { z, ZodType } from 'zod'
 
 import { CommandSingleSelect } from '@/components/commands'
+import { CommandMultiSelect } from '@/components/commands/CommandMultiSelect'
 
 import { useFieldOptions } from '../../../hooks/useFieldOptions'
 import { FieldInputComponentProps } from '../../../types'
@@ -13,14 +14,31 @@ export const GenericSelectInput = <S extends ZodType>({
   onChange,
   inputText
 }: FieldInputComponentProps<S>) => {
-  // 复用之前的 Hook，虽然 Priority 通常不需要搜索，但统一接口没坏处
-  // 注意：Priority 通常是全局或项目级的，不太需要 debounce 搜索，
+  const isMultiple = context.metadata.schema.type === 'array'
+
   const { options, isLoading } = useFieldOptions({
     adapter,
     context,
     config,
     query: inputText
   })
+
+  if (isMultiple) {
+    // eslint-disable-next-line sonarjs/no-nested-conditional
+    const values = value ? (Array.isArray(value) ? value : [value]) : []
+    return (
+      <CommandMultiSelect
+        title={adapter.title}
+        isLoading={isLoading}
+        value={values}
+        options={options}
+        // @ts-expect-error newValue is array, should be handler externally
+        onChange={(newValue) => onChange(newValue)}
+        getOptionValue={adapter.keyOf}
+        getOptionLabel={adapter.labelOf ?? adapter.keyOf}
+      />
+    )
+  }
 
   return (
     <CommandSingleSelect

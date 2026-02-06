@@ -32,6 +32,8 @@ export const GenericSelectConfig = <S extends ZodType>({
   onConfirm
 }: FieldConfigComponentProps<S>) => {
   type Value = z.infer<S>
+
+  const isMultiple = context.metadata.schema.type === 'array'
   const [query, setQuery] = useState('')
   const { options, isLoading } = useFieldOptions({
     adapter,
@@ -45,9 +47,33 @@ export const GenericSelectConfig = <S extends ZodType>({
     onConfirm()
   })
 
+  if (isMultiple) {
+    // eslint-disable-next-line sonarjs/no-nested-conditional
+    const values = value ? (Array.isArray(value) ? value : [value]) : []
+    return (
+      <AutoComplete<Value, true>
+        multiple={true}
+        isLoading={isLoading}
+        value={values}
+        // @ts-expect-error newValue is array, should be handler externally
+        onValueChange={onSelect}
+        query={query}
+        onQueryChange={setQuery}
+        options={options}
+        getOptionValue={adapter.keyOf}
+        getOptionLabel={adapter.labelOf ?? adapter.keyOf}
+        renderOptionIcon={(opt) => {
+          const iconUrl = getIconUrl(opt)
+          const name = adapter.labelOf?.(opt) ?? adapter.keyOf(opt)
+          return iconUrl ? <GeneralIcon alt={name} iconUrl={iconUrl} /> : null
+        }}
+      />
+    )
+  }
+
   return (
     <AutoComplete<Value, false>
-      multiple={false}
+      multiple={isMultiple}
       isLoading={isLoading}
       value={value ?? null}
       onValueChange={onSelect}
