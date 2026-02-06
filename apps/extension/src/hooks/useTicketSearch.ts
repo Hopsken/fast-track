@@ -4,7 +4,7 @@ import { useDebounce, useMemoizedFn } from 'ahooks'
 
 import { getJiraService } from '@/services'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
-import { JiraTicket } from '@/types'
+import { JiraIssue } from '@/types'
 import { queryKeys } from '@/utils/queryKeys'
 import { rankTickets } from '@/utils/ticket-ranking'
 import { normalizeProjects } from '@/utils/ticket-search'
@@ -41,7 +41,7 @@ export const useTicketSearch = (options: TicketSearchOptions = {}) => {
     return rankTickets(tickets, search)
   })
 
-  return useQuery<JiraTicket[]>({
+  return useQuery<JiraIssue[]>({
     queryKey: queryKeys.tickets.search({
       query: debouncedQuery,
       projects,

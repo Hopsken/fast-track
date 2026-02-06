@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { IssueTemplateScopeSchema } from './template'
+import { IssueTemplateScopeSchema } from '../template'
 
 describe('IssueTemplateScopeSchema (v1)', () => {
   it('requires all required issueType fields', () => {

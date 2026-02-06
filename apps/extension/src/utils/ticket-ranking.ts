@@ -1,6 +1,6 @@
 import { uniqBy } from 'lodash-es'
 
-import { JiraTicket } from '@/types'
+import { JiraIssue } from '@/types'
 
 import { isNonNullable } from './assert'
 
@@ -8,7 +8,7 @@ const IN_PROGRESS_KEYS = ['indeterminate']
 const IN_PROGRESS_NAMES = ['in progress']
 
 type RankedTicket = {
-  ticket: JiraTicket
+  ticket: JiraIssue
   relevance: number
   inProgress: boolean
   updatedAt: number
@@ -23,12 +23,12 @@ const getTimestamp = (value?: string | null) => {
   return Number.isFinite(parsed) ? parsed : 0
 }
 
-const getUpdatedAt = (ticket: JiraTicket) =>
+const getUpdatedAt = (ticket: JiraIssue) =>
   getTimestamp(ticket.updated) ||
   getTimestamp(ticket.lastViewed) ||
   getTimestamp(ticket.created)
 
-const isInProgress = (ticket: JiraTicket) => {
+const isInProgress = (ticket: JiraIssue) => {
   const statusCategoryKey =
     ticket.status?.statusCategory?.key?.toLowerCase() ?? ''
   const statusCategoryName =
@@ -42,7 +42,7 @@ const isInProgress = (ticket: JiraTicket) => {
 }
 
 const computeRelevance = (
-  ticket: JiraTicket,
+  ticket: JiraIssue,
   query: string,
   tokens: string[]
 ) => {
@@ -110,7 +110,7 @@ const computeRelevance = (
 }
 
 export const rankTickets = (
-  tickets: JiraTicket[],
+  tickets: JiraIssue[],
   query: string,
   limit = 30
 ) => {
@@ -152,14 +152,14 @@ export const rankTickets = (
     .map((item) => item.ticket)
 }
 
-export const filterTicketsByQuery = (tickets: JiraTicket[], query: string) => {
+export const filterTicketsByQuery = (tickets: JiraIssue[], query: string) => {
   const normalizedQuery = normalize(query)
   if (!normalizedQuery) return tickets
 
   const tokens = normalizedQuery.split(/\s+/).filter(Boolean)
   if (!tokens.length) return tickets
 
-  const matches = (ticket: JiraTicket) => {
+  const matches = (ticket: JiraIssue) => {
     const haystack = [ticket.key, ticket.summary, ticket.assignee?.displayName]
       .filter(isNonNullable)
       .map((value) => value.toLowerCase())

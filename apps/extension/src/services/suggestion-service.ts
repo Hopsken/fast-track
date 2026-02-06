@@ -12,10 +12,10 @@ import {
 import { JiraAPI } from '@/lib/jira'
 import { getStorageItem } from '@/lib/storage'
 import { bucketSuggestionTickets } from '@/lib/tickets/issue-suggestions'
-import { JiraTicket } from '@/types'
+import { JiraIssue } from '@/types'
 
 export type IssueSuggestion = {
-  tickets: Record<string, JiraTicket>
+  tickets: Record<string, JiraIssue>
   inProgress: string[]
   todo: string[]
   done: string[]
@@ -92,11 +92,11 @@ export class SuggestionService {
     }
   }
 
-  private async getMySuggestedTickets(limit = 50): Promise<JiraTicket[]> {
+  private async getMySuggestedTickets(limit = 50): Promise<JiraIssue[]> {
     return this.jira.issues.getMySuggestedIssues(limit)
   }
 
-  private async getRecentHistoryTickets(limit = 7): Promise<JiraTicket[]> {
+  private async getRecentHistoryTickets(limit = 7): Promise<JiraIssue[]> {
     return this.jira.issues.getRecentHistoryIssues(limit)
   }
 

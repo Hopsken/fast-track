@@ -1,4 +1,4 @@
-import { JiraTicket } from '@/types'
+import { JiraIssue } from '@/types'
 import { normalizeProjects } from '@/utils/ticket-search'
 
 export type TicketSearchKey = {
@@ -54,7 +54,7 @@ export const queryKeys = {
       ['tickets', ticketKey, 'editMeta'] as const,
     mergeRequests: (ticketKey: string) =>
       ['tickets', ticketKey, 'mergeRequests'] as const,
-    transitions: (ticket: JiraTicket) =>
+    transitions: (ticket: JiraIssue) =>
       ['tickets', ticket.key, 'transitions', ticket.status.name] as const,
     createMeta: (projectId: string, issueTypeId: string) =>
       ['tickets', 'createMeta', projectId, issueTypeId] as const

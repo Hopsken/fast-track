@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
-import { JiraTicket } from '@/types'
+import type { JiraIssue } from '@/repository/schema'
 
 import { bucketSuggestionTickets } from './issue-suggestions'
 
 const makeTicket = (
   key: string,
   statusCategoryKey: string | null
-): JiraTicket => ({
+): JiraIssue => ({
   __typename: 'JiraTicket',
   id: key,
   key,

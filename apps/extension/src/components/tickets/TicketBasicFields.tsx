@@ -1,10 +1,10 @@
-import { JiraTicket } from '@/types'
+import { JiraIssue } from '@/types'
 import { IssueTypeIcon } from '~/components/ui/jira'
 
 import { TicketMetadataChips } from './TicketMetadataChips'
 
 interface TicketBasicFieldsProps {
-  ticket: Partial<JiraTicket>
+  ticket: Partial<JiraIssue>
   showKey?: boolean
 }
 

@@ -44,7 +44,7 @@ const persistOptions: PersistQueryClientProviderProps['persistOptions'] = {
  * Normy normalizer config (GraphQL-style)
  *
  * Uses `__typename` + `key` or `id` for normalization keys.
- * Example: "JiraTicket:PROJ-123"
+ * Example: "JiraIssue:PROJ-123"
  *
  * This enables automatic cache updates across all queries containing the same entity.
  */
@@ -54,7 +54,7 @@ const normalizerConfig = {
     const id = obj.id
     const hasValidId = typeof id === 'string' || typeof id === 'number'
 
-    // GraphQL-style: __typename + key (for JiraTicket)
+    // GraphQL-style: __typename + key (for JiraIssue)
     if (typename && typeof obj.key === 'string') {
       return `${typename}:${obj.key}`
     }

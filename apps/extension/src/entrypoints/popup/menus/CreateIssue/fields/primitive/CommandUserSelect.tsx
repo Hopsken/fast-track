@@ -9,15 +9,14 @@ import {
 import { useMemoizedFn, useMount } from 'ahooks'
 
 import { useAutoCompleteUsers } from '@/hooks/useAutoComplete'
+import { JiraUserSchema, type JiraUser } from '@/repository/schema'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
-import { UserDetails } from '@/types/jira'
 
-import { asRecord, getFieldTitle } from '../utils'
+import { getFieldTitle } from '../utils'
 
 import { FieldInputProps } from './types'
 
-const toUserId = (user: UserDetails) =>
-  user.accountId ?? user.emailAddress ?? ''
+const toUserId = (user: JiraUser) => user.accountId || user.emailAddress || ''
 
 export function CommandUserSelect({
   field,
@@ -35,16 +34,9 @@ export function CommandUserSelect({
   )
 
   // Extract selected user from currentValue
-  const selected = useMemo((): UserDetails | undefined => {
-    const rec = asRecord(currentValue)
-    if (!rec) return undefined
-    return {
-      accountId: typeof rec.accountId === 'string' ? rec.accountId : undefined,
-      displayName:
-        typeof rec.displayName === 'string' ? rec.displayName : undefined,
-      emailAddress:
-        typeof rec.emailAddress === 'string' ? rec.emailAddress : undefined
-    }
+  const selected = useMemo((): JiraUser | undefined => {
+    const parsed = JiraUserSchema.safeParse(currentValue)
+    return parsed.success ? parsed.data : undefined
   }, [currentValue])
 
   useMount(() => {
@@ -53,7 +45,7 @@ export function CommandUserSelect({
     }
   })
 
-  const handleSelectUser = useMemoizedFn((user: UserDetails) => {
+  const handleSelectUser = useMemoizedFn((user: JiraUser) => {
     onChange(user)
     onConfirm()
   })
@@ -64,15 +56,12 @@ export function CommandUserSelect({
         {isLoading ? <CommandLoading>Loading...</CommandLoading> : null}
 
         {(users ?? []).map((user) => {
-          const userId = toUserId(user)
-          const displayName =
-            user.displayName || user.name || user.emailAddress || 'Anonymous'
+          const parsedUser = JiraUserSchema.safeParse(user)
+          if (!parsedUser.success) return null
 
-          const userValue: UserDetails = {
-            accountId: user.accountId,
-            displayName: user.displayName,
-            emailAddress: user.emailAddress
-          }
+          const userValue = parsedUser.data
+          const userId = toUserId(userValue)
+          const displayName = userValue.displayName
 
           return (
             <CommandItem

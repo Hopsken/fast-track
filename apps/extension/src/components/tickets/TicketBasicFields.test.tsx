@@ -2,18 +2,18 @@ import React from 'react'
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import { JiraTicket } from '@/types'
+import { JiraIssue } from '@/types'
 
 import { TicketBasicFields } from './TicketBasicFields'
 
 describe('TicketBasicFields', () => {
-  const mockTicket: JiraTicket = {
+  const mockTicket: JiraIssue = {
     key: 'TEST-1',
     summary: 'Summary',
     status: { name: 'Done', statusCategory: { colorName: 'green' } },
     issueType: { name: 'Bug' },
     priority: { name: 'High' }
-  } as unknown as JiraTicket
+  } as unknown as JiraIssue
 
   it('renders ticket info', () => {
     render(<TicketBasicFields ticket={mockTicket} />)

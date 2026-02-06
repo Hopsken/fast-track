@@ -2,7 +2,7 @@ import type { UserDetails } from 'jira.js/version3/models/userDetails'
 
 import {
   JiraAssignee,
-  JiraTicket,
+  JiraIssue,
   JiraTransition,
   JiraUserInfo,
   UserPreferences
@@ -11,7 +11,7 @@ import { mapUserToAssignee } from '@/utils/jira/issues'
 
 export function shouldAutoAssignOnTransition(
   preferences: UserPreferences,
-  ticket: JiraTicket,
+  ticket: JiraIssue,
   transition: JiraTransition
 ) {
   return (

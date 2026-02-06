@@ -25,7 +25,7 @@ function makeSuggestionFixtures(): IssueSuggestion {
     statusCategoryKey: 'indeterminate' | 'new' | 'done',
     summary: string
   ) => ({
-    __typename: 'JiraTicket' as const,
+    __typename: 'JiraIssue' as const,
     id: key,
     key,
     summary,

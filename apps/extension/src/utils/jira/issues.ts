@@ -3,13 +3,13 @@ import type { Priority } from 'jira.js/version3/models/priority'
 import type { StatusDetails } from 'jira.js/version3/models/statusDetails'
 import type { UserDetails } from 'jira.js/version3/models/userDetails'
 
-import {
+import type {
   JiraAssignee,
   JiraPriority,
   JiraStatus,
-  JiraTicket,
+  JiraIssue,
   JiraTransition
-} from '@/types'
+} from '@/repository/schema'
 
 import { slugify } from '../string'
 
@@ -18,12 +18,12 @@ const TICKET_KEY_PATTERN = /^[A-Z]+-\d+$/i
 export const isTicketKey = (value: string) =>
   TICKET_KEY_PATTERN.test(value.trim())
 
-export function getIssueTitleLink(ticket: JiraTicket) {
+export function getIssueTitleLink(ticket: JiraIssue) {
   return `[${ticket.summary}](${ticket.url})`
 }
 
 export function generateBranchName(
-  issue: JiraTicket,
+  issue: JiraIssue,
   nameFormat?: string
 ): string {
   const issueKey = issue.key
@@ -42,8 +42,8 @@ export function generateBranchName(
     .replace('{summaryShort}', slugify(issueSummaryShort))
 }
 
-export function mergeTicketsByKey(tickets: JiraTicket[]) {
-  const ticketsByKey = new Map<string, JiraTicket>()
+export function mergeTicketsByKey(tickets: JiraIssue[]) {
+  const ticketsByKey = new Map<string, JiraIssue>()
 
   tickets.forEach((ticket) => {
     const existing = ticketsByKey.get(ticket.key)

@@ -3,7 +3,7 @@ import { Input } from '@internal/ui/components/input'
 import { Label } from '@internal/ui/components/label'
 import { Switch } from '@internal/ui/components/switch'
 
-import { JiraTicket } from '@/types'
+import { JiraIssue } from '@/types'
 import { generateBranchName } from '@/utils/jira/issues'
 import { useStorage } from '~/hooks'
 import { getAuthService } from '~/services'
@@ -87,7 +87,7 @@ export function GeneralTab() {
                   {
                     key: 'JIRA-123',
                     summary: 'Big feature'
-                  } as JiraTicket,
+                  } as JiraIssue,
                   preferences.branchNameFormat
                 )}
                 .

@@ -13,3 +13,12 @@ export const JiraProjectSchema = z
   .strip()
 
 export type JiraProject = z.infer<typeof JiraProjectSchema>
+
+export const JiraProjectRefSchema = JiraProjectSchema.pick({
+  id: true,
+  key: true,
+  name: true,
+  avatarUrl: true
+}).strip()
+
+export type JiraProjectRef = z.infer<typeof JiraProjectRefSchema>

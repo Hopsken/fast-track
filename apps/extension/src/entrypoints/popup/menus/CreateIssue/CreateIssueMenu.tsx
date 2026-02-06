@@ -4,7 +4,7 @@ import { Outlet, Route, Routes, useLocation } from 'react-router-dom'
 
 import { TicketBasicFields } from '@/components'
 import { HotkeysScopeProvider } from '@/lib/hotkeys'
-import type { JiraTicket } from '@/types'
+import type { JiraIssue } from '@/types'
 import type { VisibleField } from '~/services/template-service/gap-analysis'
 import type { IssueTemplate } from '~/types/template'
 
@@ -30,7 +30,7 @@ function FieldInputMenuRouter() {
 function CreateIssueMenuLayout() {
   const { template, values } = useCreateIssueDraftStore()
 
-  const ticket = useMemo<Partial<JiraTicket>>(() => {
+  const ticket = useMemo<Partial<JiraIssue>>(() => {
     const { project, issueType } = template.scope
     return {
       key: `${project.key}-?`,

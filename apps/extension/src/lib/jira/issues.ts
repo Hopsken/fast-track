@@ -8,17 +8,17 @@ import type { Issue } from 'jira.js/version3/models/issue'
 import type { GetIssuePickerResource } from 'jira.js/version3/parameters/getIssuePickerResource'
 import { chunk, compact, flatMap, map, orderBy, uniqBy } from 'lodash-es'
 
-import { FieldMetadata } from '@/repository/schema'
-import {
-  IssueDetail,
+import type {
+  CreateIssuePayload,
+  FieldMetadata,
   IssueSource,
+  JiraIssue,
+  JiraIssueDetail,
   JiraMergeRequest,
   JiraPriority,
-  JiraTicket,
   JiraTransition,
-  CreateIssuePayload,
-  UserDetails
-} from '@/types'
+  JiraUser
+} from '@/repository/schema'
 import { isNonNullable } from '@/utils/assert'
 import { isTicketKey, mapPriority, mapTransition } from '@/utils/jira/issues'
 import { extractMergeRequestsFromRemoteLinks } from '@/utils/jira/merge-requests'
@@ -59,7 +59,7 @@ export class JiraIssueService {
   /**
    * Fetches a single issue by key
    */
-  async getIssue(issueKey: string): Promise<JiraTicket> {
+  async getIssue(issueKey: string): Promise<JiraIssue> {
     log.info(`🎫 JiraAPI: Fetching issue ${issueKey}`)
 
     const client = await this.getClient()
@@ -126,7 +126,7 @@ export class JiraIssueService {
       .filter((priority): priority is JiraPriority => !!priority.id)
   }
 
-  async getIssueTransitions(issue: JiraTicket): Promise<JiraTransition[]> {
+  async getIssueTransitions(issue: JiraIssue): Promise<JiraTransition[]> {
     const client = await this.getClient()
     const transitions = await client.issues.getTransitions({
       issueIdOrKey: issue.key,
@@ -143,10 +143,10 @@ export class JiraIssueService {
     transition: JiraTransition,
     options?: {
       autoAssign?: {
-        assignee: UserDetails
+        assignee: Pick<JiraUser, 'accountId'>
       }
     }
-  ): Promise<JiraTicket> {
+  ): Promise<JiraIssue> {
     const client = await this.getClient()
 
     await client.issues.doTransition({
@@ -166,7 +166,7 @@ export class JiraIssueService {
   async updateIssuePriority(
     issueKey: string,
     priority: JiraPriority
-  ): Promise<JiraTicket> {
+  ): Promise<JiraIssue> {
     const normalizedPriority = mapPriority(priority)
     const { id: priorityId } = normalizedPriority
     if (!priorityId) {
@@ -187,7 +187,7 @@ export class JiraIssueService {
   async searchIssuesByText(
     query: string,
     options?: { limit?: number; projectKeys?: string[] }
-  ): Promise<JiraTicket[]> {
+  ): Promise<JiraIssue[]> {
     const trimmedQuery = query.trim()
     if (!trimmedQuery) {
       return []
@@ -252,7 +252,7 @@ export class JiraIssueService {
       source?: IssueSource
       limit?: number
     }
-  ): Promise<JiraTicket[]> => {
+  ): Promise<JiraIssue[]> => {
     const { source, limit = 30 } = options ?? {}
     const client = await this.getClient()
     const response =
@@ -272,7 +272,7 @@ export class JiraIssueService {
    * Fetches in-progress and open sprint issues separately to improve resilience
    * when openSprints() isn't available.
    */
-  async getMySuggestedIssues(limit = 50): Promise<JiraTicket[]> {
+  async getMySuggestedIssues(limit = 50): Promise<JiraIssue[]> {
     const assigneeClause = 'assignee = currentUser()'
     const inProgressJql = `${assigneeClause} AND statusCategory = "In Progress"`
     const openSprintJql = `${assigneeClause} AND sprint in openSprints()`
@@ -326,7 +326,7 @@ export class JiraIssueService {
     return uniqueTickets.slice(0, limit)
   }
 
-  async getRecentHistoryIssues(limit = 10): Promise<JiraTicket[]> {
+  async getRecentHistoryIssues(limit = 10): Promise<JiraIssue[]> {
     return this.searchIssuesUsingJql(
       'issue in issueHistory() ORDER BY lastViewed DESC, updated DESC',
       { source: 'history', limit }
@@ -343,7 +343,7 @@ export class JiraIssueService {
   /**
    * Fetches multiple issues using bulk API with functional patterns
    */
-  async getIssues(issueKeys: string[]): Promise<JiraTicket[]> {
+  async getIssues(issueKeys: string[]): Promise<JiraIssue[]> {
     log.info(`🎫 JiraAPI: Bulk fetching ${issueKeys.length} issues:`, issueKeys)
 
     const batchSize = 100 // jira.js bulkFetchIssues limit
@@ -364,7 +364,7 @@ export class JiraIssueService {
   /**
    * Processes a bulk batch of issue keys using jira.js bulkFetchIssues
    */
-  private async processBulkBatch(batch: string[]): Promise<JiraTicket[]> {
+  private async processBulkBatch(batch: string[]): Promise<JiraIssue[]> {
     try {
       const client = await this.getClient()
       // Use bulk fetch API to get multiple issues at once
@@ -402,7 +402,7 @@ export class JiraIssueService {
   /**
    * Converts a jira.js Issue to internal ticket format
    */
-  private convertToTicket(issue: Issue, source?: IssueSource): JiraTicket {
+  private convertToTicket(issue: Issue, source?: IssueSource): JiraIssue {
     const statusName = issue.fields?.status?.name?.toLowerCase?.() || ''
     const statusKey =
       issue.fields?.status?.statusCategory?.key?.toLowerCase?.() || ''
@@ -458,7 +458,7 @@ export class JiraIssueService {
   /**
    * Fetches a single issue with full details for detail view
    */
-  async getIssueDetail(issueKey: string): Promise<IssueDetail> {
+  async getIssueDetail(issueKey: string): Promise<JiraIssueDetail> {
     log.info(`🎫 JiraAPI: Fetching issue detail ${issueKey}`)
 
     const client = await this.getClient()
@@ -503,7 +503,7 @@ export class JiraIssueService {
     }
   }
 
-  private convertToIssueDetail(issue: Issue): IssueDetail {
+  private convertToIssueDetail(issue: Issue): JiraIssueDetail {
     const ticket = this.convertToTicket(issue)
 
     const description =
@@ -548,6 +548,7 @@ export class JiraIssueService {
       })),
       dueDate: issue.fields?.duedate ?? undefined,
       project: {
+        id: issue.fields?.project?.id ?? '',
         key: issue.fields?.project?.key ?? '',
         name: issue.fields?.project?.name ?? '',
         avatarUrl: issue.fields?.project?.avatarUrls?.['48x48']

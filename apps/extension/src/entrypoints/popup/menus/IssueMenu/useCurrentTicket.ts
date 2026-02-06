@@ -1,6 +1,6 @@
 import { useOutletContext, useParams } from 'react-router-dom'
 
-import { IssueDetail } from '@/types'
+import { JiraIssueDetail } from '@/types'
 
 export const useCurrentTicketKey = () => {
   const { ticketKey } = useParams<{ ticketKey: string }>()
@@ -10,5 +10,5 @@ export const useCurrentTicketKey = () => {
 }
 
 export function useCurrentTicket() {
-  return useOutletContext<IssueDetail>()
+  return useOutletContext<JiraIssueDetail>()
 }

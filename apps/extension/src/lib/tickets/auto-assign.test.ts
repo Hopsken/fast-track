@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
 import { shouldAutoAssignOnTransition } from '@/lib/tickets/auto-assign'
-import { JiraTicket, JiraTransition, UserPreferences } from '@/types'
+import type { JiraIssue, JiraTransition } from '@/repository/schema'
+import { UserPreferences } from '@/types'
 
 const basePreferences: UserPreferences = {
   branchNameFormat: '{key}-{summary}',
@@ -31,7 +32,7 @@ const baseTicket = {
   lastViewed: null,
   created: '2024-01-01',
   updated: '2024-01-01'
-} satisfies JiraTicket
+} satisfies JiraIssue
 
 const baseTransition = {
   id: '20',

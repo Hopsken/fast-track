@@ -6,7 +6,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useTicketDetails } from '@/hooks/useTicketDetails'
-import { IssueDetail, JiraTicket } from '@/types'
+import { JiraIssueDetail, JiraIssue } from '@/types'
 
 import { TicketDetails } from './TicketDetails'
 
@@ -31,7 +31,7 @@ describe('TicketDetails', () => {
       key: 'T-1',
       issueType: { name: 'Bug' },
       status: { name: 'Done', statusCategory: { colorName: 'green' } }
-    } as unknown as JiraTicket
+    } as unknown as JiraIssue
 
     vi.mocked(useTicketDetails).mockReturnValue({
       isLoading: false,
@@ -39,7 +39,7 @@ describe('TicketDetails', () => {
         ...mockTicket,
         description: '<p>Full Description Content</p>'
       }
-    } as unknown as UseQueryResult<IssueDetail>)
+    } as unknown as UseQueryResult<JiraIssueDetail>)
 
     render(
       <MemoryRouter>

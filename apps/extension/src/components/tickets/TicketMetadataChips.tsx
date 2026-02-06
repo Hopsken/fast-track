@@ -3,7 +3,7 @@ import { ArrowUpCircle, Tag } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 
 import { AssigneeAvatar } from '@/components/ui'
-import { IssueDetail, JiraTicket } from '@/types'
+import { JiraIssueDetail, JiraIssue } from '@/types'
 import { getStatusDotColor } from '@/utils/ticket-status'
 
 const chipTransition = {
@@ -14,9 +14,9 @@ const chipTransition = {
 export function TicketMetadataChips({
   ticket
 }: {
-  ticket: Partial<JiraTicket> | IssueDetail
+  ticket: Partial<JiraIssue> | JiraIssueDetail
 }) {
-  const labels = (ticket as IssueDetail).labels || []
+  const labels = (ticket as JiraIssueDetail).labels || []
 
   return (
     <div className="flex flex-wrap items-center gap-2 text-xs">

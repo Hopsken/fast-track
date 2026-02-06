@@ -6,7 +6,7 @@ import { Browser, browser } from '#imports'
 import { escape } from 'lodash-es'
 
 import { getJiraService } from '@/services'
-import { JiraTicket } from '@/types'
+import { JiraIssue } from '@/types'
 import { isTicketKey } from '@/utils/jira/issues'
 import { getLogger } from '~/utils/logger'
 import { openJiraIssue, openJiraSearch } from '~/utils/open-jira-issue'
@@ -67,7 +67,7 @@ export class OmniboxHandlerService {
 
     const requestId = ++this.latestRequestId
 
-    const emitSuggestions = (tickets: JiraTicket[]) => {
+    const emitSuggestions = (tickets: JiraIssue[]) => {
       if (requestId !== this.latestRequestId) return
       suggest(this.buildSuggestions(tickets, query))
     }
@@ -85,7 +85,7 @@ export class OmniboxHandlerService {
    * Builds suggestions from tickets plus direct key entry
    */
   private static buildSuggestions(
-    tickets: JiraTicket[],
+    tickets: JiraIssue[],
     text: string
   ): Browser.omnibox.SuggestResult[] {
     const normalized = text.trim()
@@ -125,7 +125,7 @@ export class OmniboxHandlerService {
   }
 
   private static toSuggestion(
-    ticket: JiraTicket
+    ticket: JiraIssue
   ): Browser.omnibox.SuggestResult {
     const key = escape(ticket.key)
     const summary = escape(ticket.summary)

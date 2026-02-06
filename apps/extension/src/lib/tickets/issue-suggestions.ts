@@ -1,4 +1,4 @@
-import { JiraTicket } from '@/types'
+import { JiraIssue } from '@/types'
 
 export type IssueSuggestionBuckets = {
   inProgress: string[]
@@ -7,7 +7,7 @@ export type IssueSuggestionBuckets = {
 }
 
 export const bucketSuggestionTickets = (
-  tickets: JiraTicket[]
+  tickets: JiraIssue[]
 ): IssueSuggestionBuckets =>
   tickets.reduce<IssueSuggestionBuckets>(
     (acc, ticket) => {

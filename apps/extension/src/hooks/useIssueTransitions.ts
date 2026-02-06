@@ -2,11 +2,11 @@ import { useQuery } from '@tanstack/react-query'
 
 import { usePrefetchOptionsIfApplicable } from '@/components/PrefetchQuery'
 import { getJiraService } from '@/services'
-import { JiraTicket } from '@/types'
+import { JiraIssue } from '@/types'
 import { queryKeys } from '@/utils/queryKeys'
 import { minutes } from '@/utils/time'
 
-export function useIssueTransitions(issue: JiraTicket) {
+export function useIssueTransitions(issue: JiraIssue) {
   const queryOptions = usePrefetchOptionsIfApplicable()
   return useQuery({
     ...queryOptions,

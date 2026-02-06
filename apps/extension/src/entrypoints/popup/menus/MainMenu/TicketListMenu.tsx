@@ -8,7 +8,7 @@ import { useIssueSuggestions } from '@/hooks/useIssueSuggestions'
 import { useHotkey } from '@/lib/hotkeys'
 import { IssueSuggestion } from '@/services/suggestion-service'
 import { useCommandSearch } from '@/stores/command/useCommandInputStore'
-import { JiraTicket } from '@/types'
+import { JiraIssue } from '@/types'
 import { isTicketKey } from '@/utils/jira/issues'
 
 import { CommandRoutes } from '../../routes'
@@ -44,7 +44,7 @@ function SuggestedTickets({ issues }: SuggestedTicketsProps) {
   const getTickets = (keys?: string[]) =>
     compact(keys?.map((ticketKey) => issues?.tickets[ticketKey])) ?? []
 
-  function renderGroup(heading: string, tickets?: JiraTicket[]) {
+  function renderGroup(heading: string, tickets?: JiraIssue[]) {
     if (!tickets?.length) return null
 
     return (

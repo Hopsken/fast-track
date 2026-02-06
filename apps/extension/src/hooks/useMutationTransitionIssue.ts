@@ -5,10 +5,11 @@ import {
   mapCurrentUserToAssignee,
   shouldAutoAssignOnTransition
 } from '@/lib/tickets/auto-assign'
+import type { JiraIssue, JiraTransition } from '@/repository/schema'
 import { getJiraService } from '@/services'
 import { showToast } from '@/stores/command/useToastStore'
 import { useCurrentUser } from '@/stores/useCurrentUser'
-import { JiraTicket, JiraTransition, UserPreferences } from '@/types'
+import { UserPreferences } from '@/types'
 import { generateBranchName } from '@/utils/jira/issues'
 import { queryKeys } from '@/utils/queryKeys'
 import { useUserPreferences } from '~/stores/useUserPreferences'
@@ -21,7 +22,7 @@ export function useMutationTransitionIssue() {
 
   return useMutation({
     mutationFn: async (params: {
-      ticket: JiraTicket
+      ticket: JiraIssue
       transition: JiraTransition
     }) => {
       const shouldAutoAssign =
@@ -130,7 +131,7 @@ export function useMutationTransitionIssue() {
 
 function shouldCopyBranchName(
   preferences: UserPreferences,
-  ticket: JiraTicket,
+  ticket: JiraIssue,
   transition: JiraTransition
 ) {
   return (

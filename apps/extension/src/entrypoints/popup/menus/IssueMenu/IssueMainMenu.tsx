@@ -14,7 +14,7 @@ import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
 import { useIssuePriorities } from '@/hooks/useIssuePriorities'
 import { useIssueTransitions } from '@/hooks/useIssueTransitions'
 import { useTicketDetails } from '@/hooks/useTicketDetails'
-import { IssueDetail, JiraTicket } from '@/types'
+import { JiraIssueDetail, JiraIssue } from '@/types'
 import { openJiraIssue } from '@/utils/open-jira-issue'
 
 import { useCurrentTicketKey } from './useCurrentTicket'
@@ -30,7 +30,7 @@ export const IssueMainMenu = memo(function IssueMainMenu() {
   return <IssueMainMenuInner ticket={ticket} />
 })
 
-const IssueMainMenuInner = ({ ticket }: { ticket: IssueDetail }) => {
+const IssueMainMenuInner = ({ ticket }: { ticket: JiraIssueDetail }) => {
   const onSelect = useMemoizedFn(() => {
     openJiraIssue(ticket.key)
   })
@@ -54,7 +54,7 @@ const IssueMainMenuInner = ({ ticket }: { ticket: IssueDetail }) => {
   )
 }
 
-function PrefetchActions({ ticket }: { ticket: JiraTicket }) {
+function PrefetchActions({ ticket }: { ticket: JiraIssue }) {
   useIssuePriorities()
   useIssueEditMeta(ticket.key)
   useIssueTransitions(ticket)

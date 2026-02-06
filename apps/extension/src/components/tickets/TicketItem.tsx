@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { useIsOptionKeyPressed } from '@/hooks/useIsOptionKeyPressed'
 import { getSuggestionService } from '@/services'
-import { JiraTicket } from '@/types'
+import { JiraIssue } from '@/types'
 import { openJiraIssue } from '@/utils/open-jira-issue'
 import {
   IssueTypeIcon,
@@ -16,7 +16,7 @@ import {
 import { HighlightedText } from '~/utils/text-highlighting'
 
 interface TicketItemProps {
-  ticket: JiraTicket
+  ticket: JiraIssue
   searchQuery?: string
 
   showAvatar?: boolean

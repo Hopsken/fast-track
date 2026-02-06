@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
+import type { JiraPriority } from '@/repository/schema'
 import { getJiraService } from '@/services'
 import { showToast } from '@/stores/command/useToastStore'
-import { JiraPriority } from '@/types'
 import { queryKeys } from '@/utils/queryKeys'
 import { formatErrorMessage } from '~/utils/formatError'
 

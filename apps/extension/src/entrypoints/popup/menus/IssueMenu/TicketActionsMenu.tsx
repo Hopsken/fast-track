@@ -16,7 +16,7 @@ import { useMutationAssignMyself } from '@/hooks/useMutationAssignIssue'
 import { HotkeysScopeProvider } from '@/lib/hotkeys'
 import { useCurrentUser } from '@/stores/useCurrentUser'
 import { useUserPreferences } from '@/stores/useUserPreferences'
-import { JiraTicket } from '@/types'
+import { JiraIssue } from '@/types'
 import { generateBranchName, getIssueTitleLink } from '@/utils/jira/issues'
 
 import { CommandRoutes } from '../../routes'
@@ -117,7 +117,7 @@ export const TicketActionsMenu = () => {
   )
 }
 
-function AssignOrUnassignMySelf({ ticket }: { ticket: JiraTicket }) {
+function AssignOrUnassignMySelf({ ticket }: { ticket: JiraIssue }) {
   const userInfo = useCurrentUser()
   const isAssignedByMe = userInfo?.email === ticket.assignee?.emailAddress
 
