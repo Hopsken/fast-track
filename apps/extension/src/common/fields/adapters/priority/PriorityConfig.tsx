@@ -15,8 +15,9 @@ import { FieldConfigComponentProps } from '../../types'
 export const PriorityConfig = ({
   adapter,
   context,
-  config,
-  onChangeConfig
+  value,
+  onValueChange,
+  config
 }: FieldConfigComponentProps<typeof JiraPrioritySchema>) => {
   const [query, setQuery] = useState('')
   const { options, isLoading } = useFieldOptions({
@@ -30,10 +31,8 @@ export const PriorityConfig = ({
     <AutoComplete<JiraPriority, false>
       multiple={false}
       isLoading={isLoading}
-      value={config.presetValue ?? null}
-      onValueChange={(val) =>
-        onChangeConfig({ ...config, presetValue: val ?? undefined })
-      }
+      value={value ?? null}
+      onValueChange={onValueChange}
       query={query}
       onQueryChange={setQuery}
       options={options}

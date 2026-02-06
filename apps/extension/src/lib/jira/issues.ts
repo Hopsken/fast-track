@@ -8,16 +8,17 @@ import type { Issue } from 'jira.js/version3/models/issue'
 import type { GetIssuePickerResource } from 'jira.js/version3/parameters/getIssuePickerResource'
 import { chunk, compact, flatMap, map, orderBy, uniqBy } from 'lodash-es'
 
-import type {
-  CreateIssuePayload,
-  JiraFieldMetadata,
-  IssueSource,
-  JiraIssue,
-  JiraIssueDetail,
-  JiraMergeRequest,
-  JiraPriority,
-  JiraTransition,
-  JiraUser
+import {
+  type CreateIssuePayload,
+  type JiraFieldMetadata,
+  type IssueSource,
+  type JiraIssue,
+  type JiraIssueDetail,
+  type JiraMergeRequest,
+  type JiraPriority,
+  type JiraTransition,
+  type JiraUser,
+  JiraIssueRefSchema
 } from '@/repository/schema'
 import { isNonNullable } from '@/utils/assert'
 import { isTicketKey, mapPriority, mapTransition } from '@/utils/jira/issues'
@@ -337,7 +338,9 @@ export class JiraIssueService {
     const client = await this.getClient()
     const result = await client.issueSearch.getIssuePickerResource(params)
 
-    return flatMap(result.sections, (section) => section.issues)
+    return flatMap(result.sections, (section) =>
+      section.issues?.map((issue) => JiraIssueRefSchema.safeParse(issue).data)
+    ).filter(isNonNullable)
   }
 
   /**

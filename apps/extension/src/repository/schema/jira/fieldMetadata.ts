@@ -6,6 +6,7 @@ export type JiraFieldSystem =
   | 'assignee'
   | 'reporter'
   | 'priority'
+  | 'parent'
   | 'status'
   | 'resolution'
   | 'duedate'

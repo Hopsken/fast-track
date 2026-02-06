@@ -9,6 +9,7 @@ import type { AgileClient } from 'jira.js'
 import { Board } from 'jira.js/agile/models/board'
 import { Sprint } from 'jira.js/agile/models/sprint'
 
+import { JiraSprint, JiraSprintSchema } from '@/repository/schema'
 import { isNonNullable } from '@/utils/assert'
 import { concatPromises } from '@/utils/promise'
 
@@ -34,7 +35,7 @@ export class JiraAgileService {
       boardIds?: number[]
       states?: Array<'active' | 'closed' | 'future'>
     }
-  ): Promise<Sprint[]> {
+  ): Promise<JiraSprint[]> {
     const client = await this.getClient()
     const { states = ['active', 'future'] } = params ?? {}
 
@@ -46,13 +47,15 @@ export class JiraAgileService {
         .filter(isNonNullable)
     }
 
-    return concatPromises<Sprint>(
+    return concatPromises<JiraSprint>(
       boardIds.map(async (boardId) => {
         const { values: sprints } = await client.board.getAllSprints({
           boardId,
           state: states.join(',')
         })
         return sprints
+          .map((sprint) => JiraSprintSchema.safeParse(sprint).data)
+          .filter(isNonNullable)
       })
     )
   }
