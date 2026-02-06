@@ -5,6 +5,7 @@ import {
   FieldAdapter,
   FieldAdapterKey
 } from '../../../types'
+import { GenericFieldAdapterOverrides } from '../type'
 
 import { GenericSelectConfig } from './GenericSelectConfig'
 import { GenericSelectInput } from './GenericSelectInput'
@@ -12,14 +13,8 @@ import { GenericSelectInput } from './GenericSelectInput'
 export const createSelectFieldAdapter = <ValueSchema extends ZodType>(
   key: FieldAdapterKey,
   schema: ValueSchema,
-  overrides: Omit<
-    FieldAdapter<ValueSchema>,
-    'key' | 'schema' | 'InputComponent' | 'ConfigComponent'
-  > &
-    Partial<
-      Pick<FieldAdapter<ValueSchema>, 'InputComponent' | 'ConfigComponent'>
-    >
-) => {
+  overrides: GenericFieldAdapterOverrides<ValueSchema>
+): FieldAdapter<ValueSchema> => {
   const { InputComponent, ConfigComponent, ...restConfig } = overrides
   return defineFieldAdapter<ValueSchema>({
     key,

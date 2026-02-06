@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useMemoizedFn } from 'ahooks'
 import { z, ZodType } from 'zod'
 
 import { GeneralIcon } from '@/components'
@@ -26,7 +27,9 @@ export const GenericSelectConfig = <S extends ZodType>({
   adapter,
   context,
   config,
-  onChangeConfig
+  value,
+  onValueChange,
+  onConfirm
 }: FieldConfigComponentProps<S>) => {
   type Value = z.infer<S>
   const [query, setQuery] = useState('')
@@ -37,14 +40,17 @@ export const GenericSelectConfig = <S extends ZodType>({
     query
   })
 
+  const onSelect = useMemoizedFn((opt: Value | null) => {
+    onValueChange(opt)
+    onConfirm()
+  })
+
   return (
     <AutoComplete<Value, false>
       multiple={false}
       isLoading={isLoading}
-      value={config.presetValue ?? null}
-      onValueChange={(val) =>
-        onChangeConfig({ ...config, presetValue: val ?? undefined })
-      }
+      value={value ?? null}
+      onValueChange={onSelect}
       query={query}
       onQueryChange={setQuery}
       options={options}

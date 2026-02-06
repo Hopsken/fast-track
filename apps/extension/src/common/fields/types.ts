@@ -27,7 +27,9 @@ interface FieldComponentCommonProps<ValueSchema extends ZodType> {
 // Field config 组件，用于渲染配置页面
 export interface FieldConfigComponentProps<ValueSchema extends ZodType>
   extends FieldComponentCommonProps<ValueSchema> {
-  onChangeConfig: (newConfig: FieldConfig<z.infer<ValueSchema>>) => void
+  value?: z.infer<ValueSchema>
+  onValueChange: (value: z.infer<ValueSchema> | null) => void
+  onConfirm: () => void
 }
 
 export type FieldConfigComponent<ValueSchema extends ZodType> = ComponentType<

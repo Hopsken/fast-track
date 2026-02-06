@@ -1,4 +1,5 @@
 import { createElement } from 'react'
+import { noop } from 'lodash-es'
 
 import { useFieldAdapter } from '@/common/fields'
 import { FieldConfig, JiraFieldMetadata } from '@/repository/schema'
@@ -8,8 +9,7 @@ export function FieldConfigRow({
   field,
   project,
   issueType,
-  config,
-  onChangeConfig
+  config
 }: {
   project: JiraProject
   issueType: JiraIssueType
@@ -25,6 +25,9 @@ export function FieldConfigRow({
     adapter,
     context: { project, issueType, metadata: field },
     config,
-    onChangeConfig
+    // FIXME
+    value: undefined,
+    onValueChange: noop,
+    onConfirm: noop
   })
 }
