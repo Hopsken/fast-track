@@ -9,7 +9,8 @@ import {
 import { PlusIcon } from 'lucide-react'
 
 import { LoadingCursor } from '@/components/LoadingCursor'
-import type { FieldConfig, FieldMetadata } from '~/types/template'
+import { JiraFieldMetadata } from '@/repository/schema'
+import type { FieldConfig } from '~/types/template'
 
 import { AddFieldDialog } from './AddFieldDialog'
 import { useWizardContext } from './context'
@@ -41,7 +42,7 @@ export function FieldsSection() {
 
     // Iterate fieldsConfig keys (JS insertion order) so newly added fields
     // appear at the bottom of the list.
-    const configured: FieldMetadata[] = []
+    const configured: JiraFieldMetadata[] = []
     for (const fieldId of Object.keys(fieldsConfig)) {
       const f = fieldMap.get(fieldId)
       if (f && !EXCLUDED.has(fieldId)) configured.push(f)
@@ -57,15 +58,15 @@ export function FieldsSection() {
 
   const handleAddField = useCallback(
     (fieldId: string) => {
-      actions.setFieldConfig(fieldId, { behavior: 'preset' })
+      actions.setFieldConfig({ fieldId, behavior: 'preset' })
       setCommandOpen(false)
     },
     [actions]
   )
 
   const handleConfigChange = useCallback(
-    (fieldId: string, config: FieldConfig) => {
-      actions.setFieldConfig(fieldId, config)
+    (config: FieldConfig) => {
+      actions.setFieldConfig(config)
     },
     [actions]
   )
@@ -126,9 +127,7 @@ export function FieldsSection() {
                   issueType={scope.issueType!}
                   field={field}
                   config={fieldsConfig[field.fieldId]!}
-                  onConfigChange={(config) =>
-                    handleConfigChange(field.fieldId, config)
-                  }
+                  onConfigChange={handleConfigChange}
                   onRemove={() => actions.removeFieldConfig(field.fieldId)}
                 />
               ))}

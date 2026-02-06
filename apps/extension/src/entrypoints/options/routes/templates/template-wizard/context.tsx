@@ -12,17 +12,14 @@ import { useDebounce } from 'ahooks'
 
 import type { SearchOption } from '@/components/ui'
 import { extractLeadingEmoji } from '@/lib/emoji'
+import { JiraFieldMetadata } from '@/repository/schema'
 import { getJiraService } from '@/services'
 import { JiraIssueType, JiraProject } from '@/types'
 import { formatErrorMessage } from '@/utils/formatError'
 import { queryKeys } from '@/utils/queryKeys'
 import { minutes } from '@/utils/time'
 import { getTemplateService } from '~/services/template-service'
-import type {
-  FieldConfig,
-  FieldMetadata,
-  IssueTemplate
-} from '~/types/template'
+import type { FieldConfig, IssueTemplate } from '~/types/template'
 
 import { type WizardScope } from './types'
 
@@ -43,7 +40,7 @@ export type WizardState = {
   issueTypeOptions: SearchOption<JiraIssueType>[]
 
   // Fields
-  availableFields: FieldMetadata[]
+  availableFields: JiraFieldMetadata[]
   areFieldsLoading: boolean
   fieldsError: string | null
   fieldsConfig: Record<string, FieldConfig>
@@ -62,7 +59,7 @@ export type WizardActions = {
   selectProject: (opt: JiraProject | null) => void
   selectIssueType: (opt: JiraIssueType | null) => void
 
-  setFieldConfig: (fieldId: string, config: FieldConfig) => void
+  setFieldConfig: (config: FieldConfig) => void
   removeFieldConfig: (fieldId: string) => void
 
   setName: (next: string) => void
@@ -224,10 +221,10 @@ export function TemplateWizardProvider(props: ProviderProps) {
     if (!isEdit) setFieldsConfig({})
   }, [scopeKey, isEdit])
 
-  const setFieldConfig = useCallback((fieldId: string, config: FieldConfig) => {
+  const setFieldConfig = useCallback((config: FieldConfig) => {
     setFieldsConfig((prev) => ({
       ...prev,
-      [fieldId]: config
+      [config.fieldId]: config
     }))
   }, [])
 

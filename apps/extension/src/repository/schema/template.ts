@@ -1,8 +1,8 @@
 import { z } from 'zod'
 
 import {
-  JiraFieldAllowedValueSchema,
   JiraFieldMetadataSchema,
+  JiraFieldSchemaSchema,
   JiraIssueTypeSchema,
   JiraProjectSchema
 } from './jira'
@@ -45,18 +45,23 @@ export type IssueTemplateScope = z.infer<typeof IssueTemplateScopeSchema>
  *
  * The model doesn't distinguish source — only the config UI branches on field.allowedValues.
  */
-export const FieldConfigSchema = z.discriminatedUnion('behavior', [
-  z.object({
-    behavior: z.literal('preset'),
-    presetValue: z.unknown().optional()
-  }),
-  z.object({
-    behavior: z.literal('restricted'),
-    allowedOptions: z.array(JiraFieldAllowedValueSchema).min(1)
-  }),
-  z.object({ behavior: z.literal('ignore') })
-])
-export type FieldConfig = z.infer<typeof FieldConfigSchema>
+export const FieldConfigSchema = z.object({
+  fieldId: z.string(),
+  behavior: z.union([z.literal('preset'), z.literal('restricted')]),
+  presetValue: z.unknown().optional(),
+  allowedOptions: z.array(z.unknown()).optional()
+})
+
+/**
+ * Field configuration with typed presetValue and allowedOptions
+ */
+export type FieldConfig<T = unknown> = Omit<
+  z.infer<typeof FieldConfigSchema>,
+  'presetValue' | 'allowedOptions'
+> & {
+  presetValue?: T
+  allowedOptions?: T[]
+}
 
 export const IssueTemplateSchema = z.object({
   id: z.string().min(1),

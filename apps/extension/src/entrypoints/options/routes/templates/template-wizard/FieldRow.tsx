@@ -2,11 +2,14 @@ import { useCallback } from 'react'
 import { Badge } from '@internal/ui/components/badge'
 import { Trash2Icon } from 'lucide-react'
 
-import { JiraIssueType, JiraProject } from '@/repository/schema'
-import type { AllowedValue, FieldConfig, FieldMetadata } from '~/types/template'
+import {
+  JiraIssueType,
+  JiraProject,
+  JiraFieldMetadata
+} from '@/repository/schema'
+import type { FieldConfig } from '~/types/template'
 
-import { FieldInput } from './FieldInput'
-import { RestrictedOptionsInput } from './RestrictedOptionsInput'
+import { FieldConfigRow } from './FieldConfigRow'
 
 /* ------------------------------------------------------------------ */
 /*  Mode helpers                                                       */
@@ -78,49 +81,63 @@ export function FieldRow({
 }: {
   project: JiraProject
   issueType: JiraIssueType
-  field: FieldMetadata
+  field: JiraFieldMetadata
   config: FieldConfig
   onConfigChange: (config: FieldConfig) => void
   onRemove?: () => void
 }) {
+  const { fieldId } = field
   const currentMode = getModeFromConfig(config)
 
   const handleModeChange = useCallback(
     (mode: FieldMode) => {
       switch (mode) {
         case 'preset':
-          onConfigChange({ behavior: 'preset', presetValue: undefined })
+          onConfigChange({
+            fieldId,
+            behavior: 'preset',
+            presetValue: undefined
+          })
           break
         case 'restricted':
           // Default depends on whether field has Jira-provided allowedValues
           if (field.allowedValues && field.allowedValues.length > 0) {
             // Start with all Jira options selected
             onConfigChange({
+              fieldId,
               behavior: 'restricted',
               allowedOptions: field.allowedValues
             })
           } else {
             // User-defined options (number, text, user) — start empty, force user to add
-            onConfigChange({ behavior: 'restricted', allowedOptions: [] })
+            onConfigChange({
+              fieldId,
+              behavior: 'restricted',
+              allowedOptions: []
+            })
           }
           break
       }
     },
-    [field.allowedValues, onConfigChange]
+    [field.allowedValues, fieldId, onConfigChange]
   )
 
   const handlePresetChange = useCallback(
     (value: unknown) => {
-      onConfigChange({ behavior: 'preset', presetValue: value })
+      onConfigChange({ fieldId, behavior: 'preset', presetValue: value })
     },
-    [onConfigChange]
+    [fieldId, onConfigChange]
   )
 
   const handleRestrictedChange = useCallback(
-    (options: AllowedValue[]) => {
-      onConfigChange({ behavior: 'restricted', allowedOptions: options })
+    (options: unknown[]) => {
+      onConfigChange({
+        fieldId,
+        behavior: 'restricted',
+        allowedOptions: options
+      })
     },
-    [onConfigChange]
+    [fieldId, onConfigChange]
   )
 
   return (
@@ -148,27 +165,13 @@ export function FieldRow({
           </div>
         </div>
 
-        {/* Input area — depends on mode */}
-        {currentMode === 'preset' && (
-          <FieldInput
-            project={project}
-            issueType={issueType}
-            field={field}
-            value={
-              config.behavior === 'preset' ? config.presetValue : undefined
-            }
-            onChange={handlePresetChange}
-          />
-        )}
-        {currentMode === 'restricted' && (
-          <RestrictedOptionsInput
-            field={field}
-            selectedOptions={
-              config.behavior === 'restricted' ? config.allowedOptions : []
-            }
-            onChange={handleRestrictedChange}
-          />
-        )}
+        <FieldConfigRow
+          project={project}
+          issueType={issueType}
+          field={field}
+          config={config}
+          onChangeConfig={onConfigChange}
+        />
       </div>
     </div>
   )

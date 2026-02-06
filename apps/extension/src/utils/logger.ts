@@ -12,8 +12,10 @@ export const logger = (() => {
   return extensionLogger
 })()
 
-export const getLogger = (name: string) => {
-  const namespacedLogger = loglevel.getLogger(`extension:${name}`)
+export const getLogger = (name?: string) => {
+  const namespacedLogger = loglevel.getLogger(
+    name ? `extension:${name}` : 'extension'
+  )
   namespacedLogger.setLevel(DEFAULT_LEVEL)
   return namespacedLogger
 }
