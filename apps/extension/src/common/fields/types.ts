@@ -3,6 +3,7 @@ import { z, ZodType } from 'zod'
 
 import {
   FieldConfig,
+  JiraFieldMetadata,
   JiraFieldSchemaArrayItemsType,
   JiraFieldSchemaType,
   JiraFieldSystem,
@@ -13,6 +14,7 @@ import {
 export interface JiraFieldContext {
   project?: JiraProject
   issueType?: JiraIssueType
+  metadata: JiraFieldMetadata
 }
 
 // Field 组件渲染公共属性
@@ -60,6 +62,7 @@ export interface FieldAdapter<
   // 1. 唯一标识，对应 Jira 的 schema type (e.g., 'com.atlassian.jira.plugin...:select')
   // equals to system type for system field, otherwise, it's schema.type+schema.items type
   key: FieldAdapterKey
+  title?: string
 
   // 2. Zod schema for the field value
   schema: ValueSchema

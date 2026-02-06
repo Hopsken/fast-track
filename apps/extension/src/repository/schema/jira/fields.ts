@@ -35,6 +35,7 @@ export type JiraTransition = z.infer<typeof JiraTransitionSchema>
 
 export const JiraAssigneeSchema = z
   .object({
+    accountId: z.string(),
     displayName: z.string(),
     emailAddress: z.string(),
     avatarUrls: JiraAvatarUrlSchema

@@ -8,7 +8,9 @@
 
 import { AgileClient, Config, Version3Client } from 'jira.js'
 
+import { JiraUserSchema } from '@/repository/schema'
 import { AuthCredentials, JiraUserInfo } from '@/types'
+import { isNonNullable } from '@/utils/assert'
 import { getLogger } from '@/utils/logger'
 
 import { JiraAgileService } from './agile'
@@ -138,7 +140,10 @@ export class JiraAPI {
       projectKey,
       query
     })
-    return result.filter((user) => user.accountType === 'atlassian')
+    return result
+      .filter((user) => user.accountType === 'atlassian')
+      .map((user) => JiraUserSchema.safeParse(user).data)
+      .filter(isNonNullable)
   }
 
   /**

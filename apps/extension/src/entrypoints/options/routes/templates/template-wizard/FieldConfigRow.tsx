@@ -23,7 +23,7 @@ export function FieldConfigRow({
 
   return createElement(ConfigComponent, {
     adapter,
-    context: { project, issueType },
+    context: { project, issueType, metadata: field },
     config,
     onChangeConfig
   })
