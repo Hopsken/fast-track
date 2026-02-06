@@ -4,14 +4,22 @@ import { FieldMetadata } from '@/repository/schema'
 
 import { FieldInputBaseProps } from '../types'
 
-import { LabelsInput, ProjectUserInput, SprintInput } from './fields'
-import { ParentInput } from './fields/ParentInput'
-import { NumberInput, TextAreaInput, TextInput } from './primitive'
-import { DateInput } from './primitive/DateInput'
-import { DateTimeInput } from './primitive/DateTimeInput'
-import { MultiSelectChips } from './primitive/MultiSelectChips'
-import { SingleSelectField } from './primitive/SingleSelectField'
-import { UserFieldInput } from './primitive/UserFieldInput'
+import {
+  LabelsInput,
+  ProjectUserInput,
+  SprintInput,
+  ParentInput
+} from './fields'
+import {
+  DateInput,
+  DateTimeInput,
+  MultiSelectInput,
+  NumberInput,
+  SingleSelectInput,
+  TextAreaInput,
+  TextInput,
+  UserFieldInput
+} from './primitive'
 
 const UnsupportedField = ({ field }: FieldInputBaseProps) => {
   return <span>Field {field.name} is not supported</span>
@@ -24,12 +32,12 @@ const componentByFieldKey: Record<string, ComponentType<any>> = {
   parent: ParentInput,
   assignee: UserFieldInput,
   reporter: ProjectUserInput,
-  priority: SingleSelectField,
+  priority: SingleSelectInput,
   labels: LabelsInput,
-  components: MultiSelectChips,
-  fixVersions: MultiSelectChips,
+  components: MultiSelectInput,
+  fixVersions: MultiSelectInput,
   duedate: DateInput,
-  resolution: SingleSelectField
+  resolution: SingleSelectInput
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -47,14 +55,14 @@ const componentBySchemaType: Record<string, ComponentType<any>> = {
   user: UserFieldInput,
   date: DateInput,
   datetime: DateTimeInput,
-  option: SingleSelectField,
+  option: SingleSelectInput,
   // team: SingleSelectField,
-  array: MultiSelectChips
+  array: MultiSelectInput
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const componentBySchemaItemsType: Record<string, ComponentType<any>> = {
-  string: MultiSelectChips
+  string: MultiSelectInput
   // user: MultiSelectChips
 }
 

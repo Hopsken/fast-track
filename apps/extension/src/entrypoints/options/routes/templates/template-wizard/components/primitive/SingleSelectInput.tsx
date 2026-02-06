@@ -12,7 +12,7 @@ import { useFieldOptions } from './useFieldOptions'
  * Converts field metadata allowed values into searchable options.
  * Supports filtering to quickly find options in large lists.
  */
-export function SingleSelectField<T extends IconOption>({
+export function SingleSelectInput<T extends IconOption>({
   field,
   value,
   onChange

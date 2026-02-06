@@ -26,7 +26,7 @@ import { useFieldOptions } from './useFieldOptions'
  * ```
 
  */
-export function MultiSelectChips<T extends IconOption>({
+export function MultiSelectInput<T extends IconOption>({
   field,
   value,
   onChange
