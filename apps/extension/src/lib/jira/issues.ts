@@ -10,7 +10,7 @@ import { chunk, compact, flatMap, map, orderBy, uniqBy } from 'lodash-es'
 
 import type {
   CreateIssuePayload,
-  FieldMetadata,
+  JiraFieldMetadata,
   IssueSource,
   JiraIssue,
   JiraIssueDetail,
@@ -81,7 +81,7 @@ export class JiraIssueService {
   async getCreateIssueMetaFields(input: {
     projectIdOrKey: string
     issueTypeId: string
-  }): Promise<FieldMetadata[]> {
+  }): Promise<JiraFieldMetadata[]> {
     const client = await this.getClient()
 
     const page = await client.issues.getCreateIssueMetaIssueTypeId({

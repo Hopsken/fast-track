@@ -1,6 +1,6 @@
 import { ComponentType } from 'react'
 
-import { FieldMetadata } from '@/repository/schema'
+import { JiraFieldMetadata } from '@/repository/schema'
 
 import { FieldInputBaseProps } from '../types'
 
@@ -67,7 +67,7 @@ const componentBySchemaItemsType: Record<string, ComponentType<any>> = {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getFieldEditor(field: FieldMetadata): ComponentType<any> {
+export function getFieldEditor(field: JiraFieldMetadata): ComponentType<any> {
   const { key, schema } = field
   return (
     // First determine by known system field key

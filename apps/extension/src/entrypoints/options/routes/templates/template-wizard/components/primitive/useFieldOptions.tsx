@@ -1,8 +1,8 @@
 import { useAutoCompleteQuery } from '@/hooks/useAutoComplete'
-import { FieldMetadata } from '@/repository/schema'
+import { JiraFieldMetadata } from '@/repository/schema'
 
 export function useFieldOptions<T = unknown>(
-  field: FieldMetadata,
+  field: JiraFieldMetadata,
   query: string
 ) {
   const { autoCompleteUrl, allowedValues } = field

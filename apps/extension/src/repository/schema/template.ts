@@ -1,94 +1,24 @@
 import { z } from 'zod'
 
-import { JiraIssueTypeSchema, JiraProjectSchema } from './jira'
+import {
+  JiraFieldAllowedValueSchema,
+  JiraFieldMetadataSchema,
+  JiraIssueTypeSchema,
+  JiraProjectSchema
+} from './jira'
 
 /**
  * Template scope is bound to a Jira instance via hostname only.
  * (No protocol, no path)
  */
 export const IssueTemplateScopeSchema = z.object({
-  baseUrlHost: z
-    .string()
-    .trim()
-    .min(1)
-    .refine(
-      (v) =>
-        !v.includes('://') &&
-        !v.includes('/') &&
-        !v.includes('?') &&
-        !v.includes('#') &&
-        !/\s/.test(v),
-      {
-        message: 'baseUrlHost must be a hostname only (no protocol/path)'
-      }
-    ),
+  baseUrlHost: z.string().trim().regex(z.regexes.hostname, {
+    message: 'baseUrlHost must be a valid hostname'
+  }),
   project: JiraProjectSchema,
   issueType: JiraIssueTypeSchema
 })
 export type IssueTemplateScope = z.infer<typeof IssueTemplateScopeSchema>
-
-/**
- * Known Jira field schema `type` values.
- *
- * The `(string & {})` tail preserves autocomplete for known literals while
- * still accepting any string the Jira API might return in the future.
- */
-export type JiraSchemaType =
-  | 'string'
-  | 'number'
-  | 'array'
-  | 'option'
-  | 'priority'
-  | 'resolution'
-  | 'user'
-  | 'date'
-  | 'datetime'
-  | 'issuetype'
-  | 'project'
-  | 'status'
-  | 'securitylevel'
-  | 'component'
-  | 'version'
-  | 'group'
-  | 'issuelink'
-  | 'timetracking'
-  | 'any'
-  | (string & {})
-
-/**
- * Known Jira field schema `items` values (element type when `type` is `'array'`).
- */
-export type JiraSchemaItemType =
-  | 'option'
-  | 'component'
-  | 'version'
-  | 'priority'
-  | 'resolution'
-  | 'string'
-  | 'user'
-  | 'group'
-  | 'json'
-  | 'issuelinks'
-  | (string & {})
-
-export const JsonTypeSchema = z.object({
-  type: z.string() as z.ZodType<JiraSchemaType>,
-  items: (z.string() as z.ZodType<JiraSchemaItemType>).optional(),
-  system: z.string().optional(),
-  custom: z.string().optional(),
-  customId: z.number().optional()
-})
-export type JsonType = z.infer<typeof JsonTypeSchema>
-
-export const AllowedValueSchema = z
-  .object({
-    id: z.string(),
-    name: z.string().optional(),
-    value: z.string().optional(),
-    iconUrl: z.string().optional()
-  })
-  .catchall(z.unknown())
-export type AllowedValue = z.infer<typeof AllowedValueSchema>
 
 /**
  * Field configuration within a template — discriminated union on `behavior`.
@@ -122,7 +52,7 @@ export const FieldConfigSchema = z.discriminatedUnion('behavior', [
   }),
   z.object({
     behavior: z.literal('restricted'),
-    allowedOptions: z.array(AllowedValueSchema).min(1)
+    allowedOptions: z.array(JiraFieldAllowedValueSchema).min(1)
   }),
   z.object({ behavior: z.literal('ignore') })
 ])
@@ -143,23 +73,10 @@ export const IssueTemplateSchema = z.object({
 })
 export type IssueTemplate = z.infer<typeof IssueTemplateSchema>
 
-export const FieldMetadataSchema = z.object({
-  fieldId: z.string(),
-  key: z.string(),
-  name: z.string(),
-  required: z.boolean(),
-  schema: JsonTypeSchema,
-  allowedValues: z.array(AllowedValueSchema).optional(),
-  autoCompleteUrl: z.string().optional(),
-  hasDefaultValue: z.boolean().optional(),
-  defaultValue: z.unknown().optional()
-})
-export type FieldMetadata = z.infer<typeof FieldMetadataSchema>
-
 export const CachedFieldMetadataSchema = z.object({
   cacheKey: z.string(), // `${baseUrlHost}:${projectKey}:${issueTypeId}`
   lastUpdated: z.iso.datetime(),
-  fields: z.array(FieldMetadataSchema)
+  fields: z.array(JiraFieldMetadataSchema)
 })
 export type CachedFieldMetadata = z.infer<typeof CachedFieldMetadataSchema>
 
@@ -177,6 +94,6 @@ export const FieldConflictSchema = z.object({
   fieldName: z.string(),
   type: ConflictTypeSchema,
   message: z.string(),
-  fieldMetadata: FieldMetadataSchema.optional()
+  fieldMetadata: JiraFieldMetadataSchema.optional()
 })
 export type FieldConflict = z.infer<typeof FieldConflictSchema>

@@ -2,13 +2,13 @@ export type {
   IssueTemplate,
   IssueTemplateScope,
   FieldConfig,
-  FieldMetadata,
+  JiraFieldMetadata as FieldMetadata,
   CachedFieldMetadata,
-  JsonType,
-  AllowedValue,
+  JiraFieldSchema as JsonType,
+  JiraFieldAllowedValue as AllowedValue,
   ConflictType,
   FieldConflict,
-  JiraSchemaItemType,
-  JiraSchemaType,
-  JsonTypeSchema
+  JiraFieldSchemaArrayItemsType as JiraSchemaItemType,
+  JiraFieldSchemaType as JiraSchemaType,
+  JiraFieldSchemaSchema as JsonTypeSchema
 } from '~/repository/schema/template'

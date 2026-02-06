@@ -1,5 +1,6 @@
 export * from './issueType'
 export * from './issue'
 export * from './fields'
+export * from './fieldMetadata'
 export * from './project'
 export * from './user'
