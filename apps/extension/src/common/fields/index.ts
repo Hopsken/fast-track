@@ -1,6 +1,7 @@
 import { JiraAssigneeAdapter } from './adapters/assignee'
 import { JiraComponentAdapter } from './adapters/component'
 import { JiraDateAdapter } from './adapters/date'
+import { JiraDateTimeAdapter } from './adapters/datetime'
 import { JiraPriorityAdapter } from './adapters/priority'
 import { JiraResolutionAdapter } from './adapters/resolution'
 import { JiraUserAdapter } from './adapters/user'
@@ -15,6 +16,7 @@ registerAdapter(JiraComponentAdapter)
 registerAdapter(JiraUserAdapter)
 registerAdapter(JiraResolutionAdapter)
 registerAdapter(JiraDateAdapter)
+registerAdapter(JiraDateTimeAdapter)
 
 export { getFieldAdapter }
 export { useFieldAdapter } from './hooks/useFieldAdapter'

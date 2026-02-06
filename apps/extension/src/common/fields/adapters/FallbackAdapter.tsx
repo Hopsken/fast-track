@@ -1,7 +1,7 @@
 import stringify from 'fast-json-stable-stringify'
 import { z } from 'zod'
 
-import { FieldAdapter, FieldInputComponentProps } from '../types'
+import { FieldAdapter, JiraFieldContext } from '../types'
 
 /**
  * Fallback Schema
@@ -14,15 +14,11 @@ const fallbackSchema = z.any().optional()
  * Fallback UI Component
  * 展示一个友好的警告框，告诉开发者或用户这个字段暂时不可用。
  */
-const FallbackInput = ({
-  config
-}: {
-  config: FieldInputComponentProps['config']
-}) => {
+const FallbackInput = ({ context }: { context: JiraFieldContext }) => {
   // 从 config 中尝试获取字段的原始类型，方便调试
   // 假设 registry 传递过来时把原始类型塞进了 config.jiraFieldType
-  const fieldType = config?.schema.type || 'unknown'
-  const fieldId = config?.fieldId || 'unknown-id'
+  const fieldType = context.metadata?.schema.type || 'unknown'
+  const fieldId = context.metadata?.fieldId || 'unknown-id'
 
   return (
     <div
