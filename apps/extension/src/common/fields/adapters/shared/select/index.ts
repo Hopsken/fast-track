@@ -1,16 +1,15 @@
-import { ZodType } from 'zod'
-
 import {
   defineFieldAdapter,
   FieldAdapter,
-  FieldAdapterKey
+  FieldAdapterKey,
+  FieldValueSchema
 } from '../../../types'
 import { GenericFieldAdapterOverrides } from '../type'
 
 import { GenericSelectConfig } from './GenericSelectConfig'
 import { GenericSelectInput } from './GenericSelectInput'
 
-export const createSelectFieldAdapter = <ValueSchema extends ZodType>(
+export const createSelectFieldAdapter = <ValueSchema extends FieldValueSchema>(
   key: FieldAdapterKey,
   schema: ValueSchema,
   overrides: GenericFieldAdapterOverrides<ValueSchema>

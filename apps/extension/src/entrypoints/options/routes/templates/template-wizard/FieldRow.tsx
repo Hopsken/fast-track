@@ -1,7 +1,9 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { Badge } from '@internal/ui/components/badge'
 import { Trash2Icon } from 'lucide-react'
 
+import { useFieldAdapter } from '@/common/fields'
+import { JiraFieldContext } from '@/common/fields/types'
 import {
   JiraIssueType,
   JiraProject,
@@ -9,19 +11,11 @@ import {
 } from '@/repository/schema'
 import type { FieldConfig } from '~/types/template'
 
-import { FieldConfigRow } from './FieldConfigRow'
-
 /* ------------------------------------------------------------------ */
 /*  Mode helpers                                                       */
 /* ------------------------------------------------------------------ */
 
-type FieldMode = 'preset' | 'restricted'
-
-function getModeFromConfig(config: FieldConfig): FieldMode {
-  if (config.behavior === 'preset') return 'preset'
-  if (config.behavior === 'restricted') return 'restricted'
-  return 'preset'
-}
+type FieldMode = FieldConfig['behavior']
 
 /* ------------------------------------------------------------------ */
 /*  3-way toggle                                                       */
@@ -87,7 +81,18 @@ export function FieldRow({
   onRemove?: () => void
 }) {
   const { fieldId } = field
-  const currentMode = getModeFromConfig(config)
+  const adapter = useFieldAdapter(field)
+
+  const currentMode = config.behavior
+
+  const fieldContext = useMemo<JiraFieldContext>(
+    () => ({
+      project,
+      issueType,
+      metadata: field
+    }),
+    [field, issueType, project]
+  )
 
   const handleModeChange = useCallback(
     (mode: FieldMode) => {
@@ -122,23 +127,7 @@ export function FieldRow({
     [field.allowedValues, fieldId, onConfigChange]
   )
 
-  const handlePresetChange = useCallback(
-    (value: unknown) => {
-      onConfigChange({ fieldId, behavior: 'preset', presetValue: value })
-    },
-    [fieldId, onConfigChange]
-  )
-
-  const handleRestrictedChange = useCallback(
-    (options: unknown[]) => {
-      onConfigChange({
-        fieldId,
-        behavior: 'restricted',
-        allowedOptions: options
-      })
-    },
-    [fieldId, onConfigChange]
-  )
+  const ConfigComponent = adapter.ConfigComponent
 
   return (
     <div className="bg-card flex items-start gap-3 rounded-lg">
@@ -165,10 +154,9 @@ export function FieldRow({
           </div>
         </div>
 
-        <FieldConfigRow
-          project={project}
-          issueType={issueType}
-          field={field}
+        <ConfigComponent
+          adapter={adapter}
+          context={fieldContext}
           config={config}
           onChangeConfig={onConfigChange}
         />

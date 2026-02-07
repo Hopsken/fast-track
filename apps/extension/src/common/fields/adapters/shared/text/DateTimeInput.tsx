@@ -1,45 +1,69 @@
+import { ChangeEvent, useCallback, useState } from 'react'
 import { Input } from '@internal/ui/components/input'
 import { ZodString } from 'zod'
 
-import { FieldConfigComponentProps } from '@/common/fields/types'
+import { isNonNullable } from '@/utils/assert'
 
-export function DateTimeInput({
+import { FieldConfigComponentProps, SelectComponentProps } from '../../../types'
+import { GenericFieldConfig } from '../GenericFieldConfig'
+
+const toJiraDateTime = (value: string) => {
+  if (value.length === 0) return null
+
+  try {
+    const date = new Date(value)
+    if (isNaN(date.getTime())) return null
+
+    return date.toISOString().replace(/\.\d{3}Z$/, '.000+0000')
+  } catch {
+    return null
+  }
+}
+
+const DateTimeSelect = ({
+  isMultiple,
   value,
-  onValueChange,
-  context
-}: FieldConfigComponentProps<ZodString>) {
-  // Convert from Jira format (ISO 8601) to datetime-local format (YYYY-MM-DDTHH:mm)
-  const displayValue = value
+  onChange
+}: SelectComponentProps<string>) => {
+  const [inputValue, setInputValue] = useState(() => {
+    if (value == null) return ''
+    if (Array.isArray(value)) return value.join(',')
+    return value
+  })
+
+  const handleInput = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setInputValue(e.target.value)
+      const inputValue = e.target.value.trim()
+
+      if (isMultiple) {
+        const newValues = inputValue
+          .split(',')
+          .map((val) => toJiraDateTime(val.trim()))
+          .filter(isNonNullable)
+        onChange(newValues)
+        return
+      }
+
+      const newValue = toJiraDateTime(inputValue)
+      onChange(newValue ?? null)
+    },
+    [isMultiple, onChange]
+  )
 
   return (
     <div className="space-y-1">
       <Input
-        type="datetime-local"
-        value={displayValue}
-        onChange={(e) => {
-          const newValue = e.target.value
-          if (newValue.length === 0) {
-            onValueChange(null)
-            return
-          }
-
-          // Convert from datetime-local format to ISO 8601
-          try {
-            const date = new Date(newValue)
-            if (!isNaN(date.getTime())) {
-              // Format as ISO 8601 with UTC timezone for Jira
-              const isoString = date
-                .toISOString()
-                .replace(/\.\d{3}Z$/, '.000+0000')
-              onValueChange(isoString)
-            }
-          } catch {
-            onValueChange(null)
-          }
-        }}
-        aria-label={context.metadata.name ?? 'Date and Time'}
+        type={isMultiple ? 'text' : 'datetime-local'}
+        placeholder={'YYYY-MM-DDTHH:mm'}
+        value={inputValue}
+        onChange={handleInput}
       />
       <p className="text-muted-foreground text-xs">Select date and time</p>
     </div>
   )
+}
+
+export const DateTimeInput = (props: FieldConfigComponentProps<ZodString>) => {
+  return <GenericFieldConfig {...props} SelectorComponent={DateTimeSelect} />
 }

@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { UnwrapArray } from '@/utils/type-utils'
+
 import {
   JiraFieldMetadataSchema,
   JiraFieldSchemaSchema,
@@ -54,13 +56,14 @@ export const FieldConfigSchema = z.object({
 
 /**
  * Field configuration with typed presetValue and allowedOptions
+ * value could be array, but options can only be items[]
  */
 export type FieldConfig<T = unknown> = Omit<
   z.infer<typeof FieldConfigSchema>,
   'presetValue' | 'allowedOptions'
 > & {
   presetValue?: T
-  allowedOptions?: T[]
+  allowedOptions?: UnwrapArray<T>[]
 }
 
 export const IssueTemplateSchema = z.object({

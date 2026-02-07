@@ -1,12 +1,10 @@
-import { z, ZodType } from 'zod'
-
 import { CommandSingleSelect } from '@/components/commands'
 import { CommandMultiSelect } from '@/components/commands/CommandMultiSelect'
 
 import { useFieldOptions } from '../../../hooks/useFieldOptions'
-import { FieldInputComponentProps } from '../../../types'
+import { FieldInputComponentProps, FieldValueSchema } from '../../../types'
 
-export const GenericSelectInput = <S extends ZodType>({
+export const GenericSelectInput = <S extends FieldValueSchema>({
   adapter,
   config,
   value,

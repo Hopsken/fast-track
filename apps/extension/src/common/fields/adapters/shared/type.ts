@@ -1,8 +1,6 @@
-import { ZodType } from 'zod'
+import { FieldAdapter, FieldValueSchema } from '../../types'
 
-import { FieldAdapter } from '../../types'
-
-export type GenericFieldAdapterOverrides<S extends ZodType> = Omit<
+export type GenericFieldAdapterOverrides<S extends FieldValueSchema> = Omit<
   FieldAdapter<S>,
   'key' | 'schema' | 'InputComponent' | 'ConfigComponent'
 > &

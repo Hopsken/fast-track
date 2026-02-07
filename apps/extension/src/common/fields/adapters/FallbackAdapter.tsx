@@ -1,7 +1,7 @@
 import stringify from 'fast-json-stable-stringify'
 import { z } from 'zod'
 
-import { FieldAdapter, JiraFieldContext } from '../types'
+import { FieldAdapter, FieldValueSchema, JiraFieldContext } from '../types'
 
 /**
  * Fallback Schema
@@ -44,10 +44,12 @@ const FallbackInput = ({ context }: { context: JiraFieldContext }) => {
   )
 }
 
-export const FallbackAdapter: FieldAdapter<typeof fallbackSchema> = {
+export const FallbackAdapter: FieldAdapter<FieldValueSchema> = {
   key: 'fallback',
 
-  schema: fallbackSchema,
+  // @ts-expect-error ah...
+  schema: z.unknown(),
+
   keyOf: (val) => stringify(val),
 
   // 不需要 fetchOptions，因为我们不展示选项
@@ -70,5 +72,6 @@ export const FallbackAdapter: FieldAdapter<typeof fallbackSchema> = {
    * 如果 API 返回了值，我们原样保留，虽然 UI 无法编辑，
    * 但保持数据完整性是个好习惯。
    */
+  // @ts-expect-error ignore this
   fromDTO: (apiValue) => apiValue
 }

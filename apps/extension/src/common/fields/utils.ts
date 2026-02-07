@@ -22,3 +22,9 @@ export async function fetchAutoCompleteOptions<S extends ZodType>(
 
   return []
 }
+
+export function isSchemaMulti(field: JiraFieldMetadata) {
+  if (!field.schema) return false
+
+  return field.schema.type === 'array'
+}

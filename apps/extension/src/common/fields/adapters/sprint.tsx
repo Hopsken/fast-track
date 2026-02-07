@@ -1,4 +1,4 @@
-import { JiraIssueRefSchema, JiraSprintSchema } from '@/repository/schema'
+import { JiraSprintSchema } from '@/repository/schema'
 import { getJiraService } from '@/services'
 
 import { createSelectFieldAdapter } from './shared/select'
