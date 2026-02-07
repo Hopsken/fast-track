@@ -6,7 +6,7 @@ import { z, ZodType } from 'zod'
 import { FieldConfig } from '@/repository/schema'
 import { isNonNullable } from '@/utils/assert'
 
-import { FieldAdapter, JiraFieldContext } from '../types'
+import { FieldAdapter, JiraFieldContext, UnwrapArray } from '../types'
 
 export const useFieldOptions = <Schema extends ZodType>(params: {
   adapter: FieldAdapter<Schema>
@@ -14,6 +14,8 @@ export const useFieldOptions = <Schema extends ZodType>(params: {
   config: FieldConfig<z.infer<Schema>>
   query?: string
 }) => {
+  type Item = UnwrapArray<z.infer<Schema>>
+
   const { adapter, context, config, query = '' } = params
 
   // 2. 防抖处理：只有 debouncedValue 变化时，才会触发 React Query
@@ -24,7 +26,7 @@ export const useFieldOptions = <Schema extends ZodType>(params: {
   const isServerSearch =
     config.behavior !== 'restricted' && !context.metadata.allowedValues
 
-  const queryResult = useQuery({
+  const queryResult = useQuery<Item[]>({
     // 关键点：将 debouncedQuery 加入缓存 Key
 
     // eslint-disable-next-line @tanstack/query/exhaustive-deps
@@ -63,7 +65,7 @@ export const useFieldOptions = <Schema extends ZodType>(params: {
     }
 
     // Limit 模式：使用配置的 allowedValues，并在前端做简单的本地过滤
-    const allowedValues = config.allowedOptions || []
+    const allowedValues = (config.allowedOptions as Item[]) || []
     const search = debouncedQuery?.trim().toLowerCase() ?? ''
 
     if (search) {

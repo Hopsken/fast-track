@@ -6,7 +6,7 @@ import { GeneralIcon } from '@/components'
 import { AutoComplete } from '@/components/ui/AutoComplete'
 
 import { useFieldOptions } from '../../../hooks/useFieldOptions'
-import { FieldConfigComponentProps } from '../../../types'
+import { FieldConfigComponentProps, UnwrapArray } from '../../../types'
 
 const iconicSchema = z.object({
   iconUrl: z.string().optional(),
@@ -32,57 +32,52 @@ export const GenericSelectConfig = <S extends ZodType>({
   onConfirm
 }: FieldConfigComponentProps<S>) => {
   type Value = z.infer<S>
+  type Item = UnwrapArray<Value>
 
   const isMultiple = context.metadata.schema.type === 'array'
   const [query, setQuery] = useState('')
-  const { options, isLoading } = useFieldOptions({
+  const { options, isLoading } = useFieldOptions<S>({
     adapter,
     context,
     config,
     query
   })
 
-  const onSelect = useMemoizedFn((opt: Value | null) => {
-    onValueChange(opt)
-    onConfirm()
+  // AutoComplete 在多选时返回 Item[]，单选时返回 Item | null
+  // 这正好对应了我们的 Value 类型
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleValueChange = useMemoizedFn((newValue: any) => {
+    onValueChange(newValue)
+
+    // 5. 交互优化：只有单选时，选中后才自动 Confirm (关闭)
+    // 多选时用户通常需要连续选多个，不应自动关闭
+    if (!isMultiple) {
+      onConfirm()
+    }
   })
 
-  if (isMultiple) {
-    // eslint-disable-next-line sonarjs/no-nested-conditional
-    const values = value ? (Array.isArray(value) ? value : [value]) : []
-    return (
-      <AutoComplete<Value, true>
-        multiple={true}
-        isLoading={isLoading}
-        value={values}
-        // @ts-expect-error newValue is array, should be handler externally
-        onValueChange={onSelect}
-        query={query}
-        onQueryChange={setQuery}
-        options={options}
-        getOptionValue={adapter.keyOf}
-        getOptionLabel={adapter.labelOf ?? adapter.keyOf}
-        renderOptionIcon={(opt) => {
-          const iconUrl = getIconUrl(opt)
-          const name = adapter.labelOf?.(opt) ?? adapter.keyOf(opt)
-          return iconUrl ? <GeneralIcon alt={name} iconUrl={iconUrl} /> : null
-        }}
-      />
-    )
-  }
-
+  // 将 AutoComplete 的泛型显式指定为 Item (单个选项类型)
   return (
-    <AutoComplete<Value, false>
+    <AutoComplete<Item, boolean>
       multiple={isMultiple}
       isLoading={isLoading}
-      value={value ?? null}
-      onValueChange={onSelect}
+      // 这里的类型转换是必要的，因为 TypeScript 无法在运行时确定 Value 到底是 Item 还是 Item[]
+      // 但我们在逻辑上保证了 matches multiple 属性
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      value={value as any}
+      onValueChange={handleValueChange}
       query={query}
       onQueryChange={setQuery}
-      options={options}
-      getOptionValue={adapter.keyOf}
-      getOptionLabel={adapter.labelOf ?? adapter.keyOf}
+      // 强制 options 类型为 Item[]
+      // 这样 AutoComplete 内部才能正确处理 keyOf(item)
+      options={options as unknown as Item[]}
+      // Adapter 的 keyOf/labelOf 是针对 Item 设计的
+      getOptionValue={(item) => adapter.keyOf(item as Item)}
+      getOptionLabel={(item) =>
+        adapter.labelOf?.(item as Item) ?? adapter.keyOf(item as Item)
+      }
       renderOptionIcon={(opt) => {
+        // opt 在这里被正确推导为 Item
         const iconUrl = getIconUrl(opt)
         const name = adapter.labelOf?.(opt) ?? adapter.keyOf(opt)
         return iconUrl ? <GeneralIcon alt={name} iconUrl={iconUrl} /> : null

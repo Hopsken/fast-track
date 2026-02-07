@@ -11,6 +11,11 @@ import {
   JiraProject
 } from '@/repository/schema'
 
+// 提取数组元素类型，如果不是数组则返回本身
+// 例如: UnwrapArray<User[]> -> User
+// 例如: UnwrapArray<User> -> User
+export type UnwrapArray<T> = T extends (infer U)[] ? U : T
+
 export interface JiraFieldContext {
   project?: JiraProject
   issueType?: JiraIssueType
@@ -59,7 +64,10 @@ export type FieldAdapterKey =
 
 export interface FieldAdapter<
   ValueSchema extends ZodType,
-  Value extends z.infer<ValueSchema> = z.infer<ValueSchema>
+  // 推导出 Value 类型 (表单值的类型，可能是 T 或 T[])
+  Value extends z.infer<ValueSchema> = z.infer<ValueSchema>,
+  // 推导出 Item 类型 (下拉选项的原子类型，永远是 T)
+  Item extends UnwrapArray<Value> = UnwrapArray<Value>
 > {
   // 1. 唯一标识，对应 Jira 的 schema type (e.g., 'com.atlassian.jira.plugin...:select')
   // equals to system type for system field, otherwise, it's schema.type+schema.items type
@@ -68,13 +76,13 @@ export interface FieldAdapter<
 
   // 2. Zod schema for the field value
   schema: ValueSchema
-  keyOf: (val: Value) => string
-  labelOf?: (val: Value) => string
-  keywords?: (val: Value) => string[]
+  keyOf: (val: Item) => string
+  labelOf?: (val: Item) => string
+  keywords?: (val: Item) => string[]
 
   // 3. 数据获取：如何获取该字段的选项列表（用于 Limit 模式或 Popup 里的选择）
   // 上下文可能包含 project key 或 issue type
-  fetchOptions?: (context: JiraFieldContext, query?: string) => Promise<Value[]>
+  fetchOptions?: (context: JiraFieldContext, query?: string) => Promise<Item[]>
 
   // 4. 配置态 UI (Options Page)：用于设置 Preset 或 Limit
   // 比如 Story Point 可能是一个数字输入框，而 Assignee 是一个用户选择器
