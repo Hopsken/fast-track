@@ -54,4 +54,4 @@
 
 ## Documents
 
-- `apps/extension/docs/FIELD_ARCHITECTURE.md` - Extension Jira field architecture guide
+- `apps/extension/docs/issue-templates-architecture.md` - Extension Jira field architecture guide
