@@ -1,4 +1,3 @@
-import { browser } from '#imports'
 import { PropsWithChildren } from 'react'
 import { QueryNormalizerProvider } from '@normy/react-query'
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
@@ -8,6 +7,7 @@ import {
   PersistQueryClientProvider,
   PersistQueryClientProviderProps
 } from '@tanstack/react-query-persist-client'
+import { browser } from 'wxt/browser'
 
 import { days, minutes } from '@/utils/time'
 

@@ -2,11 +2,13 @@ import { readFile, readdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 
 import tailwindcss from '@tailwindcss/vite'
+import unusedCode from 'vite-plugin-unused-code'
 import { defineConfig } from 'wxt'
 
 import packageJson from '../../package.json'
 
 const isDev = process.env.NODE_ENV !== 'production'
+const DEBUG = !!process.env.DEBUG
 
 /** 递归查找 HTML 文件 */
 async function findHtmlFiles(dir: string): Promise<string[]> {
@@ -33,7 +35,20 @@ export default defineConfig({
   imports: false,
 
   vite: () => ({
-    plugins: [tailwindcss()]
+    plugins: [
+      tailwindcss(),
+      DEBUG
+        ? unusedCode({
+            patterns: [
+              'src/**/*.{ts,tsx}',
+              '!**/*.{spec,test}.{ts,tsx}',
+              '!**/*.content.ts',
+              '!**/e2e/*',
+              '!**/mocks/*'
+            ]
+          })
+        : null
+    ]
   }),
 
   hooks: {

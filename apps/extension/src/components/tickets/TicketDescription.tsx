@@ -1,4 +1,4 @@
-import { useMemo } from '#imports'
+import { useMemo } from 'react'
 // eslint-disable-next-line import-x/no-named-as-default
 import DOMPurify from 'dompurify'
 

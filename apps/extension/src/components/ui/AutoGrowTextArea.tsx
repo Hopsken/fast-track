@@ -2,7 +2,7 @@
 /*  Auto-growing textarea (borderless, for inline editing)             */
 /* ------------------------------------------------------------------ */
 
-import { useRef, useCallback } from '#imports'
+import { useRef, useCallback } from 'react'
 
 export function AutoGrowTextarea({
   value,

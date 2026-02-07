@@ -2,7 +2,7 @@
  * Background service for handling extension installation and lifecycle events
  */
 
-import { browser } from '#imports'
+import { browser } from 'wxt/browser'
 
 import { openOptionsPage } from '~/utils/extension'
 import { getLogger } from '~/utils/logger'
