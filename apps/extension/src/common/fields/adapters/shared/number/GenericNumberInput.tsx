@@ -32,7 +32,7 @@ export const GenericNumberInput = (
 
   return (
     <CommandNumberInput
-      title={adapter.title}
+      title={adapter.title ?? context.metadata.name}
       value={value}
       onChange={onChange}
       onConfirm={onConfirm}

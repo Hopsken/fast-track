@@ -12,6 +12,7 @@ export function TicketBasicFields({
   ticket,
   showKey = true
 }: TicketBasicFieldsProps) {
+  const hasMetadataValues = ticket.assignee || ticket.priority || ticket.status
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-2">
       <div className="flex items-center gap-2">
@@ -27,7 +28,7 @@ export function TicketBasicFields({
         </div>
       </div>
 
-      <TicketMetadataChips ticket={ticket} />
+      {hasMetadataValues && <TicketMetadataChips ticket={ticket} />}
     </div>
   )
 }

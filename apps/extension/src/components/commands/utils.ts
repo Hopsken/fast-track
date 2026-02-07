@@ -2,6 +2,18 @@
  * Command UI helpers for pre-filling and parsing input values
  */
 
+import { z } from 'zod'
+
+const iconicSchema = z.object({
+  iconUrl: z.string().optional(),
+  avatarUrl: z.string().optional()
+})
+
+export const getIconUrl = (val: unknown) => {
+  const { data } = iconicSchema.safeParse(val)
+  return data?.iconUrl ?? data?.avatarUrl ?? ''
+}
+
 export function prefillStringValue(
   currentValue: unknown,
   setSearch: (value: string) => void

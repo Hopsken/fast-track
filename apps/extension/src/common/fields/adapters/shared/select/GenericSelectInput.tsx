@@ -27,7 +27,7 @@ export const GenericSelectInput = <S extends FieldValueSchema>({
     const values = value ? (Array.isArray(value) ? value : [value]) : []
     return (
       <CommandMultiSelect
-        title={adapter.title}
+        title={adapter.title ?? context.metadata.name}
         isLoading={isLoading}
         value={values}
         options={options}
@@ -42,7 +42,7 @@ export const GenericSelectInput = <S extends FieldValueSchema>({
 
   return (
     <CommandSingleSelect
-      title={adapter.title}
+      title={adapter.title ?? context.metadata.name}
       isLoading={isLoading}
       value={value}
       options={options}

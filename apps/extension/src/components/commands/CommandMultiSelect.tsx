@@ -8,6 +8,10 @@ import {
 } from '@internal/ui/components/command'
 import { Check } from 'lucide-react'
 
+import { GeneralIcon } from '../ui'
+
+import { getIconUrl } from './utils'
+
 export type CommandMultiSelectProps<T> = {
   title?: React.ReactNode
   isLoading?: boolean
@@ -56,6 +60,7 @@ export function CommandMultiSelect<T>({
           const label = getOptionLabel?.(opt) ?? value
           const isSelected = selectedIds.has(value)
           const keywords = getOptionKeywords?.(opt)
+          const iconUrl = getIconUrl(opt)
           return (
             <CommandItem
               key={value}
@@ -63,7 +68,12 @@ export function CommandMultiSelect<T>({
               keywords={keywords}
               onSelect={() => toggle(opt)}>
               <div className="flex w-full items-center justify-between">
-                <span className="truncate">{label}</span>
+                <div className="flex items-center gap-2">
+                  {iconUrl ? (
+                    <GeneralIcon alt={label} iconUrl={iconUrl} />
+                  ) : null}
+                  <span className="truncate">{label}</span>
+                </div>
                 {isSelected ? <Check className="size-4" /> : null}
               </div>
             </CommandItem>

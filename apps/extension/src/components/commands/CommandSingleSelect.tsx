@@ -7,6 +7,10 @@ import {
   CommandLoading
 } from '@internal/ui/components/command'
 
+import { GeneralIcon } from '../ui'
+
+import { getIconUrl } from './utils'
+
 export type CommandSingleSelectProps<T> = {
   title?: React.ReactNode
   isLoading?: boolean
@@ -61,13 +65,17 @@ export function CommandSingleSelect<T>({
         {options.map((opt) => {
           const value = getOptionValue(opt)
           const label = getOptionLabel?.(opt) ?? value
+          const iconUrl = getIconUrl(opt)
           return (
             <CommandItem
               key={value}
               value={value}
               keywords={getOptionKeywords?.(opt)}
               onSelect={() => onSelect(opt)}>
-              <span className="truncate">{label}</span>
+              <div className="flex items-center gap-2">
+                {iconUrl ? <GeneralIcon alt={label} iconUrl={iconUrl} /> : null}
+                <span className="truncate">{label}</span>
+              </div>
             </CommandItem>
           )
         })}

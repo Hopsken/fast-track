@@ -8,15 +8,7 @@ import { AutoComplete } from '@/components/ui/AutoComplete'
 
 import { useFieldContext } from '../context'
 
-const iconicSchema = z.object({
-  iconUrl: z.string().optional(),
-  avatarUrl: z.string().optional()
-})
-
-const getIconUrl = (val: unknown) => {
-  const { data } = iconicSchema.safeParse(val)
-  return data?.iconUrl ?? data?.avatarUrl ?? ''
-}
+import { getIconUrl } from './utils'
 
 export const GeneralSelect = <S extends FieldValueSchema>({
   isMultiple,
