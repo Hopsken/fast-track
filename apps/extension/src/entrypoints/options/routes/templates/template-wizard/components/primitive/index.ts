@@ -1,8 +1,0 @@
-export { TextInput } from './TextInput'
-export { NumberInput } from './NumberInput'
-export { TextAreaInput } from './TextAreaInput'
-export { DateInput } from './DateInput'
-export { DateTimeInput } from './DateTimeInput'
-export { MultiSelectInput } from './MultiSelectInput'
-export { SingleSelectInput } from './SingleSelectInput'
-export { UserFieldInput } from './UserFieldInput'
