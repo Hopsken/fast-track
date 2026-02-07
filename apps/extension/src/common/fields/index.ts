@@ -2,6 +2,7 @@ import { JiraAssigneeAdapter } from './adapters/assignee'
 import { JiraComponentAdapter } from './adapters/component'
 import { JiraDateAdapter } from './adapters/date'
 import { JiraDateTimeAdapter } from './adapters/datetime'
+import { JiraDescriptionAdapter } from './adapters/description'
 import { JiraDueDateAdapter } from './adapters/duedate'
 import { JiraEnvironmentAdapter } from './adapters/environment'
 import { JiraGroupAdapter } from './adapters/group'
@@ -15,6 +16,7 @@ import { JiraResolutionAdapter } from './adapters/resolution'
 import { JiraSecurityLevelAdapter } from './adapters/securitylevel'
 import { JiraSprintAdapter } from './adapters/sprint'
 import { JiraStringAdapter } from './adapters/string'
+import { JiraSummaryAdapter } from './adapters/summary'
 import { JiraUserAdapter } from './adapters/user'
 import { JiraVersionAdapter } from './adapters/version'
 import { registerAdapter, getFieldAdapter } from './registry'
@@ -27,6 +29,8 @@ registerAdapter(JiraParentAdapter)
 registerAdapter(JiraReporterAdapter)
 registerAdapter(JiraDueDateAdapter)
 registerAdapter(JiraEnvironmentAdapter)
+registerAdapter(JiraSummaryAdapter)
+registerAdapter(JiraDescriptionAdapter)
 
 // custom fields
 registerAdapter(JiraSprintAdapter)

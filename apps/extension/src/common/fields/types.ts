@@ -82,6 +82,7 @@ export interface FieldAdapter<
   keyOf: (val: Value) => string
   labelOf?: (val: Value) => string
   keywords?: (val: Value) => string[]
+  supportModes?: Array<FieldConfig['behavior']>
 
   // 3. 数据获取：如何获取该字段的选项列表（用于 Limit 模式或 Popup 里的选择）
   // 上下文可能包含 project key 或 issue type

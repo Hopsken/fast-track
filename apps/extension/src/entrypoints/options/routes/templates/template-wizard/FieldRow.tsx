@@ -31,14 +31,17 @@ const MODE_META: Record<FieldMode, { label: string; title: string }> = {
 
 function ModeToggle({
   mode,
+  supportedModes,
   onModeChange
 }: {
   mode: FieldMode
+  supportedModes?: FieldMode[]
   onModeChange: (mode: FieldMode) => void
 }) {
+  const modes = supportedModes ?? ['preset', 'restricted']
   return (
     <div className="bg-muted flex gap-0.5 rounded-md p-0.5" role="radiogroup">
-      {(['preset', 'restricted'] as const).map((m) => {
+      {modes.map((m) => {
         const isActive = mode === m
         return (
           <button
@@ -141,7 +144,11 @@ export function FieldRow({
 
           {/* Right: mode toggle + remove */}
           <div className="flex items-center gap-2">
-            <ModeToggle mode={currentMode} onModeChange={handleModeChange} />
+            <ModeToggle
+              mode={currentMode}
+              supportedModes={adapter.supportModes}
+              onModeChange={handleModeChange}
+            />
             {onRemove && (
               <button
                 type="button"
