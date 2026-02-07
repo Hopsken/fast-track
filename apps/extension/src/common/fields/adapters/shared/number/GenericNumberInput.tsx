@@ -11,12 +11,20 @@ export const GenericNumberInput = (
   const { config, adapter, context, value, onChange, onConfirm } = props
 
   // 限制模式：使用配置的 allowedOptions，并在前端做简单的本地过滤
-  if (config.behavior === 'restricted' && config.allowedOptions?.length) {
+  if (
+    config &&
+    config.behavior === 'restricted' &&
+    config.allowedOptions?.length
+  ) {
     return <GenericSelectInput {...props} />
   }
 
   // 预置模式：使用 field 的 allowedValues，并在前端做简单的本地过滤
-  if (config.behavior === 'preset' && context.metadata.allowedValues?.length) {
+  if (
+    config &&
+    config.behavior === 'preset' &&
+    context.metadata.allowedValues?.length
+  ) {
     return <GenericSelectInput {...props} />
   }
 

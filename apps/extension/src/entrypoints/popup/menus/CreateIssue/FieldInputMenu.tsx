@@ -1,14 +1,14 @@
-import { createElement, Fragment } from 'react'
+import { Fragment, useMemo } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import { useLocation } from 'react-router-dom'
 
+import { useFieldAdapter } from '@/common/fields'
+import { JiraFieldContext } from '@/common/fields/types'
 import { useHotkey } from '@/lib/hotkeys'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 import { VisibleField } from '~/services/template-service/gap-analysis'
 
 import { FieldConfirm } from './FieldConfirm'
-import { getFieldInputComponent } from './fields/fieldRegistry'
-import { SummaryDescriptionInput } from './fields/specialized'
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 import { useWizardNavigation } from './useWizardNavigation'
 
@@ -16,10 +16,20 @@ export function FieldInputMenu() {
   const { field } = useLocation().state as { field: VisibleField }
   const { fieldId } = field
 
-  const { setSearch } = useCommandInput()
+  const { search, setSearch } = useCommandInput()
   const { template, values, setValue } = useCreateIssueDraftStore()
   const { goToNextField } = useWizardNavigation()
   const currentValue = values[field.fieldId]
+
+  const adapter = useFieldAdapter(field.metadata)
+  const fieldConfig = template.fields[fieldId]
+  const fieldContext = useMemo<JiraFieldContext>(
+    () => ({
+      ...template.scope,
+      metadata: field.metadata
+    }),
+    [field.metadata, template.scope]
+  )
 
   const onChange = useMemoizedFn((value: unknown) => {
     setValue(fieldId, value)
@@ -30,37 +40,26 @@ export function FieldInputMenu() {
     goToNextField()
   })
 
-  const isSummaryField = fieldId === 'summary' || fieldId === 'description'
-
   useHotkey('field.confirm-complex', onConfirm, {
-    enabled: !isSummaryField,
     eventListenerOptions: {
       capture: true
     }
   })
 
-  // Summary + Description combined field (special case)
-  if (isSummaryField) {
-    return <SummaryDescriptionInput focusField={fieldId} />
-  }
-
-  const fieldConfirmBtn = <FieldConfirm onClick={onConfirm} />
-
-  // Get component from registry
-  const FieldComponent = getFieldInputComponent(field)
-  const fieldElement = createElement(FieldComponent, {
-    field,
-    project: template.scope.project,
-    issueType: template.scope.issueType,
-    currentValue,
-    onChange,
-    onConfirm
-  })
+  const InputComponent = adapter.InputComponent
 
   return (
     <Fragment>
-      {fieldElement}
-      {fieldConfirmBtn}
+      <InputComponent
+        adapter={adapter}
+        config={fieldConfig}
+        context={fieldContext}
+        onChange={onChange}
+        onConfirm={onConfirm}
+        value={currentValue}
+        inputText={search}
+      />
+      <FieldConfirm onClick={onConfirm} />
     </Fragment>
   )
 }

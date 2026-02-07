@@ -19,10 +19,18 @@ import { useSetupWizard } from './useSetupWizard'
 
 function FieldInputMenuRouter() {
   const { field } = useLocation().state as { field: VisibleField }
+  const { fieldId } = field
+  const isSummaryOrDescription =
+    fieldId === 'summary' || fieldId === 'description'
+
   // Key forces full remount when wizard moves to a different field
   return (
     <HotkeysScopeProvider scope="field-input">
-      <FieldInputMenu key={field.fieldId} />
+      {isSummaryOrDescription ? (
+        <SummaryDescriptionInput focusField={fieldId} />
+      ) : (
+        <FieldInputMenu key={field.fieldId} />
+      )}
     </HotkeysScopeProvider>
   )
 }

@@ -23,12 +23,12 @@ export const GenericFieldConfig = <T extends FieldValueSchema>(
 ) => {
   type Value = z.infer<T>
   const { adapter, config, context, SelectorComponent, onChangeConfig } = props
-  const { behavior } = config
 
   const { metadata } = context
   const isFieldMulti = isSchemaMulti(metadata)
 
   function renderConfig() {
+    const { behavior } = config
     if (behavior === 'restricted') {
       return (
         <RestrictedValueBuilder

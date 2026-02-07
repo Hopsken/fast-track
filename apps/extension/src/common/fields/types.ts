@@ -30,13 +30,13 @@ export interface FieldComponentCommonProps<
   ValueSchema extends FieldValueSchema
 > {
   adapter: FieldAdapter<ValueSchema>
-  config: FieldConfig<z.infer<ValueSchema>>
   context: JiraFieldContext
 }
 
 // Field config 组件，用于渲染配置页面
 export interface FieldConfigComponentProps<ValueSchema extends FieldValueSchema>
   extends FieldComponentCommonProps<ValueSchema> {
+  config: FieldConfig<z.infer<ValueSchema>>
   onChangeConfig: (newConfig: FieldConfig<z.infer<ValueSchema>>) => void
 }
 
@@ -46,6 +46,9 @@ export type FieldConfigComponent<ValueSchema extends FieldValueSchema> =
 // Field input 组件，用于渲染输入页面
 export interface FieldInputComponentProps<ValueSchema extends FieldValueSchema>
   extends FieldComponentCommonProps<ValueSchema> {
+  // config is undefined for fields not configured in template
+  config?: FieldConfig<z.infer<ValueSchema>>
+
   inputText?: string
 
   value?: z.infer<ValueSchema>
@@ -59,7 +62,7 @@ export type FieldInputComponent<ValueSchema extends FieldValueSchema> =
 // Field key，包含 system fields, schema type, schema items type
 export type FieldAdapterKey =
   | JiraFieldSystem
-  | Omit<JiraFieldSchemaType, 'array'>
+  | Exclude<JiraFieldSchemaType, 'array'>
   | JiraFieldSchemaArrayItemsType
   | (string & {})
 

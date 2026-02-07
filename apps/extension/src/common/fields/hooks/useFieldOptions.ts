@@ -11,7 +11,7 @@ import { FieldAdapter, FieldValueSchema, JiraFieldContext } from '../types'
 export const useFieldOptions = <Schema extends FieldValueSchema>(params: {
   adapter: FieldAdapter<Schema>
   context: JiraFieldContext
-  config: FieldConfig<z.infer<Schema>>
+  config?: FieldConfig<z.infer<Schema>>
   query?: string
 }) => {
   type Value = z.infer<Schema>
@@ -23,7 +23,7 @@ export const useFieldOptions = <Schema extends FieldValueSchema>(params: {
   // 3. 判断是否需要服务端搜索
   // 如果是 'limit' 模式，我们不需要发请求，直接用本地数据
   const isServerSearch =
-    config.behavior !== 'restricted' && !context.metadata.allowedValues
+    config?.behavior !== 'restricted' && !context.metadata.allowedValues
 
   const queryResult = useQuery<Value[]>({
     // 关键点：将 debouncedQuery 加入缓存 Key
@@ -64,7 +64,7 @@ export const useFieldOptions = <Schema extends FieldValueSchema>(params: {
     }
 
     // Limit 模式：使用配置的 allowedValues，并在前端做简单的本地过滤
-    const allowedValues = (config.allowedOptions as Value[]) || []
+    const allowedValues = (config?.allowedOptions as Value[]) || []
     const search = debouncedQuery?.trim().toLowerCase() ?? ''
 
     if (search) {
@@ -80,7 +80,7 @@ export const useFieldOptions = <Schema extends FieldValueSchema>(params: {
     return allowedValues
   }, [
     adapter,
-    config.allowedOptions,
+    config?.allowedOptions,
     context.metadata.allowedValues,
     debouncedQuery,
     isServerSearch,
