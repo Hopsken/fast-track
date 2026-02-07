@@ -443,7 +443,7 @@ export class JiraIssueService {
       : null
 
     return JiraIssueSchema.parse({
-      __typename: 'JiraTicket',
+      __typename: 'JiraIssue',
       id: issue.id ? String(issue.id) : '',
       key: issue.key ?? '',
       summary: issue.fields?.summary || '',

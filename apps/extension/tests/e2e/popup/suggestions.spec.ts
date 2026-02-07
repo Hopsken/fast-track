@@ -1,8 +1,8 @@
 import { dehydrate, QueryClient } from '@tanstack/query-core'
 
-import type { IssueSuggestion } from '@/services/ticket-service'
-
 import { expect, test } from '../fixtures'
+
+import type { IssueSuggestion } from '@/services/ticket-service'
 
 const MOCK_AUTH_CREDENTIALS = {
   type: 'apiKey' as const,

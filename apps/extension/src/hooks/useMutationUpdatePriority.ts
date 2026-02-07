@@ -31,7 +31,7 @@ export function useMutationUpdatePriority() {
         toast,
         priorityName: priority.name,
         optimisticData: {
-          __typename: 'JiraTicket' as const,
+          __typename: 'JiraIssue' as const,
           key: ticketKey,
           priority,
           updated: new Date().toISOString()

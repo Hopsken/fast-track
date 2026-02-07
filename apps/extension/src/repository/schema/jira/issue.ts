@@ -22,7 +22,7 @@ export type IssueSource = z.infer<typeof IssueSourceSchema>
 
 export const JiraIssueSchema = z
   .object({
-    __typename: z.literal('JiraTicket'),
+    __typename: z.literal('JiraIssue'),
     id: z.string(),
     key: z.string(),
     summary: z.string(),

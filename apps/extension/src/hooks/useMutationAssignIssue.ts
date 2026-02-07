@@ -22,7 +22,7 @@ export function useMutationAssignIssue() {
       // Return updated ticket for normy to normalize
       return (
         updated ?? {
-          __typename: 'JiraTicket' as const,
+          __typename: 'JiraIssue' as const,
           key: params.ticketKey,
           assignee: params.assignee ? mapUserToAssignee(params.assignee) : null
         }
@@ -48,7 +48,7 @@ export function useMutationAssignIssue() {
         displayName,
         isUnassign,
         optimisticData: {
-          __typename: 'JiraTicket' as const,
+          __typename: 'JiraIssue' as const,
           key: ticketKey,
           assignee: assignee ? mapUserToAssignee(assignee) : null,
           updated: new Date().toISOString()
@@ -102,7 +102,7 @@ export function useMutationAssignMyself() {
       // Return updated ticket for normy to normalize
       return (
         updated ?? {
-          __typename: 'JiraTicket' as const,
+          __typename: 'JiraIssue' as const,
           key: params.ticketKey,
           assignee: params.assign ? mapCurrentUserToAssignee(myself) : null
         }
@@ -122,7 +122,7 @@ export function useMutationAssignMyself() {
       return {
         toast,
         optimisticData: {
-          __typename: 'JiraTicket' as const,
+          __typename: 'JiraIssue' as const,
           key: ticketKey,
           assignee: assign ? mapCurrentUserToAssignee(myself) : null,
           updated: new Date().toISOString()
