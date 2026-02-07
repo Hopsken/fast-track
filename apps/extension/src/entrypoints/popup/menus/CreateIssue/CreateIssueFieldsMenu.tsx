@@ -24,13 +24,14 @@ export function CreateIssueFieldsMenu() {
     project: { key: projectKey },
     issueType: { id: issueTypeId }
   } = template.scope
-  const { data: fieldsMetadata, isLoading: isLoadingFields } =
-    useIssueCreateMeta(projectKey, issueTypeId)
+  const { isLoading: isLoadingFields } = useIssueCreateMeta(
+    projectKey,
+    issueTypeId
+  )
 
   // Form submission
   const { submit } = useCreateIssueForm({
-    template,
-    fieldsMetadata
+    template
   })
 
   useHotkey('issue.create.proceed', submit, {

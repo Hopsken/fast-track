@@ -1,41 +1,32 @@
 import { useMemoizedFn } from 'ahooks'
 import { useNavigate } from 'react-router-dom'
 
+import { JiraFieldMetadata } from '@/repository/schema'
 import { getJiraService } from '@/services/jira-service'
 import { getTemplateService } from '@/services/template-service'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
 import { showToast } from '@/stores/command/useToastStore'
 import { nextTick } from '@/utils/nextTick'
-import { buildCreateIssueFields } from '~/services/template-service/issue-payload'
-import type { FieldMetadata, IssueTemplate } from '~/types/template'
+import type { IssueTemplate } from '~/types/template'
 import { formatErrorMessage } from '~/utils/formatError'
 
 import { CommandRoutes } from '../../routes'
 
-import { extractJiraFieldErrors, pickNonEmptyValues } from './fields/utils'
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
+import { extractJiraFieldErrors, buildCreateIssueFields } from './utils'
 
 export interface UseCreateIssueFormOptions {
   template: IssueTemplate
-  fieldsMetadata?: FieldMetadata[]
 }
 
-export function useCreateIssueForm({
-  template,
-  fieldsMetadata = []
-}: UseCreateIssueFormOptions) {
+export function useCreateIssueForm({ template }: UseCreateIssueFormOptions) {
   const { setSearch } = useCommandInput()
   const navigate = useNavigate()
-  const { values, setErrors, promoteFields, reset } = useCreateIssueDraftStore()
+  const { values, wizardFields, setErrors, promoteFields, reset } =
+    useCreateIssueDraftStore()
 
   const submit = useMemoizedFn(async () => {
-    const userInput = pickNonEmptyValues(values)
-
-    const fields = buildCreateIssueFields({
-      template,
-      fieldsMetadata,
-      input: userInput
-    })
+    const fields = buildCreateIssueFields(wizardFields, values)
 
     const toast = showToast({
       style: 'loading',

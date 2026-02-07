@@ -4,8 +4,8 @@ import { keyBy, merge, unionBy } from 'lodash-es'
 import { useIssueCreateMeta } from '@/hooks/useIssueCreateMeta'
 import { computeVisibleFields } from '@/services/template-service/gap-analysis'
 
-import { computePromotedFields, computeWizardSequence } from './fields/utils'
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
+import { computePromotedFields, computeWizardSequence } from './utils'
 
 export const useSetupWizard = () => {
   const { template, promotedFieldIds, setWizardFields } =

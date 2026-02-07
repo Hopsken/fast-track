@@ -18,7 +18,9 @@ import {
   type JiraPriority,
   type JiraTransition,
   type JiraUser,
-  JiraIssueRefSchema
+  JiraIssueRefSchema,
+  JiraFieldMetadataSchema,
+  JiraIssueSchema
 } from '@/repository/schema'
 import { isNonNullable } from '@/utils/assert'
 import { isTicketKey, mapPriority, mapTransition } from '@/utils/jira/issues'
@@ -27,8 +29,6 @@ import { normalizeProjects } from '@/utils/ticket-search'
 import { getLogger } from '~/utils/logger'
 
 import { toISODateString } from '../date'
-
-import { parseCreateMetaFields, isValidCreateMetaFields } from './create-meta'
 
 const issueFields = [
   'id',
@@ -89,9 +89,10 @@ export class JiraIssueService {
       projectIdOrKey: input.projectIdOrKey,
       issueTypeId: input.issueTypeId
     })
-    const fields = parseCreateMetaFields(page)
-    if (!isValidCreateMetaFields(fields)) return []
-    return fields
+    const fields = (page.fields ?? page.results)
+      ?.map((item) => JiraFieldMetadataSchema.safeParse(item).data)
+      .filter(isNonNullable)
+    return fields ?? []
   }
 
   async createIssue(input: CreateIssuePayload): Promise<{ key: string }> {

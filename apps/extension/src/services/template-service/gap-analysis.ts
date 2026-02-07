@@ -1,5 +1,4 @@
 import { JiraFieldMetadata } from '@/repository/schema'
-import { UnwrapArray } from '@/utils/type-utils'
 import type {
   FieldConfig,
   FieldConflict,
@@ -8,17 +7,37 @@ import type {
 
 export interface VisibleField<T = unknown> {
   fieldId: string
-  config?: FieldConfig
-  metadata?: JiraFieldMetadata
-
-  // TODO: remove this following two
-  presetValue?: unknown
-  /** When set, the create-issue form should only show these options (restricted mode). */
-  allowedOptions?: UnwrapArray<T>[]
+  config?: FieldConfig<T>
+  metadata: JiraFieldMetadata
 
   isEditable: boolean
   conflict?: FieldConflict
 }
+
+const DEFAULT_SCHEMAS = {
+  summary: {
+    required: true,
+    schema: {
+      type: 'string',
+      system: 'summary'
+    },
+    name: 'Summary',
+    key: 'summary',
+    hasDefaultValue: false,
+    fieldId: 'summary'
+  },
+  description: {
+    required: false,
+    schema: {
+      type: 'string',
+      system: 'description'
+    },
+    name: 'Description',
+    key: 'description',
+    hasDefaultValue: false,
+    fieldId: 'description'
+  }
+} satisfies Record<string, JiraFieldMetadata>
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export function computeVisibleFields(
@@ -41,12 +60,12 @@ export function computeVisibleFields(
   const visible: VisibleField[] = [
     {
       fieldId: 'summary',
-      metadata: getMetadata('summary'),
+      metadata: DEFAULT_SCHEMAS.summary,
       isEditable: true
     },
     {
       fieldId: 'description',
-      metadata: getMetadata('description'),
+      metadata: DEFAULT_SCHEMAS.description,
       isEditable: true
     }
   ]
@@ -55,14 +74,17 @@ export function computeVisibleFields(
     if (shouldSkipField(fieldId)) continue
 
     const metadata = getMetadata(fieldId)
+
+    // Skip field if unable to get metadata of it
+    if (!metadata) continue
+
     const conflict = conflictMap.get(fieldId)
 
     if (config.behavior === 'restricted') {
       visible.push({
         fieldId,
         config,
-        metadata: conflict?.fieldMetadata ?? metadata,
-        allowedOptions: config.allowedOptions,
+        metadata,
         isEditable: true,
         conflict
       })
@@ -73,8 +95,7 @@ export function computeVisibleFields(
       visible.push({
         fieldId,
         config,
-        metadata: conflict?.fieldMetadata ?? metadata,
-        presetValue: config.presetValue,
+        metadata,
         isEditable: true,
         conflict
       })
@@ -88,9 +109,13 @@ export function computeVisibleFields(
     const alreadyVisible = visible.some((f) => f.fieldId === conflict.fieldId)
     if (alreadyVisible) continue
 
+    const metadata = conflict.fieldMetadata
+    // skip field if no metadata defined
+    if (!metadata) continue
+
     visible.push({
       fieldId: conflict.fieldId,
-      metadata: conflict.fieldMetadata,
+      metadata,
       isEditable: true,
       conflict
     })

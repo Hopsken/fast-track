@@ -58,7 +58,13 @@ describe('TemplateService', () => {
           subtask: false
         }
       },
-      fields: { priority: { behavior: 'preset', presetValue: { id: '1' } } }
+      fields: {
+        priority: {
+          fieldId: 'priority',
+          behavior: 'preset',
+          presetValue: { id: '1' }
+        }
+      }
     })
 
     const fetched = await svc.getTemplate(created.id)
