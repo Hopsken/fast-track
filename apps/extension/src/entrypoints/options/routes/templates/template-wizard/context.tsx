@@ -315,18 +315,7 @@ export function TemplateWizardProvider(props: ProviderProps) {
       const field = fieldMap.get(fieldId)
       const fieldName = field?.name ?? fieldId
 
-      if (config.behavior === 'preset') {
-        // Preset must have a value
-        if (
-          config.presetValue === undefined ||
-          config.presetValue === null ||
-          config.presetValue === ''
-        ) {
-          validationErrors.push(
-            `${fieldName}: Preset value required. Set a value or switch to "Show" mode.`
-          )
-        }
-      } else if (config.behavior === 'restricted') {
+      if (config.behavior === 'restricted') {
         // Restricted must have at least one option
         if (!config.allowedOptions || config.allowedOptions.length === 0) {
           validationErrors.push(
