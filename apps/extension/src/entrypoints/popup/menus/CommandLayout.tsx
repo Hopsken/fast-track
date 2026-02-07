@@ -15,7 +15,6 @@ export function CommandLayout() {
   return (
     <HotkeysScopeProvider scope="global">
       <Command
-        loop
         shouldFilter={shouldFilter}
         value={value}
         onValueChange={setValue}>

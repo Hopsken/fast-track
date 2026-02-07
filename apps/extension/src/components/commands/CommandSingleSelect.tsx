@@ -6,6 +6,9 @@ import {
   CommandList,
   CommandLoading
 } from '@internal/ui/components/command'
+import { useMount } from 'ahooks'
+
+import { useCommandInput } from '@/stores/command/useCommandInputStore'
 
 import { GeneralIcon } from '../ui'
 
@@ -28,6 +31,7 @@ export type CommandSingleSelectProps<T> = {
 export function CommandSingleSelect<T>({
   title,
   isLoading,
+  value,
   onChange,
   onConfirm,
   options,
@@ -35,18 +39,24 @@ export function CommandSingleSelect<T>({
   getOptionLabel,
   getOptionKeywords
 }: CommandSingleSelectProps<T>) {
-  // Extract selected option from currentValue to sync with command state
-  // const selected = useMemo(() => {
-  //   const rec = asRecord(currentValue)
-  //   if (!rec || typeof rec.id !== 'string') return undefined
-  //   return allowedOptions.find((opt) => opt.id === rec.id)
-  // }, [currentValue, allowedOptions])
+  const { setValue } = useCommandInput()
 
-  // useMount(() => {
-  //   if (selected) {
-  //     setValue(selected.id)
-  //   }
-  // })
+  useMount(() => {
+    let timeoutId: number
+
+    if (value) {
+      const optVal = getOptionValue(value)
+      timeoutId = window.setTimeout(() => {
+        setValue(optVal)
+      }, 0)
+    }
+
+    return () => {
+      if (timeoutId) {
+        window.clearTimeout(timeoutId)
+      }
+    }
+  })
 
   const onSelect = (opt: T) => {
     onChange(opt)
