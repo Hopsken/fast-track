@@ -1,5 +1,5 @@
 import { ComponentType } from 'react'
-import { z, ZodNumber, ZodObject, ZodString } from 'zod'
+import { z, ZodNumber, ZodString, ZodType } from 'zod'
 
 import {
   FieldConfig,
@@ -11,7 +11,7 @@ import {
   JiraProject
 } from '@/repository/schema'
 
-export type FieldValueSchema = ZodString | ZodNumber | ZodObject
+export type FieldValueSchema = ZodString | ZodNumber | ZodType
 
 export interface JiraFieldContext {
   project?: JiraProject

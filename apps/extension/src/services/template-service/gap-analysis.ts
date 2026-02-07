@@ -1,18 +1,21 @@
+import { JiraFieldMetadata } from '@/repository/schema'
+import { UnwrapArray } from '@/utils/type-utils'
 import type {
-  AllowedValue,
   FieldConfig,
   FieldConflict,
-  FieldMetadata,
   IssueTemplate
 } from '~/types/template'
 
-export interface VisibleField {
+export interface VisibleField<T = unknown> {
   fieldId: string
   config?: FieldConfig
-  metadata?: FieldMetadata
+  metadata?: JiraFieldMetadata
+
+  // TODO: remove this following two
   presetValue?: unknown
   /** When set, the create-issue form should only show these options (restricted mode). */
-  allowedOptions?: AllowedValue[]
+  allowedOptions?: UnwrapArray<T>[]
+
   isEditable: boolean
   conflict?: FieldConflict
 }
@@ -20,7 +23,7 @@ export interface VisibleField {
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export function computeVisibleFields(
   template: IssueTemplate,
-  fieldsMetadata: FieldMetadata[],
+  fieldsMetadata: JiraFieldMetadata[],
   conflicts?: FieldConflict[]
 ): VisibleField[] {
   const conflictList = conflicts ?? []

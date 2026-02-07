@@ -2,9 +2,10 @@ import { CommandItem } from '@internal/ui/components/command'
 import { cn } from '@internal/ui/lib/utils'
 import { AlertCircle, Check, ChevronRight } from 'lucide-react'
 
+import { useFieldAdapter } from '@/common/fields'
 import type { VisibleField } from '~/services/template-service/gap-analysis'
 
-import { formatValuePreview, getFieldName, isEmptyValue } from './fields/utils'
+
 
 export interface FieldListItemProps {
   field: VisibleField
@@ -22,7 +23,9 @@ export function FieldListItem({
   onSelect
 }: FieldListItemProps) {
   const { fieldId, metadata } = field
-  const fieldName = getFieldName(fieldId, metadata)
+  const adapter = useFieldAdapter(metadata)
+
+  const fieldName = adapter.title ?? metadata.
   const isEmpty = isEmptyValue(value)
   const valuePreview = formatValuePreview(value)
   const hasError = !!error

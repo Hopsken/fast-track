@@ -4,7 +4,6 @@ import { UnwrapArray } from '@/utils/type-utils'
 
 import {
   JiraFieldMetadataSchema,
-  JiraFieldSchemaSchema,
   JiraIssueTypeSchema,
   JiraProjectSchema
 } from './jira'

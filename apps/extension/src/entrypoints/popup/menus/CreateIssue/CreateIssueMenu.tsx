@@ -10,7 +10,7 @@ import type { IssueTemplate } from '~/types/template'
 
 import { CreateIssueFieldsMenu } from './CreateIssueFieldsMenu'
 import { FieldInputMenu } from './FieldInputMenu'
-import { SummaryDescriptionInput } from './fields'
+import { SummaryDescriptionInput } from './SummaryDescriptionInput'
 import {
   CreateIssueDraftStoreProvider,
   useCreateIssueDraftStore

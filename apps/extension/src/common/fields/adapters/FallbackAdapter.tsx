@@ -47,8 +47,7 @@ const FallbackInput = ({ context }: { context: JiraFieldContext }) => {
 export const FallbackAdapter: FieldAdapter<FieldValueSchema> = {
   key: 'fallback',
 
-  // @ts-expect-error ah...
-  schema: z.unknown(),
+  schema: fallbackSchema,
 
   keyOf: (val) => stringify(val),
 
@@ -72,6 +71,5 @@ export const FallbackAdapter: FieldAdapter<FieldValueSchema> = {
    * 如果 API 返回了值，我们原样保留，虽然 UI 无法编辑，
    * 但保持数据完整性是个好习惯。
    */
-  // @ts-expect-error ignore this
   fromDTO: (apiValue) => apiValue
 }

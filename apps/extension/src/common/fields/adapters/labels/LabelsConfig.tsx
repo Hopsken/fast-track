@@ -5,22 +5,18 @@ import { ZodString } from 'zod'
 import { CreatableAutoComplete } from '@/components/ui/CreatableAutoComplete'
 
 import { useFieldOptions } from '../../hooks/useFieldOptions'
-import { FieldConfigComponentProps } from '../../types'
+import { FieldConfigComponentProps, SelectComponentProps } from '../../types'
+import { useFieldContext } from '../shared/context'
+import { GenericFieldConfig } from '../shared/GenericFieldConfig'
 
-/**
- * Single select field input with search/filter functionality.
- * Converts field metadata allowed values into searchable options.
- * Supports filtering to quickly find options in large lists.
- */
-export const LabelsConfig = ({
+export const LabelsSelector = ({
+  isMultiple,
   value,
-  onValueChange,
-  adapter,
-  context,
-  config
-}: FieldConfigComponentProps<ZodString>) => {
+  onChange
+}: SelectComponentProps<string>) => {
   const [query, setQuery] = useState('')
-  const { options: labels, isLoading } = useFieldOptions({
+  const { adapter, context, config } = useFieldContext<ZodString>()
+  const { options: labels, isLoading } = useFieldOptions<ZodString>({
     adapter,
     context,
     config,
@@ -39,16 +35,18 @@ export const LabelsConfig = ({
 
   return (
     <CreatableAutoComplete
-      multiple
+      multiple={isMultiple}
       isLoading={isLoading}
-      value={(value as unknown as string[]) ?? []}
-      // @ts-expect-error to fix
-      onValueChange={onValueChange}
+      value={value}
+      onValueChange={onChange}
       options={allOptions}
-      // No need to actually create labels
       onCreate={onCreate}
       query={query}
       onQueryChange={setQuery}
     />
   )
+}
+
+export const LabelsConfig = (props: FieldConfigComponentProps<ZodString>) => {
+  return <GenericFieldConfig {...props} SelectorComponent={LabelsSelector} />
 }

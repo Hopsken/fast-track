@@ -19,9 +19,13 @@ import { formatErrorMessage } from '@/utils/formatError'
 import { queryKeys } from '@/utils/queryKeys'
 import { minutes } from '@/utils/time'
 import { getTemplateService } from '~/services/template-service'
-import type { FieldConfig, IssueTemplate } from '~/types/template'
+import type {
+  FieldConfig,
+  IssueTemplate,
+  IssueTemplateScope
+} from '~/types/template'
 
-import { type WizardScope } from './types'
+type WizardScope = Partial<Omit<IssueTemplateScope, 'baseUrlHost'>>
 
 /* ------------------------------------------------------------------ */
 /*  Public types                                                       */

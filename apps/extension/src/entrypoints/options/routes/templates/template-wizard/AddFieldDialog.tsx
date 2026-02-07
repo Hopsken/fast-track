@@ -10,7 +10,7 @@ import {
   CommandSeparator
 } from '@internal/ui/components/command'
 
-import type { FieldMetadata } from '~/types/template'
+import { JiraFieldMetadata } from '@/repository/schema'
 
 export function AddFieldDialog({
   open,
@@ -21,8 +21,8 @@ export function AddFieldDialog({
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
-  configuredFields: FieldMetadata[]
-  unconfiguredFields: FieldMetadata[]
+  configuredFields: JiraFieldMetadata[]
+  unconfiguredFields: JiraFieldMetadata[]
   onSelect: (fieldId: string) => void
 }) {
   // Sort required fields to the top of the available list
