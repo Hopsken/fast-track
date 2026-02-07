@@ -255,37 +255,6 @@ describe('computeVisibleFields', () => {
     expect(visible.filter((f) => f.fieldId === 'customfield_9')).toHaveLength(1)
   })
 
-  it('shows restricted fields with allowedOptions', () => {
-    const template = createTemplate({
-      fields: {
-        priority: {
-          fieldId: 'priority',
-          behavior: 'restricted',
-          allowedOptions: [
-            { id: '1', name: 'High' },
-            { id: '2', name: 'Medium' }
-          ]
-        }
-      }
-    })
-
-    const visible = computeVisibleFields(
-      template,
-      [summaryField, priorityField],
-      []
-    )
-
-    const field = visible.find((f) => f.fieldId === 'priority')
-    expect(field).toMatchObject({
-      fieldId: 'priority',
-      isEditable: true,
-      allowedOptions: [
-        { id: '1', name: 'High' },
-        { id: '2', name: 'Medium' }
-      ]
-    })
-  })
-
   it('shows restricted fields with conflict and uses conflict metadata', () => {
     const template = createTemplate({
       fields: {

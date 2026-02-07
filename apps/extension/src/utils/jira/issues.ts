@@ -60,6 +60,7 @@ export function mergeTicketsByKey(tickets: JiraIssue[]) {
 
 export function mapUserToAssignee(user: UserDetails): JiraAssignee {
   return {
+    accountId: user.accountId || '',
     displayName: user.displayName || user.name || user.emailAddress || '',
     emailAddress: user.emailAddress || '',
     avatarUrls:

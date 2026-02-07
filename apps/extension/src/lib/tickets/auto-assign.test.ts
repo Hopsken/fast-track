@@ -73,6 +73,7 @@ describe('shouldAutoAssignOnTransition', () => {
         {
           ...baseTicket,
           assignee: {
+            accountId: '',
             displayName: 'Jane',
             emailAddress: '',
             avatarUrls: ''

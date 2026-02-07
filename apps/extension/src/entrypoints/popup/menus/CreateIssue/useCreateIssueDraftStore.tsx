@@ -68,10 +68,13 @@ const createIssueDraftStore = (template: IssueTemplate) =>
           }),
 
         setWizardFields: (fields) => {
-          set((prev) => ({ wizardFields: fields, values: {
-          ...buildInitialValues(fields),
-          ...prev.values
-        } }))
+          set((prev) => ({
+            wizardFields: fields,
+            values: {
+              ...buildInitialValues(fields),
+              ...prev.values
+            }
+          }))
         },
         setWizardIndex: (index) => set((prev) => ({ wizardIndex: index })),
 

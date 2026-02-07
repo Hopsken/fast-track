@@ -18,9 +18,12 @@ import {
   type JiraPriority,
   type JiraTransition,
   type JiraUser,
+  JiraAssigneeSchema,
   JiraIssueRefSchema,
   JiraFieldMetadataSchema,
-  JiraIssueSchema
+  JiraIssueSchema,
+  JiraIssueTypeSchema,
+  JiraStatusSchema
 } from '@/repository/schema'
 import { isNonNullable } from '@/utils/assert'
 import { isTicketKey, mapPriority, mapTransition } from '@/utils/jira/issues'
@@ -49,6 +52,24 @@ const normalizeJqlValue = (value: string) => value.replace(/["\\]/g, '')
 const log = getLogger('jira-issues')
 
 type ClientGetter = () => Promise<Version3Client>
+
+const defaultIssueType: JiraIssue['issueType'] = {
+  id: '',
+  name: '',
+  iconUrl: '',
+  description: ''
+}
+
+const defaultStatus: JiraIssue['status'] = {
+  id: '',
+  name: '',
+  description: '',
+  statusCategory: {
+    key: '',
+    colorName: '',
+    name: ''
+  }
+}
 
 /**
  * Service for issue-related operations.
@@ -412,35 +433,23 @@ export class JiraIssueService {
       issue.fields?.status?.statusCategory?.key?.toLowerCase?.() || ''
     const isInProgress =
       statusName.includes('in progress') || statusKey === 'indeterminate'
+    const issueType =
+      JiraIssueTypeSchema.safeParse(issue.fields?.issuetype).data ??
+      defaultIssueType
+    const status =
+      JiraStatusSchema.safeParse(issue.fields?.status).data ?? defaultStatus
+    const assignee = issue.fields?.assignee
+      ? (JiraAssigneeSchema.safeParse(issue.fields.assignee).data ?? null)
+      : null
 
-    return {
+    return JiraIssueSchema.parse({
       __typename: 'JiraTicket',
-      id: String(issue.id),
-      key: issue.key,
+      id: issue.id ? String(issue.id) : '',
+      key: issue.key ?? '',
       summary: issue.fields?.summary || '',
-      issueType: {
-        id: issue.fields?.issuetype?.id || '',
-        name: issue.fields?.issuetype?.name || '',
-        iconUrl: issue.fields?.issuetype?.iconUrl || '',
-        description: issue.fields?.issuetype?.description || ''
-      },
-      status: {
-        id: issue.fields?.status?.id || '',
-        name: issue.fields?.status?.name || '',
-        description: issue.fields?.status?.description || '',
-        statusCategory: {
-          key: issue.fields?.status?.statusCategory?.key || '',
-          colorName: issue.fields?.status?.statusCategory?.colorName || '',
-          name: issue.fields?.status?.statusCategory?.name || ''
-        }
-      },
-      assignee: issue.fields?.assignee
-        ? {
-            displayName: issue.fields.assignee.displayName || '',
-            emailAddress: issue.fields.assignee.emailAddress || '',
-            avatarUrls: issue.fields.assignee.avatarUrls?.['48x48'] || ''
-          }
-        : null,
+      issueType,
+      status,
+      assignee,
       priority: issue.fields?.priority
         ? mapPriority(issue.fields.priority)
         : null,
@@ -456,7 +465,7 @@ export class JiraIssueService {
         ? toISODateString(issue.fields.created)
         : '',
       updated: issue.fields.updated ? toISODateString(issue.fields.updated) : ''
-    }
+    })
   }
 
   /**
@@ -521,6 +530,7 @@ export class JiraIssueService {
       description: typeof description === 'string' ? description : '',
       reporter: issue.fields?.reporter
         ? {
+            accountId: issue.fields.reporter.accountId ?? '',
             displayName: issue.fields.reporter.displayName ?? '',
             emailAddress: issue.fields.reporter.emailAddress ?? '',
             avatarUrls: issue.fields.reporter.avatarUrls?.['48x48'] ?? ''

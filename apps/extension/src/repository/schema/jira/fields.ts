@@ -1,4 +1,3 @@
-import { M } from 'vitest/dist/chunks/reporters.d.BFLkQcL6.js'
 import { z } from 'zod'
 
 import { JiraAvatarUrlSchema } from './user'
@@ -34,14 +33,30 @@ export const JiraTransitionSchema = z
 
 export type JiraTransition = z.infer<typeof JiraTransitionSchema>
 
-export const JiraAssigneeSchema = z
-  .object({
-    accountId: z.string(),
-    displayName: z.string(),
-    emailAddress: z.string(),
-    avatarUrls: JiraAvatarUrlSchema
-  })
-  .strip()
+export const JiraAssigneeSchema = z.preprocess(
+  (value) => {
+    if (!value || typeof value !== 'object') return value
+
+    const record = value as Record<string, unknown>
+
+    return {
+      accountId: typeof record.accountId === 'string' ? record.accountId : '',
+      displayName:
+        typeof record.displayName === 'string' ? record.displayName : '',
+      emailAddress:
+        typeof record.emailAddress === 'string' ? record.emailAddress : '',
+      avatarUrls: record.avatarUrls ?? record.avatarUrl
+    }
+  },
+  z
+    .object({
+      accountId: z.string(),
+      displayName: z.string(),
+      emailAddress: z.string(),
+      avatarUrls: JiraAvatarUrlSchema
+    })
+    .strip()
+)
 
 export type JiraAssignee = z.infer<typeof JiraAssigneeSchema>
 

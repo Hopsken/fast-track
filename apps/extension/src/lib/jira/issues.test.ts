@@ -240,3 +240,63 @@ describe('JiraIssueService getMySuggestedIssues', () => {
     expect(results[0]?.key).toBe('PROJ-2')
   })
 })
+
+describe('JiraIssueService getIssue', () => {
+  it('should normalize assignee avatarUrls via JiraIssueSchema', async () => {
+    const getIssueMock = vi.fn().mockResolvedValue({
+      id: '1',
+      key: 'PROJ-1',
+      self: 'https://jira.example.com/rest/api/3/issue/1',
+      fields: {
+        summary: 'Ticket with avatar record',
+        issuetype: {
+          id: '10001',
+          name: 'Task',
+          iconUrl: '',
+          description: ''
+        },
+        status: {
+          id: '10',
+          name: 'In Progress',
+          description: '',
+          statusCategory: {
+            key: 'indeterminate',
+            colorName: '',
+            name: ''
+          }
+        },
+        assignee: {
+          accountId: 'acc-1',
+          displayName: 'Alex Doe',
+          emailAddress: 'alex@example.com',
+          avatarUrls: {
+            '32x32': 'https://jira.example.com/avatar-32.png'
+          }
+        },
+        priority: null,
+        project: {
+          key: 'PROJ',
+          name: 'Project'
+        },
+        created: '2024-01-01T00:00:00.000Z',
+        updated: '2024-01-02T00:00:00.000Z'
+      }
+    } as unknown as Issue)
+
+    const client = {
+      issues: {
+        getIssue: getIssueMock
+      }
+    } as unknown as Version3Client
+
+    const getClient = vi.fn().mockResolvedValue(client)
+    const service = new JiraIssueService(getClient)
+
+    const issue = await service.getIssue('PROJ-1')
+
+    expect(issue.assignee?.accountId).toBe('acc-1')
+    expect(issue.assignee?.avatarUrls).toBe(
+      'https://jira.example.com/avatar-32.png'
+    )
+  })
+})
