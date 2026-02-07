@@ -10,6 +10,7 @@ export const GenericSelectInput = <S extends FieldValueSchema>({
   value,
   context,
   onChange,
+  onConfirm,
   inputText
 }: FieldInputComponentProps<S>) => {
   const isMultiple = context.metadata.schema.type === 'array'
@@ -32,6 +33,7 @@ export const GenericSelectInput = <S extends FieldValueSchema>({
         options={options}
         // @ts-expect-error newValue is array, should be handler externally
         onChange={(newValue) => onChange(newValue)}
+        onConfirm={onConfirm}
         getOptionValue={adapter.keyOf}
         getOptionLabel={adapter.labelOf ?? adapter.keyOf}
       />
@@ -45,6 +47,7 @@ export const GenericSelectInput = <S extends FieldValueSchema>({
       value={value}
       options={options}
       onChange={onChange}
+      onConfirm={onConfirm}
       getOptionValue={adapter.keyOf}
       getOptionLabel={adapter.labelOf ?? adapter.keyOf}
     />
