@@ -1,10 +1,15 @@
 import { ComponentType, useState } from 'react'
+import { Button } from '@internal/ui/components/button'
 import { uniqWith } from 'lodash-es'
+import { PlusIcon, XIcon } from 'lucide-react'
 import { z } from 'zod'
+
+import { GeneralIcon } from '@/components'
 
 import { FieldValueSchema, SelectComponentProps } from '../../types'
 
 import { useFieldContext } from './context'
+import { getIconUrl } from './select/utils'
 
 const isSameValue = <T,>(keyOf: (item: T) => string) => {
   return (a: T, b: T) => keyOf(a) === keyOf(b)
@@ -32,14 +37,21 @@ export const RestrictedValueBuilder = <
     return adapter.labelOf?.(item) ?? adapter.keyOf(item)
   }
 
-  // 删除某一项
+  function renderIcon(item: Item) {
+    const iconUrl = getIconUrl(item)
+    if (!iconUrl) return null
+    const isUser = 'avatarUrl' in (item as object)
+    return (
+      <GeneralIcon alt={renderLabel(item)} iconUrl={iconUrl} rounded={isUser} />
+    )
+  }
+
   const handleRemove = (index: number) => {
     const newValues = [...values]
     newValues.splice(index, 1)
     onChange(newValues)
   }
 
-  // 添加一项
   const handleAdd = (newItem: Item | Item[] | null) => {
     if (!newItem) return
 
@@ -49,51 +61,51 @@ export const RestrictedValueBuilder = <
   }
 
   return (
-    <div className="space-y-3">
-      {/* 1. 列表展示区域 (Your Sketch Items) */}
-      <div className="space-y-2">
-        {values.map((item, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between rounded-md border border-gray-200 bg-gray-50 p-3">
-            <span className="text-sm font-medium text-gray-700">
+    <div className="space-y-2">
+      {values.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {values.map((item, index) => (
+            <div
+              key={adapter.keyOf(item)}
+              className="bg-muted text-foreground flex h-[calc(--spacing(5.5))] w-fit items-center justify-center gap-1 whitespace-nowrap rounded-sm px-1.5 text-xs font-medium">
+              {renderIcon(item)}
               {renderLabel(item)}
-            </span>
-            <button
-              onClick={() => handleRemove(index)}
-              className="p-1 text-gray-400 transition-colors hover:text-red-500"
-              title="Remove restriction">
-              ✕
-            </button>
-          </div>
-        ))}
-      </div>
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                className="-ml-1 opacity-50 hover:opacity-100"
+                onClick={() => handleRemove(index)}>
+                <XIcon className="pointer-events-none" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
 
-      {/* 2. 添加区域 (Value Picker) */}
       {isAdding ? (
-        <div className="animate-in fade-in zoom-in-95 rounded-md border border-blue-200 bg-blue-50 p-3 duration-200">
-          <div className="mb-1 text-xs font-semibold uppercase text-blue-600">
-            Add allowed value
-          </div>
+        <div>
           <SelectorComponent
-            // 【关键】在添加限制条件时，始终强制为单选
-            // 这样用户每次只添加一个条目，逻辑清晰
             isMultiple={false}
             value={null}
             onChange={handleAdd}
           />
-          <button
-            onClick={() => setIsAdding(false)}
-            className="mt-2 text-xs text-gray-500 hover:underline">
+          <Button
+            variant="ghost"
+            size="xs"
+            className="mt-1"
+            onClick={() => setIsAdding(false)}>
             Cancel
-          </button>
+          </Button>
         </div>
       ) : (
-        <button
-          onClick={() => setIsAdding(true)}
-          className="flex items-center gap-2 rounded-md border border-transparent px-3 py-2 text-sm font-medium text-blue-600 transition-colors hover:border-blue-100 hover:bg-blue-50">
-          <span>+ Add allowed value</span>
-        </button>
+        <Button
+          variant="ghost"
+          size="xs"
+          className="text-muted-foreground"
+          onClick={() => setIsAdding(true)}>
+          <PlusIcon />
+          Add value
+        </Button>
       )}
     </div>
   )
