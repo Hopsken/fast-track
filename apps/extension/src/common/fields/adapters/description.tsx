@@ -8,7 +8,16 @@ export const JiraDescriptionAdapter = createTextFieldAdapter(
   {
     supportModes: ['preset'],
     keyOf: (val) => val,
-    toDTO: (val) => val,
+    toDTO: (text) => ({
+      type: 'doc',
+      version: 1,
+      content: [
+        {
+          type: 'paragraph',
+          content: [{ type: 'text', text }]
+        }
+      ]
+    }),
     fromDTO: (dto) => (typeof dto === 'string' ? dto : null)
   }
 )

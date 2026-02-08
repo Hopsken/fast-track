@@ -35,6 +35,7 @@
     "@wxt-dev/analytics": "^0.5.1",
     "ahooks": "^3.9.6",
     "cash-dom": "^8.1.5",
+    "chrono-node": "^2.9.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

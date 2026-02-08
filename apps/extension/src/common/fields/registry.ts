@@ -1,7 +1,7 @@
 import { JiraFieldSchema } from '@/repository/schema'
 import { getLogger } from '@/utils'
 
-import { FallbackAdapter } from './adapters/FallbackAdapter'
+import { FallbackAdapter } from './adapters/fallback'
 import { FieldAdapter } from './types'
 
 const log = getLogger()

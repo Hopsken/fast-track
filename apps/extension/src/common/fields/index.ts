@@ -1,7 +1,5 @@
 import { JiraAssigneeAdapter } from './adapters/assignee'
 import { JiraComponentAdapter } from './adapters/component'
-import { JiraDateAdapter } from './adapters/date'
-import { JiraDateTimeAdapter } from './adapters/datetime'
 import { JiraDescriptionAdapter } from './adapters/description'
 import { JiraDueDateAdapter } from './adapters/duedate'
 import { JiraEnvironmentAdapter } from './adapters/environment'
@@ -14,6 +12,7 @@ import { JiraPriorityAdapter } from './adapters/priority'
 import { JiraReporterAdapter } from './adapters/reporter'
 import { JiraResolutionAdapter } from './adapters/resolution'
 import { JiraSecurityLevelAdapter } from './adapters/securitylevel'
+import { JiraDateAdapter, JiraDatetimeAdapter } from './adapters/shared/date'
 import { JiraSprintAdapter } from './adapters/sprint'
 import { JiraStringAdapter } from './adapters/string'
 import { JiraSummaryAdapter } from './adapters/summary'
@@ -40,7 +39,7 @@ registerAdapter(JiraComponentAdapter)
 registerAdapter(JiraUserAdapter)
 registerAdapter(JiraResolutionAdapter)
 registerAdapter(JiraDateAdapter)
-registerAdapter(JiraDateTimeAdapter)
+registerAdapter(JiraDatetimeAdapter)
 registerAdapter(JiraOptionAdapter)
 registerAdapter(JiraVersionAdapter)
 registerAdapter(JiraGroupAdapter)

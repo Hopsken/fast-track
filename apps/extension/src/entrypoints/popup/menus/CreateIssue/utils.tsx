@@ -2,8 +2,10 @@ import { ReactNode } from 'react'
 import { isEmpty, mapValues } from 'lodash-es'
 
 import { getFieldAdapter } from '@/common/fields'
+import { JiraDescriptionAdapter } from '@/common/fields/adapters/description'
+import { JiraSummaryAdapter } from '@/common/fields/adapters/summary'
 import { FieldAdapter } from '@/common/fields/types'
-import { JiraFieldMetadata } from '@/repository/schema'
+import { IssueTemplate, JiraFieldMetadata } from '@/repository/schema'
 import { VisibleField } from '@/services/template-service/gap-analysis'
 import { isNonNullable } from '@/utils/assert'
 
@@ -114,10 +116,11 @@ export function extractJiraFieldErrors(
 }
 
 export function buildCreateIssueFields(
+  template: IssueTemplate,
   visibleFields: VisibleField[],
   values: Record<string, unknown>
 ): Record<string, unknown> {
-  return mapValues(values, (value, fieldId) => {
+  const fieldValues = mapValues(values, (value, fieldId) => {
     const field = visibleFields.find((f) => f.fieldId === fieldId)
     if (!field) return value
 
@@ -129,4 +132,12 @@ export function buildCreateIssueFields(
       ? value.map((val) => adapter.toDTO(val))
       : adapter.toDTO(value)
   })
+
+  return {
+    ...fieldValues,
+    project: { id: template.scope.project.id },
+    issuetype: { id: template.scope.issueType.id },
+    summary: values['summary'] ?? '',
+    description: JiraDescriptionAdapter.toDTO(values['description'] as string)
+  }
 }

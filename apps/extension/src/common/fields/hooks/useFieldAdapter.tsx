@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 
 import { JiraFieldMetadata } from '@/repository/schema'
 
-import { FallbackAdapter } from '../adapters/FallbackAdapter'
+import { FallbackAdapter } from '../adapters/fallback'
 import { getFieldAdapter } from '../registry'
 
 export const useFieldAdapter = (field: JiraFieldMetadata) => {

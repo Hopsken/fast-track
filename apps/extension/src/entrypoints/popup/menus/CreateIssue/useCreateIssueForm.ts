@@ -1,7 +1,6 @@
 import { useMemoizedFn } from 'ahooks'
 import { useNavigate } from 'react-router-dom'
 
-import { JiraFieldMetadata } from '@/repository/schema'
 import { getJiraService } from '@/services/jira-service'
 import { getTemplateService } from '@/services/template-service'
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
@@ -26,7 +25,7 @@ export function useCreateIssueForm({ template }: UseCreateIssueFormOptions) {
     useCreateIssueDraftStore()
 
   const submit = useMemoizedFn(async () => {
-    const fields = buildCreateIssueFields(wizardFields, values)
+    const fields = buildCreateIssueFields(template, wizardFields, values)
 
     const toast = showToast({
       style: 'loading',
