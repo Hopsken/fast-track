@@ -26,13 +26,13 @@ const NumberSelect = ({
       if (isMultiple) {
         const newValues = inputValue
           .split(',')
-          .map((val) => z.number().safeParse(val).data)
+          .map((val) => z.coerce.number().safeParse(val).data)
           .filter(isNonNullable)
         onChange(newValues)
         return
       }
 
-      const newValue = z.number().safeParse(inputValue).data
+      const newValue = z.coerce.number().safeParse(inputValue).data
       onChange(newValue ?? null)
     },
     [isMultiple, onChange]

@@ -13,8 +13,7 @@ const toJiraDateTime = (value: string) => {
   try {
     const date = new Date(value)
     if (isNaN(date.getTime())) return null
-
-    return date.toISOString().replace(/\.\d{3}Z$/, '.000+0000')
+    return date.toISOString()
   } catch {
     return null
   }
@@ -36,6 +35,8 @@ const DateTimeSelect = ({
       setInputValue(e.target.value)
       const inputValue = e.target.value.trim()
 
+      console.log({ inputValue })
+
       if (isMultiple) {
         const newValues = inputValue
           .split(',')
@@ -46,6 +47,7 @@ const DateTimeSelect = ({
       }
 
       const newValue = toJiraDateTime(inputValue)
+      console.log({ newValue })
       onChange(newValue ?? null)
     },
     [isMultiple, onChange]

@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
+import { uniq } from 'lodash-es'
 
 import { AutoComplete } from './AutoComplete'
 
@@ -201,10 +202,10 @@ export function CreatableAutoComplete<Multiple extends boolean = false>({
   // Augment options with create option
   const augmentedOptions = useMemo(() => {
     const allOptions = [...options, ...(value ?? [])]
-    if (!shouldShowCreateOption) return allOptions
+    if (!shouldShowCreateOption) return uniq(allOptions)
 
     const createOption = `${CREATE_OPTION_PREFIX}${query.trim()}`
-    return [createOption, ...allOptions]
+    return uniq([createOption, ...allOptions])
   }, [options, value, shouldShowCreateOption, query])
 
   // Handle value changes, including create option selection
