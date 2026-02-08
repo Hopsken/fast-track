@@ -47,7 +47,8 @@ export type WizardState = {
   availableFields: JiraFieldMetadata[]
   areFieldsLoading: boolean
   fieldsError: string | null
-  fieldsConfig: Record<string, FieldConfig>
+  fieldsConfig: FieldConfig[]
+  fieldsMap: Map<string, FieldConfig>
 
   // Basics
   name: string
@@ -65,6 +66,7 @@ export type WizardActions = {
 
   setFieldConfig: (config: FieldConfig) => void
   removeFieldConfig: (fieldId: string) => void
+  reorderFields: (fromIndex: number, toIndex: number) => void
 
   setName: (next: string) => void
   setDescription: (next: string) => void
@@ -217,25 +219,40 @@ export function TemplateWizardProvider(props: ProviderProps) {
 
   // Reset fieldsConfig when scope changes (create mode only)
   const scopeKey = `${scope.project?.key ?? ''}:${scope.issueType?.id ?? ''}`
-  const [fieldsConfig, setFieldsConfig] = useState<Record<string, FieldConfig>>(
-    () => existingTemplate?.fields ?? {}
+  const [fieldsConfig, setFieldsConfig] = useState<FieldConfig[]>(
+    () => existingTemplate?.fields ?? []
+  )
+
+  const fieldsMap = useMemo(
+    () => new Map(fieldsConfig.map((c) => [c.fieldId, c])),
+    [fieldsConfig]
   )
 
   useEffect(() => {
-    if (!isEdit) setFieldsConfig({})
+    if (!isEdit) setFieldsConfig([])
   }, [scopeKey, isEdit])
 
   const setFieldConfig = useCallback((config: FieldConfig) => {
-    setFieldsConfig((prev) => ({
-      ...prev,
-      [config.fieldId]: config
-    }))
+    setFieldsConfig((prev) => {
+      const idx = prev.findIndex((c) => c.fieldId === config.fieldId)
+      if (idx >= 0) {
+        const next = prev.slice()
+        next[idx] = config
+        return next
+      }
+      return [...prev, config]
+    })
   }, [])
 
   const removeFieldConfig = useCallback((fieldId: string) => {
+    setFieldsConfig((prev) => prev.filter((c) => c.fieldId !== fieldId))
+  }, [])
+
+  const reorderFields = useCallback((fromIndex: number, toIndex: number) => {
     setFieldsConfig((prev) => {
-      const next = { ...prev }
-      delete next[fieldId]
+      const next = prev.slice()
+      const [moved] = next.splice(fromIndex, 1)
+      next.splice(toIndex, 0, moved!)
       return next
     })
   }, [])
@@ -311,9 +328,9 @@ export function TemplateWizardProvider(props: ProviderProps) {
     const validationErrors: string[] = []
     const fieldMap = new Map(availableFields.map((f) => [f.fieldId, f]))
 
-    for (const [fieldId, config] of Object.entries(fieldsConfig)) {
-      const field = fieldMap.get(fieldId)
-      const fieldName = field?.name ?? fieldId
+    for (const config of fieldsConfig) {
+      const field = fieldMap.get(config.fieldId)
+      const fieldName = field?.name ?? config.fieldId
 
       if (config.behavior === 'restricted') {
         // Restricted must have at least one option
@@ -408,6 +425,7 @@ export function TemplateWizardProvider(props: ProviderProps) {
       areFieldsLoading,
       fieldsError,
       fieldsConfig,
+      fieldsMap,
       name,
       description: description,
       saveError,
@@ -425,6 +443,7 @@ export function TemplateWizardProvider(props: ProviderProps) {
       areFieldsLoading,
       fieldsError,
       fieldsConfig,
+      fieldsMap,
       name,
       description,
       saveError,
@@ -440,6 +459,7 @@ export function TemplateWizardProvider(props: ProviderProps) {
       selectIssueType,
       setFieldConfig,
       removeFieldConfig,
+      reorderFields,
       setName,
       setDescription: setDescription,
       save,
@@ -448,6 +468,7 @@ export function TemplateWizardProvider(props: ProviderProps) {
     [
       deleteTemplate,
       isEdit,
+      reorderFields,
       removeFieldConfig,
       save,
       selectIssueType,

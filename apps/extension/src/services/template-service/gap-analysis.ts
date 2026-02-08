@@ -70,7 +70,8 @@ export function computeVisibleFields(
     }
   ]
 
-  for (const [fieldId, config] of Object.entries(template.fields)) {
+  for (const config of template.fields) {
+    const { fieldId } = config
     if (shouldSkipField(fieldId)) continue
 
     const metadata = getMetadata(fieldId)
@@ -80,18 +81,7 @@ export function computeVisibleFields(
 
     const conflict = conflictMap.get(fieldId)
 
-    if (config.behavior === 'restricted') {
-      visible.push({
-        fieldId,
-        config,
-        metadata,
-        isEditable: true,
-        conflict
-      })
-      continue
-    }
-
-    if (config.behavior === 'preset') {
+    if (config.behavior === 'restricted' || config.behavior === 'preset') {
       visible.push({
         fieldId,
         config,
@@ -131,7 +121,7 @@ export function computeVisibleFields(
     if (alreadyVisible) continue
 
     // Field is required but has no template config — show it
-    const hasConfig = field.fieldId in template.fields
+    const hasConfig = template.fields.some((c) => c.fieldId === field.fieldId)
     if (!hasConfig) {
       visible.push({
         fieldId: field.fieldId,

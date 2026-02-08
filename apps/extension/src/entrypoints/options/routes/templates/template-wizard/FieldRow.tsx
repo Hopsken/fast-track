@@ -1,6 +1,8 @@
 import { useCallback, useMemo } from 'react'
 import { Badge } from '@internal/ui/components/badge'
-import { Trash2Icon } from 'lucide-react'
+import { Button } from '@internal/ui/components/button'
+import { ButtonGroup } from '@internal/ui/components/button-group'
+import { ChevronDownIcon, ChevronUpIcon, Trash2Icon } from 'lucide-react'
 
 import { useFieldAdapter } from '@/common/fields'
 import { JiraFieldContext } from '@/common/fields/types'
@@ -74,7 +76,9 @@ export function FieldRow({
   project,
   issueType,
   onConfigChange,
-  onRemove
+  onRemove,
+  onMoveUp,
+  onMoveDown
 }: {
   project: JiraProject
   issueType: JiraIssueType
@@ -82,6 +86,8 @@ export function FieldRow({
   config: FieldConfig
   onConfigChange: (config: FieldConfig) => void
   onRemove?: () => void
+  onMoveUp?: () => void
+  onMoveDown?: () => void
 }) {
   const { fieldId } = field
   const adapter = useFieldAdapter(field)
@@ -142,13 +148,35 @@ export function FieldRow({
             {field.required && <Badge variant="secondary">Required</Badge>}
           </div>
 
-          {/* Right: mode toggle + remove */}
+          {/* Right: mode toggle + reorder + remove */}
           <div className="flex items-center gap-2">
+            {(onMoveUp || onMoveDown) && (
+              <ButtonGroup>
+                <Button
+                  variant={'outline'}
+                  size={'icon-xs'}
+                  onClick={onMoveUp}
+                  disabled={!onMoveUp}
+                  aria-label="Move up">
+                  <ChevronUpIcon className="size-3.5" />
+                </Button>
+                <Button
+                  variant={'outline'}
+                  size={'icon-xs'}
+                  onClick={onMoveDown}
+                  disabled={!onMoveDown}
+                  aria-label="Move down">
+                  <ChevronDownIcon className="size-3.5" />
+                </Button>
+              </ButtonGroup>
+            )}
+
             <ModeToggle
               mode={currentMode}
               supportedModes={adapter.supportModes}
               onModeChange={handleModeChange}
             />
+
             {onRemove && (
               <button
                 type="button"

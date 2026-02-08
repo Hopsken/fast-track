@@ -58,13 +58,13 @@ describe('TemplateService', () => {
           subtask: false
         }
       },
-      fields: {
-        priority: {
+      fields: [
+        {
           fieldId: 'priority',
           behavior: 'preset',
           presetValue: { id: '1' }
         }
-      }
+      ]
     })
 
     const fetched = await svc.getTemplate(created.id)
@@ -99,7 +99,7 @@ describe('TemplateService', () => {
           subtask: false
         }
       },
-      fields: {}
+      fields: []
     })
 
     await svc.markTemplateUsed(t.id)
@@ -127,7 +127,7 @@ describe('TemplateService', () => {
           subtask: false
         }
       },
-      fields: {}
+      fields: []
     })
 
     const templatesItem = (
@@ -161,7 +161,7 @@ describe('TemplateService', () => {
             subtask: false
           }
         },
-        fields: {},
+        fields: [],
         createdAt: 'not-a-date',
         updatedAt: 'not-a-date'
       }
@@ -186,7 +186,7 @@ describe('TemplateService', () => {
             name: 'Project'
           }
         },
-        fields: {}
+        fields: []
       })
     ).rejects.toThrow(/Invalid template/i)
   })

@@ -21,6 +21,7 @@ import { FieldRow } from './FieldRow'
 /* ------------------------------------------------------------------ */
 
 const EXCLUDED = new Set(['project', 'issuetype', 'attachment', 'issuelinks'])
+const PINNED = new Set(['summary', 'description'])
 
 /* ------------------------------------------------------------------ */
 /*  Fields section                                                     */
@@ -32,29 +33,44 @@ export function FieldsSection() {
     scope,
     availableFields,
     fieldsConfig,
+    fieldsMap,
     areFieldsLoading,
     fieldsError
   } = state
   const [commandOpen, setCommandOpen] = useState(false)
 
-  const { configuredFields, unconfiguredFields } = useMemo(() => {
-    const fieldMap = new Map(availableFields.map((f) => [f.fieldId, f]))
+  const { pinnedFields, reorderableFields, unconfiguredFields } =
+    useMemo(() => {
+      const fieldMetaMap = new Map(availableFields.map((f) => [f.fieldId, f]))
 
-    // Iterate fieldsConfig keys (JS insertion order) so newly added fields
-    // appear at the bottom of the list.
-    const configured: JiraFieldMetadata[] = []
-    for (const fieldId of Object.keys(fieldsConfig)) {
-      const f = fieldMap.get(fieldId)
-      if (f && !EXCLUDED.has(fieldId)) configured.push(f)
-    }
+      const pinned: JiraFieldMetadata[] = []
+      const reorderable: JiraFieldMetadata[] = []
 
-    const configuredIds = new Set(configured.map((f) => f.fieldId))
-    const unconfigured = availableFields.filter(
-      (f) => !EXCLUDED.has(f.fieldId) && !configuredIds.has(f.fieldId)
-    )
+      for (const config of fieldsConfig) {
+        if (EXCLUDED.has(config.fieldId)) continue
+        const f = fieldMetaMap.get(config.fieldId)
+        if (!f) continue
 
-    return { configuredFields: configured, unconfiguredFields: unconfigured }
-  }, [availableFields, fieldsConfig])
+        if (PINNED.has(config.fieldId)) {
+          pinned.push(f)
+        } else {
+          reorderable.push(f)
+        }
+      }
+
+      const configuredIds = new Set(fieldsConfig.map((c) => c.fieldId))
+      const unconfigured = availableFields.filter(
+        (f) => !EXCLUDED.has(f.fieldId) && !configuredIds.has(f.fieldId)
+      )
+
+      return {
+        pinnedFields: pinned,
+        reorderableFields: reorderable,
+        unconfiguredFields: unconfigured
+      }
+    }, [availableFields, fieldsConfig])
+
+  const allConfigured = [...pinnedFields, ...reorderableFields]
 
   const handleAddField = useCallback(
     (fieldId: string) => {
@@ -69,6 +85,37 @@ export function FieldsSection() {
       actions.setFieldConfig(config)
     },
     [actions]
+  )
+
+  const handleMoveUp = useCallback(
+    (fieldId: string) => {
+      const idx = fieldsConfig.findIndex((c) => c.fieldId === fieldId)
+      if (idx <= 0) return
+      // Find the previous non-pinned field
+      let target = idx - 1
+      while (target >= 0 && PINNED.has(fieldsConfig[target]!.fieldId)) {
+        target--
+      }
+      if (target >= 0) actions.reorderFields(idx, target)
+    },
+    [actions, fieldsConfig]
+  )
+
+  const handleMoveDown = useCallback(
+    (fieldId: string) => {
+      const idx = fieldsConfig.findIndex((c) => c.fieldId === fieldId)
+      if (idx < 0 || idx >= fieldsConfig.length - 1) return
+      // Find the next non-pinned field
+      let target = idx + 1
+      while (
+        target < fieldsConfig.length &&
+        PINNED.has(fieldsConfig[target]!.fieldId)
+      ) {
+        target++
+      }
+      if (target < fieldsConfig.length) actions.reorderFields(idx, target)
+    },
+    [actions, fieldsConfig]
   )
 
   if (!scope.issueType || !scope.project) return null
@@ -105,7 +152,7 @@ export function FieldsSection() {
 
       {!areFieldsLoading && !fieldsError && (
         <>
-          {configuredFields.length === 0 ? (
+          {allConfigured.length === 0 ? (
             <Empty className="border py-8">
               <EmptyHeader>
                 <EmptyTitle className="text-sm">
@@ -120,15 +167,34 @@ export function FieldsSection() {
             </Empty>
           ) : (
             <div className="space-y-2">
-              {configuredFields.map((field) => (
+              {pinnedFields.map((field) => (
                 <FieldRow
                   key={field.fieldId}
                   project={scope.project!}
                   issueType={scope.issueType!}
                   field={field}
-                  config={fieldsConfig[field.fieldId]!}
+                  config={fieldsMap.get(field.fieldId)!}
                   onConfigChange={handleConfigChange}
                   onRemove={() => actions.removeFieldConfig(field.fieldId)}
+                />
+              ))}
+              {reorderableFields.map((field, index) => (
+                <FieldRow
+                  key={field.fieldId}
+                  project={scope.project!}
+                  issueType={scope.issueType!}
+                  field={field}
+                  config={fieldsMap.get(field.fieldId)!}
+                  onConfigChange={handleConfigChange}
+                  onRemove={() => actions.removeFieldConfig(field.fieldId)}
+                  onMoveUp={
+                    index > 0 ? () => handleMoveUp(field.fieldId) : undefined
+                  }
+                  onMoveDown={
+                    index < reorderableFields.length - 1
+                      ? () => handleMoveDown(field.fieldId)
+                      : undefined
+                  }
                 />
               ))}
             </div>
@@ -140,7 +206,7 @@ export function FieldsSection() {
       <AddFieldDialog
         open={commandOpen}
         onOpenChange={setCommandOpen}
-        configuredFields={configuredFields}
+        configuredFields={allConfigured}
         unconfiguredFields={unconfiguredFields}
         onSelect={handleAddField}
       />

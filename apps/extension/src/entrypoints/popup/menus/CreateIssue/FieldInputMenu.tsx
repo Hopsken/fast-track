@@ -22,7 +22,7 @@ export function FieldInputMenu() {
   const currentValue = values[field.fieldId]
 
   const adapter = useFieldAdapter(field.metadata)
-  const fieldConfig = template.fields[fieldId]
+  const fieldConfig = template.fields.find((c) => c.fieldId === fieldId)
   const fieldContext = useMemo<JiraFieldContext>(
     () => ({
       ...template.scope,

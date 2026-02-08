@@ -24,7 +24,7 @@ function createTemplate(partial?: Partial<IssueTemplate>): IssueTemplate {
         description: ''
       }
     },
-    fields: {},
+    fields: [],
     createdAt: now,
     updatedAt: now,
     ...partial
@@ -50,7 +50,7 @@ const priorityField: JiraFieldMetadata = {
 
 describe('computeVisibleFields', () => {
   it('always includes summary', () => {
-    const template = createTemplate({ fields: {} })
+    const template = createTemplate({ fields: [] })
     const visible = computeVisibleFields(template, [summaryField], [])
 
     expect(visible.some((f) => f.fieldId === 'summary')).toBe(true)
@@ -58,13 +58,13 @@ describe('computeVisibleFields', () => {
 
   it('includes description if behavior=preset', () => {
     const template = createTemplate({
-      fields: {
-        description: {
+      fields: [
+        {
           fieldId: 'description',
           behavior: 'preset',
           presetValue: 'Hello'
         }
-      }
+      ]
     })
 
     const visible = computeVisibleFields(template, [], [])
@@ -82,13 +82,13 @@ describe('computeVisibleFields', () => {
 
   it('shows fields with behavior=preset', () => {
     const template = createTemplate({
-      fields: {
-        priority: {
+      fields: [
+        {
           fieldId: 'priority',
           behavior: 'preset',
           presetValue: { id: '1' }
         }
-      }
+      ]
     })
 
     const visible = computeVisibleFields(
@@ -106,13 +106,13 @@ describe('computeVisibleFields', () => {
 
   it('shows preset fields when conflict exists for that field', () => {
     const template = createTemplate({
-      fields: {
-        priority: {
+      fields: [
+        {
           fieldId: 'priority',
           behavior: 'preset',
           presetValue: { id: 'deleted' }
         }
-      }
+      ]
     })
 
     const conflicts: FieldConflict[] = [
@@ -142,7 +142,7 @@ describe('computeVisibleFields', () => {
   })
 
   it('adds now_required conflicts even if not in template', () => {
-    const template = createTemplate({ fields: {} })
+    const template = createTemplate({ fields: [] })
 
     const conflicts: FieldConflict[] = [
       {
@@ -180,7 +180,7 @@ describe('computeVisibleFields', () => {
       required: true,
       schema: { type: 'string' }
     }
-    const template = createTemplate({ fields: {} })
+    const template = createTemplate({ fields: [] })
 
     const visible = computeVisibleFields(
       template,
@@ -209,13 +209,13 @@ describe('computeVisibleFields', () => {
       allowedValues: [{ id: '1', name: 'High' }]
     }
     const template = createTemplate({
-      fields: {
-        priority: {
+      fields: [
+        {
           fieldId: 'priority',
           behavior: 'preset',
           presetValue: { id: '1' }
         }
-      }
+      ]
     })
 
     const visible = computeVisibleFields(
@@ -236,13 +236,13 @@ describe('computeVisibleFields', () => {
       schema: { type: 'string' }
     }
     const template = createTemplate({
-      fields: {
-        customfield_9: {
+      fields: [
+        {
           fieldId: 'customfield_9',
           behavior: 'preset',
           presetValue: { id: '1' }
         }
-      }
+      ]
     })
 
     const visible = computeVisibleFields(
@@ -257,8 +257,8 @@ describe('computeVisibleFields', () => {
 
   it('shows restricted fields with conflict and uses conflict metadata', () => {
     const template = createTemplate({
-      fields: {
-        priority: {
+      fields: [
+        {
           fieldId: 'priority',
           behavior: 'restricted',
           allowedOptions: [
@@ -266,7 +266,7 @@ describe('computeVisibleFields', () => {
             { id: 'gone', name: 'Removed' }
           ]
         }
-      }
+      ]
     })
 
     const freshMeta: JiraFieldMetadata = {
@@ -309,13 +309,13 @@ describe('computeVisibleFields', () => {
       required: true
     }
     const template = createTemplate({
-      fields: {
-        priority: {
+      fields: [
+        {
           fieldId: 'priority',
           behavior: 'restricted',
           allowedOptions: [{ id: '1', name: 'High' }]
         }
-      }
+      ]
     })
 
     const visible = computeVisibleFields(
@@ -329,18 +329,18 @@ describe('computeVisibleFields', () => {
 
   it('ignores project/issuetype fields', () => {
     const template = createTemplate({
-      fields: {
-        project: {
+      fields: [
+        {
           fieldId: 'project',
           behavior: 'preset',
           presetValue: { id: '1' }
         },
-        issuetype: {
+        {
           fieldId: 'issuetype',
           behavior: 'preset',
           presetValue: { id: '1' }
         }
-      }
+      ]
     })
 
     const visible = computeVisibleFields(template, [], [])

@@ -72,7 +72,7 @@ export const IssueTemplateSchema = z.object({
   icon: z.string().optional(),
 
   scope: IssueTemplateScopeSchema,
-  fields: z.record(z.string(), FieldConfigSchema),
+  fields: z.array(FieldConfigSchema),
 
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
