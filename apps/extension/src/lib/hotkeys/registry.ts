@@ -66,7 +66,7 @@ export const HOTKEY_REGISTRY = {
     scopes: ['global'],
     category: 'navigation',
     description: 'Clear input, go back, or close popup (context-aware)',
-    priority: 10,
+    priority: 5,
     preventDefault: true,
     enableOnFormTags: true
   },
@@ -109,6 +109,17 @@ export const HOTKEY_REGISTRY = {
     category: 'field-input',
     description: 'Confirm fields value and proceed to create issue',
     priority: 4,
+    preventDefault: true,
+    enableOnFormTags: true
+  },
+
+  'field-input.escape': {
+    id: 'field-input.escape',
+    shortcut: { modifiers: [], key: 'escape' },
+    scopes: ['field-input'],
+    category: 'field-input',
+    description: 'Go back to fields menu',
+    priority: 10,
     preventDefault: true,
     enableOnFormTags: true
   },

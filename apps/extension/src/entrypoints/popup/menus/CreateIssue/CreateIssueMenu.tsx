@@ -17,9 +17,8 @@ import {
 } from './useCreateIssueDraftStore'
 import { useSetupWizard } from './useSetupWizard'
 
-function FieldInputMenuRouter() {
-  const { field } = useLocation().state as { field: VisibleField }
-  const { fieldId } = field
+function FieldInputMenuRouter(props: { field: VisibleField }) {
+  const { fieldId } = props.field
   const isSummaryOrDescription =
     fieldId === 'summary' || fieldId === 'description'
 
@@ -29,53 +28,27 @@ function FieldInputMenuRouter() {
       {isSummaryOrDescription ? (
         <SummaryDescriptionInput focusField={fieldId} />
       ) : (
-        <FieldInputMenu key={field.fieldId} />
+        <FieldInputMenu key={fieldId} field={props.field} />
       )}
     </HotkeysScopeProvider>
-  )
-}
-
-function CreateIssueMenuLayout() {
-  const { template, values } = useCreateIssueDraftStore()
-
-  const ticket = useMemo<Partial<JiraIssue>>(() => {
-    const { project, issueType } = template.scope
-    return {
-      key: `${project.key}-?`,
-      summary: values['summary'] as string,
-      issueType,
-      status: undefined,
-      assignee: null,
-      priority: null
-    }
-  }, [template, values])
-
-  return (
-    <CommandList>
-      <CommandGroup>
-        <div className="outline-hidden relative flex min-h-[44px] cursor-default select-none items-center gap-2 rounded-sm p-3 text-sm">
-          <TicketBasicFields ticket={ticket} />
-        </div>
-      </CommandGroup>
-
-      <Outlet />
-    </CommandList>
   )
 }
 
 function CreateIssueMenuInner() {
   useSetupWizard()
 
-  return (
-    <Routes>
-      <Route index element={<SummaryDescriptionInput focusField="summary" />} />
+  const { wizardFields, wizardIndex } = useCreateIssueDraftStore()
+  const activeField = wizardFields[wizardIndex]
 
-      <Route element={<CreateIssueMenuLayout />}>
-        <Route path="edit" element={<FieldInputMenuRouter />} />
-        <Route path="review" element={<CreateIssueFieldsMenu />} />
-      </Route>
-    </Routes>
-  )
+  if (!activeField) {
+    return (
+      <CommandList>
+        <CreateIssueFieldsMenu />
+      </CommandList>
+    )
+  }
+
+  return <FieldInputMenuRouter field={activeField} />
 }
 
 export function CreateIssueMenu() {

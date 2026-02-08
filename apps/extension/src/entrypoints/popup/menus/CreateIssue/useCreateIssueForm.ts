@@ -9,8 +9,6 @@ import { nextTick } from '@/utils/nextTick'
 import type { IssueTemplate } from '~/types/template'
 import { formatErrorMessage } from '~/utils/formatError'
 
-import { CommandRoutes } from '../../routes'
-
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 import { extractJiraFieldErrors, buildCreateIssueFields } from './utils'
 
@@ -63,9 +61,6 @@ export function useCreateIssueForm({ template }: UseCreateIssueFormOptions) {
       if (errorsMap) {
         setErrors(errorsMap)
         promoteFields(Object.keys(errorsMap))
-
-        // TD: clear fields navigate histories
-        navigate(CommandRoutes.CreateIssueReview)
 
         toast.update({
           style: 'failure',

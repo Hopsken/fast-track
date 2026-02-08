@@ -1,6 +1,5 @@
 import { Fragment, useMemo } from 'react'
 import { useMemoizedFn } from 'ahooks'
-import { useLocation } from 'react-router-dom'
 
 import { useFieldAdapter } from '@/common/fields'
 import { JiraFieldContext } from '@/common/fields/types'
@@ -12,14 +11,12 @@ import { FieldConfirm } from './FieldConfirm'
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 import { useWizardNavigation } from './useWizardNavigation'
 
-export function FieldInputMenu() {
-  const { field } = useLocation().state as { field: VisibleField }
+export function FieldInputMenu({ field }: { field: VisibleField }) {
   const { fieldId } = field
-
   const { search, setSearch } = useCommandInput()
   const { template, values, setValue } = useCreateIssueDraftStore()
-  const { goToNextField } = useWizardNavigation()
-  const currentValue = values[field.fieldId]
+  const { goToNextField, goBackToFieldsMenu } = useWizardNavigation()
+  const currentValue = values[fieldId]
 
   const adapter = useFieldAdapter(field.metadata)
   const fieldConfig = template.fields.find((c) => c.fieldId === fieldId)
@@ -45,6 +42,8 @@ export function FieldInputMenu() {
       capture: true
     }
   })
+
+  useHotkey('field-input.escape', goBackToFieldsMenu)
 
   const InputComponent = adapter.InputComponent
 

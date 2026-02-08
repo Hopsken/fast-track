@@ -1,11 +1,8 @@
-import { useNavigate } from 'react-router-dom'
-
 import { ActionLoading } from '@/components/actions'
 import { useIssueCreateMeta } from '@/hooks/useIssueCreateMeta'
 import { useHotkey } from '@/lib/hotkeys'
 import type { VisibleField } from '~/services/template-service/gap-analysis'
 
-import { CommandRoutes } from '../../routes'
 import { CommandControl } from '../CommandMenu'
 
 import { FieldConfirm } from './FieldConfirm'
@@ -14,8 +11,6 @@ import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 import { useCreateIssueForm } from './useCreateIssueForm'
 
 export function CreateIssueFieldsMenu() {
-  const navigate = useNavigate()
-
   const { template, values, errors, clearError, wizardFields, setWizardIndex } =
     useCreateIssueDraftStore()
 
@@ -52,8 +47,6 @@ export function CreateIssueFieldsMenu() {
     // Update wizard cursor so Cmd+Enter continues from this point
     const idx = wizardFields.findIndex((f) => f.fieldId === field.fieldId)
     if (idx >= 0) setWizardIndex(idx)
-
-    navigate(CommandRoutes.CreateIssueEditField, { state: { field } })
   }
 
   return (

@@ -1,9 +1,6 @@
 import { useMemoizedFn } from 'ahooks'
-import { useNavigate } from 'react-router-dom'
 
 import { useCommandInput } from '@/stores/command/useCommandInputStore'
-
-import { CommandRoutes } from '../../routes'
 
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 import { isEmptyValue } from './utils'
@@ -12,8 +9,12 @@ export function useWizardNavigation() {
   const { values, wizardFields, wizardIndex, setWizardIndex, clearError } =
     useCreateIssueDraftStore()
 
-  const navigate = useNavigate()
   const { setSearch } = useCommandInput()
+
+  const goBackToFieldsMenu = useMemoizedFn(() => {
+    setSearch('')
+    setWizardIndex(-1)
+  })
 
   /**
    * Save has already happened in the caller.
@@ -21,10 +22,10 @@ export function useWizardNavigation() {
    * or navigates to the review screen if every field has a value.
    */
   const goToNextField = useMemoizedFn(() => {
-    // Fallback: if wizard never initialized, just go back
+    // Fallback: if wizard never initialized, just reset the wizard field (go to fields menu)
     if (wizardFields.length === 0) {
       setSearch('')
-      navigate(-1)
+      setWizardIndex(-1)
       return
     }
 
@@ -37,19 +38,17 @@ export function useWizardNavigation() {
       setWizardIndex(i)
       setSearch('')
       clearError(field.fieldId)
-      navigate(CommandRoutes.CreateIssueEditField, {
-        state: { field }
-      })
       return
     }
 
     // All remaining fields filled → navigate to review
+    setWizardIndex(-1)
     setSearch('')
-    navigate(CommandRoutes.CreateIssueReview)
   })
 
   return {
     goToNextField,
+    goBackToFieldsMenu,
     currentStep: wizardIndex + 1,
     totalSteps: wizardFields.length
   }
