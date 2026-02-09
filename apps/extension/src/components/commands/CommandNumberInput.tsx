@@ -7,14 +7,15 @@ import { useMount } from 'ahooks'
 import { z } from 'zod'
 
 import { useHotkey } from '@/lib/hotkeys'
-import { useCommandInput } from '@/stores/command/useCommandInputStore'
-
-import { prefillNumberValue } from './utils'
 
 export type CommandNumberInputProps = {
   title?: string
   value?: number
   onChange: (value: number | null) => void
+
+  search?: string
+  setSearch?: (value: string) => void
+
   onConfirm: () => void
 }
 
@@ -22,18 +23,19 @@ export function CommandNumberInput({
   title,
   value,
   onChange,
+  search,
+  setSearch,
   onConfirm
 }: CommandNumberInputProps) {
-  // TODO: fix deps
-  const { search, setSearch } = useCommandInput()
-
   // Pre-fill the search box with current value
   useMount(() => {
-    prefillNumberValue(value, setSearch)
+    if (setSearch && value != null) {
+      setSearch(String(value))
+    }
   })
 
   useHotkey('field.confirm-simple', () => {
-    const trimmed = search.trim()
+    const trimmed = search?.trim()
     if (!trimmed) return onChange(null)
 
     const num = z.number().safeParse(trimmed).data

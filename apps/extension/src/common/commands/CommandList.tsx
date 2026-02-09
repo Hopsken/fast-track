@@ -20,7 +20,7 @@ export function CommandList(props: CommandListProps) {
   return (
     <CommandListComponent {...restProps}>
       {isLoading && <CommandLoading>Loading...</CommandLoading>}
-      {<CommandEmpty>{emptyPlaceholder}</CommandEmpty>}
+      {!isLoading && <CommandEmpty>{emptyPlaceholder}</CommandEmpty>}
       {children}
     </CommandListComponent>
   )

@@ -11,7 +11,8 @@ export const GenericSelectInput = <S extends FieldValueSchema>({
   context,
   onChange,
   onConfirm,
-  inputText
+  search,
+  onSearchChange
 }: FieldInputComponentProps<S>) => {
   const isMultiple = context.metadata.schema.type === 'array'
 
@@ -19,7 +20,7 @@ export const GenericSelectInput = <S extends FieldValueSchema>({
     adapter,
     context,
     config,
-    query: inputText
+    query: search
   })
 
   if (isMultiple) {
@@ -50,6 +51,8 @@ export const GenericSelectInput = <S extends FieldValueSchema>({
       onConfirm={onConfirm}
       getOptionValue={adapter.keyOf}
       getOptionLabel={adapter.labelOf ?? adapter.keyOf}
+      search={search}
+      setSearch={onSearchChange}
     />
   )
 }

@@ -1,7 +1,7 @@
 import { useCreation } from 'ahooks'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 
-import { NavigationProvider } from '@/common/commands'
+import { CommandFooter, NavigationProvider } from '@/common/commands'
 import { EmptyAuthNotice } from '@/components/EmptyAuthNotice'
 import { QueryClientProvider } from '@/components/QueryClientProvider'
 import { HotkeysProvider } from '@/lib/hotkeys'
@@ -12,11 +12,7 @@ import {
 } from '@/stores/useCurrentUser'
 import { UserPreferencesProvider } from '@/stores/useUserPreferences'
 
-import { CommandLayout } from './menus/CommandLayout'
-import { CreateIssueMenu } from './menus/CreateIssue'
-import { IssueMenu } from './menus/IssueMenu'
 import { MainMenu } from './menus/MainMenu'
-import { CommandRoutes } from './routes'
 
 function App() {
   return (
@@ -24,6 +20,7 @@ function App() {
       <NavigationProvider>
         <MainMenu />
       </NavigationProvider>
+      <CommandFooter />
     </div>
   )
 }

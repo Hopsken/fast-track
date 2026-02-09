@@ -1,19 +1,26 @@
 import { Fragment, useMemo } from 'react'
 import { useMemoizedFn } from 'ahooks'
+import { first } from 'lodash-es'
 
+import {
+  CommandPanel,
+  useCommandSearch,
+  useSetCommandSearch
+} from '@/common/commands'
 import { useFieldAdapter } from '@/common/fields'
 import { JiraFieldContext } from '@/common/fields/types'
 import { useHotkey } from '@/lib/hotkeys'
-import { useCommandInput } from '@/stores/command/useCommandInputStore'
 import { VisibleField } from '~/services/template-service/gap-analysis'
 
 import { FieldConfirm } from './FieldConfirm'
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 import { useWizardNavigation } from './useWizardNavigation'
 
-export function FieldInputMenu({ field }: { field: VisibleField }) {
+function FieldInputMenuInner({ field }: { field: VisibleField }) {
   const { fieldId } = field
-  const { search, setSearch } = useCommandInput()
+
+  const search = useCommandSearch()
+  const setSearch = useSetCommandSearch()
   const { template, values, setValue } = useCreateIssueDraftStore()
   const { goToNextField, goBackToFieldsMenu } = useWizardNavigation()
   const currentValue = values[fieldId]
@@ -52,9 +59,37 @@ export function FieldInputMenu({ field }: { field: VisibleField }) {
         onChange={onChange}
         onConfirm={onConfirm}
         value={currentValue}
-        inputText={search}
+        search={search}
+        onSearchChange={setSearch}
       />
       <FieldConfirm onClick={onConfirm} />
     </Fragment>
+  )
+}
+
+export function FieldInputMenu({ field }: { field: VisibleField }) {
+  const adapter = useFieldAdapter(field.metadata)
+
+  const { values } = useCreateIssueDraftStore()
+  const currentValue = values[field.fieldId]
+
+  const initialValue = useMemo(() => {
+    if (!currentValue) return ''
+
+    if (Array.isArray(currentValue)) {
+      const firstValue = first(currentValue)
+      return adapter.keyOf(firstValue) ?? ''
+    }
+
+    return adapter.keyOf(currentValue) ?? ''
+  }, [currentValue, adapter])
+
+  // TODO: implement filter logic
+  // const shouldFilter = ...
+
+  return (
+    <CommandPanel value={initialValue}>
+      <FieldInputMenuInner field={field} />
+    </CommandPanel>
   )
 }

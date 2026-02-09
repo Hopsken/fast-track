@@ -1,19 +1,24 @@
 import {
-  CommandEmpty,
+  Action,
   CommandGroup,
   CommandList,
-  CommandLoading
-} from '@internal/ui/components/command'
-
-import { Action, ActionLoading } from '@/components/actions'
+  CommandPanel
+} from '@/common/commands'
 import { useIssueTransitions } from '@/hooks/useIssueTransitions'
 import { useMutationTransitionIssue } from '@/hooks/useMutationTransitionIssue'
-import { JiraTransition } from '@/types'
+import { useTicketDetails } from '@/hooks/useTicketDetails'
+import { JiraIssue, JiraTransition } from '@/types'
 
-import { useCurrentTicket } from './useCurrentTicket'
+export function IssueStatusMenu({ ticketKey }: { ticketKey: string }) {
+  const { data: ticketData, isLoading } = useTicketDetails(ticketKey)
+  return (
+    <CommandPanel isLoading={isLoading}>
+      {ticketData ? <IssueStatusMenuInner ticket={ticketData} /> : null}
+    </CommandPanel>
+  )
+}
 
-export function TicketStatusMenu() {
-  const ticket = useCurrentTicket()
+function IssueStatusMenuInner({ ticket }: { ticket: JiraIssue }) {
   const { data: transitions, isLoading } = useIssueTransitions(ticket)
   const { mutate: transitionIssue } = useMutationTransitionIssue()
 
@@ -31,8 +36,6 @@ export function TicketStatusMenu() {
   }
 
   function renderList() {
-    if (isLoading) return <CommandLoading>Loading...</CommandLoading>
-
     if (!transitions) return null
 
     return transitions
@@ -53,10 +56,10 @@ export function TicketStatusMenu() {
   }
 
   return (
-    <CommandList>
-      <ActionLoading isLoading={isLoading} />
+    <CommandList
+      isLoading={isLoading}
+      emptyPlaceholder="No available transitions">
       <CommandGroup heading="Change status...">{renderList()}</CommandGroup>
-      {!isLoading && <CommandEmpty>No available transitions</CommandEmpty>}
     </CommandList>
   )
 }

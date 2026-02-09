@@ -1,10 +1,7 @@
-import { useMemo } from 'react'
-import { CommandGroup, CommandList } from '@internal/ui/components/command'
-import { Outlet, Route, Routes, useLocation } from 'react-router-dom'
+import { CommandList } from '@internal/ui/components/command'
 
-import { TicketBasicFields } from '@/components'
+import { CommandPanel } from '@/common/commands'
 import { HotkeysScopeProvider } from '@/lib/hotkeys'
-import type { JiraIssue } from '@/types'
 import type { VisibleField } from '~/services/template-service/gap-analysis'
 import type { IssueTemplate } from '~/types/template'
 
@@ -41,21 +38,13 @@ function CreateIssueMenuInner() {
   const activeField = wizardFields[wizardIndex]
 
   if (!activeField) {
-    return (
-      <CommandList>
-        <CreateIssueFieldsMenu />
-      </CommandList>
-    )
+    return <CreateIssueFieldsMenu />
   }
 
   return <FieldInputMenuRouter field={activeField} />
 }
 
-export function CreateIssueMenu() {
-  const { template } = (useLocation().state ?? {}) as {
-    template: IssueTemplate
-  }
-
+export function CreateIssueMenu({ template }: { template: IssueTemplate }) {
   return (
     <HotkeysScopeProvider scope="create-issue">
       <CreateIssueDraftStoreProvider template={template}>

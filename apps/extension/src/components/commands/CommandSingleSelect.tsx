@@ -8,8 +8,6 @@ import {
 } from '@internal/ui/components/command'
 import { useMount } from 'ahooks'
 
-import { useCommandInput } from '@/stores/command/useCommandInputStore'
-
 import { GeneralIcon } from '../ui'
 
 import { getIconUrl } from './utils'
@@ -22,6 +20,9 @@ export type CommandSingleSelectProps<T> = {
   onChange: (value: T | null) => void
   onConfirm?: () => void
 
+  search?: string
+  setSearch?: (value: string) => void
+
   options: T[]
   getOptionValue: (option: T) => string
   getOptionLabel?: (option: T) => string
@@ -31,7 +32,6 @@ export type CommandSingleSelectProps<T> = {
 export function CommandSingleSelect<T>({
   title,
   isLoading,
-  value,
   onChange,
   onConfirm,
   options,
@@ -39,25 +39,6 @@ export function CommandSingleSelect<T>({
   getOptionLabel,
   getOptionKeywords
 }: CommandSingleSelectProps<T>) {
-  const { setValue } = useCommandInput()
-
-  useMount(() => {
-    let timeoutId: number
-
-    if (value) {
-      const optVal = getOptionValue(value)
-      timeoutId = window.setTimeout(() => {
-        setValue(optVal)
-      }, 0)
-    }
-
-    return () => {
-      if (timeoutId) {
-        window.clearTimeout(timeoutId)
-      }
-    }
-  })
-
   const onSelect = (opt: T) => {
     onChange(opt)
     onConfirm?.()

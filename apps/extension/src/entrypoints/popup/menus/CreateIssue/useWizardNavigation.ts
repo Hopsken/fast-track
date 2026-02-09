@@ -1,6 +1,6 @@
 import { useMemoizedFn } from 'ahooks'
 
-import { useCommandInput } from '@/stores/command/useCommandInputStore'
+import { useSetCommandSearch } from '@/common/commands'
 
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 import { isEmptyValue } from './utils'
@@ -9,7 +9,7 @@ export function useWizardNavigation() {
   const { values, wizardFields, wizardIndex, setWizardIndex, clearError } =
     useCreateIssueDraftStore()
 
-  const { setSearch } = useCommandInput()
+  const setSearch = useSetCommandSearch()
 
   const goBackToFieldsMenu = useMemoizedFn(() => {
     setSearch('')

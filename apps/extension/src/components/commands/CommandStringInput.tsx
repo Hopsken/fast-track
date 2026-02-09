@@ -6,13 +6,12 @@ import {
 import { useMount } from 'ahooks'
 
 import { useHotkey } from '@/lib/hotkeys'
-import { useCommandInput } from '@/stores/command/useCommandInputStore'
-
-import { prefillStringValue } from './utils'
 
 export type CommandStringInputProps = {
   title?: string
   value?: string
+  search?: string
+  setSearch?: (value: string) => void
   onChange: (value: string) => void
   onConfirm: () => void
 }
@@ -20,21 +19,22 @@ export type CommandStringInputProps = {
 export function CommandStringInput({
   title,
   value,
+  search,
+  setSearch,
   onChange,
   onConfirm
 }: CommandStringInputProps) {
   // TODO: fix deps
-  const { search, setSearch } = useCommandInput()
 
   // Pre-fill the search box with current value
   useMount(() => {
     if (value) {
-      prefillStringValue(value, setSearch)
+      setSearch?.(value)
     }
   })
 
   useHotkey('field.confirm-simple', () => {
-    onChange(search)
+    onChange(search ?? '')
     onConfirm()
   })
 

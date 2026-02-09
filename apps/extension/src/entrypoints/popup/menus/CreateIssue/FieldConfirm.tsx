@@ -1,7 +1,6 @@
 import { Button } from '@internal/ui/components/button'
 
-import { ActionShortcut } from '@/components/actions/ActionShortcut'
-import { CommandFooterSlot } from '@/stores/command/useCommandFooterSlot'
+import { CommandFooterSlot, CommandShortcut } from '@/common/commands'
 
 import { WizardProgressBar } from './WizardProgressBar'
 
@@ -21,7 +20,7 @@ export function FieldConfirm(props: {
           className="-my-1 -mr-4"
           disabled={props.disabled}>
           <span>{props.text || 'Continue'}</span>
-          <ActionShortcut hotkeyId="field.confirm-complex" />
+          <CommandShortcut hotkeyId="field.confirm-complex" />
         </Button>
       </div>
     </CommandFooterSlot>

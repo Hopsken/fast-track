@@ -8,7 +8,16 @@ import { GenericSelectInput } from '../select/GenericSelectInput'
 export const GenericNumberInput = (
   props: FieldInputComponentProps<ZodNumber>
 ) => {
-  const { config, adapter, context, value, onChange, onConfirm } = props
+  const {
+    config,
+    adapter,
+    context,
+    value,
+    onChange,
+    search,
+    onSearchChange,
+    onConfirm
+  } = props
 
   // 限制模式：使用配置的 allowedOptions，并在前端做简单的本地过滤
   if (
@@ -35,6 +44,8 @@ export const GenericNumberInput = (
       title={adapter.title ?? context.metadata.name}
       value={value}
       onChange={onChange}
+      search={search}
+      setSearch={onSearchChange}
       onConfirm={onConfirm}
     />
   )

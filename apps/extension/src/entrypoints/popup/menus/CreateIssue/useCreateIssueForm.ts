@@ -1,9 +1,8 @@
 import { useMemoizedFn } from 'ahooks'
-import { useNavigate } from 'react-router-dom'
 
+import { useNavigation } from '@/common/commands'
 import { getJiraService } from '@/services/jira-service'
 import { getTemplateService } from '@/services/template-service'
-import { useCommandInput } from '@/stores/command/useCommandInputStore'
 import { showToast } from '@/stores/command/useToastStore'
 import { nextTick } from '@/utils/nextTick'
 import type { IssueTemplate } from '~/types/template'
@@ -17,8 +16,7 @@ export interface UseCreateIssueFormOptions {
 }
 
 export function useCreateIssueForm({ template }: UseCreateIssueFormOptions) {
-  const { setSearch } = useCommandInput()
-  const navigate = useNavigate()
+  const navigate = useNavigation()
   const { values, wizardFields, setErrors, promoteFields, reset } =
     useCreateIssueDraftStore()
 
@@ -52,9 +50,7 @@ export function useCreateIssueForm({ template }: UseCreateIssueFormOptions) {
 
       reset()
 
-      // Return to main menu and clear the "+" query.
-      navigate('/')
-      setSearch('')
+      navigate.pop()
     } catch (e) {
       const errorsMap = extractJiraFieldErrors(e)
 

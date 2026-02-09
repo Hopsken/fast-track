@@ -35,17 +35,17 @@ export type CommandProviderProps = Partial<
 const createCommandStore = (props: CommandProviderProps) =>
   createStore<CommandStoreState>()(
     devtools((set) => ({
-      value: props.value || '',
+      value: props.value ?? '',
       setValue: (value) => set({ value }),
 
-      isLoading: props.isLoading,
-      searchPlaceholder: props.searchPlaceholder,
-      searchReadonly: props.searchReadonly,
+      isLoading: props.isLoading ?? false,
+      searchPlaceholder: props.searchPlaceholder ?? 'Filter by title...',
+      searchReadonly: props.searchReadonly ?? false,
 
-      search: props.search || '',
+      search: props.search ?? '',
       setSearch: (search) => set({ search }),
 
-      shouldFilter: props.shouldFilter
+      shouldFilter: props.shouldFilter ?? true
     }))
   )
 
@@ -71,7 +71,7 @@ export const useCommandStore = <R,>(
   return useStore(store, selector)
 }
 
-export const useUpdateCommandSearch = () => {
+export const useSetCommandSearch = () => {
   return useCommandStore((state) => state.setSearch)
 }
 

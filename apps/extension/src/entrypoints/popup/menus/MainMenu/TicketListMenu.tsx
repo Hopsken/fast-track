@@ -9,7 +9,7 @@ import { IssueSuggestion } from '@/services/suggestion-service'
 import { JiraIssue } from '@/types'
 import { isTicketKey } from '@/utils/jira/issues'
 
-import { IssueMenu } from '../IssueMenu'
+import { useIssueMenus } from '../IssueMenu'
 
 import { SearchResultMenu } from './SearchResultMenu'
 
@@ -63,20 +63,20 @@ function SuggestedTickets({ isLoading, issues }: SuggestedTicketsProps) {
 
 function useQuickNavigate() {
   const ticketKey = useCommandState((s) => s.value)
-  const navigate = useNavigation()
+  const issueMenus = useIssueMenus()
 
   useHotkey('issue.status', () => {
     if (!isTicketKey(ticketKey)) return
-    navigate.push(<IssueMenu ticketKey={ticketKey} />)
+    issueMenus.openIssueMenu(ticketKey)
   })
 
   useHotkey('issue.priority', () => {
     if (!isTicketKey(ticketKey)) return
-    navigate.push(<IssueMenu ticketKey={ticketKey} />)
+    issueMenus.openIssuePriorityMenu(ticketKey)
   })
 
   useHotkey('issue.assign', () => {
     if (!isTicketKey(ticketKey)) return
-    navigate.push(<IssueMenu ticketKey={ticketKey} />)
+    issueMenus.openIssueAssignMenu(ticketKey)
   })
 }

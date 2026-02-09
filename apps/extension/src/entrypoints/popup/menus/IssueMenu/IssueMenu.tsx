@@ -5,6 +5,7 @@ import {
   CommandGroup,
   CommandItem,
   CommandList,
+  CommandPanel,
   CommandSeparator
 } from '@/common/commands'
 import { PrefetchProvider } from '@/components/PrefetchQuery'
@@ -16,18 +17,20 @@ import { useTicketDetails } from '@/hooks/useTicketDetails'
 import { JiraIssueDetail, JiraIssue } from '@/types'
 import { openJiraIssue } from '@/utils/open-jira-issue'
 
-export const IssueMainMenu = memo(function IssueMainMenu({
+import { IssueActions } from './IssueActions'
+
+export const IssueMenu = memo(function IssueMenu({
   ticketKey
 }: {
   ticketKey: string
 }) {
-  const { data: ticket } = useTicketDetails(ticketKey)
+  const { isLoading, data: ticket } = useTicketDetails(ticketKey)
 
-  if (!ticket) {
-    return null
-  }
-
-  return <IssueMainMenuInner ticket={ticket} />
+  return (
+    <CommandPanel isLoading={isLoading}>
+      {ticket ? <IssueMainMenuInner ticket={ticket} /> : null}
+    </CommandPanel>
+  )
 })
 
 const IssueMainMenuInner = ({ ticket }: { ticket: JiraIssueDetail }) => {
@@ -44,6 +47,8 @@ const IssueMainMenuInner = ({ ticket }: { ticket: JiraIssueDetail }) => {
       </CommandGroup>
 
       <CommandSeparator />
+
+      <IssueActions ticket={ticket} />
 
       <PrefetchProvider>
         <PrefetchActions ticket={ticket} />

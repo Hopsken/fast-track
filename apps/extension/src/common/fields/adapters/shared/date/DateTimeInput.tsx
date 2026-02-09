@@ -8,7 +8,6 @@ import {
 import { ZodString } from 'zod'
 
 import { useHotkey } from '@/lib/hotkeys'
-import { useCommandInput } from '@/stores/command/useCommandInputStore'
 import { formatDateTimeDisplay, formatDateTimeISO } from '@/utils/date-format'
 
 import { FieldInputComponentProps } from '../../../types'
@@ -16,12 +15,10 @@ import { FieldInputComponentProps } from '../../../types'
 import { parseNaturalDateTime, toJiraDateTime } from './dateParsing'
 
 export const DateTimeInput = (props: FieldInputComponentProps<ZodString>) => {
-  const { adapter, context, onChange, onConfirm } = props
-
-  const { search } = useCommandInput()
+  const { adapter, context, onChange, onConfirm, search } = props
 
   const parsedDateTime = useMemo(() => {
-    const trimmed = search.trim()
+    const trimmed = search?.trim()
     if (!trimmed) return null
     return parseNaturalDateTime(trimmed)
   }, [search])
@@ -32,7 +29,7 @@ export const DateTimeInput = (props: FieldInputComponentProps<ZodString>) => {
   }, [parsedDateTime])
 
   const handleSelect = () => {
-    const trimmed = search.trim()
+    const trimmed = search?.trim()
     if (!trimmed) {
       onChange(null)
       onConfirm()
@@ -53,9 +50,9 @@ export const DateTimeInput = (props: FieldInputComponentProps<ZodString>) => {
   return (
     <CommandList>
       <CommandGroup heading={adapter.title ?? context.metadata.name}>
-        {!search.trim() ? (
+        {!search?.trim() ? (
           <CommandEmpty>
-            Type a date/time (e.g., "tomorrow at 3pm", "next friday 9am")
+            {`Type a date/time (e.g., "tomorrow at 3pm", "next friday 9am")`}
           </CommandEmpty>
         ) : parsedDateTime && displayDateTime ? (
           <CommandItem value={search} onSelect={handleSelect}>

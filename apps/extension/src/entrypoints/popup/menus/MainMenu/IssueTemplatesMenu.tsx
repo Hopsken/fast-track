@@ -1,19 +1,18 @@
 import { useCallback } from 'react'
 import { Settings } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 
-import { CommandGroup, CommandList } from '@/common/commands'
+import { CommandGroup, CommandList, useNavigation } from '@/common/commands'
 import { GeneralIcon } from '@/components'
 import { Action } from '@/components/actions'
 import { useTemplates } from '@/hooks/useTemplates'
 import { IssueTemplate } from '@/types/template'
 import { openOptionsPage } from '@/utils'
 
-import { CommandRoutes } from '../../routes'
+import { CreateIssueMenu } from '../CreateIssue'
 
 export function IssueTemplatesMenu() {
   const { data: templates, isLoading } = useTemplates()
-  const navigate = useNavigate()
+  const navigate = useNavigation()
 
   const handleCreateTemplate = () => {
     openOptionsPage('/templates')
@@ -21,9 +20,7 @@ export function IssueTemplatesMenu() {
 
   const onSelect = useCallback(
     (template: IssueTemplate) => {
-      navigate(CommandRoutes.CreateIssueFromTemplate(template.id), {
-        state: { template }
-      })
+      navigate.push(<CreateIssueMenu template={template} />)
     },
     [navigate]
   )

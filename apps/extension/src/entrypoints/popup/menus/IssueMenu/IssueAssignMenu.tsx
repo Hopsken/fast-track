@@ -1,25 +1,28 @@
 import {
-  CommandEmpty,
   CommandGroup,
   CommandList,
-  CommandLoading,
-  useCommandState
-} from '@internal/ui/components/command'
-
-import { Action, ActionLoading, ActionUser } from '@/components/actions'
+  CommandPanel,
+  useCommandSearch
+} from '@/common/commands'
+import { Action } from '@/common/commands/actions'
+import { ActionUser } from '@/components/actions'
 import { useAutoCompleteUsers } from '@/hooks/useAutoComplete'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
 import { useMutationAssignIssue } from '@/hooks/useMutationAssignIssue'
 import { AssigneeAvatar } from '~/components/ui/jira'
 
-import { useCurrentTicket } from './useCurrentTicket'
-
-export function TicketAssignMenu() {
-  const ticket = useCurrentTicket()
-  const { data: editMeta, isLoading: isLoadingEditMeta } = useIssueEditMeta(
-    ticket.key
+export function IssueAssignMenu({ ticketKey }: { ticketKey: string }) {
+  return (
+    <CommandPanel>
+      <IssueAssignMenuInner ticketKey={ticketKey} />
+    </CommandPanel>
   )
-  const search = useCommandState((state) => state.search)
+}
+
+function IssueAssignMenuInner({ ticketKey }: { ticketKey: string }) {
+  const { data: editMeta, isLoading: isLoadingEditMeta } =
+    useIssueEditMeta(ticketKey)
+  const search = useCommandSearch()
 
   const assigneeAutoCompleteUrl =
     editMeta?.fields?.assignee?.autoCompleteUrl || ''
@@ -34,15 +37,13 @@ export function TicketAssignMenu() {
       value="assignee-none"
       prefix={<AssigneeAvatar assignee={null} />}
       title="No assignee"
-      onSelect={() => assignTicket({ ticketKey: ticket.key, assignee: null })}
+      onSelect={() => assignTicket({ ticketKey, assignee: null })}
     />
   )
 
   const isLoading = isLoadingUsers || isLoadingEditMeta
 
   function renderList() {
-    if (isLoading) return <CommandLoading>Loading...</CommandLoading>
-
     return users?.map((user) => {
       const identifier =
         user.accountId || user.emailAddress || user.displayName || 'assignee'
@@ -54,22 +55,18 @@ export function TicketAssignMenu() {
           key={identifier}
           value={`${displayName} ${identifier}`}
           user={user}
-          onSelect={() =>
-            assignTicket({ ticketKey: ticket.key, assignee: user })
-          }
+          onSelect={() => assignTicket({ ticketKey, assignee: user })}
         />
       )
     })
   }
 
   return (
-    <CommandList>
-      <ActionLoading isLoading={isLoading} />
+    <CommandList isLoading={isLoading} emptyPlaceholder="No matching users">
       <CommandGroup heading="Assign to...">
         {unassignAction}
         {renderList()}
       </CommandGroup>
-      {!isLoading && <CommandEmpty>No matching users</CommandEmpty>}
     </CommandList>
   )
 }

@@ -1,19 +1,56 @@
-import { Route, Routes } from 'react-router-dom'
+import { useCallback } from 'react'
 
-import { CommandPanel } from '@/common/commands'
+import { useNavigation } from '@/common/commands'
 
-import { IssueMainMenu } from './IssueMainMenu'
-import { TicketActionsMenu } from './TicketActionsMenu'
-import { TicketAssignMenu } from './TicketAssignMenu'
-import { TicketDetailsMenu } from './TicketDetailsMenu'
-import { TicketMergeRequestsMenu } from './TicketMergeRequestsMenu'
-import { TicketPriorityMenu } from './TicketPriorityMenu'
-import { TicketStatusMenu } from './TicketStatusMenu'
+import { IssueAssignMenu } from './IssueAssignMenu'
+import { IssueMenu } from './IssueMenu'
+import { IssueMergeRequestsMenu } from './IssueMergeRequestsMenu'
+import { IssuePriorityMenu } from './IssuePriorityMenu'
+import { IssueStatusMenu } from './IssueStatusMenu'
 
-export function IssueMenu({ ticketKey }: { ticketKey: string }) {
-  return (
-    <CommandPanel>
-      <IssueMainMenu ticketKey={ticketKey} />
-    </CommandPanel>
+export function useIssueMenus() {
+  const navigate = useNavigation()
+
+  const openIssueMenu = useCallback(
+    (ticketKey: string) => {
+      navigate.push(<IssueMenu ticketKey={ticketKey} />)
+    },
+    [navigate]
   )
+
+  const openIssueAssignMenu = useCallback(
+    (ticketKey: string) => {
+      navigate.push(<IssueAssignMenu ticketKey={ticketKey} />)
+    },
+    [navigate]
+  )
+
+  const openIssueMergeRequestsMenu = useCallback(
+    (ticketKey: string) => {
+      navigate.push(<IssueMergeRequestsMenu ticketKey={ticketKey} />)
+    },
+    [navigate]
+  )
+
+  const openIssuePriorityMenu = useCallback(
+    (ticketKey: string) => {
+      navigate.push(<IssuePriorityMenu ticketKey={ticketKey} />)
+    },
+    [navigate]
+  )
+
+  const openIssueStatusMenu = useCallback(
+    (ticketKey: string) => {
+      navigate.push(<IssueStatusMenu ticketKey={ticketKey} />)
+    },
+    [navigate]
+  )
+
+  return {
+    openIssueMenu,
+    openIssueAssignMenu,
+    openIssueMergeRequestsMenu,
+    openIssuePriorityMenu,
+    openIssueStatusMenu
+  }
 }

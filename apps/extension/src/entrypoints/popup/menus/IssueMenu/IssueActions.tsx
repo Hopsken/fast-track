@@ -10,8 +10,8 @@ import {
   UserRoundPlus
 } from 'lucide-react'
 
+import { Action, ActionCopyToClipboard, ActionPush } from '@/common/commands'
 import { AssigneeAvatar } from '@/components'
-import { Action, ActionCopyToClipboard, ActionPush } from '@/components/actions'
 import { useMutationAssignMyself } from '@/hooks/useMutationAssignIssue'
 import { HotkeysScopeProvider } from '@/lib/hotkeys'
 import { useCurrentUser } from '@/stores/useCurrentUser'
@@ -19,12 +19,11 @@ import { useUserPreferences } from '@/stores/useUserPreferences'
 import { JiraIssue } from '@/types'
 import { generateBranchName, getIssueTitleLink } from '@/utils/jira/issues'
 
-import { CommandRoutes } from '../../routes'
+import { IssueAssignMenu } from './IssueAssignMenu'
+import { IssuePriorityMenu } from './IssuePriorityMenu'
+import { IssueStatusMenu } from './IssueStatusMenu'
 
-import { useCurrentTicket } from './useCurrentTicket'
-
-export const TicketActionsMenu = () => {
-  const ticket = useCurrentTicket()
+export const IssueActions = ({ ticket }: { ticket: JiraIssue }) => {
   const [preferences] = useUserPreferences()
 
   const formatted = useMemo(
@@ -41,7 +40,7 @@ export const TicketActionsMenu = () => {
         <CommandGroup heading="General">
           <ActionPush
             value="assign-to"
-            target={CommandRoutes.IssueDetails(ticket.key)}
+            target={<IssueAssignMenu ticketKey={ticket.key} />}
             icon={UserPen}
             title="Assign to..."
             hotkeyId="issue.assign"
@@ -51,7 +50,7 @@ export const TicketActionsMenu = () => {
 
           <ActionPush
             value="change-status"
-            target={CommandRoutes.IssueStatus(ticket.key)}
+            target={<IssueStatusMenu ticketKey={ticket.key} />}
             icon={Route}
             title="Change status..."
             hotkeyId="issue.status"
@@ -59,7 +58,7 @@ export const TicketActionsMenu = () => {
 
           <ActionPush
             value="change-priority"
-            target={CommandRoutes.IssuePriority(ticket.key)}
+            target={<IssuePriorityMenu ticketKey={ticket.key} />}
             icon={ChartNoAxesColumnIncreasing}
             title="Change priority..."
             hotkeyId="issue.priority"

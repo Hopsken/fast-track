@@ -1,4 +1,4 @@
-import { PropsWithChildren, ReactNode } from 'react'
+import { PropsWithChildren, ReactElement, ReactNode } from 'react'
 import { last, pick, reverse } from 'lodash-es'
 import { createStore, useStore } from 'zustand'
 import { useShallow } from 'zustand/shallow'
@@ -11,7 +11,7 @@ type NavigationItem = {
 type NavigationStoreState = {
   stacks: NavigationItem[]
 
-  push: (target: ReactNode, onPop?: () => void) => void
+  push: (target: ReactElement, onPop?: () => void) => void
   pop: (step?: number) => void
 }
 
@@ -49,6 +49,6 @@ export function useNavigation() {
 export function useIsNavigationRoot() {
   return useStore(
     navigationStore,
-    useShallow((s) => s.stacks.length <= 1)
+    useShallow((s) => !s.stacks.length)
   )
 }

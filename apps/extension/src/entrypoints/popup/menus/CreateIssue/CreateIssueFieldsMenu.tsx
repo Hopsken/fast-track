@@ -1,9 +1,8 @@
+import { CommandPanel } from '@/common/commands'
 import { ActionLoading } from '@/components/actions'
 import { useIssueCreateMeta } from '@/hooks/useIssueCreateMeta'
 import { useHotkey } from '@/lib/hotkeys'
 import type { VisibleField } from '~/services/template-service/gap-analysis'
-
-import { CommandControl } from '../CommandMenu'
 
 import { FieldConfirm } from './FieldConfirm'
 import { FieldList } from './FieldList'
@@ -46,7 +45,7 @@ export function CreateIssueFieldsMenu() {
   }
 
   return (
-    <CommandControl searchPlaceholder={template.name} searchReadonly>
+    <CommandPanel searchPlaceholder={template.name} searchReadonly>
       <ActionLoading isLoading={isLoadingFields} />
 
       <FieldList
@@ -58,6 +57,6 @@ export function CreateIssueFieldsMenu() {
       />
 
       <FieldConfirm onClick={submit} text="Create Issue" />
-    </CommandControl>
+    </CommandPanel>
   )
 }

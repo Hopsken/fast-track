@@ -1,4 +1,4 @@
-import { PropsWithChildren, ReactNode } from 'react'
+import { PropsWithChildren, ReactElement } from 'react'
 import { useMemoizedFn } from 'ahooks'
 
 import { useNavigation } from '../navigation'
@@ -6,7 +6,7 @@ import { useNavigation } from '../navigation'
 import { Action, ActionProps } from './Action'
 
 export interface ActionPushProps extends ActionProps {
-  target: ReactNode
+  target: ReactElement
 
   onPush?: () => void
   onPop?: () => void
