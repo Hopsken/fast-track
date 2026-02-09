@@ -1,6 +1,6 @@
-import { CommandList } from '@internal/ui/components/command'
 import { Cog, MessageSquareWarning } from 'lucide-react'
 
+import { CommandList } from '@/common/commands'
 import { Action } from '@/components/actions'
 import { openInNewTab, openOptionsPage } from '@/utils'
 

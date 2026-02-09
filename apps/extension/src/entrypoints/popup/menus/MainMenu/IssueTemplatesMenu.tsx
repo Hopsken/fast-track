@@ -1,12 +1,8 @@
 import { useCallback } from 'react'
-import {
-  CommandEmpty,
-  CommandGroup,
-  CommandList
-} from '@internal/ui/components/command'
-import { FileText, Settings } from 'lucide-react'
+import { Settings } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
+import { CommandGroup, CommandList } from '@/common/commands'
 import { GeneralIcon } from '@/components'
 import { Action } from '@/components/actions'
 import { useTemplates } from '@/hooks/useTemplates'
@@ -33,9 +29,7 @@ export function IssueTemplatesMenu() {
   )
 
   return (
-    <CommandList>
-      <CommandEmpty>No templates</CommandEmpty>
-
+    <CommandList isLoading={isLoading} emptyPlaceholder="No templates">
       <CommandGroup heading="Issue Templates">
         {templates?.map((template) => (
           <Action

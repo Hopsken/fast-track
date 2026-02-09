@@ -1,18 +1,15 @@
 import { CommandGroup, useCommandState } from '@internal/ui/components/command'
 import { compact } from 'lodash-es'
-import { useNavigate } from 'react-router-dom'
 
-import { ActionLoading } from '@/components/actions'
+import { CommandList, useCommandSearch, useNavigation } from '@/common/commands'
 import { TicketItem } from '@/components/tickets'
 import { useIssueSuggestions } from '@/hooks/useIssueSuggestions'
 import { useHotkey } from '@/lib/hotkeys'
 import { IssueSuggestion } from '@/services/suggestion-service'
-import { useCommandSearch } from '@/stores/command/useCommandInputStore'
 import { JiraIssue } from '@/types'
 import { isTicketKey } from '@/utils/jira/issues'
 
-import { CommandRoutes } from '../../routes'
-import { CommandMenu } from '../CommandMenu'
+import { IssueMenu } from '../IssueMenu'
 
 import { SearchResultMenu } from './SearchResultMenu'
 
@@ -20,27 +17,26 @@ export function TicketListMenu() {
   const searchQuery = useCommandSearch()
   const shouldShowSuggestions = !searchQuery.trim()
 
-  const { data: issueSuggestions, isLoading } = useIssueSuggestions()
+  const { data: issueSuggestions } = useIssueSuggestions()
 
   useQuickNavigate()
 
-  return (
-    <CommandMenu shouldFilter={false} aria-label="Ticket search results">
-      <ActionLoading isLoading={isLoading} />
-      {shouldShowSuggestions ? (
-        <SuggestedTickets issues={issueSuggestions} />
-      ) : (
-        <SearchResultMenu suggestions={issueSuggestions} />
-      )}
-    </CommandMenu>
+  return shouldShowSuggestions ? (
+    <SuggestedTickets issues={issueSuggestions} />
+  ) : (
+    <SearchResultMenu
+      searchQuery={searchQuery}
+      suggestions={issueSuggestions}
+    />
   )
 }
 
 interface SuggestedTicketsProps {
+  isLoading?: boolean
   issues?: IssueSuggestion
 }
 
-function SuggestedTickets({ issues }: SuggestedTicketsProps) {
+function SuggestedTickets({ isLoading, issues }: SuggestedTicketsProps) {
   const getTickets = (keys?: string[]) =>
     compact(keys?.map((ticketKey) => issues?.tickets[ticketKey])) ?? []
 
@@ -56,31 +52,31 @@ function SuggestedTickets({ issues }: SuggestedTicketsProps) {
     )
   }
   return (
-    <>
+    <CommandList isLoading={isLoading}>
       {renderGroup('In Progress', getTickets(issues?.inProgress))}
       {renderGroup('Upcoming', getTickets(issues?.todo))}
       {renderGroup('Done', getTickets(issues?.done))}
       {renderGroup('Recommend for you', getTickets(issues?.recommend))}
-    </>
+    </CommandList>
   )
 }
 
 function useQuickNavigate() {
   const ticketKey = useCommandState((s) => s.value)
-  const navigate = useNavigate()
+  const navigate = useNavigation()
 
   useHotkey('issue.status', () => {
     if (!isTicketKey(ticketKey)) return
-    navigate(CommandRoutes.IssueStatus(ticketKey))
+    navigate.push(<IssueMenu ticketKey={ticketKey} />)
   })
 
   useHotkey('issue.priority', () => {
     if (!isTicketKey(ticketKey)) return
-    navigate(CommandRoutes.IssuePriority(ticketKey))
+    navigate.push(<IssueMenu ticketKey={ticketKey} />)
   })
 
   useHotkey('issue.assign', () => {
     if (!isTicketKey(ticketKey)) return
-    navigate(CommandRoutes.IssueAssign(ticketKey))
+    navigate.push(<IssueMenu ticketKey={ticketKey} />)
   })
 }

@@ -1,7 +1,8 @@
 import { CommandItem } from '@internal/ui/components/command'
 import { useMemoizedFn } from 'ahooks'
-import { useNavigate } from 'react-router-dom'
 
+import { useNavigation } from '@/common/commands'
+import { IssueMenu } from '@/entrypoints/popup/menus/IssueMenu'
 import { useIsOptionKeyPressed } from '@/hooks/useIsOptionKeyPressed'
 import { getSuggestionService } from '@/services'
 import { JiraIssue } from '@/types'
@@ -33,7 +34,7 @@ export function TicketItem({
   showPriority = true,
   showStatus = true
 }: TicketItemProps) {
-  const navigate = useNavigate()
+  const navigate = useNavigation()
   const isOptionKeyPressed = useIsOptionKeyPressed()
 
   const onSelect = useMemoizedFn(() => {
@@ -44,7 +45,7 @@ export function TicketItem({
     if (isOptionKeyPressed) {
       openJiraIssue(ticket.key)
     } else {
-      navigate(`/ticket/${ticket.key}`)
+      navigate.push(<IssueMenu ticketKey={ticket.key} />)
     }
   })
 

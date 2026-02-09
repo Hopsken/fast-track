@@ -1,6 +1,7 @@
 import { useCreation } from 'ahooks'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 
+import { NavigationProvider } from '@/common/commands'
 import { EmptyAuthNotice } from '@/components/EmptyAuthNotice'
 import { QueryClientProvider } from '@/components/QueryClientProvider'
 import { HotkeysProvider } from '@/lib/hotkeys'
@@ -20,18 +21,9 @@ import { CommandRoutes } from './routes'
 function App() {
   return (
     <div className="linear w-xl">
-      <Routes>
-        <Route element={<CommandLayout />}>
-          <Route index element={<MainMenu />} />
-
-          <Route path={CommandRoutes.IssueDef} element={<IssueMenu />} />
-
-          <Route
-            path={CommandRoutes.CreateIssue}
-            element={<CreateIssueMenu />}
-          />
-        </Route>
-      </Routes>
+      <NavigationProvider>
+        <MainMenu />
+      </NavigationProvider>
     </div>
   )
 }

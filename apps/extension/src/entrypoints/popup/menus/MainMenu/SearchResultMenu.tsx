@@ -1,18 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CommandItem, CommandList } from '@internal/ui/components/command'
 import { compact, uniqBy } from 'lodash-es'
 
-import { ActionLoading } from '@/components/actions'
+import { CommandItem, CommandList } from '@/common/commands'
 import { TicketList } from '@/components/tickets'
 import { useFrequentProjects } from '@/hooks/useFrequentProjects'
-import { useSearchQuery, useTicketSearch } from '@/hooks/useTicketSearch'
+import { useTicketSearch } from '@/hooks/useTicketSearch'
 import { IssueSuggestion } from '@/services/suggestion-service'
 import { filterTicketsByQuery } from '@/utils/ticket-ranking'
 
-export function SearchResultMenu(props: { suggestions?: IssueSuggestion }) {
-  const { suggestions } = props
-
-  const searchQuery = useSearchQuery()
+export function SearchResultMenu(props: {
+  searchQuery: string
+  suggestions?: IssueSuggestion
+}) {
+  const { suggestions, searchQuery } = props
 
   const [showAllProjects, setShowAllProjects] = useState(false)
 
@@ -41,6 +41,7 @@ export function SearchResultMenu(props: { suggestions?: IssueSuggestion }) {
 
   const { data: scopedResults = [], isFetching: isScopedSearching } =
     useTicketSearch({
+      searchQuery,
       enabled: useScopedProjects && !showAllProjects,
       projectKeys: frequentProjects,
       limit: 6
@@ -48,6 +49,7 @@ export function SearchResultMenu(props: { suggestions?: IssueSuggestion }) {
 
   const { data: allResults = [], isFetching: isAllSearching } = useTicketSearch(
     {
+      searchQuery,
       enabled: !useScopedProjects || showAllProjects,
       limit: 10
     }
@@ -64,8 +66,10 @@ export function SearchResultMenu(props: { suggestions?: IssueSuggestion }) {
   const shouldShowMore =
     useScopedProjects && !showAllProjects && Boolean(searchQuery.trim())
 
+  console.log('shouldShowMore', shouldShowMore, searchResults)
+
   return (
-    <CommandList aria-label="Ticket search results">
+    <CommandList isLoading={isSearching} aria-label="Ticket search results">
       <TicketList
         searchQuery={searchQuery}
         tickets={searchResults}
@@ -73,14 +77,11 @@ export function SearchResultMenu(props: { suggestions?: IssueSuggestion }) {
       />
       {shouldShowMore ? (
         <CommandItem
-          forceMount
           value="show-all-projects"
           onSelect={() => setShowAllProjects(true)}>
           Show more results
         </CommandItem>
       ) : null}
-
-      <ActionLoading isLoading={isSearching} />
     </CommandList>
   )
 }
