@@ -29,11 +29,7 @@ export function CreateIssueFieldsMenu() {
     template
   })
 
-  useHotkey('issue.create.proceed', submit, {
-    eventListenerOptions: {
-      capture: true
-    }
-  })
+  useHotkey('issue.create.proceed', submit)
 
   // Field selection handler
   const handleSelectField = (field: VisibleField) => {

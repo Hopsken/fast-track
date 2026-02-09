@@ -1,7 +1,7 @@
 import { PropsWithChildren, useEffect } from 'react'
 import { useHotkeysContext } from 'react-hotkeys-hook'
 
-import { HotkeyScope } from './registry'
+import type { HotkeyScope } from './types'
 
 export function HotkeysScope({
   scope,

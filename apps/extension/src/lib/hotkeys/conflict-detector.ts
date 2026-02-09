@@ -4,12 +4,8 @@ import {
   resolvePlatformShortcut
 } from '@/lib/keyboard'
 
-import {
-  HOTKEY_REGISTRY,
-  HotkeyDefinition,
-  HotkeyScope,
-  HotkeyId
-} from './registry'
+import { HOTKEY_REGISTRY, HotkeyId } from './registry'
+import type { HotkeyDefinition, HotkeyScope } from './types'
 
 /**
  * Represents a conflict between two hotkeys.

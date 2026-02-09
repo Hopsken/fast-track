@@ -1,10 +1,13 @@
-// Core registry
+// Types
 export type {
   HotkeyScope,
   HotkeyCategory,
   HotkeyDefinition,
-  HotkeyId
-} from './registry'
+  RegisterHotkeyOptions
+} from './types'
+
+// Core registry
+export type { HotkeyId } from './registry'
 export {
   HOTKEY_REGISTRY,
   getHotkeyDefinition,

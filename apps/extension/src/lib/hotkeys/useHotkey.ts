@@ -1,7 +1,6 @@
-import { useState, DependencyList } from 'react'
+import { useState, useEffect, useCallback, DependencyList } from 'react'
 import {
   useHotkeys,
-  Keys,
   Options,
   HotkeyCallback as ReactHotkeyCallback
 } from 'react-hotkeys-hook'
@@ -12,6 +11,7 @@ import {
   resolvePlatformShortcut
 } from '@/lib/keyboard'
 
+import { hotkeyPriorityManager } from './priority-manager'
 import { HotkeyId, getHotkeyDefinition } from './registry'
 
 /**
@@ -50,7 +50,7 @@ const mapModifierKey = (modifier: KeyModifier): string => {
  */
 const mapKeyboardShortcutToReactHotkeys = (
   shortcut: KeyboardShortcut
-): Keys => {
+): string => {
   if (shortcut.modifiers.length === 0) {
     return shortcut.key
   }
@@ -66,6 +66,7 @@ const mapKeyboardShortcutToReactHotkeys = (
  * - Centralized configuration (scopes, priorities, defaults)
  * - Consistent behavior across the app
  * - Build-time conflict detection
+ * - Runtime priority enforcement via HotkeyPriorityManager
  *
  * @example
  * ```tsx
@@ -103,10 +104,43 @@ export function useHotkey(
   // Convert to react-hotkeys-hook format
   const keys = mapKeyboardShortcutToReactHotkeys(shortcut)
 
+  // Register with priority manager (stable ID across re-renders)
+  const [instanceId] = useState(() =>
+    hotkeyPriorityManager.register({
+      hotkeyId,
+      normalizedKeys: keys,
+      priority: definition.priority ?? 5,
+      enabled: restOptions.enabled ?? true
+    })
+  )
+
+  // Unregister on unmount
+  useEffect(() => {
+    return () => {
+      hotkeyPriorityManager.unregister(instanceId)
+    }
+  }, [instanceId])
+
+  // Sync enabled state
+  const enabled = restOptions.enabled ?? true
+  useEffect(() => {
+    hotkeyPriorityManager.updateEnabled(instanceId, enabled)
+  }, [instanceId, enabled])
+
+  // Wrap callback with priority check
+  const wrappedCallback: HotkeyCallback = useCallback(
+    (keyboardEvent, hotkeysEvent) => {
+      if (hotkeyPriorityManager.shouldExecute(instanceId)) {
+        callback(keyboardEvent, hotkeysEvent)
+      }
+    },
+    [instanceId, callback]
+  )
+
   // Register hotkey with react-hotkeys-hook
   useHotkeys(
     keys,
-    callback,
+    wrappedCallback,
     {
       ...restOptions,
       preventDefault: definition.preventDefault ?? true,

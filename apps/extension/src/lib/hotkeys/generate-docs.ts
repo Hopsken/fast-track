@@ -5,11 +5,8 @@
 
 import { PlatformOS, resolvePlatformShortcut } from '@/lib/keyboard'
 
-import {
-  HOTKEY_REGISTRY,
-  HotkeyCategory,
-  getHotkeysByCategory
-} from './registry'
+import { HOTKEY_REGISTRY, getHotkeysByCategory } from './registry'
+import type { HotkeyCategory } from './types'
 
 /**
  * Format a shortcut for display.
