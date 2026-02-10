@@ -1,7 +1,5 @@
 import { useMemoizedFn } from 'ahooks'
 
-import { useSetCommandSearch } from '@/common/commands'
-
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 import { isEmptyValue } from './utils'
 
@@ -9,10 +7,7 @@ export function useWizardNavigation() {
   const { values, wizardFields, wizardIndex, setWizardIndex, clearError } =
     useCreateIssueDraftStore()
 
-  const setSearch = useSetCommandSearch()
-
   const goBackToFieldsMenu = useMemoizedFn(() => {
-    setSearch('')
     setWizardIndex(-1)
   })
 
@@ -24,7 +19,6 @@ export function useWizardNavigation() {
   const goToNextField = useMemoizedFn(() => {
     // Fallback: if wizard never initialized, just reset the wizard field (go to fields menu)
     if (wizardFields.length === 0) {
-      setSearch('')
       setWizardIndex(-1)
       return
     }
@@ -36,14 +30,12 @@ export function useWizardNavigation() {
       if (!isEmptyValue(values[field.fieldId])) continue
 
       setWizardIndex(i)
-      setSearch('')
       clearError(field.fieldId)
       return
     }
 
     // All remaining fields filled → navigate to review
     setWizardIndex(-1)
-    setSearch('')
   })
 
   return {

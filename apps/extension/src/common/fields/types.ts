@@ -49,9 +49,6 @@ export interface FieldInputComponentProps<ValueSchema extends FieldValueSchema>
   // config is undefined for fields not configured in template
   config?: FieldConfig<z.infer<ValueSchema>>
 
-  search?: string
-  onSearchChange: (newText: string) => void
-
   value?: z.infer<ValueSchema>
   onChange: (newValue: z.infer<ValueSchema> | null) => void
   onConfirm: () => void

@@ -1,26 +1,28 @@
+import { useMemo } from 'react'
+
+import { CommandPanel, useCommandSearch } from '@/common/commands'
 import { CommandSingleSelect } from '@/components/commands'
 import { CommandMultiSelect } from '@/components/commands/CommandMultiSelect'
 
 import { useFieldOptions } from '../../../hooks/useFieldOptions'
 import { FieldInputComponentProps, FieldValueSchema } from '../../../types'
 
-export const GenericSelectInput = <S extends FieldValueSchema>({
+const GenericSelectInputInner = <S extends FieldValueSchema>({
   adapter,
   config,
   value,
   context,
   onChange,
-  onConfirm,
-  search,
-  onSearchChange
+  onConfirm
 }: FieldInputComponentProps<S>) => {
   const isMultiple = context.metadata.schema.type === 'array'
+  const query = useCommandSearch()
 
   const { options, isLoading } = useFieldOptions({
     adapter,
     context,
     config,
-    query: search
+    query
   })
 
   if (isMultiple) {
@@ -51,8 +53,27 @@ export const GenericSelectInput = <S extends FieldValueSchema>({
       onConfirm={onConfirm}
       getOptionValue={adapter.keyOf}
       getOptionLabel={adapter.labelOf ?? adapter.keyOf}
-      search={search}
-      setSearch={onSearchChange}
     />
+  )
+}
+
+export function GenericSelectInput<S extends FieldValueSchema>(
+  props: FieldInputComponentProps<S>
+) {
+  const { value, adapter } = props
+  const initialValue = useMemo(() => {
+    if (!value) return ''
+
+    if (Array.isArray(value)) {
+      const firstValue = value[0]
+      return adapter.keyOf(firstValue) ?? ''
+    }
+
+    return adapter.keyOf(value) ?? ''
+  }, [value, adapter])
+  return (
+    <CommandPanel value={initialValue}>
+      <GenericSelectInputInner {...props} />
+    </CommandPanel>
   )
 }

@@ -1,12 +1,7 @@
 import { useMemo } from 'react'
-import {
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-  CommandList,
-  CommandLoading
-} from '@internal/ui/components/command'
 import { Check } from 'lucide-react'
+
+import { CommandGroup, CommandItem, CommandList } from '@/common/commands'
 
 import { GeneralIcon } from '../ui'
 
@@ -51,9 +46,7 @@ export function CommandMultiSelect<T>({
   }
 
   return (
-    <CommandList>
-      {isLoading && <CommandLoading>Loading...</CommandLoading>}
-      {!isLoading && <CommandEmpty>No available options</CommandEmpty>}
+    <CommandList isLoading={isLoading} emptyPlaceholder="No available options">
       <CommandGroup heading={title}>
         {options.map((opt) => {
           const value = getOptionValue(opt)

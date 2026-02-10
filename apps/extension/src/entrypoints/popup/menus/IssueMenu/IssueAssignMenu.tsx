@@ -1,14 +1,15 @@
 import {
+  Action,
+  ActionUser,
   CommandGroup,
   CommandList,
   CommandPanel,
   useCommandSearch
 } from '@/common/commands'
-import { Action } from '@/common/commands/actions'
-import { ActionUser } from '@/components/actions'
 import { useAutoCompleteUsers } from '@/hooks/useAutoComplete'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
 import { useMutationAssignIssue } from '@/hooks/useMutationAssignIssue'
+import { JiraUserSchema } from '@/repository/schema/jira/user'
 import { AssigneeAvatar } from '~/components/ui/jira'
 
 export function IssueAssignMenu({ ticketKey }: { ticketKey: string }) {
@@ -45,16 +46,15 @@ function IssueAssignMenuInner({ ticketKey }: { ticketKey: string }) {
 
   function renderList() {
     return users?.map((user) => {
+      const jiraUser = JiraUserSchema.parse(user)
       const identifier =
-        user.accountId || user.emailAddress || user.displayName || 'assignee'
-      const displayName =
-        user.displayName || user.name || user.emailAddress || 'Anonymous'
+        jiraUser.accountId || jiraUser.emailAddress || jiraUser.displayName
 
       return (
         <ActionUser
           key={identifier}
-          value={`${displayName} ${identifier}`}
-          user={user}
+          value={`${jiraUser.displayName} ${identifier}`}
+          user={jiraUser}
           onSelect={() => assignTicket({ ticketKey, assignee: user })}
         />
       )

@@ -1,11 +1,6 @@
-import {
-  CommandEmpty,
-  CommandGroup,
-  CommandList
-} from '@internal/ui/components/command'
-import { useMount } from 'ahooks'
 import { z } from 'zod'
 
+import { CommandList, CommandPanel, useCommandSearch } from '@/common/commands'
 import { useHotkey } from '@/lib/hotkeys'
 
 export type CommandNumberInputProps = {
@@ -13,26 +8,14 @@ export type CommandNumberInputProps = {
   value?: number
   onChange: (value: number | null) => void
 
-  search?: string
-  setSearch?: (value: string) => void
-
   onConfirm: () => void
 }
 
-export function CommandNumberInput({
-  title,
-  value,
+function CommandNumberInputInner({
   onChange,
-  search,
-  setSearch,
   onConfirm
 }: CommandNumberInputProps) {
-  // Pre-fill the search box with current value
-  useMount(() => {
-    if (setSearch && value != null) {
-      setSearch(String(value))
-    }
-  })
+  const search = useCommandSearch()
 
   useHotkey('field.confirm-simple', () => {
     const trimmed = search?.trim()
@@ -47,11 +30,14 @@ export function CommandNumberInput({
     onConfirm()
   })
 
+  return <CommandList emptyPlaceholder="Type a number and press Enter" />
+}
+
+export function CommandNumberInput(props: CommandNumberInputProps) {
   return (
-    <CommandList>
-      <CommandGroup heading={title}>
-        <CommandEmpty>Type a number and press Enter</CommandEmpty>
-      </CommandGroup>
-    </CommandList>
+    <CommandPanel
+      search={props.value != null ? String(props.value) : undefined}>
+      <CommandNumberInputInner {...props} />
+    </CommandPanel>
   )
 }

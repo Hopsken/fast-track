@@ -14,8 +14,7 @@ export const GenericNumberInput = (
     context,
     value,
     onChange,
-    search,
-    onSearchChange,
+
     onConfirm
   } = props
 
@@ -44,8 +43,6 @@ export const GenericNumberInput = (
       title={adapter.title ?? context.metadata.name}
       value={value}
       onChange={onChange}
-      search={search}
-      setSearch={onSearchChange}
       onConfirm={onConfirm}
     />
   )

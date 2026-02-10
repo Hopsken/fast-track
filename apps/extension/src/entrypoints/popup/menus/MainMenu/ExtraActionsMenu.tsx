@@ -1,7 +1,6 @@
 import { Cog, MessageSquareWarning } from 'lucide-react'
 
-import { CommandList } from '@/common/commands'
-import { Action } from '@/components/actions'
+import { Action, CommandList } from '@/common/commands'
 import { openInNewTab, openOptionsPage } from '@/utils'
 
 const openFeedback = () => {

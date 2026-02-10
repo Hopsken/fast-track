@@ -53,7 +53,7 @@ function SummaryDescriptionInputInner({ focusField }: Props) {
   useHotkey('field.confirm-complex', saveAndContinue)
 
   return (
-    <CommandList>
+    <CommandList showPlaceholder={false}>
       <CommandGroup heading="Description">
         <div className="p-3">
           <textarea

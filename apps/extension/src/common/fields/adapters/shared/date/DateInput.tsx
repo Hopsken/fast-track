@@ -7,6 +7,7 @@ import {
 } from '@internal/ui/components/command'
 import { ZodString } from 'zod'
 
+import { CommandPanel, useCommandSearch } from '@/common/commands'
 import { useHotkey } from '@/lib/hotkeys'
 import { formatDateDisplay } from '@/utils/date-format'
 
@@ -14,8 +15,9 @@ import { FieldInputComponentProps } from '../../../types'
 
 import { parseNaturalDate, toJiraDate } from './dateParsing'
 
-export const DateInput = (props: FieldInputComponentProps<ZodString>) => {
-  const { adapter, context, onChange, onConfirm, search } = props
+const DateInputInner = (props: FieldInputComponentProps<ZodString>) => {
+  const { adapter, context, onChange, onConfirm } = props
+  const search = useCommandSearch()
 
   const parsedDate = useMemo(() => {
     const trimmed = search?.trim()
@@ -69,5 +71,13 @@ export const DateInput = (props: FieldInputComponentProps<ZodString>) => {
         )}
       </CommandGroup>
     </CommandList>
+  )
+}
+
+export const DateInput = (props: FieldInputComponentProps<ZodString>) => {
+  return (
+    <CommandPanel>
+      <DateInputInner {...props} />
+    </CommandPanel>
   )
 }

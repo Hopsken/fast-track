@@ -1,30 +1,27 @@
-import {
-  CommandEmpty,
-  CommandGroup,
-  CommandList
-} from '@internal/ui/components/command'
 import { useMount } from 'ahooks'
 
+import {
+  CommandList,
+  CommandPanel,
+  useCommandSearch,
+  useSetCommandSearch
+} from '@/common/commands'
 import { useHotkey } from '@/lib/hotkeys'
 
 export type CommandStringInputProps = {
   title?: string
   value?: string
-  search?: string
-  setSearch?: (value: string) => void
   onChange: (value: string) => void
   onConfirm: () => void
 }
 
-export function CommandStringInput({
-  title,
+function CommandStringInputInner({
   value,
-  search,
-  setSearch,
   onChange,
   onConfirm
 }: CommandStringInputProps) {
-  // TODO: fix deps
+  const search = useCommandSearch()
+  const setSearch = useSetCommandSearch()
 
   // Pre-fill the search box with current value
   useMount(() => {
@@ -38,11 +35,13 @@ export function CommandStringInput({
     onConfirm()
   })
 
+  return <CommandList emptyPlaceholder="Type a value and press Enter" />
+}
+
+export function CommandStringInput(props: CommandStringInputProps) {
   return (
-    <CommandList>
-      <CommandGroup heading={title}>
-        <CommandEmpty>Type a value and press Enter</CommandEmpty>
-      </CommandGroup>
-    </CommandList>
+    <CommandPanel search={props.value}>
+      <CommandStringInputInner {...props} />
+    </CommandPanel>
   )
 }

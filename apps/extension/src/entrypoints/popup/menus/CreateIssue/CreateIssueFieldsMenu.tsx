@@ -1,5 +1,4 @@
-import { CommandPanel } from '@/common/commands'
-import { ActionLoading } from '@/components/actions'
+import { ActionLoading, CommandPanel } from '@/common/commands'
 import { useIssueCreateMeta } from '@/hooks/useIssueCreateMeta'
 import { useHotkey } from '@/lib/hotkeys'
 import type { VisibleField } from '~/services/template-service/gap-analysis'

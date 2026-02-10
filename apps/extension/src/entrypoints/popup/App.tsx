@@ -1,5 +1,4 @@
 import { useCreation } from 'ahooks'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
 
 import { CommandFooter, NavigationProvider } from '@/common/commands'
 import { EmptyAuthNotice } from '@/components/EmptyAuthNotice'
@@ -57,9 +56,7 @@ function AppWithProviders() {
   return (
     <QueryClientProvider>
       <UserContextProvider>
-        <MemoryRouter>
-          <AppRouter />
-        </MemoryRouter>
+        <AppRouter />
       </UserContextProvider>
     </QueryClientProvider>
   )

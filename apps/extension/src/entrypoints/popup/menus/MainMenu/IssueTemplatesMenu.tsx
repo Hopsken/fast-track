@@ -1,9 +1,13 @@
 import { useCallback } from 'react'
 import { Settings } from 'lucide-react'
 
-import { CommandGroup, CommandList, useNavigation } from '@/common/commands'
+import {
+  Action,
+  CommandGroup,
+  CommandList,
+  useNavigation
+} from '@/common/commands'
 import { GeneralIcon } from '@/components'
-import { Action } from '@/components/actions'
 import { useTemplates } from '@/hooks/useTemplates'
 import { IssueTemplate } from '@/types/template'
 import { openOptionsPage } from '@/utils'

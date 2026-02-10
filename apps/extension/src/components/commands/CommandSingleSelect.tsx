@@ -1,12 +1,11 @@
 import React from 'react'
+
 import {
-  CommandEmpty,
   CommandGroup,
   CommandItem,
   CommandList,
-  CommandLoading
-} from '@internal/ui/components/command'
-import { useMount } from 'ahooks'
+  CommandPanel
+} from '@/common/commands'
 
 import { GeneralIcon } from '../ui'
 
@@ -19,9 +18,6 @@ export type CommandSingleSelectProps<T> = {
   value?: T
   onChange: (value: T | null) => void
   onConfirm?: () => void
-
-  search?: string
-  setSearch?: (value: string) => void
 
   options: T[]
   getOptionValue: (option: T) => string
@@ -45,13 +41,7 @@ export function CommandSingleSelect<T>({
   }
 
   return (
-    <CommandList>
-      {isLoading ? (
-        <CommandLoading>Loading...</CommandLoading>
-      ) : (
-        <CommandEmpty>No options available</CommandEmpty>
-      )}
-
+    <CommandList isLoading={isLoading} emptyPlaceholder="No options available">
       <CommandGroup heading={title}>
         {options.map((opt) => {
           const value = getOptionValue(opt)
