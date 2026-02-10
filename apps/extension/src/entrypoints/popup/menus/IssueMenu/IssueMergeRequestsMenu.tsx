@@ -4,7 +4,7 @@ import {
   Action,
   CommandGroup,
   CommandList,
-  CommandPanel
+  ActionPanel
 } from '@/common/commands'
 import { useIssueMergeRequests } from '@/hooks/useIssueMergeRequests'
 import { JiraMergeRequest } from '@/types'
@@ -28,7 +28,7 @@ export function IssueMergeRequestsMenu({ ticketKey }: { ticketKey: string }) {
   const { data: mergeRequests, isLoading } = useIssueMergeRequests(ticketKey)
 
   return (
-    <CommandPanel>
+    <ActionPanel>
       <CommandList isLoading={isLoading} emptyPlaceholder="No merge requests">
         <CommandGroup heading={`${ticketKey} merge requests`}>
           {mergeRequests?.map((mergeRequest) => (
@@ -42,6 +42,6 @@ export function IssueMergeRequestsMenu({ ticketKey }: { ticketKey: string }) {
           ))}
         </CommandGroup>
       </CommandList>
-    </CommandPanel>
+    </ActionPanel>
   )
 }

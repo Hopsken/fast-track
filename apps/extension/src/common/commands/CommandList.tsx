@@ -7,7 +7,6 @@ import {
 
 export type CommandListProps = {
   isLoading?: boolean
-  showPlaceholder?: boolean
   emptyPlaceholder?: ReactNode
   children?: ReactNode
 } & ComponentProps<typeof CommandListComponent>
@@ -16,14 +15,13 @@ export function CommandList(props: CommandListProps) {
   const {
     isLoading,
     children,
-    showPlaceholder = true,
     emptyPlaceholder = 'No results',
     ...restProps
   } = props
   return (
     <CommandListComponent {...restProps}>
       {isLoading && <CommandLoading>Loading...</CommandLoading>}
-      {!isLoading && showPlaceholder && (
+      {!isLoading && emptyPlaceholder && (
         <CommandEmpty>{emptyPlaceholder}</CommandEmpty>
       )}
       {children}

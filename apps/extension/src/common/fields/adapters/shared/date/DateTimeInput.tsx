@@ -1,12 +1,11 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { ZodString } from 'zod'
 
 import {
   CommandGroup,
   CommandItem,
   CommandList,
-  CommandPanel,
-  useCommandSearch
+  ActionPanel
 } from '@/common/commands'
 import { useHotkey } from '@/lib/hotkeys'
 import { formatDateTimeDisplay, formatDateTimeISO } from '@/utils/date-format'
@@ -15,9 +14,10 @@ import { FieldInputComponentProps } from '../../../types'
 
 import { parseNaturalDateTime, toJiraDateTime } from './dateParsing'
 
-const DateTimeInputInner = (props: FieldInputComponentProps<ZodString>) => {
+export const DateTimeInput = (props: FieldInputComponentProps<ZodString>) => {
   const { adapter, context, onChange, onConfirm } = props
-  const search = useCommandSearch()
+
+  const [search, setSearch] = useState('')
 
   const parsedDateTime = useMemo(() => {
     const trimmed = search?.trim()
@@ -50,27 +50,25 @@ const DateTimeInputInner = (props: FieldInputComponentProps<ZodString>) => {
   useHotkey('field.confirm-simple', handleSelect)
 
   return (
-    <CommandList emptyPlaceholder="invalid date/time format">
-      <CommandGroup heading={adapter.title ?? context.metadata.name}>
-        {parsedDateTime && displayDateTime ? (
-          <CommandItem value={search} onSelect={handleSelect}>
-            <div className="flex flex-col">
-              <span className="font-medium">{displayDateTime}</span>
-              <span className="text-muted-foreground text-xs">
-                {formatDateTimeISO(parsedDateTime)}
-              </span>
-            </div>
-          </CommandItem>
-        ) : null}
-      </CommandGroup>
-    </CommandList>
-  )
-}
-
-export const DateTimeInput = (props: FieldInputComponentProps<ZodString>) => {
-  return (
-    <CommandPanel searchPlaceholder="Type a date/time (e.g., 'tomorrow at 3pm', 'next friday 9am')">
-      <DateTimeInputInner {...props} />
-    </CommandPanel>
+    <ActionPanel
+      searchPlaceholder="Type a date/time (e.g., 'tomorrow at 3pm', 'next friday 9am')"
+      value={search}
+      search={search}
+      onSearchChange={setSearch}>
+      <CommandList emptyPlaceholder="invalid date/time format">
+        <CommandGroup heading={adapter.title ?? context.metadata.name}>
+          {parsedDateTime && displayDateTime ? (
+            <CommandItem value={search} onSelect={handleSelect}>
+              <div className="flex flex-col">
+                <span className="font-medium">{displayDateTime}</span>
+                <span className="text-muted-foreground text-xs">
+                  {formatDateTimeISO(parsedDateTime)}
+                </span>
+              </div>
+            </CommandItem>
+          ) : null}
+        </CommandGroup>
+      </CommandList>
+    </ActionPanel>
   )
 }

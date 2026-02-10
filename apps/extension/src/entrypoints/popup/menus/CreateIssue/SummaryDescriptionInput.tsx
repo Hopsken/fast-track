@@ -1,13 +1,7 @@
 import { useRef, useState } from 'react'
 import { useMount } from 'ahooks'
 
-import {
-  CommandGroup,
-  CommandList,
-  CommandPanel,
-  useCommandSearch,
-  useSetCommandSearch
-} from '@/common/commands'
+import { CommandGroup, CommandList, ActionPanel } from '@/common/commands'
 import { HotkeysScopeProvider, useHotkey } from '@/lib/hotkeys'
 
 import { FieldConfirm } from './FieldConfirm'
@@ -20,8 +14,9 @@ interface Props {
 
 function SummaryDescriptionInputInner({ focusField }: Props) {
   const { values, setValue } = useCreateIssueDraftStore()
-  const search = useCommandSearch()
-  const setSearch = useSetCommandSearch()
+  const currentSummary = values['summary']
+
+  const [search, setSearch] = useState(currentSummary)
   const { goToNextField } = useWizardNavigation()
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -34,10 +29,6 @@ function SummaryDescriptionInputInner({ focusField }: Props) {
 
   // Pre-fill summary into the search box; shift focus if description was clicked
   useMount(() => {
-    const currentSummary = values['summary']
-    if (typeof currentSummary === 'string') {
-      setSearch(currentSummary)
-    }
     if (focusField === 'description') {
       requestAnimationFrame(() => textareaRef.current?.focus())
     }
@@ -53,32 +44,30 @@ function SummaryDescriptionInputInner({ focusField }: Props) {
   useHotkey('field.confirm-complex', saveAndContinue)
 
   return (
-    <CommandList showPlaceholder={false}>
-      <CommandGroup heading="Description">
-        <div className="p-3">
-          <textarea
-            ref={textareaRef}
-            className="border-input bg-background focus-visible:ring-ring/50 min-h-[140px] w-full rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-[3px]"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Type description…"
-          />
-        </div>
-      </CommandGroup>
+    <ActionPanel searchPlaceholder="What's this about..." shouldFilter={false}>
+      <CommandList emptyPlaceholder="">
+        <CommandGroup heading="Description">
+          <div className="p-3">
+            <textarea
+              ref={textareaRef}
+              className="border-input bg-background focus-visible:ring-ring/50 min-h-[140px] w-full rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-[3px]"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Type description…"
+            />
+          </div>
+        </CommandGroup>
 
-      <FieldConfirm onClick={saveAndContinue} />
-    </CommandList>
+        <FieldConfirm onClick={saveAndContinue} />
+      </CommandList>
+    </ActionPanel>
   )
 }
 
 export function SummaryDescriptionInput({ focusField }: Props) {
   return (
     <HotkeysScopeProvider scope="field-input">
-      <CommandPanel
-        searchPlaceholder="What's this about..."
-        shouldFilter={false}>
-        <SummaryDescriptionInputInner focusField={focusField} />
-      </CommandPanel>
+      <SummaryDescriptionInputInner focusField={focusField} />
     </HotkeysScopeProvider>
   )
 }

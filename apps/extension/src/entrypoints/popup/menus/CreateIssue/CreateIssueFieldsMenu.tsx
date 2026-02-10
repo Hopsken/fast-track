@@ -1,4 +1,4 @@
-import { ActionLoading, CommandPanel } from '@/common/commands'
+import { ActionLoading, ActionPanel } from '@/common/commands'
 import { useIssueCreateMeta } from '@/hooks/useIssueCreateMeta'
 import { useHotkey } from '@/lib/hotkeys'
 import type { VisibleField } from '~/services/template-service/gap-analysis'
@@ -44,7 +44,7 @@ export function CreateIssueFieldsMenu() {
   }
 
   return (
-    <CommandPanel searchPlaceholder={template.name} searchReadonly>
+    <ActionPanel searchPlaceholder={template.name} searchReadonly>
       <ActionLoading isLoading={isLoadingFields} />
 
       <FieldList
@@ -56,6 +56,6 @@ export function CreateIssueFieldsMenu() {
       />
 
       <FieldConfirm onClick={submit} text="Create Issue" />
-    </CommandPanel>
+    </ActionPanel>
   )
 }

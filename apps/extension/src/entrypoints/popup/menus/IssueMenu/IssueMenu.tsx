@@ -5,7 +5,7 @@ import {
   CommandGroup,
   CommandItem,
   CommandList,
-  CommandPanel,
+  ActionPanel,
   CommandSeparator
 } from '@/common/commands'
 import { PrefetchProvider } from '@/components/PrefetchQuery'
@@ -27,9 +27,9 @@ export const IssueMenu = memo(function IssueMenu({
   const { isLoading, data: ticket } = useTicketDetails(ticketKey)
 
   return (
-    <CommandPanel isLoading={isLoading}>
+    <ActionPanel isLoading={isLoading}>
       {ticket ? <IssueMainMenuInner ticket={ticket} /> : null}
-    </CommandPanel>
+    </ActionPanel>
   )
 })
 

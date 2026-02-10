@@ -1,7 +1,7 @@
 import { CommandGroup, useCommandState } from '@internal/ui/components/command'
 import { compact } from 'lodash-es'
 
-import { CommandList, useCommandSearch, useNavigation } from '@/common/commands'
+import { CommandList } from '@/common/commands'
 import { TicketItem } from '@/components/tickets'
 import { useIssueSuggestions } from '@/hooks/useIssueSuggestions'
 import { useHotkey } from '@/lib/hotkeys'
@@ -13,8 +13,7 @@ import { useIssueMenus } from '../IssueMenu'
 
 import { SearchResultMenu } from './SearchResultMenu'
 
-export function TicketListMenu() {
-  const searchQuery = useCommandSearch()
+export function TicketListMenu({ searchQuery }: { searchQuery: string }) {
   const shouldShowSuggestions = !searchQuery.trim()
 
   const { data: issueSuggestions } = useIssueSuggestions()

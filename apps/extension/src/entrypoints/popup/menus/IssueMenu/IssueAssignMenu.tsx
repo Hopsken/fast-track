@@ -1,10 +1,11 @@
+import { useState } from 'react'
+
 import {
   Action,
   ActionUser,
   CommandGroup,
   CommandList,
-  CommandPanel,
-  useCommandSearch
+  ActionPanel
 } from '@/common/commands'
 import { useAutoCompleteUsers } from '@/hooks/useAutoComplete'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
@@ -13,17 +14,10 @@ import { JiraUserSchema } from '@/repository/schema/jira/user'
 import { AssigneeAvatar } from '~/components/ui/jira'
 
 export function IssueAssignMenu({ ticketKey }: { ticketKey: string }) {
-  return (
-    <CommandPanel>
-      <IssueAssignMenuInner ticketKey={ticketKey} />
-    </CommandPanel>
-  )
-}
-
-function IssueAssignMenuInner({ ticketKey }: { ticketKey: string }) {
   const { data: editMeta, isLoading: isLoadingEditMeta } =
     useIssueEditMeta(ticketKey)
-  const search = useCommandSearch()
+
+  const [search, setSearch] = useState('')
 
   const assigneeAutoCompleteUrl =
     editMeta?.fields?.assignee?.autoCompleteUrl || ''
@@ -62,11 +56,13 @@ function IssueAssignMenuInner({ ticketKey }: { ticketKey: string }) {
   }
 
   return (
-    <CommandList isLoading={isLoading} emptyPlaceholder="No matching users">
-      <CommandGroup heading="Assign to...">
-        {unassignAction}
-        {renderList()}
-      </CommandGroup>
-    </CommandList>
+    <ActionPanel search={search} onSearchChange={setSearch}>
+      <CommandList isLoading={isLoading} emptyPlaceholder="No matching users">
+        <CommandGroup heading="Assign to...">
+          {unassignAction}
+          {renderList()}
+        </CommandGroup>
+      </CommandList>
+    </ActionPanel>
   )
 }

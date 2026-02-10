@@ -1,6 +1,7 @@
+import { useCallback, useState } from 'react'
 import { z } from 'zod'
 
-import { CommandList, CommandPanel, useCommandSearch } from '@/common/commands'
+import { ActionPanel } from '@/common/commands'
 import { useHotkey } from '@/lib/hotkeys'
 
 export type CommandNumberInputProps = {
@@ -11,33 +12,34 @@ export type CommandNumberInputProps = {
   onConfirm: () => void
 }
 
-function CommandNumberInputInner({
+export function CommandNumberInput({
+  value,
   onChange,
   onConfirm
 }: CommandNumberInputProps) {
-  const search = useCommandSearch()
+  const [search, setSearch] = useState(value != null ? String(value) : '')
+
+  const onSearchChange = useCallback(
+    (newValue: string) => {
+      setSearch(newValue)
+
+      const num = z.number().safeParse(newValue).data
+      onChange(num ?? null)
+    },
+    [onChange]
+  )
 
   useHotkey('field.confirm-simple', () => {
-    const trimmed = search?.trim()
-    if (!trimmed) return onChange(null)
-
-    const num = z.number().safeParse(trimmed).data
-    if (num === undefined) {
-      return
-    }
-
-    onChange(num)
+    const num = z.number().safeParse(search).data
+    onChange(num ?? null)
     onConfirm()
   })
 
-  return <CommandList emptyPlaceholder="Type a number and press Enter" />
-}
-
-export function CommandNumberInput(props: CommandNumberInputProps) {
   return (
-    <CommandPanel
-      search={props.value != null ? String(props.value) : undefined}>
-      <CommandNumberInputInner {...props} />
-    </CommandPanel>
+    <ActionPanel
+      search={search}
+      onSearchChange={onSearchChange}
+      searchPlaceholder="Type a number and press Enter"
+    />
   )
 }

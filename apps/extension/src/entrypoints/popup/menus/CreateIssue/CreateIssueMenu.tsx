@@ -1,6 +1,6 @@
 import { CommandList } from '@internal/ui/components/command'
 
-import { CommandPanel } from '@/common/commands'
+import { ActionPanel } from '@/common/commands'
 import { HotkeysScopeProvider } from '@/lib/hotkeys'
 import type { VisibleField } from '~/services/template-service/gap-analysis'
 import type { IssueTemplate } from '~/types/template'

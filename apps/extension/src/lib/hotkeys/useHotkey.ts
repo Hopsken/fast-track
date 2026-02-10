@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, DependencyList } from 'react'
+import { useMount, useUnmount } from 'ahooks'
 import {
   useHotkeys,
   Options,
@@ -115,17 +116,13 @@ export function useHotkey(
   )
 
   // Unregister on unmount
-  useEffect(() => {
-    return () => {
-      hotkeyPriorityManager.unregister(instanceId)
-    }
-  }, [instanceId])
-
-  // Sync enabled state
-  const enabled = restOptions.enabled ?? true
-  useEffect(() => {
-    hotkeyPriorityManager.updateEnabled(instanceId, enabled)
-  }, [instanceId, enabled])
+  useUnmount(() => {
+    console.log('Unmount')
+    hotkeyPriorityManager.unregister(instanceId)
+  })
+  // useEffect(() => {
+  //   return () => {}
+  // }, [instanceId])
 
   // Wrap callback with priority check
   const wrappedCallback: HotkeyCallback = useCallback(
@@ -144,7 +141,7 @@ export function useHotkey(
     {
       ...restOptions,
       preventDefault: definition.preventDefault ?? true,
-      enableOnFormTags: definition.enableOnFormTags ?? false,
+      enableOnFormTags: definition.enableOnFormTags ?? true,
       scopes: definition.scopes as string[]
     },
     deps

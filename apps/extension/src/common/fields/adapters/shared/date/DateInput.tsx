@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import {
   CommandEmpty,
   CommandGroup,
@@ -7,7 +7,7 @@ import {
 } from '@internal/ui/components/command'
 import { ZodString } from 'zod'
 
-import { CommandPanel, useCommandSearch } from '@/common/commands'
+import { ActionPanel } from '@/common/commands'
 import { useHotkey } from '@/lib/hotkeys'
 import { formatDateDisplay } from '@/utils/date-format'
 
@@ -15,12 +15,13 @@ import { FieldInputComponentProps } from '../../../types'
 
 import { parseNaturalDate, toJiraDate } from './dateParsing'
 
-const DateInputInner = (props: FieldInputComponentProps<ZodString>) => {
-  const { adapter, context, onChange, onConfirm } = props
-  const search = useCommandSearch()
+export const DateInput = (props: FieldInputComponentProps<ZodString>) => {
+  const { adapter, context, value, onChange, onConfirm } = props
+
+  const [search, setSearch] = useState('')
 
   const parsedDate = useMemo(() => {
-    const trimmed = search?.trim()
+    const trimmed = search.trim()
     if (!trimmed) return null
     return parseNaturalDate(trimmed)
   }, [search])
@@ -31,7 +32,7 @@ const DateInputInner = (props: FieldInputComponentProps<ZodString>) => {
   }, [parsedDate])
 
   const handleSelect = () => {
-    const trimmed = search?.trim()
+    const trimmed = search.trim()
     if (!trimmed) {
       onChange(null)
       onConfirm()
@@ -50,34 +51,27 @@ const DateInputInner = (props: FieldInputComponentProps<ZodString>) => {
   useHotkey('field.confirm-simple', handleSelect)
 
   return (
-    <CommandList>
-      {!search?.trim() && (
-        <CommandEmpty>
-          {`Type a date (e.g., "tomorrow", "next friday")`}
-        </CommandEmpty>
-      )}
-      <CommandGroup heading={adapter.title ?? context.metadata.name}>
-        {parsedDate && displayDate ? (
-          <CommandItem value={search} onSelect={handleSelect}>
-            <div className="flex flex-col">
-              <span className="font-medium">{displayDate}</span>
-              <span className="text-muted-foreground text-xs">
-                {toJiraDate(parsedDate)}
-              </span>
-            </div>
-          </CommandItem>
-        ) : (
-          <CommandEmpty>Invalid date format</CommandEmpty>
-        )}
-      </CommandGroup>
-    </CommandList>
-  )
-}
-
-export const DateInput = (props: FieldInputComponentProps<ZodString>) => {
-  return (
-    <CommandPanel>
-      <DateInputInner {...props} />
-    </CommandPanel>
+    <ActionPanel
+      searchPlaceholder='Type a date (e.g., "tomorrow", "next friday")'
+      value={value}
+      search={search}
+      onSearchChange={setSearch}>
+      <CommandList>
+        <CommandGroup heading={adapter.title ?? context.metadata.name}>
+          {parsedDate && displayDate ? (
+            <CommandItem value={search} onSelect={handleSelect}>
+              <div className="flex flex-col">
+                <span className="font-medium">{displayDate}</span>
+                <span className="text-muted-foreground text-xs">
+                  {toJiraDate(parsedDate)}
+                </span>
+              </div>
+            </CommandItem>
+          ) : (
+            <CommandEmpty>Invalid date format</CommandEmpty>
+          )}
+        </CommandGroup>
+      </CommandList>
+    </ActionPanel>
   )
 }

@@ -1,13 +1,12 @@
-import { useMemo } from 'react'
+import { useState } from 'react'
 
-import { CommandPanel, useCommandSearch } from '@/common/commands'
 import { CommandSingleSelect } from '@/components/commands'
 import { CommandMultiSelect } from '@/components/commands/CommandMultiSelect'
 
 import { useFieldOptions } from '../../../hooks/useFieldOptions'
 import { FieldInputComponentProps, FieldValueSchema } from '../../../types'
 
-const GenericSelectInputInner = <S extends FieldValueSchema>({
+export const GenericSelectInput = <S extends FieldValueSchema>({
   adapter,
   config,
   value,
@@ -15,14 +14,14 @@ const GenericSelectInputInner = <S extends FieldValueSchema>({
   onChange,
   onConfirm
 }: FieldInputComponentProps<S>) => {
+  const [search, setSearch] = useState('')
   const isMultiple = context.metadata.schema.type === 'array'
-  const query = useCommandSearch()
 
   const { options, isLoading } = useFieldOptions({
     adapter,
     context,
     config,
-    query
+    query: search
   })
 
   if (isMultiple) {
@@ -37,6 +36,8 @@ const GenericSelectInputInner = <S extends FieldValueSchema>({
         // @ts-expect-error newValue is array, should be handler externally
         onChange={(newValue) => onChange(newValue)}
         onConfirm={onConfirm}
+        search={search}
+        onSearchChange={setSearch}
         getOptionValue={adapter.keyOf}
         getOptionLabel={adapter.labelOf ?? adapter.keyOf}
       />
@@ -51,29 +52,10 @@ const GenericSelectInputInner = <S extends FieldValueSchema>({
       options={options}
       onChange={onChange}
       onConfirm={onConfirm}
+      search={search}
+      onSearchChange={setSearch}
       getOptionValue={adapter.keyOf}
       getOptionLabel={adapter.labelOf ?? adapter.keyOf}
     />
-  )
-}
-
-export function GenericSelectInput<S extends FieldValueSchema>(
-  props: FieldInputComponentProps<S>
-) {
-  const { value, adapter } = props
-  const initialValue = useMemo(() => {
-    if (!value) return ''
-
-    if (Array.isArray(value)) {
-      const firstValue = value[0]
-      return adapter.keyOf(firstValue) ?? ''
-    }
-
-    return adapter.keyOf(value) ?? ''
-  }, [value, adapter])
-  return (
-    <CommandPanel value={initialValue}>
-      <GenericSelectInputInner {...props} />
-    </CommandPanel>
   )
 }

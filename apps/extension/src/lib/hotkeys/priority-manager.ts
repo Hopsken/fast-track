@@ -18,19 +18,13 @@ class HotkeyPriorityManager {
 
   register(options: RegisterHotkeyOptions): string {
     const instanceId = `hotkey-${nextId++}`
+    console.log('Registering', instanceId, options)
     this.instances.set(instanceId, { instanceId, ...options })
     return instanceId
   }
 
   unregister(instanceId: string): void {
     this.instances.delete(instanceId)
-  }
-
-  updateEnabled(instanceId: string, enabled: boolean): void {
-    const instance = this.instances.get(instanceId)
-    if (instance) {
-      instance.enabled = enabled
-    }
   }
 
   /**
@@ -44,19 +38,24 @@ class HotkeyPriorityManager {
    * need to duplicate that check.
    */
   shouldExecute(instanceId: string): boolean {
+    console.log('shouldExecute', instanceId, this.instances)
     const instance = this.instances.get(instanceId)
     if (!instance) return false
 
+    console.log('shouldExecute', instanceId, instance)
+
     for (const other of this.instances.values()) {
       if (other.instanceId === instanceId) continue
+      // Only compare instances with the same normalized keys
       if (other.normalizedKeys !== instance.normalizedKeys) continue
-      if (!other.enabled) continue
 
+      console.log('other', other)
       if (other.priority > instance.priority) {
         return false
       }
     }
 
+    console.log('Can execute')
     return true
   }
 }

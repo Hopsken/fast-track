@@ -4,7 +4,7 @@ import {
   CommandGroup,
   CommandItem,
   CommandList,
-  CommandPanel
+  ActionPanel
 } from '@/common/commands'
 
 import { GeneralIcon } from '../ui'
@@ -19,6 +19,9 @@ export type CommandSingleSelectProps<T> = {
   onChange: (value: T | null) => void
   onConfirm?: () => void
 
+  search?: string
+  onSearchChange?: (search: string) => void
+
   options: T[]
   getOptionValue: (option: T) => string
   getOptionLabel?: (option: T) => string
@@ -28,39 +31,54 @@ export type CommandSingleSelectProps<T> = {
 export function CommandSingleSelect<T>({
   title,
   isLoading,
+  value,
   onChange,
   onConfirm,
+  search,
+  onSearchChange,
   options,
   getOptionValue,
   getOptionLabel,
   getOptionKeywords
 }: CommandSingleSelectProps<T>) {
+  const defaultValue = value ? getOptionValue(value) : ''
+
   const onSelect = (opt: T) => {
     onChange(opt)
     onConfirm?.()
   }
 
   return (
-    <CommandList isLoading={isLoading} emptyPlaceholder="No options available">
-      <CommandGroup heading={title}>
-        {options.map((opt) => {
-          const value = getOptionValue(opt)
-          const label = getOptionLabel?.(opt) ?? value
-          const iconUrl = getIconUrl(opt)
-          return (
-            <CommandItem
-              key={value}
-              value={value}
-              keywords={getOptionKeywords?.(opt)}
-              onSelect={() => onSelect(opt)}>
-              <div className="flex items-center gap-2">
-                {iconUrl ? <GeneralIcon alt={label} iconUrl={iconUrl} /> : null}
-                <span className="truncate">{label}</span>
-              </div>
-            </CommandItem>
-          )
-        })}
-      </CommandGroup>
-    </CommandList>
+    <ActionPanel
+      defaultValue={defaultValue}
+      search={search}
+      onSearchChange={onSearchChange}
+      searchPlaceholder="Type to search...">
+      <CommandList
+        isLoading={isLoading}
+        emptyPlaceholder="No options available">
+        <CommandGroup heading={title}>
+          {options.map((opt) => {
+            const value = getOptionValue(opt)
+            const label = getOptionLabel?.(opt) ?? value
+            const iconUrl = getIconUrl(opt)
+            return (
+              <CommandItem
+                key={value}
+                value={value}
+                keywords={getOptionKeywords?.(opt)}
+                onSelect={() => onSelect(opt)}>
+                <div className="flex items-center gap-2">
+                  {iconUrl ? (
+                    <GeneralIcon alt={label} iconUrl={iconUrl} />
+                  ) : null}
+                  <span className="truncate">{label}</span>
+                </div>
+              </CommandItem>
+            )
+          })}
+        </CommandGroup>
+      </CommandList>
+    </ActionPanel>
   )
 }

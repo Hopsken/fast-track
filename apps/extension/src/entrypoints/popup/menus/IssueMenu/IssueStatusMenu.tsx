@@ -2,7 +2,7 @@ import {
   Action,
   CommandGroup,
   CommandList,
-  CommandPanel
+  ActionPanel
 } from '@/common/commands'
 import { useIssueTransitions } from '@/hooks/useIssueTransitions'
 import { useMutationTransitionIssue } from '@/hooks/useMutationTransitionIssue'
@@ -12,9 +12,9 @@ import { JiraIssue, JiraTransition } from '@/types'
 export function IssueStatusMenu({ ticketKey }: { ticketKey: string }) {
   const { data: ticketData, isLoading } = useTicketDetails(ticketKey)
   return (
-    <CommandPanel isLoading={isLoading}>
+    <ActionPanel isLoading={isLoading}>
       {ticketData ? <IssueStatusMenuInner ticket={ticketData} /> : null}
-    </CommandPanel>
+    </ActionPanel>
   )
 }
 
