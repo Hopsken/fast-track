@@ -71,7 +71,7 @@ export function ActionSearch({
   ) : null
 
   useHotkey('global.escape', () => {
-    if (search && !readonly) {
+    if (currentValue && !readonly) {
       // clear input value when esc is pressed
       onValueChange('')
     } else if (isRoot) {

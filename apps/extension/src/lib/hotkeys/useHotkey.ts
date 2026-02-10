@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback, DependencyList } from 'react'
-import { useMount, useUnmount } from 'ahooks'
+import { useState, useEffect, useRef, useCallback, DependencyList } from 'react'
+import { useMemoizedFn, useMount } from 'ahooks'
 import {
   useHotkeys,
+  useHotkeysContext,
   Options,
   HotkeyCallback as ReactHotkeyCallback
 } from 'react-hotkeys-hook'
@@ -106,32 +107,36 @@ export function useHotkey(
   const keys = mapKeyboardShortcutToReactHotkeys(shortcut)
 
   // Register with priority manager (stable ID across re-renders)
-  const [instanceId] = useState(() =>
-    hotkeyPriorityManager.register({
+  const instanceIdRef = useRef<string | null>(null)
+  useMount(() => {
+    const instanceId = hotkeyPriorityManager.register({
       hotkeyId,
       normalizedKeys: keys,
       priority: definition.priority ?? 5,
+      scopes: [...definition.scopes],
       enabled: restOptions.enabled ?? true
     })
-  )
+    instanceIdRef.current = instanceId
 
-  // Unregister on unmount
-  useUnmount(() => {
-    console.log('Unmount')
-    hotkeyPriorityManager.unregister(instanceId)
+    return () => {
+      hotkeyPriorityManager.unregister(instanceId)
+    }
   })
-  // useEffect(() => {
-  //   return () => {}
-  // }, [instanceId])
+
+  // Track active scopes for callback-time access
+  const { activeScopes } = useHotkeysContext()
 
   // Wrap callback with priority check
-  const wrappedCallback: HotkeyCallback = useCallback(
+  const wrappedCallback: HotkeyCallback = useMemoizedFn(
     (keyboardEvent, hotkeysEvent) => {
-      if (hotkeyPriorityManager.shouldExecute(instanceId)) {
+      const instanceId = instanceIdRef.current
+
+      if (!instanceId) return
+
+      if (hotkeyPriorityManager.shouldExecute(instanceId, activeScopes)) {
         callback(keyboardEvent, hotkeysEvent)
       }
-    },
-    [instanceId, callback]
+    }
   )
 
   // Register hotkey with react-hotkeys-hook

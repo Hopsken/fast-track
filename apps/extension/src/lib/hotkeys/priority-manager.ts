@@ -18,7 +18,6 @@ class HotkeyPriorityManager {
 
   register(options: RegisterHotkeyOptions): string {
     const instanceId = `hotkey-${nextId++}`
-    console.log('Registering', instanceId, options)
     this.instances.set(instanceId, { instanceId, ...options })
     return instanceId
   }
@@ -29,33 +28,38 @@ class HotkeyPriorityManager {
 
   /**
    * Returns true if this instance should execute its callback.
-   * Checks all other enabled registered instances with the same normalizedKeys.
+   * Checks all other registered instances with the same normalizedKeys
+   * that have at least one scope in activeScopes and are enabled.
    * If any has strictly higher priority, returns false.
    * Equal priority → both execute (preserves current behavior).
-   *
-   * Scope filtering is handled by react-hotkeys-hook — it only invokes
-   * callbacks whose scopes are active, so the priority manager doesn't
-   * need to duplicate that check.
    */
-  shouldExecute(instanceId: string): boolean {
-    console.log('shouldExecute', instanceId, this.instances)
+  shouldExecute(instanceId: string, activeScopes: string[]): boolean {
     const instance = this.instances.get(instanceId)
     if (!instance) return false
 
-    console.log('shouldExecute', instanceId, instance)
+    const activeScopesSet = new Set(activeScopes)
+
+    // Check if this instance itself has an active scope
+    const instanceHasActiveScope = instance.scopes.some((s) =>
+      activeScopesSet.has(s)
+    )
+    if (!instanceHasActiveScope) return false
 
     for (const other of this.instances.values()) {
       if (other.instanceId === instanceId) continue
-      // Only compare instances with the same normalized keys
       if (other.normalizedKeys !== instance.normalizedKeys) continue
 
-      console.log('other', other)
+      // Check if the other instance has at least one active scope
+      const otherHasActiveScope = other.scopes.some((s) =>
+        activeScopesSet.has(s)
+      )
+      if (!otherHasActiveScope) continue
+
       if (other.priority > instance.priority) {
         return false
       }
     }
 
-    console.log('Can execute')
     return true
   }
 }

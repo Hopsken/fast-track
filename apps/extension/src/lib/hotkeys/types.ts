@@ -53,5 +53,6 @@ export interface RegisterHotkeyOptions {
   hotkeyId: string
   normalizedKeys: string
   priority: number
+  scopes: HotkeyScope[]
   enabled: boolean
 }

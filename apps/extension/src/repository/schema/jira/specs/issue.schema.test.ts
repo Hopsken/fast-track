@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { JiraIssueSchema } from '../issue'
 
 const baseTicket = {
-  __typename: 'JiraTicket',
+  __typename: 'JiraIssue',
   id: '1',
   key: 'PROJ-1',
   summary: 'Test ticket',
