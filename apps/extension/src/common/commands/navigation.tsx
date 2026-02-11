@@ -1,4 +1,11 @@
-import { PropsWithChildren, ReactElement, ReactNode } from 'react'
+import {
+  createContext,
+  PropsWithChildren,
+  ReactElement,
+  ReactNode,
+  useContext,
+  useMemo
+} from 'react'
 import { last, pick, reverse } from 'lodash-es'
 import { createStore, useStore } from 'zustand'
 import { useShallow } from 'zustand/shallow'
@@ -52,3 +59,24 @@ export function useIsNavigationRoot() {
     useShallow((s) => !s.stacks.length)
   )
 }
+
+const NavigateBackContext = createContext<{
+  onNavigateBack?: () => void
+}>({ onNavigateBack: undefined })
+
+export const NavigateBackProvider = ({
+  onNavigateBack,
+  children
+}: PropsWithChildren<{
+  onNavigateBack: () => void
+}>) => {
+  const value = useMemo(() => ({ onNavigateBack }), [onNavigateBack])
+  return (
+    <NavigateBackContext.Provider value={value}>
+      {children}
+    </NavigateBackContext.Provider>
+  )
+}
+
+export const useNavigateBack = () =>
+  useContext(NavigateBackContext).onNavigateBack

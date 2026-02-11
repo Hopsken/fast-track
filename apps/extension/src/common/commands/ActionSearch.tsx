@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { Button } from '@internal/ui/components/button'
 import { CommandInput } from '@internal/ui/components/command'
 import { ArrowLeft } from 'lucide-react'
@@ -6,12 +6,17 @@ import { ArrowLeft } from 'lucide-react'
 import { useHotkey } from '@/lib/hotkeys'
 import { cn } from '@/lib/utils'
 
-import { useIsNavigationRoot, useNavigation } from './navigation'
+import {
+  useIsNavigationRoot,
+  useNavigateBack,
+  useNavigation
+} from './navigation'
 
 export type ActionSearchProps = {
   defaultSearch?: string
   search?: string
   onSearchChange?: (search: string) => void
+  onSearchConfirm?: () => void
 
   isLoading?: boolean
   readonly?: boolean
@@ -24,12 +29,13 @@ export function ActionSearch({
   defaultSearch,
   search,
   onSearchChange,
+  onSearchConfirm,
   isLoading,
   readonly,
-  placeholder,
-  onNavigateBack
+  placeholder
 }: ActionSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null)
+  const onNavigateBack = useNavigateBack()
 
   const isControlled = search !== undefined
   const [uncontrolledSearch, setUncontrolledSearch] = useState(
@@ -64,6 +70,15 @@ export function ActionSearch({
     }
   }
 
+  const onKeydown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === 'Enter' && onSearchConfirm) {
+        onSearchConfirm()
+      }
+    },
+    [onSearchConfirm]
+  )
+
   const previousPageButton = !isRoot ? (
     <Button variant={'secondary'} size={'icon-xs'} onClick={handleNavigateBack}>
       <ArrowLeft />
@@ -91,6 +106,7 @@ export function ActionSearch({
         ref={inputRef}
         value={currentValue}
         onValueChange={onValueChange}
+        onKeyDown={onKeydown}
         placeholder={placeholder ?? 'Type to search...'}
         aria-label={placeholder}
         readOnly={readonly}

@@ -47,16 +47,15 @@ export const DateInput = (props: FieldInputComponentProps<ZodString>) => {
     onConfirm()
   }
 
-  useHotkey('field.confirm-simple', handleSelect)
-
   return (
     <ActionPanel
       searchPlaceholder='Type a date (e.g., "tomorrow", "next friday")'
       value={value}
       search={search}
-      onSearchChange={setSearch}>
+      onSearchChange={setSearch}
+      onSearchConfirm={handleSelect}>
       <ActionList emptyPlaceholder="Invalid date format">
-        <ActionGroup heading={adapter.title ?? context.metadata.name}>
+        <ActionGroup>
           {parsedDate && displayDate ? (
             <ActionItem value={search} onSelect={handleSelect}>
               <div className="flex flex-col">

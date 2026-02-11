@@ -1,4 +1,6 @@
-import { ActionLoading, ActionPanel } from '@/common/commands'
+import { useMemoizedFn } from 'ahooks'
+
+import { ActionPanel } from '@/common/commands'
 import { useIssueCreateMeta } from '@/hooks/useIssueCreateMeta'
 import { useHotkey } from '@/lib/hotkeys'
 import type { VisibleField } from '~/services/template-service/gap-analysis'
@@ -30,7 +32,7 @@ export function CreateIssueFieldsMenu() {
   useHotkey('issue.create.proceed', submit)
 
   // Field selection handler
-  const handleSelectField = (field: VisibleField) => {
+  const handleSelectField = useMemoizedFn((field: VisibleField) => {
     if (field.fieldId === 'summary' || field.fieldId === 'description') {
       clearError('summary')
       clearError('description')
@@ -41,7 +43,7 @@ export function CreateIssueFieldsMenu() {
     // Update wizard cursor so Cmd+Enter continues from this point
     const idx = wizardFields.findIndex((f) => f.fieldId === field.fieldId)
     if (idx >= 0) setWizardIndex(idx)
-  }
+  })
 
   return (
     <ActionPanel

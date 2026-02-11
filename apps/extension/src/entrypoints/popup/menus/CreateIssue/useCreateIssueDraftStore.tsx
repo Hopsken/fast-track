@@ -76,7 +76,9 @@ const createIssueDraftStore = (template: IssueTemplate) =>
             }
           }))
         },
-        setWizardIndex: (index) => set({ wizardIndex: index }),
+        setWizardIndex: (index) => {
+          set({ wizardIndex: index })
+        },
 
         reset: () =>
           set((prev) => ({

@@ -14,10 +14,10 @@ interface Props {
 
 function SummaryDescriptionInputInner({ focusField }: Props) {
   const { values, setValue } = useCreateIssueDraftStore()
-  const currentSummary = values['summary']
+  const currentSummary = values['summary'] as string
 
-  const [search, setSearch] = useState(currentSummary)
-  const { goToNextField } = useWizardNavigation()
+  const [search, setSearch] = useState(currentSummary ?? '')
+  const { goToNextField, goBackToFieldsMenu } = useWizardNavigation()
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -27,10 +27,14 @@ function SummaryDescriptionInputInner({ focusField }: Props) {
       : ''
   )
 
+  const focusOnDescription = () => {
+    requestAnimationFrame(() => textareaRef.current?.focus())
+  }
+
   // Pre-fill summary into the search box; shift focus if description was clicked
   useMount(() => {
     if (focusField === 'description') {
-      requestAnimationFrame(() => textareaRef.current?.focus())
+      focusOnDescription()
     }
   })
 
@@ -42,9 +46,15 @@ function SummaryDescriptionInputInner({ focusField }: Props) {
   }
 
   useHotkey('field.confirm-complex', saveAndContinue)
+  useHotkey('field-input.escape', goBackToFieldsMenu)
 
   return (
-    <ActionPanel searchPlaceholder="What's this about..." shouldFilter={false}>
+    <ActionPanel
+      search={search}
+      onSearchChange={setSearch}
+      onSearchConfirm={focusOnDescription}
+      searchPlaceholder="What's this about..."
+      shouldFilter={false}>
       <ActionList emptyPlaceholder="">
         <ActionGroup heading="Description">
           <div className="p-3">

@@ -2,7 +2,6 @@ import { useCallback, useState } from 'react'
 import { z } from 'zod'
 
 import { ActionPanel } from '@/common/commands'
-import { useHotkey } from '@/lib/hotkeys'
 
 export type CommandNumberInputProps = {
   title?: string
@@ -29,16 +28,17 @@ export function CommandNumberInput({
     [onChange]
   )
 
-  useHotkey('field.confirm-simple', () => {
+  const onSearchConfirm = useCallback(() => {
     const num = z.number().safeParse(search).data
     onChange(num ?? null)
     onConfirm()
-  })
+  }, [search, onChange, onConfirm])
 
   return (
     <ActionPanel
       search={search}
       onSearchChange={onSearchChange}
+      onSearchConfirm={onSearchConfirm}
       searchPlaceholder="Type a number and press Enter"
     />
   )

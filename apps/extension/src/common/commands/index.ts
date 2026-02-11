@@ -7,6 +7,10 @@ export {
   CommandSeparator as ActionSeparator,
   CommandGroup as ActionGroup
 } from '@internal/ui/components/command'
-export { NavigationProvider, useNavigation } from './navigation'
+export {
+  NavigationProvider,
+  useNavigation,
+  NavigateBackProvider
+} from './navigation'
 
 export * from './actions'

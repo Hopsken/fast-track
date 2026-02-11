@@ -15,6 +15,7 @@ export interface CommandPanelProps {
   defaultSearch?: string
   search?: string
   onSearchChange?: (search: string) => void
+  onSearchConfirm?: () => void
 
   shouldFilter?: boolean
 
@@ -32,6 +33,7 @@ export const ActionPanel = (props: CommandPanelProps) => {
     defaultSearch,
     search,
     onSearchChange,
+    onSearchConfirm,
     shouldFilter,
     children
   } = props
@@ -46,6 +48,7 @@ export const ActionPanel = (props: CommandPanelProps) => {
         defaultSearch={defaultSearch}
         search={search}
         onSearchChange={onSearchChange}
+        onSearchConfirm={onSearchConfirm}
         placeholder={searchPlaceholder}
         readonly={searchReadonly}
         isLoading={isLoading}

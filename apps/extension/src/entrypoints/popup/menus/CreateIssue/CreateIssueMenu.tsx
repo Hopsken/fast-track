@@ -1,3 +1,4 @@
+import { NavigateBackProvider } from '@/common/commands'
 import { HotkeysScopeProvider } from '@/lib/hotkeys'
 import type { VisibleField } from '~/services/template-service/gap-analysis'
 import type { IssueTemplate } from '~/types/template'
@@ -10,9 +11,12 @@ import {
   useCreateIssueDraftStore
 } from './useCreateIssueDraftStore'
 import { useSetupWizard } from './useSetupWizard'
+import { useWizardNavigation } from './useWizardNavigation'
 
 function FieldInputMenuRouter(props: { field: VisibleField }) {
   const { fieldId } = props.field
+
+  const { goBackToFieldsMenu } = useWizardNavigation()
   const isSummaryOrDescription =
     fieldId === 'summary' || fieldId === 'description'
 
@@ -22,7 +26,9 @@ function FieldInputMenuRouter(props: { field: VisibleField }) {
       {isSummaryOrDescription ? (
         <SummaryDescriptionInput focusField={fieldId} />
       ) : (
-        <FieldInputMenu key={fieldId} field={props.field} />
+        <NavigateBackProvider onNavigateBack={goBackToFieldsMenu}>
+          <FieldInputMenu key={fieldId} field={props.field} />
+        </NavigateBackProvider>
       )}
     </HotkeysScopeProvider>
   )

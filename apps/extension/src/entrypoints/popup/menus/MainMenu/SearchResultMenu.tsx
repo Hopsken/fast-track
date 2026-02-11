@@ -66,8 +66,6 @@ export function SearchResultMenu(props: {
   const shouldShowMore =
     useScopedProjects && !showAllProjects && Boolean(searchQuery.trim())
 
-  console.log('shouldShowMore', shouldShowMore, searchResults)
-
   return (
     <ActionList isLoading={isSearching} aria-label="Ticket search results">
       <TicketList

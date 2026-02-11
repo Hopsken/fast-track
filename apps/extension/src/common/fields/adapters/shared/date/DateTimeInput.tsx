@@ -7,7 +7,6 @@ import {
   ActionList,
   ActionPanel
 } from '@/common/commands'
-import { useHotkey } from '@/lib/hotkeys'
 import { formatDateTimeDisplay, formatDateTimeISO } from '@/utils/date-format'
 
 import { FieldInputComponentProps } from '../../../types'
@@ -47,16 +46,17 @@ export const DateTimeInput = (props: FieldInputComponentProps<ZodString>) => {
     onConfirm()
   }
 
-  useHotkey('field.confirm-simple', handleSelect)
+  const emptyPlaceholder = search.trim() ? 'Invalid date/time format' : ''
 
   return (
     <ActionPanel
       searchPlaceholder="Type a date/time (e.g., 'tomorrow at 3pm', 'next friday 9am')"
       value={search}
       search={search}
-      onSearchChange={setSearch}>
-      <ActionList emptyPlaceholder="invalid date/time format">
-        <ActionGroup heading={adapter.title ?? context.metadata.name}>
+      onSearchChange={setSearch}
+      onSearchConfirm={handleSelect}>
+      <ActionList emptyPlaceholder={emptyPlaceholder}>
+        <ActionGroup>
           {parsedDateTime && displayDateTime ? (
             <ActionItem value={search} onSelect={handleSelect}>
               <div className="flex flex-col">
