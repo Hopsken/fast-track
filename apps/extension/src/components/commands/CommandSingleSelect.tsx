@@ -1,9 +1,9 @@
 import React from 'react'
 
 import {
-  CommandGroup,
-  CommandItem,
-  CommandList,
+  ActionGroup,
+  ActionItem,
+  ActionList,
   ActionPanel
 } from '@/common/commands'
 
@@ -54,16 +54,14 @@ export function CommandSingleSelect<T>({
       search={search}
       onSearchChange={onSearchChange}
       searchPlaceholder="Type to search...">
-      <CommandList
-        isLoading={isLoading}
-        emptyPlaceholder="No options available">
-        <CommandGroup heading={title}>
+      <ActionList isLoading={isLoading} emptyPlaceholder="No options available">
+        <ActionGroup heading={title}>
           {options.map((opt) => {
             const value = getOptionValue(opt)
             const label = getOptionLabel?.(opt) ?? value
             const iconUrl = getIconUrl(opt)
             return (
-              <CommandItem
+              <ActionItem
                 key={value}
                 value={value}
                 keywords={getOptionKeywords?.(opt)}
@@ -74,11 +72,11 @@ export function CommandSingleSelect<T>({
                   ) : null}
                   <span className="truncate">{label}</span>
                 </div>
-              </CommandItem>
+              </ActionItem>
             )
           })}
-        </CommandGroup>
-      </CommandList>
+        </ActionGroup>
+      </ActionList>
     </ActionPanel>
   )
 }

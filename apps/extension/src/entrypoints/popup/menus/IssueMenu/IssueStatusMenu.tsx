@@ -1,9 +1,4 @@
-import {
-  Action,
-  CommandGroup,
-  CommandList,
-  ActionPanel
-} from '@/common/commands'
+import { Action, ActionGroup, ActionList, ActionPanel } from '@/common/commands'
 import { useIssueTransitions } from '@/hooks/useIssueTransitions'
 import { useMutationTransitionIssue } from '@/hooks/useMutationTransitionIssue'
 import { useTicketDetails } from '@/hooks/useTicketDetails'
@@ -56,10 +51,10 @@ function IssueStatusMenuInner({ ticket }: { ticket: JiraIssue }) {
   }
 
   return (
-    <CommandList
+    <ActionList
       isLoading={isLoading}
       emptyPlaceholder="No available transitions">
-      <CommandGroup heading="Change status...">{renderList()}</CommandGroup>
-    </CommandList>
+      <ActionGroup heading="Change status...">{renderList()}</ActionGroup>
+    </ActionList>
   )
 }

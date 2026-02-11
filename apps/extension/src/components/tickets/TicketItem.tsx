@@ -1,6 +1,6 @@
-import { CommandItem } from '@internal/ui/components/command'
 import { useMemoizedFn } from 'ahooks'
 
+import { ActionItem } from '@/common/commands'
 import { useIssueMenus } from '@/entrypoints/popup/menus/IssueMenu'
 import { useIsOptionKeyPressed } from '@/hooks/useIsOptionKeyPressed'
 import { getSuggestionService } from '@/services'
@@ -59,7 +59,7 @@ export function TicketItem({
   }
 
   return (
-    <CommandItem
+    <ActionItem
       key={ticket.key}
       value={ticket.key}
       tabIndex={0}
@@ -84,6 +84,6 @@ export function TicketItem({
       {renderPriority()}
       {showStatus && <StatusBadge status={ticket.status} />}
       {showAvatar && <AssigneeAvatar assignee={ticket.assignee} />}
-    </CommandItem>
+    </ActionItem>
   )
 }

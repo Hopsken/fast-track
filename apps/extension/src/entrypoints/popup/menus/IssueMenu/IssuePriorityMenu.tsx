@@ -1,4 +1,4 @@
-import { CommandGroup, CommandList, ActionPanel } from '@/common/commands'
+import { ActionGroup, ActionList, ActionPanel } from '@/common/commands'
 import { Action } from '@/common/commands/actions'
 import { useIssuePriorities } from '@/hooks/useIssuePriorities'
 import { useMutationUpdatePriority } from '@/hooks/useMutationUpdatePriority'
@@ -22,9 +22,9 @@ export function IssuePriorityMenu({ ticketKey }: { ticketKey: string }) {
 
   return (
     <ActionPanel>
-      <CommandList emptyPlaceholder="No priorities" isLoading={isLoading}>
-        <CommandGroup heading="Change priority...">{renderList()}</CommandGroup>
-      </CommandList>
+      <ActionList emptyPlaceholder="No priorities" isLoading={isLoading}>
+        <ActionGroup heading="Change priority...">{renderList()}</ActionGroup>
+      </ActionList>
     </ActionPanel>
   )
 }

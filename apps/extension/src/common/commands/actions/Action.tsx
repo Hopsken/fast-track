@@ -4,7 +4,7 @@ import { LucideIcon } from 'lucide-react'
 
 import { HotkeyId } from '@/lib/hotkeys'
 
-import { CommandShortcut } from '../CommandShortcut'
+import { ActionShortcut } from '../ActionShortcut'
 import { useNavigation } from '../navigation'
 
 export interface ActionProps {
@@ -51,7 +51,7 @@ export function Action({
       </div>
 
       {hotkeyId && (
-        <CommandShortcut hotkeyId={hotkeyId} onSelect={onSelectItem} />
+        <ActionShortcut hotkeyId={hotkeyId} onSelect={onSelectItem} />
       )}
     </CommandItem>
   )

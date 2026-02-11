@@ -3,8 +3,8 @@ import { Settings } from 'lucide-react'
 
 import {
   Action,
-  CommandGroup,
-  CommandList,
+  ActionGroup,
+  ActionList,
   useNavigation
 } from '@/common/commands'
 import { GeneralIcon } from '@/components'
@@ -30,8 +30,8 @@ export function IssueTemplatesMenu() {
   )
 
   return (
-    <CommandList isLoading={isLoading} emptyPlaceholder="No templates">
-      <CommandGroup heading="Issue Templates">
+    <ActionList isLoading={isLoading} emptyPlaceholder="No templates">
+      <ActionGroup heading="Issue Templates">
         {templates?.map((template) => (
           <Action
             key={template.id}
@@ -49,7 +49,7 @@ export function IssueTemplatesMenu() {
             exitOnSelect={false}
           />
         ))}
-      </CommandGroup>
+      </ActionGroup>
 
       {templates?.length === 0 && !isLoading && (
         <Action
@@ -59,6 +59,6 @@ export function IssueTemplatesMenu() {
           onSelect={handleCreateTemplate}
         />
       )}
-    </CommandList>
+    </ActionList>
   )
 }

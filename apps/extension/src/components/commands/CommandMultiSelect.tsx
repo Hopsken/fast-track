@@ -4,9 +4,9 @@ import { Check } from 'lucide-react'
 
 import {
   ActionPanel,
-  CommandGroup,
-  CommandItem,
-  CommandList
+  ActionGroup,
+  ActionItem,
+  ActionList
 } from '@/common/commands'
 
 import { GeneralIcon } from '../ui'
@@ -69,10 +69,8 @@ export function CommandMultiSelect<T>({
       search={search}
       onSearchChange={onSearchChange}
       searchPlaceholder="Type to search...">
-      <CommandList
-        isLoading={isLoading}
-        emptyPlaceholder="No available options">
-        <CommandGroup heading={title}>
+      <ActionList isLoading={isLoading} emptyPlaceholder="No available options">
+        <ActionGroup heading={title}>
           {options.map((opt) => {
             const value = getOptionValue(opt)
             const label = getOptionLabel?.(opt) ?? value
@@ -80,7 +78,7 @@ export function CommandMultiSelect<T>({
             const keywords = getOptionKeywords?.(opt)
             const iconUrl = getIconUrl(opt)
             return (
-              <CommandItem
+              <ActionItem
                 key={value}
                 value={label}
                 keywords={keywords}
@@ -94,11 +92,11 @@ export function CommandMultiSelect<T>({
                   </div>
                   {isSelected ? <Check className="size-4" /> : null}
                 </div>
-              </CommandItem>
+              </ActionItem>
             )
           })}
-        </CommandGroup>
-      </CommandList>
+        </ActionGroup>
+      </ActionList>
     </ActionPanel>
   )
 }

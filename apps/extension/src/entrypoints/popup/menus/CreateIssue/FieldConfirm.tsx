@@ -1,6 +1,6 @@
 import { Button } from '@internal/ui/components/button'
 
-import { CommandFooterSlot, CommandShortcut } from '@/common/commands'
+import { ActionShortcut, ActionPanelSlot } from '@/common/commands'
 
 import { WizardProgressBar } from './WizardProgressBar'
 
@@ -10,7 +10,7 @@ export function FieldConfirm(props: {
   onClick: () => void
 }) {
   return (
-    <CommandFooterSlot>
+    <ActionPanelSlot>
       <div className="flex items-center gap-2">
         <WizardProgressBar />
         <Button
@@ -20,9 +20,9 @@ export function FieldConfirm(props: {
           className="-my-1 -mr-4"
           disabled={props.disabled}>
           <span>{props.text || 'Continue'}</span>
-          <CommandShortcut hotkeyId="field.confirm-complex" />
+          <ActionShortcut hotkeyId="field.confirm-complex" />
         </Button>
       </div>
-    </CommandFooterSlot>
+    </ActionPanelSlot>
   )
 }

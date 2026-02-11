@@ -1,6 +1,6 @@
 import { Cog, MessageSquareWarning } from 'lucide-react'
 
-import { Action, CommandList } from '@/common/commands'
+import { Action, ActionList } from '@/common/commands'
 import { openInNewTab, openOptionsPage } from '@/utils'
 
 const openFeedback = () => {
@@ -9,7 +9,7 @@ const openFeedback = () => {
 
 export function ExtraActionsMenu() {
   return (
-    <CommandList>
+    <ActionList>
       <Action
         value="/settings"
         icon={Cog}
@@ -22,6 +22,6 @@ export function ExtraActionsMenu() {
         title="Feedback"
         onSelect={openFeedback}
       />
-    </CommandList>
+    </ActionList>
   )
 }

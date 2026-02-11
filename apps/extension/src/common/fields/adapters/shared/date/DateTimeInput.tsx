@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react'
 import { ZodString } from 'zod'
 
 import {
-  CommandGroup,
-  CommandItem,
-  CommandList,
+  ActionGroup,
+  ActionItem,
+  ActionList,
   ActionPanel
 } from '@/common/commands'
 import { useHotkey } from '@/lib/hotkeys'
@@ -55,20 +55,20 @@ export const DateTimeInput = (props: FieldInputComponentProps<ZodString>) => {
       value={search}
       search={search}
       onSearchChange={setSearch}>
-      <CommandList emptyPlaceholder="invalid date/time format">
-        <CommandGroup heading={adapter.title ?? context.metadata.name}>
+      <ActionList emptyPlaceholder="invalid date/time format">
+        <ActionGroup heading={adapter.title ?? context.metadata.name}>
           {parsedDateTime && displayDateTime ? (
-            <CommandItem value={search} onSelect={handleSelect}>
+            <ActionItem value={search} onSelect={handleSelect}>
               <div className="flex flex-col">
                 <span className="font-medium">{displayDateTime}</span>
                 <span className="text-muted-foreground text-xs">
                   {formatDateTimeISO(parsedDateTime)}
                 </span>
               </div>
-            </CommandItem>
+            </ActionItem>
           ) : null}
-        </CommandGroup>
-      </CommandList>
+        </ActionGroup>
+      </ActionList>
     </ActionPanel>
   )
 }

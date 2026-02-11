@@ -44,9 +44,10 @@ export function CreateIssueFieldsMenu() {
   }
 
   return (
-    <ActionPanel searchPlaceholder={template.name} searchReadonly>
-      <ActionLoading isLoading={isLoadingFields} />
-
+    <ActionPanel
+      searchReadonly
+      isLoading={isLoadingFields}
+      searchPlaceholder={template.name}>
       <FieldList
         heading="Review"
         fields={wizardFields}

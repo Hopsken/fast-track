@@ -1,11 +1,6 @@
 import { Github, Gitlab, GitPullRequest } from 'lucide-react'
 
-import {
-  Action,
-  CommandGroup,
-  CommandList,
-  ActionPanel
-} from '@/common/commands'
+import { Action, ActionGroup, ActionList, ActionPanel } from '@/common/commands'
 import { useIssueMergeRequests } from '@/hooks/useIssueMergeRequests'
 import { JiraMergeRequest } from '@/types'
 import { openInNewTab } from '@/utils/extension'
@@ -29,8 +24,8 @@ export function IssueMergeRequestsMenu({ ticketKey }: { ticketKey: string }) {
 
   return (
     <ActionPanel>
-      <CommandList isLoading={isLoading} emptyPlaceholder="No merge requests">
-        <CommandGroup heading={`${ticketKey} merge requests`}>
+      <ActionList isLoading={isLoading} emptyPlaceholder="No merge requests">
+        <ActionGroup heading={`${ticketKey} merge requests`}>
           {mergeRequests?.map((mergeRequest) => (
             <Action
               key={mergeRequest.id}
@@ -40,8 +35,8 @@ export function IssueMergeRequestsMenu({ ticketKey }: { ticketKey: string }) {
               onSelect={() => openInNewTab(mergeRequest.url)}
             />
           ))}
-        </CommandGroup>
-      </CommandList>
+        </ActionGroup>
+      </ActionList>
     </ActionPanel>
   )
 }

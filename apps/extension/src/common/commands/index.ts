@@ -1,11 +1,11 @@
 export { ActionPanel } from './ActionPanel'
-export { CommandShortcut } from './CommandShortcut'
-export { CommandList } from './CommandList'
-export { CommandFooter, CommandFooterSlot } from './CommandFooter'
+export { ActionShortcut } from './ActionShortcut'
+export { ActionList } from './ActionList'
+export { ActionPanelFooter, ActionPanelSlot } from './ActionPanelFooter'
 export {
-  CommandItem,
-  CommandSeparator,
-  CommandGroup
+  CommandItem as ActionItem,
+  CommandSeparator as ActionSeparator,
+  CommandGroup as ActionGroup
 } from '@internal/ui/components/command'
 export { NavigationProvider, useNavigation } from './navigation'
 

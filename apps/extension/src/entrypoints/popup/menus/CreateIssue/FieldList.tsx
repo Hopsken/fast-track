@@ -1,5 +1,4 @@
-import { CommandGroup } from '@internal/ui/components/command'
-
+import { ActionGroup, ActionList } from '@/common/commands'
 import type { VisibleField } from '~/services/template-service/gap-analysis'
 
 import { FieldListItem } from './FieldListItem'
@@ -22,17 +21,19 @@ export function FieldList({
   if (fields.length === 0) return null
 
   return (
-    <CommandGroup heading={heading}>
-      {fields.map((field) => (
-        <FieldListItem
-          key={field.fieldId}
-          field={field}
-          value={values[field.fieldId]}
-          error={errors[field.fieldId]}
-          required={field.metadata?.required ?? false}
-          onSelect={() => onSelectField(field)}
-        />
-      ))}
-    </CommandGroup>
+    <ActionList>
+      <ActionGroup heading={heading}>
+        {fields.map((field) => (
+          <FieldListItem
+            key={field.fieldId}
+            field={field}
+            value={values[field.fieldId]}
+            error={errors[field.fieldId]}
+            required={field.metadata?.required ?? false}
+            onSelect={() => onSelectField(field)}
+          />
+        ))}
+      </ActionGroup>
+    </ActionList>
   )
 }

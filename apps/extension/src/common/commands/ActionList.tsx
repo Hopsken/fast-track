@@ -1,17 +1,17 @@
 import { ComponentProps, ReactNode } from 'react'
 import {
   CommandEmpty,
-  CommandList as CommandListComponent,
+  CommandList,
   CommandLoading
 } from '@internal/ui/components/command'
 
-export type CommandListProps = {
+export type ActionListProps = {
   isLoading?: boolean
   emptyPlaceholder?: ReactNode
   children?: ReactNode
-} & ComponentProps<typeof CommandListComponent>
+} & ComponentProps<typeof CommandList>
 
-export function CommandList(props: CommandListProps) {
+export function ActionList(props: ActionListProps) {
   const {
     isLoading,
     children,
@@ -19,12 +19,12 @@ export function CommandList(props: CommandListProps) {
     ...restProps
   } = props
   return (
-    <CommandListComponent {...restProps}>
+    <CommandList {...restProps}>
       {isLoading && <CommandLoading>Loading...</CommandLoading>}
       {!isLoading && emptyPlaceholder && (
         <CommandEmpty>{emptyPlaceholder}</CommandEmpty>
       )}
       {children}
-    </CommandListComponent>
+    </CommandList>
   )
 }

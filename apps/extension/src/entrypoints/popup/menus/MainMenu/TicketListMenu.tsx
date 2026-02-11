@@ -1,7 +1,7 @@
-import { CommandGroup, useCommandState } from '@internal/ui/components/command'
+import { useCommandState } from '@internal/ui/components/command'
 import { compact } from 'lodash-es'
 
-import { CommandList } from '@/common/commands'
+import { ActionGroup, ActionList } from '@/common/commands'
 import { TicketItem } from '@/components/tickets'
 import { useIssueSuggestions } from '@/hooks/useIssueSuggestions'
 import { useHotkey } from '@/lib/hotkeys'
@@ -43,20 +43,20 @@ function SuggestedTickets({ isLoading, issues }: SuggestedTicketsProps) {
     if (!tickets?.length) return null
 
     return (
-      <CommandGroup heading={heading}>
+      <ActionGroup heading={heading}>
         {tickets.map((ticket) => (
           <TicketItem key={ticket.key} ticket={ticket} source="suggestion" />
         ))}
-      </CommandGroup>
+      </ActionGroup>
     )
   }
   return (
-    <CommandList isLoading={isLoading}>
+    <ActionList isLoading={isLoading}>
       {renderGroup('In Progress', getTickets(issues?.inProgress))}
       {renderGroup('Upcoming', getTickets(issues?.todo))}
       {renderGroup('Done', getTickets(issues?.done))}
       {renderGroup('Recommend for you', getTickets(issues?.recommend))}
-    </CommandList>
+    </ActionList>
   )
 }
 

@@ -58,7 +58,7 @@ const mapKey = (key: string): string => {
   return keyReplacements[key as keyof typeof keyReplacements] || key
 }
 
-export function CommandShortcut({
+export function ActionShortcut({
   hotkeyId,
   onSelect
 }: {

@@ -1,8 +1,8 @@
 import { Button } from '@internal/ui/components/button'
-import { CommandList } from '@internal/ui/components/command'
 import { Separator } from '@internal/ui/components/separator'
 import { useNavigate } from 'react-router-dom'
 
+import { ActionList } from '@/common/commands'
 import { useTicketDetails } from '@/hooks/useTicketDetails'
 
 import { TicketBasicFields } from './TicketBasicFields'
@@ -24,12 +24,12 @@ export function TicketDetails({ ticketKey }: { ticketKey: string }) {
   }
 
   return (
-    <CommandList className="max-h-[448px] overflow-y-auto">
+    <ActionList className="max-h-[448px] overflow-y-auto">
       <div className="space-y-4 px-4 py-3">
         {issue && <TicketBasicFields ticket={issue} />}
         <Separator className="-mx-5" />
         <TicketDescription html={issue?.description} />
       </div>
-    </CommandList>
+    </ActionList>
   )
 }

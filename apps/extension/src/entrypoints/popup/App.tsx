@@ -1,6 +1,6 @@
 import { useCreation } from 'ahooks'
 
-import { CommandFooter, NavigationProvider } from '@/common/commands'
+import { ActionPanelFooter, NavigationProvider } from '@/common/commands'
 import { EmptyAuthNotice } from '@/components/EmptyAuthNotice'
 import { QueryClientProvider } from '@/components/QueryClientProvider'
 import { HotkeysProvider } from '@/lib/hotkeys'
@@ -19,7 +19,7 @@ function App() {
       <NavigationProvider>
         <MainMenu />
       </NavigationProvider>
-      <CommandFooter />
+      <ActionPanelFooter />
     </div>
   )
 }

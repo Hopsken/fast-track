@@ -1,13 +1,12 @@
 import { useMemo, useState } from 'react'
-import {
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-  CommandList
-} from '@internal/ui/components/command'
 import { ZodString } from 'zod'
 
-import { ActionPanel } from '@/common/commands'
+import {
+  ActionPanel,
+  ActionGroup,
+  ActionItem,
+  ActionList
+} from '@/common/commands'
 import { useHotkey } from '@/lib/hotkeys'
 import { formatDateDisplay } from '@/utils/date-format'
 
@@ -56,22 +55,20 @@ export const DateInput = (props: FieldInputComponentProps<ZodString>) => {
       value={value}
       search={search}
       onSearchChange={setSearch}>
-      <CommandList>
-        <CommandGroup heading={adapter.title ?? context.metadata.name}>
+      <ActionList emptyPlaceholder="Invalid date format">
+        <ActionGroup heading={adapter.title ?? context.metadata.name}>
           {parsedDate && displayDate ? (
-            <CommandItem value={search} onSelect={handleSelect}>
+            <ActionItem value={search} onSelect={handleSelect}>
               <div className="flex flex-col">
                 <span className="font-medium">{displayDate}</span>
                 <span className="text-muted-foreground text-xs">
                   {toJiraDate(parsedDate)}
                 </span>
               </div>
-            </CommandItem>
-          ) : (
-            <CommandEmpty>Invalid date format</CommandEmpty>
-          )}
-        </CommandGroup>
-      </CommandList>
+            </ActionItem>
+          ) : null}
+        </ActionGroup>
+      </ActionList>
     </ActionPanel>
   )
 }

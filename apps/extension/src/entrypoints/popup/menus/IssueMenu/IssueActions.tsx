@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import { CommandGroup, CommandSeparator } from '@internal/ui/components/command'
 import {
   ChartNoAxesColumnIncreasing,
   Clipboard,
@@ -10,7 +9,13 @@ import {
   UserRoundPlus
 } from 'lucide-react'
 
-import { Action, ActionCopyToClipboard, ActionPush } from '@/common/commands'
+import {
+  Action,
+  ActionCopyToClipboard,
+  ActionGroup,
+  ActionPush,
+  ActionSeparator
+} from '@/common/commands'
 import { AssigneeAvatar } from '@/components'
 import { useMutationAssignMyself } from '@/hooks/useMutationAssignIssue'
 import { HotkeysScopeProvider } from '@/lib/hotkeys'
@@ -37,7 +42,7 @@ export const IssueActions = ({ ticket }: { ticket: JiraIssue }) => {
   return (
     <HotkeysScopeProvider scope="issue-actions">
       <HotkeysScopeProvider scope="issue-menu">
-        <CommandGroup heading="General">
+        <ActionGroup heading="General">
           <ActionPush
             value="assign-to"
             target={<IssueAssignMenu ticketKey={ticket.key} />}
@@ -63,11 +68,11 @@ export const IssueActions = ({ ticket }: { ticket: JiraIssue }) => {
             title="Change priority..."
             hotkeyId="issue.priority"
           />
-        </CommandGroup>
+        </ActionGroup>
 
-        <CommandSeparator />
+        <ActionSeparator />
 
-        <CommandGroup heading="Misc">
+        <ActionGroup heading="Misc">
           <ActionCopyToClipboard
             value="copy-issue-key"
             icon={Clipboard}
@@ -110,7 +115,7 @@ export const IssueActions = ({ ticket }: { ticket: JiraIssue }) => {
             title="Copy git branch name"
             hotkeyId="clipboard.copy-branch"
           />
-        </CommandGroup>
+        </ActionGroup>
       </HotkeysScopeProvider>
     </HotkeysScopeProvider>
   )

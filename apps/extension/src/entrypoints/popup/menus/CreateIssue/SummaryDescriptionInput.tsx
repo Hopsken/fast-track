@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { useMount } from 'ahooks'
 
-import { CommandGroup, CommandList, ActionPanel } from '@/common/commands'
+import { ActionGroup, ActionList, ActionPanel } from '@/common/commands'
 import { HotkeysScopeProvider, useHotkey } from '@/lib/hotkeys'
 
 import { FieldConfirm } from './FieldConfirm'
@@ -45,8 +45,8 @@ function SummaryDescriptionInputInner({ focusField }: Props) {
 
   return (
     <ActionPanel searchPlaceholder="What's this about..." shouldFilter={false}>
-      <CommandList emptyPlaceholder="">
-        <CommandGroup heading="Description">
+      <ActionList emptyPlaceholder="">
+        <ActionGroup heading="Description">
           <div className="p-3">
             <textarea
               ref={textareaRef}
@@ -56,10 +56,10 @@ function SummaryDescriptionInputInner({ focusField }: Props) {
               placeholder="Type description…"
             />
           </div>
-        </CommandGroup>
+        </ActionGroup>
 
         <FieldConfirm onClick={saveAndContinue} />
-      </CommandList>
+      </ActionList>
     </ActionPanel>
   )
 }

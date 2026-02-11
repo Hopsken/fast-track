@@ -62,7 +62,7 @@ const useCommandFooterContainerStore = create<CommandFooterContainerStore>(
  * Container component that registers a DOM element as the target for footer content.
  * This should be placed where you want the footer slot content to render.
  */
-const CommandFooterContainer = () => {
+const PanelFooterContainer = () => {
   const ref = useRef<HTMLDivElement>(null)
   const setContainer = useCommandFooterContainerStore((s) => s.setContainer)
 
@@ -80,7 +80,7 @@ const CommandFooterContainer = () => {
  * Slot component that portals its children to the CommandFooterContainer.
  * Use this to inject content into the footer from anywhere in the component tree.
  */
-export const CommandFooterSlot = ({ children }: PropsWithChildren) => {
+export const ActionPanelSlot = ({ children }: PropsWithChildren) => {
   const container = useCommandFooterContainerStore((s) => s.container)
 
   if (!container) return null
@@ -88,7 +88,7 @@ export const CommandFooterSlot = ({ children }: PropsWithChildren) => {
   return createPortal(children, container)
 }
 
-export function CommandFooter() {
+export function ActionPanelFooter() {
   const activeToast = useToastState()
   const hideToast = useToastStore((state) => state.hideToast)
 
@@ -170,7 +170,7 @@ export function CommandFooter() {
       )}>
       <div className="flex h-6 items-center justify-between">
         {activeToast ? renderToast() : renderFooter()}
-        <CommandFooterContainer />
+        <PanelFooterContainer />
       </div>
     </div>
   )

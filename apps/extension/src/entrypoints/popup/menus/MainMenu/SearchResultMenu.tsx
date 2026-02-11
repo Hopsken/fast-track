@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { compact, uniqBy } from 'lodash-es'
 
-import { CommandItem, CommandList } from '@/common/commands'
+import { ActionItem, ActionList } from '@/common/commands'
 import { TicketList } from '@/components/tickets'
 import { useFrequentProjects } from '@/hooks/useFrequentProjects'
 import { useTicketSearch } from '@/hooks/useTicketSearch'
@@ -69,19 +69,19 @@ export function SearchResultMenu(props: {
   console.log('shouldShowMore', shouldShowMore, searchResults)
 
   return (
-    <CommandList isLoading={isSearching} aria-label="Ticket search results">
+    <ActionList isLoading={isSearching} aria-label="Ticket search results">
       <TicketList
         searchQuery={searchQuery}
         tickets={searchResults}
         showEmptyNotice={!shouldShowMore}
       />
       {shouldShowMore ? (
-        <CommandItem
+        <ActionItem
           value="show-all-projects"
           onSelect={() => setShowAllProjects(true)}>
           Show more results
-        </CommandItem>
+        </ActionItem>
       ) : null}
-    </CommandList>
+    </ActionList>
   )
 }

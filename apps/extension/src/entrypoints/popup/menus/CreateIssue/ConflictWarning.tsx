@@ -1,5 +1,6 @@
-import { CommandGroup, CommandItem } from '@internal/ui/components/command'
 import { AlertTriangle } from 'lucide-react'
+
+import { ActionGroup, ActionItem } from '@/common/commands'
 
 export interface ConflictWarningProps {
   missingFieldNames: string[]
@@ -13,8 +14,8 @@ export function ConflictWarning({
   if (missingFieldNames.length === 0) return null
 
   return (
-    <CommandGroup heading="⚠️ Template Issue">
-      <CommandItem
+    <ActionGroup heading="⚠️ Template Issue">
+      <ActionItem
         value="dismiss-warning"
         onSelect={onDismiss}
         className="text-amber-700">
@@ -25,7 +26,7 @@ export function ConflictWarning({
             {missingFieldNames.join(', ')}
           </div>
         </div>
-      </CommandItem>
-    </CommandGroup>
+      </ActionItem>
+    </ActionGroup>
   )
 }

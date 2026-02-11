@@ -3,8 +3,8 @@ import { useState } from 'react'
 import {
   Action,
   ActionUser,
-  CommandGroup,
-  CommandList,
+  ActionGroup,
+  ActionList,
   ActionPanel
 } from '@/common/commands'
 import { useAutoCompleteUsers } from '@/hooks/useAutoComplete'
@@ -57,12 +57,12 @@ export function IssueAssignMenu({ ticketKey }: { ticketKey: string }) {
 
   return (
     <ActionPanel search={search} onSearchChange={setSearch}>
-      <CommandList isLoading={isLoading} emptyPlaceholder="No matching users">
-        <CommandGroup heading="Assign to...">
+      <ActionList isLoading={isLoading} emptyPlaceholder="No matching users">
+        <ActionGroup heading="Assign to...">
           {unassignAction}
           {renderList()}
-        </CommandGroup>
-      </CommandList>
+        </ActionGroup>
+      </ActionList>
     </ActionPanel>
   )
 }

@@ -2,11 +2,11 @@ import { memo } from 'react'
 import { useMemoizedFn } from 'ahooks'
 
 import {
-  CommandGroup,
-  CommandItem,
-  CommandList,
+  ActionGroup,
+  ActionItem,
+  ActionList,
   ActionPanel,
-  CommandSeparator
+  ActionSeparator
 } from '@/common/commands'
 import { PrefetchProvider } from '@/components/PrefetchQuery'
 import { TicketBasicFields } from '@/components/tickets'
@@ -39,21 +39,21 @@ const IssueMainMenuInner = ({ ticket }: { ticket: JiraIssueDetail }) => {
   })
 
   return (
-    <CommandList>
-      <CommandGroup>
-        <CommandItem value={ticket.key} onSelect={onSelect} className="mb-1">
+    <ActionList>
+      <ActionGroup>
+        <ActionItem value={ticket.key} onSelect={onSelect} className="mb-1">
           <TicketBasicFields ticket={ticket} />
-        </CommandItem>
-      </CommandGroup>
+        </ActionItem>
+      </ActionGroup>
 
-      <CommandSeparator />
+      <ActionSeparator />
 
       <IssueActions ticket={ticket} />
 
       <PrefetchProvider>
         <PrefetchActions ticket={ticket} />
       </PrefetchProvider>
-    </CommandList>
+    </ActionList>
   )
 }
 

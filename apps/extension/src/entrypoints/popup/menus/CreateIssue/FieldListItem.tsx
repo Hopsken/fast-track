@@ -1,7 +1,7 @@
-import { CommandItem } from '@internal/ui/components/command'
 import { cn } from '@internal/ui/lib/utils'
 import { AlertCircle, Check, ChevronRight } from 'lucide-react'
 
+import { ActionItem } from '@/common/commands'
 import { useFieldAdapter } from '@/common/fields'
 import type { VisibleField } from '~/services/template-service/gap-analysis'
 
@@ -33,7 +33,7 @@ export function FieldListItem({
   const searchValue = `field:${fieldId} ${fieldName}`
 
   return (
-    <CommandItem
+    <ActionItem
       value={searchValue}
       onSelect={() => onSelect(fieldId)}
       className={cn(hasError && 'border-l-2 border-l-rose-500')}>
@@ -64,6 +64,6 @@ export function FieldListItem({
 
         <ChevronRight className="text-muted-foreground size-4 shrink-0" />
       </div>
-    </CommandItem>
+    </ActionItem>
   )
 }
