@@ -12,6 +12,7 @@ export interface ActionProps {
   icon?: LucideIcon
   prefix?: ReactNode
   title: ReactNode
+  keywords?: string[]
   onSelect?: () => void
   hotkeyId?: HotkeyId
   exitOnSelect?: boolean
@@ -22,6 +23,7 @@ export function Action({
   icon,
   prefix,
   title,
+  keywords,
   onSelect,
   hotkeyId,
   exitOnSelect = true
@@ -43,6 +45,7 @@ export function Action({
       value={value}
       tabIndex={0}
       role="button"
+      keywords={keywords}
       onSelect={onSelectItem}>
       {prefixEl && <span>{prefixEl}</span>}
 

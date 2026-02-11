@@ -20,11 +20,11 @@ export function ActionList(props: ActionListProps) {
   } = props
   return (
     <CommandList {...restProps}>
+      {children}
       {isLoading && <CommandLoading>Loading...</CommandLoading>}
       {!isLoading && emptyPlaceholder && (
         <CommandEmpty>{emptyPlaceholder}</CommandEmpty>
       )}
-      {children}
     </CommandList>
   )
 }

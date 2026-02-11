@@ -22,6 +22,8 @@ export type CommandSingleSelectProps<T> = {
   search?: string
   onSearchChange?: (search: string) => void
 
+  shouldFilter?: boolean
+
   options: T[]
   getOptionValue: (option: T) => string
   getOptionLabel?: (option: T) => string
@@ -36,6 +38,7 @@ export function CommandSingleSelect<T>({
   onConfirm,
   search,
   onSearchChange,
+  shouldFilter,
   options,
   getOptionValue,
   getOptionLabel,
@@ -53,6 +56,7 @@ export function CommandSingleSelect<T>({
       defaultValue={defaultValue}
       search={search}
       onSearchChange={onSearchChange}
+      shouldFilter={shouldFilter}
       searchPlaceholder="Type to search...">
       <ActionList isLoading={isLoading} emptyPlaceholder="No options available">
         <ActionGroup heading={title}>

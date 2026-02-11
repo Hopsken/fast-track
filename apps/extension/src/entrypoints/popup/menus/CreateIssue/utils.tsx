@@ -3,7 +3,6 @@ import { isEmpty, mapValues } from 'lodash-es'
 
 import { getFieldAdapter } from '@/common/fields'
 import { JiraDescriptionAdapter } from '@/common/fields/adapters/description'
-import { JiraSummaryAdapter } from '@/common/fields/adapters/summary'
 import { FieldAdapter } from '@/common/fields/types'
 import { IssueTemplate, JiraFieldMetadata } from '@/repository/schema'
 import { VisibleField } from '@/services/template-service/gap-analysis'
@@ -29,6 +28,8 @@ export function formatValuePreview(
   value: unknown, // eslint-disable-next-line @typescript-eslint/no-explicit-any
   adapter: FieldAdapter<any>
 ): ReactNode {
+  if (value == null) return ''
+
   if (Array.isArray(value)) {
     return value
       .map((v) => formatValuePreview(v, adapter))

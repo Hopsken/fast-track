@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { CommandSingleSelect } from '@/components/commands'
 import { CommandMultiSelect } from '@/components/commands/CommandMultiSelect'
@@ -24,6 +24,10 @@ export const GenericSelectInput = <S extends FieldValueSchema>({
     query: search
   })
 
+  const shouldFilter = useMemo(() => {
+    return !adapter.fetchOptions
+  }, [adapter.fetchOptions])
+
   if (isMultiple) {
     // eslint-disable-next-line sonarjs/no-nested-conditional
     const values = value ? (Array.isArray(value) ? value : [value]) : []
@@ -38,6 +42,7 @@ export const GenericSelectInput = <S extends FieldValueSchema>({
         onConfirm={onConfirm}
         search={search}
         onSearchChange={setSearch}
+        shouldFilter={shouldFilter}
         getOptionValue={adapter.keyOf}
         getOptionLabel={adapter.labelOf ?? adapter.keyOf}
       />
@@ -54,6 +59,7 @@ export const GenericSelectInput = <S extends FieldValueSchema>({
       onConfirm={onConfirm}
       search={search}
       onSearchChange={setSearch}
+      shouldFilter={shouldFilter}
       getOptionValue={adapter.keyOf}
       getOptionLabel={adapter.labelOf ?? adapter.keyOf}
     />

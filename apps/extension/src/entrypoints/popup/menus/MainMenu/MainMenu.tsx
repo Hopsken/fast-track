@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react'
+import { Button } from '@internal/ui/components/button'
 
-import { ActionPanel } from '@/common/commands'
+import { ActionPanel, ActionPanelSlot } from '@/common/commands'
 import { HotkeysScopeProvider } from '@/lib/hotkeys'
 
-import { ExtraActionsMenu } from './ExtraActionsMenu'
+import { ExtraActionsMenu, openFeedback } from './ExtraActionsMenu'
 import { IssueTemplatesMenu } from './IssueTemplatesMenu'
 import { TicketListMenu } from './TicketListMenu'
 
@@ -11,7 +12,8 @@ export function MainMenu() {
   const [search, setSearch] = useState('')
 
   const isExtraActionsMenuVisible = search.startsWith('/')
-  const isTemplateMenuVisible = search.startsWith('+') || search.startsWith('C')
+  const isTemplateMenuVisible =
+    search.startsWith('+') || search.startsWith('C') || search.startsWith('c')
 
   const shouldFilter = useMemo(() => {
     return !!(isExtraActionsMenuVisible || isTemplateMenuVisible)
@@ -34,6 +36,16 @@ export function MainMenu() {
         shouldFilter={shouldFilter}
         searchPlaceholder="Type a command or search...">
         {renderMenu()}
+
+        <ActionPanelSlot>
+          <Button
+            variant={'ghost'}
+            size={'xs'}
+            className="font-medium"
+            onClick={openFeedback}>
+            <span>Give feedback</span>
+          </Button>
+        </ActionPanelSlot>
       </ActionPanel>
     </HotkeysScopeProvider>
   )

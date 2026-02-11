@@ -3,7 +3,7 @@ import { Cog, MessageSquareWarning } from 'lucide-react'
 import { Action, ActionList } from '@/common/commands'
 import { openInNewTab, openOptionsPage } from '@/utils'
 
-const openFeedback = () => {
+export const openFeedback = () => {
   openInNewTab('https://teamusement.featurebase.app')
 }
 

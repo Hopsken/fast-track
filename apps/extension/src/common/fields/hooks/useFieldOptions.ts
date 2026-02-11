@@ -5,6 +5,7 @@ import { z } from 'zod'
 
 import { FieldConfig } from '@/repository/schema'
 import { isNonNullable } from '@/utils/assert'
+import { minutes } from '@/utils/time'
 
 import { FieldAdapter, FieldValueSchema, JiraFieldContext } from '../types'
 
@@ -46,6 +47,8 @@ export const useFieldOptions = <Schema extends FieldValueSchema>(params: {
 
     enabled: isServerSearch && !!adapter.fetchOptions,
 
+    staleTime: minutes(1),
+    gcTime: minutes(1),
     // 关键体验优化：在搜索新词的过程中，保留上一份数据，避免下拉框突然闪烁变白
     placeholderData: keepPreviousData
   })

@@ -25,6 +25,7 @@ export type CommandMultiSelectProps<T> = {
   onSearchChange?: (search: string) => void
 
   options: T[]
+  shouldFilter?: boolean
   getOptionValue: (option: T) => string
   getOptionLabel?: (option: T) => string
   getOptionKeywords?: (option: T) => string[]
@@ -38,6 +39,7 @@ export function CommandMultiSelect<T>({
   search,
   onSearchChange,
   options,
+  shouldFilter,
   getOptionValue,
   getOptionLabel,
   getOptionKeywords
@@ -68,6 +70,7 @@ export function CommandMultiSelect<T>({
       defaultValue={defaultValue}
       search={search}
       onSearchChange={onSearchChange}
+      shouldFilter={shouldFilter}
       searchPlaceholder="Type to search...">
       <ActionList isLoading={isLoading} emptyPlaceholder="No available options">
         <ActionGroup heading={title}>

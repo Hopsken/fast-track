@@ -9,7 +9,6 @@ import { JiraNumberAdapter } from './adapters/number'
 import { JiraOptionAdapter } from './adapters/option'
 import { JiraParentAdapter } from './adapters/parent'
 import { JiraPriorityAdapter } from './adapters/priority'
-import { JiraReporterAdapter } from './adapters/reporter'
 import { JiraResolutionAdapter } from './adapters/resolution'
 import { JiraSecurityLevelAdapter } from './adapters/securitylevel'
 import { JiraDateAdapter, JiraDatetimeAdapter } from './adapters/shared/date'
@@ -25,7 +24,6 @@ registerAdapter(JiraPriorityAdapter)
 registerAdapter(JiraAssigneeAdapter)
 registerAdapter(JiraLabelAdapter)
 registerAdapter(JiraParentAdapter)
-registerAdapter(JiraReporterAdapter)
 registerAdapter(JiraDueDateAdapter)
 registerAdapter(JiraEnvironmentAdapter)
 registerAdapter(JiraSummaryAdapter)

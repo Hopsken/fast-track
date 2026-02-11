@@ -35,7 +35,13 @@ export function IssueTemplatesMenu() {
         {templates?.map((template) => (
           <Action
             key={template.id}
-            value={`C+${template.name}`}
+            value={template.id}
+            keywords={[
+              'create',
+              template.scope.project.key,
+              template.scope.project.name,
+              template.scope.issueType.name
+            ]}
             prefix={
               template.icon || (
                 <GeneralIcon
