@@ -7,8 +7,8 @@ import {
   useMemo,
   useState
 } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { useDebounce } from 'ahooks'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useDebounce, useMemoizedFn } from 'ahooks'
 
 import type { SearchOption } from '@/components/ui'
 import { extractLeadingEmoji } from '@/lib/emoji'
@@ -127,6 +127,7 @@ type ProviderProps = {
 
 export function TemplateWizardProvider(props: ProviderProps) {
   const { host, children, mode } = props
+  const queryClient = useQueryClient()
 
   const isEdit = mode === 'edit'
   const existingTemplate = isEdit ? props.template : null
@@ -318,7 +319,7 @@ export function TemplateWizardProvider(props: ProviderProps) {
 
   // --- Save ---
 
-  const save = useCallback(async () => {
+  const save = useMemoizedFn(async () => {
     setSaveError(null)
     setIsSaving(true)
 
@@ -378,22 +379,16 @@ export function TemplateWizardProvider(props: ProviderProps) {
         })
         ;(props as { onCreated: (id: string) => void })?.onCreated(created.id)
       }
+
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.issueTemplates.list(false)
+      })
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : String(e))
     } finally {
       setIsSaving(false)
     }
-  }, [
-    availableFields,
-    description,
-    existingTemplate,
-    fieldsConfig,
-    host,
-    isEdit,
-    name,
-    props,
-    scope
-  ])
+  })
 
   // --- Delete (edit mode only) ---
 

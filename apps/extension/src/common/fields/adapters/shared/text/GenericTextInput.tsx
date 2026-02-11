@@ -10,6 +10,11 @@ export const GenericTextInput = (
 ) => {
   const { config, adapter, value, context, onChange, onConfirm } = props
 
+  // 服务端模式：使用 fetchOptions 获取选项列表
+  if (adapter.fetchOptions) {
+    return <GenericSelectInput {...props} />
+  }
+
   // 限制模式：使用配置的 allowedOptions，并在前端做简单的本地过滤
   if (
     config &&

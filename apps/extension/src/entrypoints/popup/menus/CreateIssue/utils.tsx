@@ -38,7 +38,7 @@ export function formatValuePreview(
           return (
             <span key={preview} className="mr-1 inline-block">
               {preview}
-              {index < value.length - 1 ? ',&nbsp;' : ''}
+              {index < value.length - 1 ? ' ' : ''}
             </span>
           )
         }

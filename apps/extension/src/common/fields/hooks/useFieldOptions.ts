@@ -19,7 +19,11 @@ export const useFieldOptions = <Schema extends FieldValueSchema>(params: {
   const { adapter, context, config, query = '' } = params
 
   // 2. 防抖处理：只有 debouncedValue 变化时，才会触发 React Query
-  const [debouncedQuery] = useDebounce(query, { wait: 300 })
+  const debouncedQuery = useDebounce(query, {
+    wait: 300,
+    trailing: true,
+    leading: false
+  })
 
   // 3. 判断是否需要服务端搜索
   // 如果是 'limit' 模式，我们不需要发请求，直接用本地数据
