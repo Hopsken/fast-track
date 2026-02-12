@@ -21,6 +21,7 @@ jobs:
 
     outputs:
       version: ${{ steps.package_version.outputs.version }}
+      is_beta: ${{ steps.release_type.outputs.is_beta }}
 
     env:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
@@ -72,10 +73,23 @@ jobs:
         id: package_version
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
+      - name: Detect release type
+        id: release_type
+        run: |
+          if [[ $GITHUB_REF == refs/tags/v*-beta.* ]]; then
+            echo "is_beta=true" >> $GITHUB_OUTPUT
+            echo "release_type=beta" >> $GITHUB_OUTPUT
+          else
+            echo "is_beta=false" >> $GITHUB_OUTPUT
+            echo "release_type=stable" >> $GITHUB_OUTPUT
+          fi
+
       - name: Quality checkout
         run: pnpm exec turbo run typecheck lint test
 
       - name: Run extension e2e tests
+        env:
+          IS_BETA: ${{ steps.release_type.outputs.is_beta }}
         run: pnpm run build && pnpm test:e2e
 
       - name: Upload Playwright report artifact
@@ -94,7 +108,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
-          name: fast-track-chrome-v${{ steps.package_version.outputs.version }}
+          name: fast-track-chrome-v${{ steps.package_version.outputs.version }}${{ steps.release_type.outputs.is_beta == 'true' && '-beta' || '' }}
           path: apps/extension/.output/extension-${{ steps.package_version.outputs.version }}-chrome.zip
           retention-days: 30
 
@@ -102,7 +116,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
-          name: fast-track-firefox-v${{ steps.package_version.outputs.version }}
+          name: fast-track-firefox-v${{ steps.package_version.outputs.version }}${{ steps.release_type.outputs.is_beta == 'true' && '-beta' || '' }}
           path: apps/extension/.output/extension-${{ steps.package_version.outputs.version }}-firefox.zip
           retention-days: 30
 
@@ -128,8 +142,32 @@ jobs:
           path: ./artifacts/
           merge-multiple: true
 
-      - name: Browser Platform Publish
+      # Publish stable releases to both Chrome and Firefox stores
+      - name: Browser Platform Publish (Stable)
+        if: needs.build.outputs.is_beta != 'true'
         uses: PlasmoHQ/bpp@v3
         with:
           keys: ${{ secrets.SUBMIT_KEYS }}
           chrome-file: ./artifacts/extension-${{ needs.build.outputs.version }}-chrome.zip
+          firefox-file: ./artifacts/extension-${{ needs.build.outputs.version }}-firefox.zip
+
+      # Publish beta releases to Chrome as unlisted
+      - name: Browser Platform Publish (Beta - Chrome Unlisted)
+        if: needs.build.outputs.is_beta == 'true'
+        uses: PlasmoHQ/bpp@v3
+        with:
+          keys: ${{ secrets.SUBMIT_KEYS }}
+          chrome-file: ./artifacts/extension-${{ needs.build.outputs.version }}-chrome.zip
+          chrome-publish: unlisted
+
+      # Create GitHub Release for beta versions with both artifacts
+      - name: Create GitHub Release (Beta)
+        if: needs.build.outputs.is_beta == 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./artifacts/extension-${{ needs.build.outputs.version }}-chrome.zip
+            ./artifacts/extension-${{ needs.build.outputs.version }}-firefox.zip
+          prerelease: true
+          generate_release_notes: true
+          name: ${{ needs.build.outputs.version }} (Beta)

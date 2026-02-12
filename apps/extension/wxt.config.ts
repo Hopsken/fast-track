@@ -79,10 +79,15 @@ export default defineConfig({
   },
 
   manifest: {
-    name: 'Fast Track for Jira',
+    name:
+      process.env.IS_BETA === 'true'
+        ? 'Fast Track for Jira (BETA)'
+        : 'Fast Track for Jira',
     version: packageJson.version,
     description:
-      'Quick search and access to your Jira tickets with enhanced board experience',
+      process.env.IS_BETA === 'true'
+        ? `BETA VERSION - Quick search and access to your Jira tickets with enhanced board experience`
+        : 'Quick search and access to your Jira tickets with enhanced board experience',
     host_permissions: ['https://*.atlassian.net/jira*'],
     omnibox: {
       keyword: 'jj'

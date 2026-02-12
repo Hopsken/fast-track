@@ -92,6 +92,100 @@ This should create a production bundle for your extension, ready to be zipped an
 
 The easiest way to deploy your Plasmo extension is to use the built-in [bpp](https://bpp.browser.market) GitHub action. Prior to using this action however, make sure to build your extension and upload the first version to the store to establish the basic credentials. Then, simply follow [this setup instruction](https://docs.plasmo.com/framework/workflows/submit) and you should be on your way for automated submission!
 
+## Beta Release Process
+
+This project supports both stable and beta releases through the CI/CD pipeline. Beta versions allow testing new features with a limited audience before promoting to production.
+
+### Beta Tag Convention
+
+Beta versions follow semantic versioning with a beta suffix:
+
+**Format**: `v{MAJOR}.{MINOR}.{PATCH}-beta.{INCREMENT}`
+
+**Examples**:
+- `v2.5.0-beta.1` - First beta for version 2.5.0
+- `v2.5.0-beta.2` - Second iteration
+- `v3.0.0-beta.1` - Major version beta
+
+### Creating a Beta Release
+
+1. **Update version in `package.json`**:
+   ```json
+   {
+     "version": "2.5.0-beta.1"
+   }
+   ```
+
+2. **Commit the version change**:
+   ```bash
+   git commit -am "chore: bump version to 2.5.0-beta.1"
+   ```
+
+3. **Create and push the beta tag**:
+   ```bash
+   git tag v2.5.0-beta.1
+   git push origin v2.5.0-beta.1
+   ```
+
+4. **CI/CD automatically**:
+   - Runs all quality gates (typecheck, lint, tests, e2e)
+   - Builds with "BETA" label in extension name
+   - Publishes Chrome version as unlisted (accessible via direct link)
+   - Creates GitHub Release marked as pre-release
+   - Attaches both Chrome and Firefox artifacts to the release
+
+### Installing Beta Versions
+
+**Chrome**:
+- Access the unlisted version via the Chrome Web Store link provided after publishing
+- Or download the `.zip` from the GitHub Release and load it as an unpacked extension
+
+**Firefox**:
+- Download the `.xpi` file from the GitHub Release
+- Open `about:addons` in Firefox
+- Click the gear icon → Install Add-on From File
+- Select the downloaded `.xpi` file
+
+### Promoting Beta to Stable
+
+1. **Update version in `package.json`** (remove beta suffix):
+   ```json
+   {
+     "version": "2.5.0"
+   }
+   ```
+
+2. **Commit the version change**:
+   ```bash
+   git commit -am "chore: release version 2.5.0"
+   ```
+
+3. **Create and push the stable tag**:
+   ```bash
+   git tag v2.5.0
+   git push origin v2.5.0
+   ```
+
+4. **CI/CD automatically**:
+   - Publishes to Chrome Web Store (public)
+   - Publishes to Firefox Add-ons (AMO)
+   - Creates regular GitHub Release (not pre-release)
+
+### Beta vs Stable Publishing
+
+| Release Type | Chrome | Firefox | GitHub Release |
+|--------------|--------|---------|----------------|
+| **Stable** (`v2.5.0`) | Public on Chrome Web Store | Public on Firefox AMO | Regular release |
+| **Beta** (`v2.5.0-beta.1`) | Unlisted on Chrome Web Store | Manual install from GitHub | Pre-release with artifacts |
+
+### Rollback Plan
+
+If a beta release has critical issues:
+
+1. **Do not promote to stable** - keep stable tag at previous version
+2. **Create a new beta** - e.g., `v2.5.0-beta.2` with fixes
+3. **Emergency hotfix** - if needed, tag from previous stable commit
+
 ## Architecture & Documentation
 
 - **ARCHITECTURE.md**: Comprehensive system architecture and patterns
