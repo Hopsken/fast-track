@@ -62,11 +62,12 @@ function SuggestedTickets({ isLoading, issues }: SuggestedTicketsProps) {
 
 function useQuickNavigate() {
   const ticketKey = useCommandState((s) => s.value)
+
   const issueMenus = useIssueMenus()
 
   useHotkey('issue.status', () => {
     if (!isTicketKey(ticketKey)) return
-    issueMenus.openIssueMenu(ticketKey)
+    issueMenus.openIssueStatusMenu(ticketKey)
   })
 
   useHotkey('issue.priority', () => {
