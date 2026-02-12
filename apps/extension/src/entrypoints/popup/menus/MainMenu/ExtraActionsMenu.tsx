@@ -4,7 +4,7 @@ import { Action, ActionList } from '@/common/commands'
 import { openInNewTab, openOptionsPage } from '@/utils'
 
 export const openFeedback = () => {
-  openInNewTab('https://teamusement.featurebase.app')
+  openInNewTab('https://fasttrack.featurebase.app')
 }
 
 export function ExtraActionsMenu() {

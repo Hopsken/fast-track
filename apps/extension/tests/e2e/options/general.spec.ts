@@ -4,7 +4,7 @@ test.describe('Options - General Settings', () => {
   test('General tab is selected by default', async ({ openExtensionPage }) => {
     const options = await openExtensionPage('options.html')
 
-    const generalTab = options.getByRole('button', { name: 'General' })
+    const generalTab = options.getByRole('link', { name: 'General' })
     await expect(generalTab).toHaveClass(/border-blue-500/)
     await expect(generalTab).toHaveClass(/text-blue-600/)
   })
