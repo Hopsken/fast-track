@@ -20,7 +20,10 @@ export function FieldConfirm(props: {
           className="-my-1 -mr-4"
           disabled={props.disabled}>
           <span>{props.text || 'Continue'}</span>
-          <ActionShortcut hotkeyId="field.confirm-complex" />
+          <ActionShortcut
+            hotkeyId="field.confirm-complex"
+            onSelect={props.onClick}
+          />
         </Button>
       </div>
     </ActionPanelSlot>

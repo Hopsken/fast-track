@@ -1,14 +1,15 @@
+import { Button } from '@internal/ui/components/button'
 import { useMemoizedFn } from 'ahooks'
 
-import { ActionPanel } from '@/common/commands'
+import { ActionPanel, ActionPanelSlot, ActionShortcut } from '@/common/commands'
 import { useIssueCreateMeta } from '@/hooks/useIssueCreateMeta'
 import { useHotkey } from '@/lib/hotkeys'
 import type { VisibleField } from '~/services/template-service/gap-analysis'
 
-import { FieldConfirm } from './FieldConfirm'
 import { FieldList } from './FieldList'
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 import { useCreateIssueForm } from './useCreateIssueForm'
+import { WizardProgressBar } from './WizardProgressBar'
 
 export function CreateIssueFieldsMenu() {
   const { template, values, errors, clearError, wizardFields, setWizardIndex } =
@@ -29,7 +30,7 @@ export function CreateIssueFieldsMenu() {
     template
   })
 
-  useHotkey('issue.create.proceed', submit)
+  const hotkeyRef = useHotkey<HTMLDivElement>('issue.create.proceed', submit)
 
   // Field selection handler
   const handleSelectField = useMemoizedFn((field: VisibleField) => {
@@ -47,6 +48,7 @@ export function CreateIssueFieldsMenu() {
 
   return (
     <ActionPanel
+      ref={hotkeyRef}
       searchReadonly
       isLoading={isLoadingFields}
       searchPlaceholder={template.name}>
@@ -58,7 +60,19 @@ export function CreateIssueFieldsMenu() {
         onSelectField={handleSelectField}
       />
 
-      <FieldConfirm onClick={submit} text="Create Issue" />
+      <ActionPanelSlot>
+        <div className="flex items-center gap-2">
+          <WizardProgressBar />
+          <Button
+            variant={'ghost'}
+            size={'sm'}
+            onClick={submit}
+            className="-my-1 -mr-4">
+            <span>Create issue</span>
+            <ActionShortcut hotkeyId="issue.create.proceed" />
+          </Button>
+        </div>
+      </ActionPanelSlot>
     </ActionPanel>
   )
 }

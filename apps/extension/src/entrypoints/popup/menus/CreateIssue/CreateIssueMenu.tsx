@@ -41,7 +41,11 @@ function CreateIssueMenuInner() {
   const activeField = wizardFields[wizardIndex]
 
   if (!activeField) {
-    return <CreateIssueFieldsMenu />
+    return (
+      <HotkeysScopeProvider scope="create-issue">
+        <CreateIssueFieldsMenu />
+      </HotkeysScopeProvider>
+    )
   }
 
   return <FieldInputMenuRouter field={activeField} />
@@ -49,10 +53,8 @@ function CreateIssueMenuInner() {
 
 export function CreateIssueMenu({ template }: { template: IssueTemplate }) {
   return (
-    <HotkeysScopeProvider scope="create-issue">
-      <CreateIssueDraftStoreProvider template={template}>
-        <CreateIssueMenuInner />
-      </CreateIssueDraftStoreProvider>
-    </HotkeysScopeProvider>
+    <CreateIssueDraftStoreProvider template={template}>
+      <CreateIssueMenuInner />
+    </CreateIssueDraftStoreProvider>
   )
 }

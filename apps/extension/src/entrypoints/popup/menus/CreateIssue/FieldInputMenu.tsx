@@ -35,8 +35,6 @@ export function FieldInputMenu({ field }: { field: VisibleField }) {
     goToNextField()
   })
 
-  useHotkey('field.confirm-complex', onConfirm)
-
   useHotkey('field-input.escape', goBackToFieldsMenu)
 
   const InputComponent = adapter.InputComponent

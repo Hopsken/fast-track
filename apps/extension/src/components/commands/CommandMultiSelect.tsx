@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
+import { useMemoizedFn } from 'ahooks'
 import { first } from 'lodash-es'
 import { Check } from 'lucide-react'
+import { isHotkeyPressed } from 'react-hotkeys-hook'
 
 import {
   ActionPanel,
@@ -36,6 +38,7 @@ export function CommandMultiSelect<T>({
   isLoading,
   value,
   onChange,
+  onConfirm,
   search,
   onSearchChange,
   options,
@@ -58,12 +61,20 @@ export function CommandMultiSelect<T>({
 
   const selectedIds = new Set(selected.map((o) => getOptionValue(o)))
 
-  const toggle = (opt: T) => {
+  const toggle = useMemoizedFn((opt: T) => {
     const next = selectedIds.has(getOptionValue(opt))
       ? selected.filter((o) => getOptionValue(o) !== getOptionValue(opt))
       : [...selected, opt]
     onChange(next)
-  }
+  })
+
+  const onSelect = useMemoizedFn((opt: T) => {
+    if (isHotkeyPressed('meta')) {
+      onConfirm?.()
+    } else {
+      toggle(opt)
+    }
+  })
 
   return (
     <ActionPanel
@@ -85,7 +96,7 @@ export function CommandMultiSelect<T>({
                 key={value}
                 value={label}
                 keywords={keywords}
-                onSelect={() => toggle(opt)}>
+                onSelect={() => onSelect(opt)}>
                 <div className="flex w-full items-center justify-between">
                   <div className="flex items-center gap-2">
                     {iconUrl ? (

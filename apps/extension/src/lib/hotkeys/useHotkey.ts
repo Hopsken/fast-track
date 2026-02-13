@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, DependencyList } from 'react'
+import { useState, useRef, DependencyList, RefObject } from 'react'
 import { useMemoizedFn, useMount } from 'ahooks'
 import {
   useHotkeys,
@@ -88,11 +88,11 @@ const mapKeyboardShortcutToReactHotkeys = (
  * }, { deps: [value] })
  * ```
  */
-export function useHotkey(
+export function useHotkey<T extends HTMLElement>(
   hotkeyId: HotkeyId,
   callback: HotkeyCallback,
   options: UseHotkeyOptions = {}
-): void {
+): RefObject<T | null> {
   const { deps, ...restOptions } = options
 
   // Get hotkey definition from registry
@@ -140,7 +140,7 @@ export function useHotkey(
   )
 
   // Register hotkey with react-hotkeys-hook
-  useHotkeys(
+  return useHotkeys(
     keys,
     wrappedCallback,
     {
