@@ -136,10 +136,14 @@ export class JiraAPI {
 
   async searchUserOfProject(projectKey: string, query: string) {
     const client = await this.getClient()
-    const result = await client.userSearch.findUsersWithBrowsePermission({
-      projectKey,
-      query
-    })
+    const result = query
+      ? await client.userSearch.findUsersWithBrowsePermission({
+          projectKey,
+          query
+        })
+      : await client.userSearch.findAssignableUsers({
+          project: projectKey
+        })
     return result
       .filter((user) => user.accountType === 'atlassian')
       .map((user) => JiraUserSchema.safeParse(user).data)
