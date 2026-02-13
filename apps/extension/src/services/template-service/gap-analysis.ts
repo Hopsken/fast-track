@@ -116,6 +116,8 @@ export function computeVisibleFields(
   for (const field of fieldsMetadata) {
     if (!field.required) continue
     if (shouldSkipField(field.fieldId)) continue
+    // Skip if has jira server side defined default value
+    if (field.hasDefaultValue) continue
 
     const alreadyVisible = visible.some((f) => f.fieldId === field.fieldId)
     if (alreadyVisible) continue
