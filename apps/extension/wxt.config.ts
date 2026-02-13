@@ -9,6 +9,13 @@ import packageJson from '../../package.json'
 
 const isDev = process.env.NODE_ENV !== 'production'
 const DEBUG = !!process.env.DEBUG
+const isBeta = process.env.IS_BETA === 'true'
+
+// Chrome requires version to be dot-separated integers only (e.g. "2.4.7").
+// Strip any pre-release suffix like "-beta.0" for the manifest version,
+// and use version_name for the full semver string.
+const fullVersion = packageJson.version
+const chromeVersion = fullVersion.replace(/-.*$/, '')
 
 /** 递归查找 HTML 文件 */
 async function findHtmlFiles(dir: string): Promise<string[]> {
@@ -79,15 +86,12 @@ export default defineConfig({
   },
 
   manifest: {
-    name:
-      process.env.IS_BETA === 'true'
-        ? 'Fast Track for Jira (BETA)'
-        : 'Fast Track for Jira',
-    version: packageJson.version,
-    description:
-      process.env.IS_BETA === 'true'
-        ? `BETA VERSION - Quick search and access to your Jira tickets with enhanced board experience`
-        : 'Quick search and access to your Jira tickets with enhanced board experience',
+    name: isBeta ? 'Fast Track for Jira (BETA)' : 'Fast Track for Jira',
+    version: chromeVersion,
+    version_name: fullVersion,
+    description: isBeta
+      ? `BETA VERSION - Quick search and access to your Jira tickets with enhanced board experience`
+      : 'Quick search and access to your Jira tickets with enhanced board experience',
     host_permissions: ['https://*.atlassian.net/jira*'],
     omnibox: {
       keyword: 'jj'
