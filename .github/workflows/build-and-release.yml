@@ -151,15 +151,6 @@ jobs:
           chrome-file: ./artifacts/extension-${{ needs.build.outputs.version }}-chrome.zip
           firefox-file: ./artifacts/extension-${{ needs.build.outputs.version }}-firefox.zip
 
-      # Publish beta releases to Chrome as unlisted
-      - name: Browser Platform Publish (Beta - Chrome Unlisted)
-        if: needs.build.outputs.is_beta == 'true'
-        uses: PlasmoHQ/bpp@v3
-        with:
-          keys: ${{ secrets.SUBMIT_KEYS }}
-          chrome-file: ./artifacts/extension-${{ needs.build.outputs.version }}-chrome.zip
-          chrome-publish: unlisted
-
       # Create GitHub Release for beta versions with both artifacts
       - name: Create GitHub Release (Beta)
         if: needs.build.outputs.is_beta == 'true'
