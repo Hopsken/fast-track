@@ -85,7 +85,11 @@ export const ActionPanelSlot = ({ children }: PropsWithChildren) => {
 
   if (!container) return null
 
-  return createPortal(children, container)
+  return (
+    <div className="flex items-center gap-2">
+      {createPortal(children, container)}
+    </div>
+  )
 }
 
 export function ActionPanelFooter() {
@@ -151,12 +155,7 @@ export function ActionPanelFooter() {
             className="size-4 rounded grayscale transition group-hover:grayscale-0"
           />
 
-          <span className="flex-1 text-xs">
-            <span className="group-hover:hidden">Fast Track</span>
-            <span className="hidden opacity-0 transition group-hover:block group-hover:opacity-100">
-              Settings
-            </span>
-          </span>
+          <span className="flex-1 text-xs">Fast Track</span>
         </button>
       </div>
     )

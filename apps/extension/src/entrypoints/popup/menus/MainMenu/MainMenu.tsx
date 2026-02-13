@@ -3,6 +3,7 @@ import { Button } from '@internal/ui/components/button'
 
 import { ActionPanel, ActionPanelSlot } from '@/common/commands'
 import { HotkeysScopeProvider } from '@/lib/hotkeys'
+import { openOptionsPage } from '@/utils'
 
 import { ExtraActionsMenu, openFeedback } from './ExtraActionsMenu'
 import { IssueTemplatesMenu } from './IssueTemplatesMenu'
@@ -38,12 +39,14 @@ export function MainMenu() {
         {renderMenu()}
 
         <ActionPanelSlot>
+          <Button variant={'ghost'} size={'xs'} onClick={openFeedback}>
+            <span>Feedback</span>
+          </Button>
           <Button
             variant={'ghost'}
             size={'xs'}
-            className="font-medium"
-            onClick={openFeedback}>
-            <span>Give feedback</span>
+            onClick={() => openOptionsPage()}>
+            <span>Settings</span>
           </Button>
         </ActionPanelSlot>
       </ActionPanel>
