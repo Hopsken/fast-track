@@ -21,6 +21,10 @@
 - **Build**: WXT + Vite, WebExt proxy services, `jira.js`, RxJS, Zustand, React Query, Lodash-es
 - **Runtime**: Background (omnibox, proxy services) | Content scripts (`PageObserver`) | Popup/Options (React UI)
 
+## Design
+
+- Use skill design-motion-principles, prefer Emil Kowalski style.
+
 #### Framework
 
 - Prefer zustand over React context for complex states
