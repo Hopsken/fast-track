@@ -54,4 +54,6 @@
 
 ## Documents
 
-- `apps/extension/docs/issue-templates-architecture.md` - Extension Jira field architecture guide
+Before planning any feature or change, read `docs/index.md` in relevant app/package folders to discover existing architecture docs. These indexes are auto-generated and list all available documentation with descriptions.
+
+- `apps/extension/docs/index.md` — Auto-generated doc index

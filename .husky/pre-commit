@@ -1,1 +1,2 @@
+bash "$(dirname "$0")/update-docs-index.sh"
 pnpm lint-staged
