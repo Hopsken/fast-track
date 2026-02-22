@@ -38,6 +38,7 @@ export function IssueTemplatesMenu() {
             value={template.id}
             keywords={[
               'create',
+              template.name,
               template.scope.project.key,
               template.scope.project.name,
               template.scope.issueType.name
