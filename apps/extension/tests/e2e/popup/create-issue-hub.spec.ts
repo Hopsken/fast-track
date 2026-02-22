@@ -59,7 +59,13 @@ test.describe('Popup - Create issue hub', () => {
                 description: ''
               }
             },
-            fields: [],
+            fields: [
+              {
+                fieldId: 'description',
+                behavior: 'preset',
+                presetValue: 'Description'
+              }
+            ],
             createdAt: now,
             updatedAt: now
           }
