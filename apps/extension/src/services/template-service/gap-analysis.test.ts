@@ -39,6 +39,14 @@ const summaryField: JiraFieldMetadata = {
   schema: { type: 'string' }
 }
 
+const descriptionField: JiraFieldMetadata = {
+  fieldId: 'description',
+  key: 'description',
+  name: 'Description',
+  required: false,
+  schema: { type: 'string' }
+}
+
 const priorityField: JiraFieldMetadata = {
   fieldId: 'priority',
   key: 'priority',
@@ -56,7 +64,7 @@ describe('computeVisibleFields', () => {
     expect(visible.some((f) => f.fieldId === 'summary')).toBe(true)
   })
 
-  it('includes description if behavior=preset', () => {
+  it('includes description if behavior=preset (when metadata is available)', () => {
     const template = createTemplate({
       fields: [
         {
@@ -67,17 +75,25 @@ describe('computeVisibleFields', () => {
       ]
     })
 
-    const visible = computeVisibleFields(template, [], [])
+    const visible = computeVisibleFields(
+      template,
+      [summaryField, descriptionField],
+      []
+    )
 
     expect(visible.some((f) => f.fieldId === 'description')).toBe(true)
   })
 
-  it('includes description if description exists', () => {
+  it('does not treat template.description as the Jira description field', () => {
     const template = createTemplate({ description: 'Hello' })
 
-    const visible = computeVisibleFields(template, [], [])
+    const visible = computeVisibleFields(
+      template,
+      [summaryField, descriptionField],
+      []
+    )
 
-    expect(visible.some((f) => f.fieldId === 'description')).toBe(true)
+    expect(visible.some((f) => f.fieldId === 'description')).toBe(false)
   })
 
   it('shows fields with behavior=preset', () => {
