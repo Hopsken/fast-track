@@ -173,6 +173,48 @@ export function createJiraE2EMockAdapter(): AxiosAdapter {
       })
     }
 
+    // --- Create meta (create issue fields metadata) ---
+    // Used by Create Issue Hub / template wizard.
+    // jira.js: GET /rest/api/3/issue/createmeta/{projectIdOrKey}/issuetypes/{issueTypeId}
+    if (
+      method === 'get' &&
+      /^\/rest\/api\/3\/issue\/createmeta\/[^/]+\/issuetypes\/[^/]+$/.test(
+        url.pathname
+      )
+    ) {
+      return json(config, 200, {
+        startAt: 0,
+        maxResults: 50,
+        total: 2,
+        fields: [
+          {
+            fieldId: 'summary',
+            key: 'summary',
+            name: 'Summary',
+            required: true,
+            hasDefaultValue: false,
+            schema: {
+              type: 'string',
+              system: 'summary'
+            },
+            operations: ['set']
+          },
+          {
+            fieldId: 'description',
+            key: 'description',
+            name: 'Description',
+            required: false,
+            hasDefaultValue: false,
+            schema: {
+              type: 'string',
+              system: 'description'
+            },
+            operations: ['set']
+          }
+        ]
+      })
+    }
+
     // --- Myself ---
     if (method === 'get' && url.pathname === '/rest/api/3/myself') {
       return json(config, 200, {

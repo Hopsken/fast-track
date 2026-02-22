@@ -132,7 +132,11 @@ test.describe('Popup - Create issue hub', () => {
     await summaryInput.fill('Hello world')
 
     // Drill into description
-    await popup.getByText('Description').click()
+    // Use cmdk item value to avoid strict-mode collisions (the row can render
+    // "Description" in both primary + secondary lines when a preset exists).
+    await popup
+      .locator('[cmdk-item][data-value^="field:description"]')
+      .click()
 
     const textarea = popup.locator('textarea')
     await expect(textarea).toBeVisible({ timeout: 15_000 })
