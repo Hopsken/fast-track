@@ -7,11 +7,16 @@ import { isEmptyValue } from './utils'
 export function WizardProgressBar() {
   const { wizardFields, values } = useCreateIssueDraftStore()
   const segments = useMemo(
-    () =>
-      wizardFields.map((field) => ({
+    () => [
+      {
+        fieldId: 'summary',
+        isFilled: !isEmptyValue(values['summary'])
+      },
+      ...wizardFields.map((field) => ({
         fieldId: field.fieldId,
         isFilled: !isEmptyValue(values[field.fieldId])
-      })),
+      }))
+    ],
     [wizardFields, values]
   )
 

@@ -1,7 +1,12 @@
 import { Button } from '@internal/ui/components/button'
 import { useMemoizedFn } from 'ahooks'
 
-import { ActionPanel, ActionPanelSlot, ActionShortcut } from '@/common/commands'
+import {
+  ActionPanel,
+  ActionPanelSlot,
+  ActionShortcut,
+  useNavigation
+} from '@/common/commands'
 import { useIssueCreateMeta } from '@/hooks/useIssueCreateMeta'
 import { useHotkey } from '@/lib/hotkeys'
 import type { VisibleField } from '~/services/template-service/gap-analysis'
@@ -12,8 +17,17 @@ import { useCreateIssueForm } from './useCreateIssueForm'
 import { WizardProgressBar } from './WizardProgressBar'
 
 export function CreateIssueFieldsMenu() {
-  const { template, values, errors, clearError, wizardFields, setWizardIndex } =
-    useCreateIssueDraftStore()
+  const {
+    template,
+    values,
+    errors,
+    clearError,
+    setValue,
+    wizardFields,
+    setWizardIndex
+  } = useCreateIssueDraftStore()
+
+  const navigate = useNavigation()
 
   // Metadata & conflicts
   const {
@@ -26,35 +40,46 @@ export function CreateIssueFieldsMenu() {
   )
 
   // Form submission
-  const { submit } = useCreateIssueForm({
-    template
-  })
+  const { submit } = useCreateIssueForm({ template })
 
+  // Hotkeys
+  useHotkey('issue.create.cancel', () => navigate.pop())
   const hotkeyRef = useHotkey<HTMLDivElement>('issue.create.proceed', submit)
+
+  const summary = typeof values['summary'] === 'string' ? values['summary'] : ''
+
+  const handleSummaryChange = useMemoizedFn((next: string) => {
+    setValue('summary', next)
+    clearError('summary')
+  })
 
   // Field selection handler
   const handleSelectField = useMemoizedFn((field: VisibleField) => {
-    if (field.fieldId === 'summary' || field.fieldId === 'description') {
-      clearError('summary')
-      clearError('description')
-    } else {
-      clearError(field.fieldId)
-    }
+    clearError(field.fieldId)
 
-    // Update wizard cursor so Cmd+Enter continues from this point
     const idx = wizardFields.findIndex((f) => f.fieldId === field.fieldId)
     if (idx >= 0) setWizardIndex(idx)
   })
 
+  const listFields = wizardFields
+
   return (
     <ActionPanel
       ref={hotkeyRef}
-      searchReadonly
+      search={summary}
+      onSearchChange={handleSummaryChange}
+      shouldFilter={false}
       isLoading={isLoadingFields}
-      searchPlaceholder={template.name}>
+      searchPlaceholder="What's this about...">
+      {errors['summary'] ? (
+        <div className="border-b-2 border-gray-200 px-4 py-2 text-xs text-rose-600">
+          {errors['summary']}
+        </div>
+      ) : null}
+
       <FieldList
-        heading="Review"
-        fields={wizardFields}
+        heading={template.name ? `Review · ${template.name}` : 'Review'}
+        fields={listFields}
         values={values}
         errors={errors}
         onSelectField={handleSelectField}

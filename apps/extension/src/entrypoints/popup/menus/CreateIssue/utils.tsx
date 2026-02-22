@@ -2,7 +2,6 @@ import { ReactNode } from 'react'
 import { isEmpty, mapValues } from 'lodash-es'
 
 import { getFieldAdapter } from '@/common/fields'
-import { JiraDescriptionAdapter } from '@/common/fields/adapters/description'
 import { FieldAdapter } from '@/common/fields/types'
 import { IssueTemplate, JiraFieldMetadata } from '@/repository/schema'
 import { VisibleField } from '@/services/template-service/gap-analysis'
@@ -81,25 +80,19 @@ export function computePromotedFields(args: {
 }
 
 /**
- * Returns the wizard step order:
- *   1. Summary (combined with Description — one step)
- *   2. Required fields (metadata.required === true)
- *   3. Optional fields
- * Description is excluded as a standalone step; it's edited alongside Summary.
+ * Returns the drill-in field order for the hub UI.
+ *
+ * Summary is edited directly in the hub search input, so it's excluded here.
  */
 export function computeWizardSequence(
   visibleFields: VisibleField[]
 ): VisibleField[] {
-  const summaryField = visibleFields.find((f) => f.fieldId === 'summary')
-
-  const rest = visibleFields.filter(
-    (f) => f.fieldId !== 'summary' && f.fieldId !== 'description'
-  )
+  const rest = visibleFields.filter((f) => f.fieldId !== 'summary')
 
   const required = rest.filter((f) => f.metadata?.required)
   const optional = rest.filter((f) => !f.metadata?.required)
 
-  return [...(summaryField ? [summaryField] : []), ...required, ...optional]
+  return [...required, ...optional]
 }
 
 export function extractJiraFieldErrors(
@@ -118,15 +111,14 @@ export function extractJiraFieldErrors(
 
 export function buildCreateIssueFields(
   template: IssueTemplate,
-  visibleFields: VisibleField[],
+  wizardFields: VisibleField[],
   values: Record<string, unknown>
 ): Record<string, unknown> {
   const fieldValues = mapValues(values, (value, fieldId) => {
-    const field = visibleFields.find((f) => f.fieldId === fieldId)
+    const field = wizardFields.find((f) => f.fieldId === fieldId)
     if (!field) return value
 
     const adapter = getFieldAdapter(field.metadata.schema)
-
     if (!adapter) return value
 
     return Array.isArray(value)
@@ -138,7 +130,9 @@ export function buildCreateIssueFields(
     ...fieldValues,
     project: { id: template.scope.project.id },
     issuetype: { id: template.scope.issueType.id },
-    summary: values['summary'] ?? '',
-    description: JiraDescriptionAdapter.toDTO(values['description'] as string)
+
+    // Summary is edited in the hub (not part of wizardFields), so ensure it is
+    // always included in create payload.
+    summary: values['summary'] ?? ''
   }
 }

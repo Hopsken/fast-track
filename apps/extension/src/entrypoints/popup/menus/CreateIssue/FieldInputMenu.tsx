@@ -14,7 +14,7 @@ export function FieldInputMenu({ field }: { field: VisibleField }) {
   const { fieldId } = field
 
   const { template, values, setValue } = useCreateIssueDraftStore()
-  const { goToNextField, goBackToFieldsMenu } = useWizardNavigation()
+  const { goBackToFieldsMenu } = useWizardNavigation()
   const currentValue = values[fieldId]
 
   const adapter = useFieldAdapter(field.metadata)
@@ -32,7 +32,7 @@ export function FieldInputMenu({ field }: { field: VisibleField }) {
   })
 
   const onConfirm = useMemoizedFn(() => {
-    goToNextField()
+    goBackToFieldsMenu()
   })
 
   useHotkey('field-input.escape', goBackToFieldsMenu)
@@ -49,7 +49,7 @@ export function FieldInputMenu({ field }: { field: VisibleField }) {
         onConfirm={onConfirm}
         value={currentValue}
       />
-      <FieldConfirm onClick={onConfirm} />
+      <FieldConfirm text="Done" onClick={onConfirm} />
     </Fragment>
   )
 }

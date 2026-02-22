@@ -130,5 +130,20 @@ describe('HotkeyPriorityManager', () => {
         hotkeyPriorityManager.shouldExecute(createProceed, activeScopes)
       ).toBe(false)
     })
+
+    it('real scenario: Escape should cancel create-issue instead of clearing input (create-issue scope beats global)', () => {
+      const globalEscape = register('global.escape', 'escape', 5, ['global'])
+      const cancelCreate = register('issue.create.cancel', 'escape', 9, [
+        'create-issue'
+      ])
+
+      const activeScopes = ['global', 'create-issue']
+      expect(
+        hotkeyPriorityManager.shouldExecute(cancelCreate, activeScopes)
+      ).toBe(true)
+      expect(
+        hotkeyPriorityManager.shouldExecute(globalEscape, activeScopes)
+      ).toBe(false)
+    })
   })
 })

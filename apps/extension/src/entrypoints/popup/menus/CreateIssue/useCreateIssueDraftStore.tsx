@@ -40,7 +40,7 @@ const createIssueDraftStore = (template: IssueTemplate) =>
         promotedFieldIds: [],
 
         wizardFields: [],
-        wizardIndex: 0,
+        wizardIndex: -1,
 
         setValue: (fieldId, value) => {
           set((state) => ({
@@ -86,7 +86,7 @@ const createIssueDraftStore = (template: IssueTemplate) =>
             errors: {},
             promotedFieldIds: [],
             wizardFields: [],
-            wizardIndex: 0
+            wizardIndex: -1
           }))
       }),
       { name: 'create-issue-draft-store' }

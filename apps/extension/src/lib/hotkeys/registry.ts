@@ -69,6 +69,17 @@ export const HOTKEY_REGISTRY = {
     enableOnFormTags: true
   },
 
+  'issue.create.cancel': {
+    id: 'issue.create.cancel',
+    shortcut: { modifiers: [], key: 'escape' },
+    scopes: ['create-issue'],
+    category: 'navigation',
+    description: 'Cancel create issue and go back',
+    priority: 9,
+    preventDefault: true,
+    enableOnFormTags: true
+  },
+
   'field-input.escape': {
     id: 'field-input.escape',
     shortcut: { modifiers: [], key: 'escape' },
