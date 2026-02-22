@@ -52,20 +52,12 @@ export function computeVisibleFields(
     fieldsMetadata.find((f) => f.fieldId === fieldId)
 
   const shouldSkipField = (fieldId: string) =>
-    fieldId === 'summary' ||
-    fieldId === 'description' ||
-    fieldId === 'project' ||
-    fieldId === 'issuetype'
+    fieldId === 'summary' || fieldId === 'project' || fieldId === 'issuetype'
 
   const visible: VisibleField[] = [
     {
       fieldId: 'summary',
       metadata: DEFAULT_SCHEMAS.summary,
-      isEditable: true
-    },
-    {
-      fieldId: 'description',
-      metadata: DEFAULT_SCHEMAS.description,
       isEditable: true
     }
   ]

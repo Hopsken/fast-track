@@ -39,7 +39,7 @@ export function WizardProgressBar() {
           className={cn(
             'h-3 w-1 rounded-full transition-all duration-300',
             segment.isFilled
-              ? 'scale-105 bg-green-500'
+              ? 'scale-105 bg-emerald-500'
               : 'scale-100 bg-gray-200'
           )}
         />

@@ -21,7 +21,9 @@ export function useCreateIssueForm({ template }: UseCreateIssueFormOptions) {
     useCreateIssueDraftStore()
 
   const submit = useMemoizedFn(async () => {
-    const fields = buildCreateIssueFields(template, wizardFields, values)
+    const fieldValues = buildCreateIssueFields(wizardFields, values)
+
+    console.log({ fieldValues })
 
     const toast = showToast({
       style: 'loading',
@@ -31,7 +33,14 @@ export function useCreateIssueForm({ template }: UseCreateIssueFormOptions) {
 
     try {
       const jira = getJiraService()
-      const created = await jira.createIssue({ fields })
+      const created = await jira.issues.createIssue({
+        projectKey: template.scope.project.key,
+        issueTypeId: template.scope.issueType.id,
+        fields: {
+          ...fieldValues,
+          summary: (values['summary'] ?? '') as string
+        }
+      })
 
       const issueKey =
         typeof created?.key === 'string' && created.key.length > 0

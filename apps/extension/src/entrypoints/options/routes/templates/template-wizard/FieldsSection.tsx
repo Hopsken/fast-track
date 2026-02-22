@@ -21,7 +21,7 @@ import { FieldRow } from './FieldRow'
 /* ------------------------------------------------------------------ */
 
 const EXCLUDED = new Set(['project', 'issuetype', 'attachment', 'issuelinks'])
-const PINNED = new Set(['summary', 'description'])
+const PINNED = new Set(['summary'])
 
 /* ------------------------------------------------------------------ */
 /*  Fields section                                                     */

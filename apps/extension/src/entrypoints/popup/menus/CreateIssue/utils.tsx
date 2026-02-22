@@ -30,19 +30,26 @@ export function formatValuePreview(
   if (value == null) return ''
 
   if (Array.isArray(value)) {
-    return value
-      .map((v) => formatValuePreview(v, adapter))
-      .map((preview, index) => {
-        if (typeof preview === 'string') {
-          return (
-            <span key={preview} className="mr-1 inline-block">
-              {preview}
-              {index < value.length - 1 ? ' ' : ''}
-            </span>
-          )
-        }
-        return preview
-      })
+    const labels = value
+      .map((v) => adapter.labelOf?.(v) ?? adapter.keyOf(v))
+      .map((label) => label.trim())
+      .filter(Boolean)
+
+    if (labels.length === 0) return ''
+
+    const maxItems = 2
+    const shown = labels.slice(0, maxItems)
+    const restCount = labels.length - shown.length
+    const joined = shown.join(', ')
+
+    if (restCount <= 0) return joined
+
+    return (
+      <span className="min-w-0">
+        {joined}{' '}
+        <span className="text-muted-foreground tabular-nums">+{restCount}</span>
+      </span>
+    )
   }
 
   return adapter.labelOf?.(value) ?? adapter.keyOf(value)
@@ -110,11 +117,10 @@ export function extractJiraFieldErrors(
 }
 
 export function buildCreateIssueFields(
-  template: IssueTemplate,
   wizardFields: VisibleField[],
   values: Record<string, unknown>
 ): Record<string, unknown> {
-  const fieldValues = mapValues(values, (value, fieldId) => {
+  return mapValues(values, (value, fieldId) => {
     const field = wizardFields.find((f) => f.fieldId === fieldId)
     if (!field) return value
 
@@ -125,14 +131,4 @@ export function buildCreateIssueFields(
       ? value.map((val) => adapter.toDTO(val))
       : adapter.toDTO(value)
   })
-
-  return {
-    ...fieldValues,
-    project: { id: template.scope.project.id },
-    issuetype: { id: template.scope.issueType.id },
-
-    // Summary is edited in the hub (not part of wizardFields), so ensure it is
-    // always included in create payload.
-    summary: values['summary'] ?? ''
-  }
 }
