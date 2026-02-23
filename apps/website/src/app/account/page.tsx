@@ -1,6 +1,6 @@
+import type { ReactNode } from 'react'
 import { Button } from '@internal/ui/components/button'
-import { CheckCircle2, AlertTriangle } from 'lucide-react'
-import Link from 'next/link'
+import { AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { redirect } from 'next/navigation'
 
 import { isProFromSubscription } from '../../lib/billing/subscription'
@@ -12,6 +12,7 @@ type AccountSearchParams = Promise<{
 
 function formatDate(value: string | null | undefined): string | null {
   if (!value) return null
+
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return null
 
@@ -20,6 +21,204 @@ function formatDate(value: string | null | undefined): string | null {
     month: 'short',
     day: 'numeric'
   })
+}
+
+type SubscriptionRow = {
+  status: string
+  renews_at: string | null
+  ends_at: string | null
+  customer_portal_url: string | null
+  updated_at: string
+}
+
+type BillingSummary = {
+  isPro: boolean
+  status: string
+  statusLabel: string
+  renewsLabel: string | null
+  endsLabel: string | null
+  portalUrl: string | null
+  isCancelledButActive: boolean
+}
+
+function toStatusLabel(status: string): string {
+  switch (status) {
+    case 'active':
+      return 'Active'
+    case 'on_trial':
+      return 'Trial'
+    case 'cancelled':
+      return 'Cancelled'
+    case 'expired':
+      return 'Expired'
+    case 'past_due':
+      return 'Payment issue'
+    case 'unpaid':
+      return 'Unpaid'
+    default:
+      return status || 'Unknown'
+  }
+}
+
+function getBillingSummary(
+  subscription: SubscriptionRow | null
+): BillingSummary {
+  const status = subscription?.status ?? 'unknown'
+
+  const isPro = isProFromSubscription(
+    subscription
+      ? {
+          status,
+          endsAt: subscription.ends_at
+        }
+      : null
+  )
+
+  const renewsLabel = formatDate(subscription?.renews_at)
+  const endsLabel = formatDate(subscription?.ends_at)
+
+  const isCancelledButActive =
+    status === 'cancelled' && Boolean(endsLabel) && isPro
+
+  return {
+    isPro,
+    status,
+    statusLabel: toStatusLabel(status),
+    renewsLabel,
+    endsLabel,
+    portalUrl: subscription?.customer_portal_url ?? null,
+    isCancelledButActive
+  }
+}
+
+function renderCheckoutBanner(checkout: string | undefined): ReactNode {
+  if (checkout === 'success') {
+    return (
+      <div
+        role="status"
+        aria-live="polite"
+        className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-950">
+        <div className="flex gap-3">
+          <CheckCircle2
+            aria-hidden="true"
+            className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700"
+          />
+          <div className="min-w-0">
+            <p className="text-sm font-semibold">Payment complete</p>
+            <p className="mt-1 text-sm text-emerald-900/80">
+              Your plan updates after webhook sync (usually under a minute).
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (checkout === 'cancel') {
+    return (
+      <div
+        role="status"
+        aria-live="polite"
+        className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-950">
+        <div className="flex gap-3">
+          <AlertTriangle
+            aria-hidden="true"
+            className="mt-0.5 h-4 w-4 shrink-0 text-amber-700"
+          />
+          <div className="min-w-0">
+            <p className="text-sm font-semibold">Checkout cancelled</p>
+            <p className="mt-1 text-sm text-amber-900/80">
+              No charges were made.
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return null
+}
+
+function renderPlanBody(options: {
+  subscriptionError: boolean
+  billing: BillingSummary
+}): ReactNode {
+  const { subscriptionError, billing } = options
+
+  if (subscriptionError) {
+    return (
+      <p className="mt-6 text-sm text-stone-700">
+        We couldn’t load your billing status. Please try again later.
+      </p>
+    )
+  }
+
+  if (!billing.isPro) {
+    return (
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+        <p className="text-sm text-stone-600">
+          Upgrade to Pro to unlock the full product.
+        </p>
+
+        <form action="/api/billing/checkout" method="post">
+          <Button
+            type="submit"
+            variant="default"
+            className="rounded-full bg-stone-900 px-6 text-white shadow-none hover:bg-stone-800">
+            Upgrade to Pro
+          </Button>
+        </form>
+      </div>
+    )
+  }
+
+  const endsTitle = billing.isCancelledButActive ? 'Cancels on' : 'Ends'
+
+  return (
+    <div className="mt-6 grid gap-3 text-sm text-stone-700">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="text-stone-500">Status</span>
+        <span className="font-medium text-stone-900">
+          {billing.statusLabel}
+        </span>
+      </div>
+
+      {billing.renewsLabel ? (
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="text-stone-500">Renews</span>
+          <span className="font-medium text-stone-900">
+            {billing.renewsLabel}
+          </span>
+        </div>
+      ) : null}
+
+      {billing.endsLabel ? (
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="text-stone-500">{endsTitle}</span>
+          <span className="font-medium text-stone-900">
+            {billing.endsLabel}
+          </span>
+        </div>
+      ) : null}
+
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        {billing.portalUrl ? (
+          <Button asChild className="rounded-full bg-stone-900 px-6">
+            <a
+              href={billing.portalUrl}
+              target="_blank"
+              rel="noopener noreferrer">
+              Manage subscription
+            </a>
+          </Button>
+        ) : (
+          <p className="text-xs text-stone-500">
+            Manage link will appear after the first webhook sync.
+          </p>
+        )}
+      </div>
+    </div>
+  )
 }
 
 export default async function AccountPage({
@@ -36,190 +235,70 @@ export default async function AccountPage({
 
   const { checkout } = await searchParams
 
-  const { data: subscription } = await supabase
+  const { data: subscription, error: subscriptionError } = await supabase
     .from('billing_subscriptions')
     .select('status, renews_at, ends_at, customer_portal_url, updated_at')
     .eq('user_id', user.id)
-    .maybeSingle()
+    .maybeSingle<SubscriptionRow>()
 
-  const isPro = isProFromSubscription(
-    subscription
-      ? {
-          status: subscription.status,
-          endsAt: subscription.ends_at
-        }
-      : null
-  )
-
-  const renewsAtLabel = formatDate(subscription?.renews_at)
-  const endsAtLabel = formatDate(subscription?.ends_at)
-
-  const showCheckoutSuccess = checkout === 'success'
-  const showCheckoutCancel = checkout === 'cancel'
+  const billing = getBillingSummary(subscriptionError ? null : subscription)
 
   return (
     <main className="min-h-dvh bg-[#FDFBF9]">
       <div className="container mx-auto max-w-2xl px-6 py-14">
-        <h1 className="font-serif text-3xl font-semibold tracking-tight text-stone-900">
-          Account
-        </h1>
-        <p className="mt-2 text-sm text-stone-600">
-          Signed in as{' '}
-          <span className="font-medium text-stone-900">{user.email}</span>
-        </p>
-
-        {showCheckoutSuccess ? (
-          <div
-            role="status"
-            className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-950">
-            <div className="flex gap-3">
-              <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-700" />
-              <div className="min-w-0">
-                <p className="text-sm font-semibold">Payment complete</p>
-                <p className="mt-1 text-sm text-emerald-900/80">
-                  Your subscription will activate shortly (webhook sync).
-                </p>
-              </div>
-            </div>
+        <header className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="font-serif text-3xl font-semibold tracking-tight text-stone-900">
+              Account
+            </h1>
+            <p className="mt-2 text-sm text-stone-600">
+              Signed in as{' '}
+              <span className="font-medium text-stone-900">{user.email}</span>
+            </p>
           </div>
-        ) : null}
 
-        {showCheckoutCancel ? (
-          <div
-            role="status"
-            className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-950">
-            <div className="flex gap-3">
-              <AlertTriangle className="mt-0.5 h-4 w-4 text-amber-700" />
-              <div className="min-w-0">
-                <p className="text-sm font-semibold">Checkout cancelled</p>
-                <p className="mt-1 text-sm text-amber-900/80">
-                  No worries — you can upgrade anytime.
-                </p>
-              </div>
+          <form action="/auth/signout" method="post" className="shrink-0">
+            <Button
+              type="submit"
+              variant="outline"
+              className="rounded-full border-stone-300 bg-white px-5 text-stone-900 hover:bg-stone-50">
+              Sign out
+            </Button>
+          </form>
+        </header>
+
+        {renderCheckoutBanner(checkout)}
+
+        <section className="mt-10 rounded-2xl border border-stone-200 bg-white p-6">
+          <div className="flex items-start justify-between gap-6">
+            <div>
+              <h2 className="font-serif text-xl font-semibold tracking-tight text-stone-900">
+                Plan
+              </h2>
+              <p className="mt-1 text-sm text-stone-600">
+                Pro is an annual subscription — $29/year.
+              </p>
             </div>
+
+            <span
+              className={
+                billing.isPro
+                  ? 'inline-flex items-center rounded-full bg-stone-900 px-3 py-1 text-xs font-semibold text-white'
+                  : 'inline-flex items-center rounded-full bg-stone-100 px-3 py-1 text-xs font-semibold text-stone-700'
+              }>
+              {billing.isPro ? 'Pro' : 'Free'}
+            </span>
           </div>
-        ) : null}
 
-        <div className="mt-10 grid gap-4">
-          <section className="rounded-2xl border border-stone-200 bg-white p-6">
-            <div className="flex items-start justify-between gap-6">
-              <div>
-                <h2 className="font-serif text-xl font-semibold tracking-tight text-stone-900">
-                  Pro
-                </h2>
-                <p className="mt-1 text-sm text-stone-600">
-                  Annual subscription — $29/year
-                </p>
-              </div>
+          {renderPlanBody({
+            subscriptionError: Boolean(subscriptionError),
+            billing
+          })}
 
-              {isPro ? (
-                <span className="inline-flex items-center rounded-full bg-stone-900 px-3 py-1 text-xs font-semibold text-white">
-                  Pro Active
-                </span>
-              ) : (
-                <span className="inline-flex items-center rounded-full bg-stone-100 px-3 py-1 text-xs font-semibold text-stone-700">
-                  Free
-                </span>
-              )}
-            </div>
-
-            {isPro ? (
-              <div className="mt-6 grid gap-3 text-sm text-stone-700">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-stone-500">Status</span>
-                  <span className="font-medium text-stone-900">
-                    {subscription?.status ?? 'unknown'}
-                  </span>
-                </div>
-                {renewsAtLabel ? (
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-stone-500">Renews</span>
-                    <span className="font-medium text-stone-900">
-                      {renewsAtLabel}
-                    </span>
-                  </div>
-                ) : null}
-                {endsAtLabel ? (
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-stone-500">Ends</span>
-                    <span className="font-medium text-stone-900">
-                      {endsAtLabel}
-                    </span>
-                  </div>
-                ) : null}
-
-                <div className="mt-2 flex flex-wrap items-center gap-3">
-                  {subscription?.customer_portal_url ? (
-                    <Button asChild variant="outline" className="rounded-full">
-                      <a
-                        href={subscription.customer_portal_url}
-                        target="_blank"
-                        rel="noreferrer">
-                        Manage subscription
-                      </a>
-                    </Button>
-                  ) : (
-                    <p className="text-xs text-stone-500">
-                      Manage link will appear once the first webhook sync is
-                      received.
-                    </p>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-                <p className="text-sm text-stone-600">
-                  Unlock Pro features across the product.
-                </p>
-
-                <form action="/api/billing/checkout" method="post">
-                  <Button
-                    type="submit"
-                    variant="default"
-                    className="rounded-full bg-stone-900 px-6 text-white shadow-none hover:bg-stone-800">
-                    Upgrade to Pro
-                  </Button>
-                </form>
-              </div>
-            )}
-          </section>
-
-          <section className="rounded-2xl border border-stone-200 bg-white p-6">
-            <dl className="grid gap-4">
-              <div>
-                <dt className="text-xs font-medium uppercase tracking-wide text-stone-500">
-                  User ID
-                </dt>
-                <dd className="mt-1 font-mono text-sm text-stone-900">
-                  {user.id}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-xs font-medium uppercase tracking-wide text-stone-500">
-                  Provider
-                </dt>
-                <dd className="mt-1 text-sm text-stone-900">
-                  {user.app_metadata?.provider ?? 'unknown'}
-                </dd>
-              </div>
-            </dl>
-
-            <div className="mt-6 flex items-center justify-between gap-4">
-              <Button asChild variant="ghost" className="rounded-full">
-                <Link href="/">Home</Link>
-              </Button>
-
-              <form action="/auth/signout" method="post">
-                <Button
-                  type="submit"
-                  variant="default"
-                  className="rounded-full bg-stone-900 px-6 text-white shadow-none hover:bg-stone-800">
-                  Sign out
-                </Button>
-              </form>
-            </div>
-          </section>
-        </div>
+          <p className="mt-6 text-xs text-stone-500">
+            Billing is handled by LemonSqueezy.
+          </p>
+        </section>
       </div>
     </main>
   )
