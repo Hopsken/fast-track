@@ -1,8 +1,10 @@
 'use client'
 
 import { Button } from '@internal/ui/components/button'
+import { ArrowRight } from 'lucide-react'
 import { motion } from 'motion/react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 import heroImage from '../../assets/hero.png'
 
@@ -37,6 +39,18 @@ export function Hero() {
                 </a>
               </Button>
             </div>
+
+            <Link
+              href="/pricing"
+              className="mx-auto mt-5 inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white/70 px-4 py-2 text-xs font-medium text-stone-700 backdrop-blur transition-colors hover:bg-white">
+              <span className="font-semibold">Pro</span>
+              <span className="text-stone-500">$29/year</span>
+              <ArrowRight
+                aria-hidden="true"
+                className="h-3.5 w-3.5 text-stone-400"
+              />
+              <span className="sr-only">See pricing</span>
+            </Link>
           </motion.div>
         </div>
 
