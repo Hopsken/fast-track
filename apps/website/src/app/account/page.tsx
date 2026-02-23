@@ -4,7 +4,6 @@ import { CalendarDays } from 'lucide-react'
 import { redirect } from 'next/navigation'
 
 import { Header } from '../../components/landing/Header'
-import { isAllowedLemonSqueezyUrl } from '../../lib/billing/lemonsqueezy/url'
 import { isProFromSubscription } from '../../lib/billing/subscription'
 import { createSupabaseServerClientReadOnly } from '../../lib/supabase/server'
 
@@ -16,7 +15,7 @@ type SubscriptionRow = {
   status: string
   renews_at: string | null
   ends_at: string | null
-  customer_portal_url: string | null
+  lemonsqueezy_subscription_id: string | null
   updated_at: string
 }
 
@@ -25,7 +24,7 @@ type BillingSummary = {
   planName: 'Pro' | 'Free'
   nextRenewLabel: string | null
   cancelsLabel: string | null
-  portalUrl: string | null
+  subscriptionId: string | null
 }
 
 function formatDate(value: string | null | undefined): string | null {
@@ -59,15 +58,14 @@ function getBillingSummary(
   const cancelsLabel =
     status === 'cancelled' ? formatDate(subscription?.ends_at) : null
 
-  const portalUrl = subscription?.customer_portal_url
+  const subscriptionId = subscription?.lemonsqueezy_subscription_id ?? null
 
   return {
     isPro,
     planName: isPro ? 'Pro' : 'Free',
     nextRenewLabel,
     cancelsLabel,
-    portalUrl:
-      portalUrl && isAllowedLemonSqueezyUrl(portalUrl) ? portalUrl : null
+    subscriptionId
   }
 }
 
@@ -126,7 +124,7 @@ function renderSubscriptionActions(options: {
     )
   }
 
-  if (!billing.portalUrl) {
+  if (!billing.subscriptionId) {
     return (
       <p className="mt-8 text-sm text-stone-600">
         Manage link will appear after the first webhook sync.
@@ -137,7 +135,7 @@ function renderSubscriptionActions(options: {
   return (
     <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <Button asChild variant="outline" className="rounded-full">
-        <a href={billing.portalUrl} target="_blank" rel="noopener noreferrer">
+        <a href="/api/billing/portal" target="_blank" rel="noopener noreferrer">
           Manage subscription
         </a>
       </Button>
@@ -146,7 +144,10 @@ function renderSubscriptionActions(options: {
         asChild
         variant="outline"
         className="rounded-full border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700">
-        <a href={billing.portalUrl} target="_blank" rel="noopener noreferrer">
+        <a
+          href="/api/billing/portal?intent=cancel"
+          target="_blank"
+          rel="noopener noreferrer">
           Cancel plan
         </a>
       </Button>
@@ -171,7 +172,9 @@ export default async function AccountPage({
 
   const { data: subscription, error: subscriptionError } = await supabase
     .from('billing_subscriptions')
-    .select('status, renews_at, ends_at, customer_portal_url, updated_at')
+    .select(
+      'status, renews_at, ends_at, lemonsqueezy_subscription_id, updated_at'
+    )
     .eq('user_id', user.id)
     .maybeSingle<SubscriptionRow>()
 

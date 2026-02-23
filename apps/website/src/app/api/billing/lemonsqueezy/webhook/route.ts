@@ -1,7 +1,6 @@
 import { NextRequest } from 'next/server'
 
 import { getLemonSqueezyEnv } from '../../../../../lib/billing/lemonsqueezy/env.server'
-import { isAllowedLemonSqueezyUrl } from '../../../../../lib/billing/lemonsqueezy/url'
 import {
   getWebhookSignature,
   verifyLemonSqueezyWebhookSignature
@@ -40,7 +39,6 @@ type BillingSubscriptionUpsert = {
   ends_at?: string | null
   lemonsqueezy_subscription_id?: string
   lemonsqueezy_customer_id?: string
-  customer_portal_url?: string
 }
 
 function isNonEmptyString(value: unknown): value is string {
@@ -106,15 +104,6 @@ function buildSubscriptionUpsertPayload(options: {
 
   if (attributes?.ends_at !== undefined) {
     upsertPayload.ends_at = attributes.ends_at
-  }
-
-  // Don't overwrite an existing portal url with null/empty.
-  const customerPortalUrl = attributes?.urls?.customer_portal
-  if (
-    isNonEmptyString(customerPortalUrl) &&
-    isAllowedLemonSqueezyUrl(customerPortalUrl)
-  ) {
-    upsertPayload.customer_portal_url = customerPortalUrl
   }
 
   return upsertPayload

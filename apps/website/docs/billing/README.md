@@ -11,6 +11,7 @@
 2. Set env vars (see `apps/website/.env.example`):
    - `SUPABASE_SECRET_KEY`
    - `LEMONSQUEEZY_WEBHOOK_SECRET`
+   - `LEMONSQUEEZY_API_KEY` (needed to fetch signed Customer Portal URLs)
 3. Configure LemonSqueezy webhook URL:
    - `{WEBSITE_URL}/api/billing/lemonsqueezy/webhook`
 
