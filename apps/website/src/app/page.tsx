@@ -4,6 +4,7 @@ import { Features } from '../components/landing/Features'
 import { Footer } from '../components/landing/Footer'
 import { Header } from '../components/landing/Header'
 import { Hero } from '../components/landing/Hero'
+import { PricingTeaser } from '../components/landing/PricingTeaser'
 
 export const metadata: Metadata = {
   description:
@@ -17,6 +18,7 @@ export default function Index() {
       <Header />
       <Hero />
       <Features />
+      <PricingTeaser />
       <Footer />
     </main>
   )
