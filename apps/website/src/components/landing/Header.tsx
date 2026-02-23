@@ -1,8 +1,8 @@
-import { Button } from '@internal/ui/components/button'
 import Image from 'next/image'
 import Link from 'next/link'
 
 import logoUrl from '../../assets/logo.png'
+import { HeaderAuth } from '../auth/HeaderAuth'
 
 export function Header() {
   return (
@@ -23,24 +23,9 @@ export function Header() {
             </span>
           </Link>
         </div>
-        <nav className="flex items-center gap-6">
-          <Link
-            href="/privacy"
-            className="text-sm font-medium text-stone-600 transition-colors hover:text-stone-900">
-            Privacy
-          </Link>
-          <Button
-            variant="default"
-            size="sm"
-            asChild
-            className="rounded-full bg-stone-900 px-6 font-medium text-white shadow-none hover:bg-stone-800">
-            <a
-              href="https://chromewebstore.google.com/detail/jira-boost/cmlkcfgkffidbnpbjmlgplokcacfemhp"
-              target="_blank"
-              rel="noreferrer">
-              Add to Chrome
-            </a>
-          </Button>
+
+        <nav className="flex items-center">
+          <HeaderAuth />
         </nav>
       </div>
     </header>
