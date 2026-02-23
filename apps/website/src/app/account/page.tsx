@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Button } from '@internal/ui/components/button'
-import { AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { CalendarDays } from 'lucide-react'
 import { redirect } from 'next/navigation'
 
 import { isProFromSubscription } from '../../lib/billing/subscription'
@@ -9,6 +9,21 @@ import { createSupabaseServerClientReadOnly } from '../../lib/supabase/server'
 type AccountSearchParams = Promise<{
   checkout?: string
 }>
+
+type SubscriptionRow = {
+  status: string
+  renews_at: string | null
+  ends_at: string | null
+  customer_portal_url: string | null
+  updated_at: string
+}
+
+type BillingSummary = {
+  isPro: boolean
+  planName: 'Pro' | 'Free'
+  dateLine: string | null
+  portalUrl: string | null
+}
 
 function formatDate(value: string | null | undefined): string | null {
   if (!value) return null
@@ -21,43 +36,6 @@ function formatDate(value: string | null | undefined): string | null {
     month: 'short',
     day: 'numeric'
   })
-}
-
-type SubscriptionRow = {
-  status: string
-  renews_at: string | null
-  ends_at: string | null
-  customer_portal_url: string | null
-  updated_at: string
-}
-
-type BillingSummary = {
-  isPro: boolean
-  status: string
-  statusLabel: string
-  renewsLabel: string | null
-  endsLabel: string | null
-  portalUrl: string | null
-  isCancelledButActive: boolean
-}
-
-function toStatusLabel(status: string): string {
-  switch (status) {
-    case 'active':
-      return 'Active'
-    case 'on_trial':
-      return 'Trial'
-    case 'cancelled':
-      return 'Cancelled'
-    case 'expired':
-      return 'Expired'
-    case 'past_due':
-      return 'Payment issue'
-    case 'unpaid':
-      return 'Unpaid'
-    default:
-      return status || 'Unknown'
-  }
 }
 
 function getBillingSummary(
@@ -77,70 +55,28 @@ function getBillingSummary(
   const renewsLabel = formatDate(subscription?.renews_at)
   const endsLabel = formatDate(subscription?.ends_at)
 
-  const isCancelledButActive =
-    status === 'cancelled' && Boolean(endsLabel) && isPro
+  // Keep to a single "next date" line, similar to the reference IA.
+  let dateLine: string | null = null
+
+  if (isPro) {
+    if (status === 'cancelled' && endsLabel) {
+      dateLine = `Cancels on ${endsLabel}`
+    } else if (renewsLabel) {
+      dateLine = `Next payment is on ${renewsLabel}`
+    } else if (endsLabel) {
+      dateLine = `Ends on ${endsLabel}`
+    }
+  }
 
   return {
     isPro,
-    status,
-    statusLabel: toStatusLabel(status),
-    renewsLabel,
-    endsLabel,
-    portalUrl: subscription?.customer_portal_url ?? null,
-    isCancelledButActive
+    planName: isPro ? 'Pro' : 'Free',
+    dateLine,
+    portalUrl: subscription?.customer_portal_url ?? null
   }
 }
 
-function renderCheckoutBanner(checkout: string | undefined): ReactNode {
-  if (checkout === 'success') {
-    return (
-      <div
-        role="status"
-        aria-live="polite"
-        className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-950">
-        <div className="flex gap-3">
-          <CheckCircle2
-            aria-hidden="true"
-            className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700"
-          />
-          <div className="min-w-0">
-            <p className="text-sm font-semibold">Payment complete</p>
-            <p className="mt-1 text-sm text-emerald-900/80">
-              Your Pro access updates after webhook sync (usually under a
-              minute).
-            </p>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (checkout === 'cancel') {
-    return (
-      <div
-        role="status"
-        aria-live="polite"
-        className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-950">
-        <div className="flex gap-3">
-          <AlertTriangle
-            aria-hidden="true"
-            className="mt-0.5 h-4 w-4 shrink-0 text-amber-700"
-          />
-          <div className="min-w-0">
-            <p className="text-sm font-semibold">Checkout cancelled</p>
-            <p className="mt-1 text-sm text-amber-900/80">
-              No charges were made.
-            </p>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  return null
-}
-
-function renderProDetails(options: {
+function renderSubscriptionActions(options: {
   billing: BillingSummary
   subscriptionError: boolean
 }): ReactNode {
@@ -149,7 +85,7 @@ function renderProDetails(options: {
   if (subscriptionError) {
     return (
       <p className="mt-6 text-sm text-stone-700">
-        We couldn’t load your billing status. Please try again later.
+        We couldn’t load your subscription right now. Please try again later.
       </p>
     )
   }
@@ -157,7 +93,7 @@ function renderProDetails(options: {
   if (!billing.isPro) {
     return (
       <div className="mt-7 flex flex-wrap items-center justify-between gap-4">
-        <p className="text-sm text-stone-600">Unlock Pro on this account.</p>
+        <p className="text-sm text-stone-600">No active subscription.</p>
 
         <form action="/api/billing/checkout" method="post">
           <Button
@@ -171,57 +107,30 @@ function renderProDetails(options: {
     )
   }
 
-  const showStatusLine = billing.status !== 'active'
-  const showRenewsLine = Boolean(billing.renewsLabel)
-  const showEndsLine = Boolean(billing.endsLabel)
-
-  const endsTitle = billing.isCancelledButActive ? 'Cancels on' : 'Ends'
+  if (!billing.portalUrl) {
+    return (
+      <p className="mt-7 text-sm text-stone-600">
+        Subscription portal link will appear after the first webhook sync.
+      </p>
+    )
+  }
 
   return (
-    <div className="mt-7 grid gap-3 text-sm text-stone-700">
-      {showStatusLine ? (
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="text-stone-500">Status</span>
-          <span className="font-medium text-stone-900">
-            {billing.statusLabel}
-          </span>
-        </div>
-      ) : null}
+    <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <Button asChild variant="outline" className="rounded-full">
+        <a href={billing.portalUrl} target="_blank" rel="noopener noreferrer">
+          Manage subscription
+        </a>
+      </Button>
 
-      {showRenewsLine ? (
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="text-stone-500">Renews</span>
-          <span className="font-medium text-stone-900">
-            {billing.renewsLabel}
-          </span>
-        </div>
-      ) : null}
-
-      {showEndsLine ? (
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="text-stone-500">{endsTitle}</span>
-          <span className="font-medium text-stone-900">
-            {billing.endsLabel}
-          </span>
-        </div>
-      ) : null}
-
-      <div className="mt-3 flex flex-wrap items-center gap-3">
-        {billing.portalUrl ? (
-          <Button asChild className="rounded-full bg-stone-900 px-6">
-            <a
-              href={billing.portalUrl}
-              target="_blank"
-              rel="noopener noreferrer">
-              Manage subscription
-            </a>
-          </Button>
-        ) : (
-          <p className="text-xs text-stone-500">
-            Manage link will appear after the first webhook sync.
-          </p>
-        )}
-      </div>
+      <Button
+        asChild
+        variant="outline"
+        className="rounded-full border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700">
+        <a href={billing.portalUrl} target="_blank" rel="noopener noreferrer">
+          Cancel plan
+        </a>
+      </Button>
     </div>
   )
 }
@@ -238,7 +147,8 @@ export default async function AccountPage({
 
   if (!user) redirect('/login')
 
-  const { checkout } = await searchParams
+  // keep query param parsing stable for future, even if we don't surface it in UI
+  await searchParams
 
   const { data: subscription, error: subscriptionError } = await supabase
     .from('billing_subscriptions')
@@ -272,24 +182,23 @@ export default async function AccountPage({
           </form>
         </header>
 
-        {renderCheckoutBanner(checkout)}
-
         <section className="mt-10 rounded-2xl border border-stone-200 bg-white p-6">
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div className="min-w-0">
-              <h2 className="font-serif text-2xl font-semibold tracking-tight text-stone-900">
-                Pro
+              <h2 className="font-serif text-3xl font-semibold tracking-tight text-stone-900">
+                {billing.planName}
               </h2>
-              <p className="mt-1 text-sm text-stone-600">
-                {billing.isPro
-                  ? 'Enabled on this account.'
-                  : 'Upgrade to enable Pro on this account.'}
-              </p>
+
+              {billing.dateLine ? (
+                <p className="mt-3 flex items-center gap-2 text-sm text-stone-600">
+                  <CalendarDays aria-hidden="true" className="h-4 w-4" />
+                  {billing.dateLine}
+                </p>
+              ) : null}
             </div>
 
             {billing.isPro ? (
-              <div className="inline-flex items-center gap-2 rounded-full bg-stone-900 px-4 py-2 text-sm font-semibold text-white">
-                <CheckCircle2 aria-hidden="true" className="h-4 w-4" />
+              <div className="inline-flex items-center rounded-full bg-stone-900 px-4 py-2 text-sm font-semibold text-white">
                 Pro
               </div>
             ) : (
@@ -299,14 +208,10 @@ export default async function AccountPage({
             )}
           </div>
 
-          {renderProDetails({
+          {renderSubscriptionActions({
             billing,
             subscriptionError: Boolean(subscriptionError)
           })}
-
-          <p className="mt-7 text-xs text-stone-500">
-            Billing is handled by LemonSqueezy.
-          </p>
         </section>
       </div>
     </main>
