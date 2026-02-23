@@ -1,5 +1,5 @@
-import { CheckIcon } from '@heroicons/react/20/solid'
 import { Button } from '@internal/ui/components/button'
+import { Check } from 'lucide-react'
 import type { Metadata } from 'next'
 
 import { Header } from '../../components/landing/Header'
@@ -54,7 +54,7 @@ export default function PricingPage() {
                 className="mt-6 grid grid-cols-1 gap-4 text-sm text-stone-700 sm:grid-cols-2">
                 {includedFeatures.map((feature) => (
                   <li key={feature} className="flex gap-x-3">
-                    <CheckIcon
+                    <Check
                       aria-hidden="true"
                       className="h-5 w-5 flex-none text-emerald-700"
                     />
