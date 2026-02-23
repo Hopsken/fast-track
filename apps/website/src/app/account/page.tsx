@@ -3,6 +3,7 @@ import { Button } from '@internal/ui/components/button'
 import { CalendarDays } from 'lucide-react'
 import { redirect } from 'next/navigation'
 
+import { Header } from '../../components/landing/Header'
 import { isProFromSubscription } from '../../lib/billing/subscription'
 import { createSupabaseServerClientReadOnly } from '../../lib/supabase/server'
 
@@ -21,7 +22,8 @@ type SubscriptionRow = {
 type BillingSummary = {
   isPro: boolean
   planName: 'Pro' | 'Free'
-  dateLine: string | null
+  nextRenewLabel: string | null
+  cancelsLabel: string | null
   portalUrl: string | null
 }
 
@@ -52,28 +54,41 @@ function getBillingSummary(
       : null
   )
 
-  const renewsLabel = formatDate(subscription?.renews_at)
-  const endsLabel = formatDate(subscription?.ends_at)
-
-  // Keep to a single "next date" line, similar to the reference IA.
-  let dateLine: string | null = null
-
-  if (isPro) {
-    if (status === 'cancelled' && endsLabel) {
-      dateLine = `Cancels on ${endsLabel}`
-    } else if (renewsLabel) {
-      dateLine = `Next payment is on ${renewsLabel}`
-    } else if (endsLabel) {
-      dateLine = `Ends on ${endsLabel}`
-    }
-  }
+  const nextRenewLabel = formatDate(subscription?.renews_at)
+  const cancelsLabel =
+    status === 'cancelled' ? formatDate(subscription?.ends_at) : null
 
   return {
     isPro,
     planName: isPro ? 'Pro' : 'Free',
-    dateLine,
+    nextRenewLabel,
+    cancelsLabel,
     portalUrl: subscription?.customer_portal_url ?? null
   }
+}
+
+function renderNextDateLine(billing: BillingSummary): ReactNode {
+  if (!billing.isPro) return null
+
+  if (billing.cancelsLabel) {
+    return (
+      <p className="flex items-center gap-2 text-sm text-stone-600">
+        <CalendarDays aria-hidden="true" className="h-4 w-4" />
+        Cancels on {billing.cancelsLabel}
+      </p>
+    )
+  }
+
+  if (billing.nextRenewLabel) {
+    return (
+      <p className="flex items-center gap-2 text-sm text-stone-600">
+        <CalendarDays aria-hidden="true" className="h-4 w-4" />
+        Next renewal is on {billing.nextRenewLabel}
+      </p>
+    )
+  }
+
+  return null
 }
 
 function renderSubscriptionActions(options: {
@@ -92,7 +107,7 @@ function renderSubscriptionActions(options: {
 
   if (!billing.isPro) {
     return (
-      <div className="mt-7 flex flex-wrap items-center justify-between gap-4">
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
         <p className="text-sm text-stone-600">No active subscription.</p>
 
         <form action="/api/billing/checkout" method="post">
@@ -100,7 +115,7 @@ function renderSubscriptionActions(options: {
             type="submit"
             variant="default"
             className="rounded-full bg-stone-900 px-6 text-white shadow-none hover:bg-stone-800">
-            Upgrade to Pro
+            Upgrade
           </Button>
         </form>
       </div>
@@ -109,14 +124,14 @@ function renderSubscriptionActions(options: {
 
   if (!billing.portalUrl) {
     return (
-      <p className="mt-7 text-sm text-stone-600">
-        Subscription portal link will appear after the first webhook sync.
+      <p className="mt-8 text-sm text-stone-600">
+        Manage link will appear after the first webhook sync.
       </p>
     )
   }
 
   return (
-    <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <Button asChild variant="outline" className="rounded-full">
         <a href={billing.portalUrl} target="_blank" rel="noopener noreferrer">
           Manage subscription
@@ -147,7 +162,7 @@ export default async function AccountPage({
 
   if (!user) redirect('/login')
 
-  // keep query param parsing stable for future, even if we don't surface it in UI
+  // Keep query param parsing stable for future, even if we don't surface it in UI.
   await searchParams
 
   const { data: subscription, error: subscriptionError } = await supabase
@@ -159,59 +174,25 @@ export default async function AccountPage({
   const billing = getBillingSummary(subscriptionError ? null : subscription)
 
   return (
-    <main className="min-h-dvh bg-[#FDFBF9]">
+    <main className="flex min-h-dvh flex-col">
+      <Header />
+
       <div className="container mx-auto max-w-2xl px-6 py-14">
-        <header className="flex flex-wrap items-start justify-between gap-4">
-          <div className="min-w-0">
-            <h1 className="font-serif text-3xl font-semibold tracking-tight text-stone-900">
-              Account
-            </h1>
-            <p className="mt-2 text-sm text-stone-600">
-              Signed in as{' '}
-              <span className="font-medium text-stone-900">{user.email}</span>
-            </p>
-          </div>
+        <section className="rounded-2xl border border-stone-200 bg-white p-6">
+          <div className="flex flex-col gap-4">
+            <h2 className="font-serif text-4xl font-semibold tracking-tight text-stone-900">
+              {billing.planName}
+            </h2>
 
-          <form action="/auth/signout" method="post" className="shrink-0">
-            <Button
-              type="submit"
-              variant="outline"
-              className="rounded-full border-stone-300 bg-white px-5 text-stone-900 hover:bg-stone-50">
-              Sign out
-            </Button>
-          </form>
-        </header>
+            {renderNextDateLine(billing)}
 
-        <section className="mt-10 rounded-2xl border border-stone-200 bg-white p-6">
-          <div className="flex flex-wrap items-start justify-between gap-6">
-            <div className="min-w-0">
-              <h2 className="font-serif text-3xl font-semibold tracking-tight text-stone-900">
-                {billing.planName}
-              </h2>
-
-              {billing.dateLine ? (
-                <p className="mt-3 flex items-center gap-2 text-sm text-stone-600">
-                  <CalendarDays aria-hidden="true" className="h-4 w-4" />
-                  {billing.dateLine}
-                </p>
-              ) : null}
+            <div className="mt-2 border-t border-dashed border-stone-200 pt-6">
+              {renderSubscriptionActions({
+                billing,
+                subscriptionError: Boolean(subscriptionError)
+              })}
             </div>
-
-            {billing.isPro ? (
-              <div className="inline-flex items-center rounded-full bg-stone-900 px-4 py-2 text-sm font-semibold text-white">
-                Pro
-              </div>
-            ) : (
-              <div className="inline-flex items-center rounded-full bg-stone-100 px-4 py-2 text-sm font-semibold text-stone-700">
-                Free
-              </div>
-            )}
           </div>
-
-          {renderSubscriptionActions({
-            billing,
-            subscriptionError: Boolean(subscriptionError)
-          })}
         </section>
       </div>
     </main>
