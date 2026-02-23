@@ -2,14 +2,16 @@
 
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
+import { AlertTriangle } from 'lucide-react'
 
 import { createSupabaseBrowserClient } from '../../lib/supabase/browser'
 import { getSupabasePublicEnv } from '../../lib/supabase/env'
+import type { LoginError } from '../../lib/supabase/login-errors'
 import { buildAuthCallbackUrl } from '../../lib/supabase/redirect-url'
 
 const supabase = createSupabaseBrowserClient()
 
-export function LoginPanel() {
+export function LoginPanel({ error }: { error?: LoginError | null }) {
   const { websiteUrl } = getSupabasePublicEnv()
 
   return (
@@ -22,6 +24,24 @@ export function LoginPanel() {
           Magic link via email, or Google.
         </p>
       </div>
+
+      {error ? (
+        <div
+          role="alert"
+          className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-950">
+          <div className="flex gap-3">
+            <AlertTriangle className="mt-0.5 h-4 w-4 text-amber-700" />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold">{error.title}</p>
+              {error.description ? (
+                <p className="mt-1 text-sm text-amber-900/80">
+                  {error.description}
+                </p>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <Auth
         supabaseClient={supabase}
