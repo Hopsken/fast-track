@@ -5,7 +5,8 @@ import type { Metadata } from 'next'
 import { Header } from '../../components/landing/Header'
 
 const includedFeatures = [
-  'All Pro features',
+  'Unlimited issue templates',
+  'Sync (coming soon)',
   'All future Pro features',
   'Support development',
   'Cancel anytime'
@@ -51,7 +52,7 @@ export default function PricingPage() {
 
               <ul
                 role="list"
-                className="mt-6 grid grid-cols-1 gap-4 text-sm text-stone-700 sm:grid-cols-2">
+                className="mt-6 flex flex-col gap-4 text-sm text-stone-700">
                 {includedFeatures.map((feature) => (
                   <li key={feature} className="flex gap-x-3">
                     <Check

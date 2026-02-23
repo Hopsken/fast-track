@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { createSupabaseServerClientReadOnly } from '../../lib/supabase/server'
 
 const included = [
-  'All Pro features',
+  'Unlimited issue templates',
+  'Sync (coming soon)',
   'All future Pro features',
   'Support development',
   'Cancel anytime'
@@ -34,7 +35,7 @@ export async function PricingTeaser() {
               One plan. No tiers. If it ships, you get it.
             </p>
 
-            <ul className="mt-7 grid grid-cols-1 gap-3 text-sm text-stone-700 sm:grid-cols-2">
+            <ul className="mt-7 flex flex-col gap-3 text-sm text-stone-700">
               {included.map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <Check
