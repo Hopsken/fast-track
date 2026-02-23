@@ -106,7 +106,8 @@ function renderCheckoutBanner(checkout: string | undefined): ReactNode {
           <div className="min-w-0">
             <p className="text-sm font-semibold">Payment complete</p>
             <p className="mt-1 text-sm text-emerald-900/80">
-              Your plan updates after webhook sync (usually under a minute).
+              Your Pro access updates after webhook sync (usually under a
+              minute).
             </p>
           </div>
         </div>
@@ -139,11 +140,11 @@ function renderCheckoutBanner(checkout: string | undefined): ReactNode {
   return null
 }
 
-function renderPlanBody(options: {
-  subscriptionError: boolean
+function renderProDetails(options: {
   billing: BillingSummary
+  subscriptionError: boolean
 }): ReactNode {
-  const { subscriptionError, billing } = options
+  const { billing, subscriptionError } = options
 
   if (subscriptionError) {
     return (
@@ -155,10 +156,8 @@ function renderPlanBody(options: {
 
   if (!billing.isPro) {
     return (
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-        <p className="text-sm text-stone-600">
-          Upgrade to Pro to unlock the full product.
-        </p>
+      <div className="mt-7 flex flex-wrap items-center justify-between gap-4">
+        <p className="text-sm text-stone-600">Unlock Pro on this account.</p>
 
         <form action="/api/billing/checkout" method="post">
           <Button
@@ -172,18 +171,24 @@ function renderPlanBody(options: {
     )
   }
 
+  const showStatusLine = billing.status !== 'active'
+  const showRenewsLine = Boolean(billing.renewsLabel)
+  const showEndsLine = Boolean(billing.endsLabel)
+
   const endsTitle = billing.isCancelledButActive ? 'Cancels on' : 'Ends'
 
   return (
-    <div className="mt-6 grid gap-3 text-sm text-stone-700">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="text-stone-500">Status</span>
-        <span className="font-medium text-stone-900">
-          {billing.statusLabel}
-        </span>
-      </div>
+    <div className="mt-7 grid gap-3 text-sm text-stone-700">
+      {showStatusLine ? (
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="text-stone-500">Status</span>
+          <span className="font-medium text-stone-900">
+            {billing.statusLabel}
+          </span>
+        </div>
+      ) : null}
 
-      {billing.renewsLabel ? (
+      {showRenewsLine ? (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-stone-500">Renews</span>
           <span className="font-medium text-stone-900">
@@ -192,7 +197,7 @@ function renderPlanBody(options: {
         </div>
       ) : null}
 
-      {billing.endsLabel ? (
+      {showEndsLine ? (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-stone-500">{endsTitle}</span>
           <span className="font-medium text-stone-900">
@@ -270,32 +275,36 @@ export default async function AccountPage({
         {renderCheckoutBanner(checkout)}
 
         <section className="mt-10 rounded-2xl border border-stone-200 bg-white p-6">
-          <div className="flex items-start justify-between gap-6">
-            <div>
-              <h2 className="font-serif text-xl font-semibold tracking-tight text-stone-900">
-                Plan
+          <div className="flex flex-wrap items-start justify-between gap-6">
+            <div className="min-w-0">
+              <h2 className="font-serif text-2xl font-semibold tracking-tight text-stone-900">
+                Pro
               </h2>
               <p className="mt-1 text-sm text-stone-600">
-                Pro is an annual subscription — $29/year.
+                {billing.isPro
+                  ? 'Enabled on this account.'
+                  : 'Upgrade to enable Pro on this account.'}
               </p>
             </div>
 
-            <span
-              className={
-                billing.isPro
-                  ? 'inline-flex items-center rounded-full bg-stone-900 px-3 py-1 text-xs font-semibold text-white'
-                  : 'inline-flex items-center rounded-full bg-stone-100 px-3 py-1 text-xs font-semibold text-stone-700'
-              }>
-              {billing.isPro ? 'Pro' : 'Free'}
-            </span>
+            {billing.isPro ? (
+              <div className="inline-flex items-center gap-2 rounded-full bg-stone-900 px-4 py-2 text-sm font-semibold text-white">
+                <CheckCircle2 aria-hidden="true" className="h-4 w-4" />
+                Pro
+              </div>
+            ) : (
+              <div className="inline-flex items-center rounded-full bg-stone-100 px-4 py-2 text-sm font-semibold text-stone-700">
+                Free
+              </div>
+            )}
           </div>
 
-          {renderPlanBody({
-            subscriptionError: Boolean(subscriptionError),
-            billing
+          {renderProDetails({
+            billing,
+            subscriptionError: Boolean(subscriptionError)
           })}
 
-          <p className="mt-6 text-xs text-stone-500">
+          <p className="mt-7 text-xs text-stone-500">
             Billing is handled by LemonSqueezy.
           </p>
         </section>
