@@ -1,9 +1,11 @@
+import { parseLemonSqueezyUrl } from './url'
+
 export function buildLemonCheckoutUrl(options: {
   checkoutUrl: string
   userId: string
   email?: string | null
 }): string {
-  const url = new URL(options.checkoutUrl)
+  const url = parseLemonSqueezyUrl(options.checkoutUrl)
 
   // Prefill email if provided.
   if (options.email) {

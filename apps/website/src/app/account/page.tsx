@@ -4,6 +4,7 @@ import { CalendarDays } from 'lucide-react'
 import { redirect } from 'next/navigation'
 
 import { Header } from '../../components/landing/Header'
+import { isAllowedLemonSqueezyUrl } from '../../lib/billing/lemonsqueezy/url'
 import { isProFromSubscription } from '../../lib/billing/subscription'
 import { createSupabaseServerClientReadOnly } from '../../lib/supabase/server'
 
@@ -58,12 +59,15 @@ function getBillingSummary(
   const cancelsLabel =
     status === 'cancelled' ? formatDate(subscription?.ends_at) : null
 
+  const portalUrl = subscription?.customer_portal_url
+
   return {
     isPro,
     planName: isPro ? 'Pro' : 'Free',
     nextRenewLabel,
     cancelsLabel,
-    portalUrl: subscription?.customer_portal_url ?? null
+    portalUrl:
+      portalUrl && isAllowedLemonSqueezyUrl(portalUrl) ? portalUrl : null
   }
 }
 
@@ -186,7 +190,7 @@ export default async function AccountPage({
 
             {renderNextDateLine(billing)}
 
-            <div className="mt-2 border-t border-dashed border-stone-200 pt-6">
+            <div className="mt-2 border-t border-dashed border-stone-200">
               {renderSubscriptionActions({
                 billing,
                 subscriptionError: Boolean(subscriptionError)

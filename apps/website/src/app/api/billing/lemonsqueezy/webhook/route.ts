@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 
 import { getLemonSqueezyEnv } from '../../../../../lib/billing/lemonsqueezy/env.server'
+import { isAllowedLemonSqueezyUrl } from '../../../../../lib/billing/lemonsqueezy/url'
 import {
   getWebhookSignature,
   verifyLemonSqueezyWebhookSignature
@@ -109,7 +110,10 @@ function buildSubscriptionUpsertPayload(options: {
 
   // Don't overwrite an existing portal url with null/empty.
   const customerPortalUrl = attributes?.urls?.customer_portal
-  if (isNonEmptyString(customerPortalUrl)) {
+  if (
+    isNonEmptyString(customerPortalUrl) &&
+    isAllowedLemonSqueezyUrl(customerPortalUrl)
+  ) {
     upsertPayload.customer_portal_url = customerPortalUrl
   }
 

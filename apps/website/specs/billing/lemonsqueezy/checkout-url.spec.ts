@@ -5,7 +5,7 @@ import { buildLemonCheckoutUrl } from '../../../src/lib/billing/lemonsqueezy/che
 describe('buildLemonCheckoutUrl', () => {
   it('should append custom supabase user id', () => {
     const url = buildLemonCheckoutUrl({
-      checkoutUrl: 'https://example.com/checkout',
+      checkoutUrl: 'https://teamusement.lemonsqueezy.com/checkout/buy/test',
       userId: 'user-123'
     })
 
@@ -14,7 +14,7 @@ describe('buildLemonCheckoutUrl', () => {
 
   it('should prefill email when provided', () => {
     const url = buildLemonCheckoutUrl({
-      checkoutUrl: 'https://example.com/checkout',
+      checkoutUrl: 'https://teamusement.lemonsqueezy.com/checkout/buy/test',
       userId: 'user-123',
       email: 'a@b.com'
     })
