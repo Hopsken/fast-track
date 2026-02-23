@@ -5,6 +5,7 @@ import { getLemonSqueezyApiEnv } from '../../../../lib/billing/lemonsqueezy/env.
 import { createSupabaseRouteHandlerClient } from '../../../../lib/supabase/server'
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 type SubscriptionRow = {
   lemonsqueezy_subscription_id: string | null
@@ -47,5 +48,7 @@ export async function GET(request: NextRequest) {
     subscriptionId
   })
 
-  return NextResponse.redirect(portalUrl, { status: 303 })
+  const response = NextResponse.redirect(portalUrl, { status: 303 })
+  response.headers.set('Cache-Control', 'no-store')
+  return response
 }

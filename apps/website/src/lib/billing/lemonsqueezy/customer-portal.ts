@@ -25,6 +25,8 @@ export async function fetchLemonSqueezyCustomerPortalUrlForSubscription(options:
     `https://api.lemonsqueezy.com/v1/subscriptions/${options.subscriptionId}`,
     {
       method: 'GET',
+      // Force a fresh signed URL. Next.js extended fetch may cache by default.
+      cache: 'no-store',
       headers: {
         Accept: 'application/vnd.api+json',
         Authorization: `Bearer ${options.apiKey}`
