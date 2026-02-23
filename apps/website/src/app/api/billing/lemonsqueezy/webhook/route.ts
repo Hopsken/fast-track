@@ -31,6 +31,29 @@ type LemonSqueezyWebhookPayload = {
   }
 }
 
+type BillingSubscriptionUpsert = {
+  user_id: string
+  updated_at: string
+  status?: string
+  renews_at?: string | null
+  ends_at?: string | null
+  lemonsqueezy_subscription_id?: string
+  lemonsqueezy_customer_id?: string
+  customer_portal_url?: string
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.length > 0
+}
+
+function safeJsonParse<T>(raw: string): T | null {
+  try {
+    return JSON.parse(raw) as T
+  } catch {
+    return null
+  }
+}
+
 function getSupabaseUserId(payload: LemonSqueezyWebhookPayload): string | null {
   const custom = payload.meta?.custom_data
   if (!custom) return null
@@ -41,6 +64,60 @@ function getSupabaseUserId(payload: LemonSqueezyWebhookPayload): string | null {
 
   if (!value) return null
   return String(value)
+}
+
+function isSubscriptionEvent(payload: LemonSqueezyWebhookPayload): boolean {
+  const eventName = payload.meta?.event_name
+  return eventName?.startsWith('subscription_') ?? false
+}
+
+function buildSubscriptionUpsertPayload(options: {
+  payload: LemonSqueezyWebhookPayload
+  userId: string
+}): BillingSubscriptionUpsert {
+  const { payload, userId } = options
+  const attributes = payload.data?.attributes
+
+  const upsertPayload: BillingSubscriptionUpsert = {
+    user_id: userId,
+    updated_at: new Date().toISOString()
+  }
+
+  if (isNonEmptyString(payload.data?.id)) {
+    upsertPayload.lemonsqueezy_subscription_id = payload.data?.id
+  }
+
+  if (
+    attributes?.customer_id !== undefined &&
+    attributes.customer_id !== null
+  ) {
+    upsertPayload.lemonsqueezy_customer_id = String(attributes.customer_id)
+  }
+
+  if (isNonEmptyString(attributes?.status)) {
+    upsertPayload.status = attributes.status
+  }
+
+  // We treat explicit `null` as authoritative; missing field stays untouched.
+  if (attributes?.renews_at !== undefined) {
+    upsertPayload.renews_at = attributes.renews_at
+  }
+
+  if (attributes?.ends_at !== undefined) {
+    upsertPayload.ends_at = attributes.ends_at
+  }
+
+  // Don't overwrite an existing portal url with null/empty.
+  const customerPortalUrl = attributes?.urls?.customer_portal
+  if (isNonEmptyString(customerPortalUrl)) {
+    upsertPayload.customer_portal_url = customerPortalUrl
+  }
+
+  return upsertPayload
+}
+
+function isUniqueViolation(error: { code?: string } | null): boolean {
+  return error?.code === '23505'
 }
 
 export async function POST(request: NextRequest) {
@@ -63,33 +140,12 @@ export async function POST(request: NextRequest) {
     return new Response('Invalid webhook signature', { status: 401 })
   }
 
-  const payload = JSON.parse(rawBody) as LemonSqueezyWebhookPayload
-
-  // Best-effort idempotency (only if Lemon includes an event id).
-  const eventId = payload.meta?.event_id
-  const supabase = createSupabaseAdminClient()
-
-  if (eventId) {
-    const { error } = await supabase
-      .from('billing_webhook_events')
-      .insert({ id: eventId })
-
-    // If already processed, return early.
-    if (error && !String(error.code).includes('23505')) {
-      // If we can't write idempotency rows, still proceed to update subscription.
-    }
-
-    if (!error) {
-      // newly inserted, continue
-    } else if (String(error.code).includes('23505')) {
-      return new Response('ok', { status: 200 })
-    }
+  const payload = safeJsonParse<LemonSqueezyWebhookPayload>(rawBody)
+  if (!payload) {
+    return new Response('Invalid JSON payload', { status: 400 })
   }
 
-  const eventName = payload.meta?.event_name
-  const isSubscriptionEvent = eventName?.startsWith('subscription_') ?? false
-
-  if (!isSubscriptionEvent) {
+  if (!isSubscriptionEvent(payload)) {
     return new Response('ignored', { status: 200 })
   }
 
@@ -98,34 +154,29 @@ export async function POST(request: NextRequest) {
     return new Response('Missing custom_data.supabase_user_id', { status: 400 })
   }
 
-  const status = payload.data?.attributes?.status ?? 'unknown'
-  const renewsAt = payload.data?.attributes?.renews_at ?? null
-  const endsAt = payload.data?.attributes?.ends_at ?? null
-  const subscriptionId = payload.data?.id ?? null
-  const customerId = payload.data?.attributes?.customer_id
-    ? String(payload.data.attributes.customer_id)
-    : null
-  const customerPortalUrl =
-    payload.data?.attributes?.urls?.customer_portal ?? null
+  const supabase = createSupabaseAdminClient()
+
+  const upsertPayload = buildSubscriptionUpsertPayload({ payload, userId })
 
   const { error: upsertError } = await supabase
     .from('billing_subscriptions')
-    .upsert(
-      {
-        user_id: userId,
-        lemonsqueezy_subscription_id: subscriptionId,
-        lemonsqueezy_customer_id: customerId,
-        status,
-        renews_at: renewsAt,
-        ends_at: endsAt,
-        customer_portal_url: customerPortalUrl,
-        updated_at: new Date().toISOString()
-      },
-      { onConflict: 'user_id' }
-    )
+    .upsert(upsertPayload, { onConflict: 'user_id' })
 
   if (upsertError) {
     return new Response('Failed to persist subscription', { status: 500 })
+  }
+
+  // Best-effort idempotency marker.
+  // Write only after the business update succeeds.
+  const eventId = payload.meta?.event_id
+  if (eventId) {
+    const { error } = await supabase
+      .from('billing_webhook_events')
+      .insert({ id: eventId })
+
+    if (error && !isUniqueViolation(error)) {
+      // no-op
+    }
   }
 
   return new Response('ok', { status: 200 })
