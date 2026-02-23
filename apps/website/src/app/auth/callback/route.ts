@@ -6,9 +6,12 @@ export async function GET(request: NextRequest) {
   const url = new URL(request.url)
   const code = url.searchParams.get('code')
   const error = url.searchParams.get('error')
+  const errorDescription = url.searchParams.get('error_description')
 
   if (error) {
-    return NextResponse.redirect(new URL(`/login?error=${error}`, url.origin))
+    const loginUrl = new URL('/login', url.origin)
+    loginUrl.searchParams.set('error', errorDescription ?? error)
+    return NextResponse.redirect(loginUrl)
   }
 
   if (!code) {
@@ -20,9 +23,9 @@ export async function GET(request: NextRequest) {
     await supabase.auth.exchangeCodeForSession(code)
 
   if (exchangeError) {
-    return NextResponse.redirect(
-      new URL('/login?error=exchange_code_for_session_failed', url.origin)
-    )
+    const loginUrl = new URL('/login', url.origin)
+    loginUrl.searchParams.set('error', 'exchange_code_for_session_failed')
+    return NextResponse.redirect(loginUrl)
   }
 
   return NextResponse.redirect(new URL('/account', url.origin))

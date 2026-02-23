@@ -2,6 +2,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
 
 import { getSupabasePublicEnv } from './src/lib/supabase/env'
+import { hasSupabaseAuthCookies } from './src/lib/supabase/auth-cookies'
 import { isProtectedPath } from './src/lib/supabase/protected-routes'
 
 type CookieToSet = {
@@ -11,6 +12,12 @@ type CookieToSet = {
 }
 
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
+  const shouldCheckUser =
+    isProtectedPath(pathname) || hasSupabaseAuthCookies(request.cookies.getAll())
+
+  if (!shouldCheckUser) return NextResponse.next()
+
   const { supabaseUrl, supabasePublishableKey } = getSupabasePublicEnv()
 
   const cookiesToSet: CookieToSet[] = []
@@ -31,7 +38,7 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const response =
-    isProtectedPath(request.nextUrl.pathname) && !user
+    isProtectedPath(pathname) && !user
       ? NextResponse.redirect(new URL('/login', request.url))
       : NextResponse.next()
 

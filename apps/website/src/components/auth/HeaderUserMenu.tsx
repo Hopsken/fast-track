@@ -31,6 +31,7 @@ export function HeaderUserMenu({ user }: { user: HeaderUser }) {
           type="button"
           variant="outline"
           size="sm"
+          aria-label="Account menu"
           className="group rounded-full border-stone-300 bg-white/60 pl-2 pr-3 text-stone-900 shadow-none hover:bg-white hover:text-stone-900">
           <span className="flex items-center gap-2">
             {user.avatarUrl ? (
