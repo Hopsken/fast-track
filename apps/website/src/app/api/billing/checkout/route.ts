@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { buildLemonCheckoutUrl } from '../../../../lib/billing/lemonsqueezy/checkout-url'
-import { getProCheckoutUrl } from '../../../../lib/billing/lemonsqueezy/constants'
+import { getLemonSqueezyEnv } from '../../../../lib/billing/lemonsqueezy/env.server'
 import { isAllowedLemonSqueezyUrl } from '../../../../lib/billing/lemonsqueezy/url'
 import { createSupabaseRouteHandlerClient } from '../../../../lib/supabase/server'
 
@@ -21,8 +21,10 @@ async function handleCheckout(request: NextRequest) {
     })
   }
 
+  const { proCheckoutUrl } = getLemonSqueezyEnv()
+
   const checkoutUrl = buildLemonCheckoutUrl({
-    checkoutUrl: getProCheckoutUrl(),
+    checkoutUrl: proCheckoutUrl,
     userId: user.id,
     email: user.email
   })

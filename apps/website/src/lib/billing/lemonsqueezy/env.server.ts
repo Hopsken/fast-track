@@ -4,6 +4,7 @@ import { requiredEnv } from '../../env/required'
 
 export interface LemonSqueezyEnv {
   webhookSecret: string
+  proCheckoutUrl: string
 }
 
 export interface LemonSqueezyApiEnv {
@@ -15,6 +16,10 @@ export function getLemonSqueezyEnv(): LemonSqueezyEnv {
     webhookSecret: requiredEnv(
       'LEMONSQUEEZY_WEBHOOK_SECRET',
       process.env.LEMONSQUEEZY_WEBHOOK_SECRET
+    ),
+    proCheckoutUrl: requiredEnv(
+      'LEMONSQUEEZY_PRO_CHECKOUT_URL',
+      process.env.LEMONSQUEEZY_PRO_CHECKOUT_URL
     )
   }
 }
