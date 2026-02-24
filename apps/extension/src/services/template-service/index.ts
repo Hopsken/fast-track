@@ -8,6 +8,7 @@ import { getStorageItem } from '~/lib/storage/schema'
 import { type IssueTemplate } from '~/types/template'
 
 const MAX_TEMPLATES = 50
+const FREE_TEMPLATES_LIMIT = 3
 
 /**
  * Template service implementation (proxy-service style)
@@ -17,7 +18,20 @@ const MAX_TEMPLATES = 50
  */
 export class TemplateService {
   private templatesItem = getStorageItem('IssueTemplates')
+  private snapshotItem = getStorageItem('SubscriptionSnapshot')
   private jiraApi = JiraAPI.getInstance()
+
+  private async getAllValidTemplates(): Promise<IssueTemplate[]> {
+    const templates = await this.templatesItem.getValue()
+
+    const valid: IssueTemplate[] = []
+    for (const t of templates) {
+      const res = IssueTemplateSchema.safeParse(t)
+      if (res.success) valid.push(res.data)
+    }
+
+    return valid
+  }
 
   // ===== CRUD =====
   async getTemplates(options?: {
@@ -53,11 +67,19 @@ export class TemplateService {
   async createTemplate(
     input: Omit<IssueTemplate, 'id' | 'createdAt' | 'updatedAt'>
   ): Promise<IssueTemplate> {
-    const templates = await this.getTemplates()
+    const templates = await this.getAllValidTemplates()
 
     if (templates.length >= MAX_TEMPLATES) {
       throw new Error(
         `Maximum template limit reached (${MAX_TEMPLATES}). Please delete unused templates.`
+      )
+    }
+
+    const snapshot = await this.snapshotItem.getValue()
+    const isPro = snapshot?.isPro ?? false
+    if (!isPro && templates.length >= FREE_TEMPLATES_LIMIT) {
+      throw new Error(
+        `Free plan limit reached (${FREE_TEMPLATES_LIMIT} issue templates). Upgrade to Pro to create more.`
       )
     }
 
@@ -82,7 +104,7 @@ export class TemplateService {
     id: string,
     updates: Partial<IssueTemplate>
   ): Promise<IssueTemplate> {
-    const templates = await this.getTemplates()
+    const templates = await this.getAllValidTemplates()
     const idx = templates.findIndex((t) => t.id === id)
     if (idx === -1) throw new Error('Template not found')
 
@@ -112,7 +134,7 @@ export class TemplateService {
   }
 
   async deleteTemplate(id: string): Promise<void> {
-    const templates = await this.getTemplates({ includeOtherHosts: true })
+    const templates = await this.getAllValidTemplates()
     await this.templatesItem.setValue(templates.filter((t) => t.id !== id))
   }
 

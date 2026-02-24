@@ -23,6 +23,9 @@ describe('TemplateService', () => {
       apiKey: { email: 'a@a.com', apiKey: 'abc' }
     })
 
+    // Default: treat as Free unless a test sets Pro explicitly
+    await getStorageItem('SubscriptionSnapshot').setValue(null)
+
     // Clear persisted storage between tests (WXT fake storage is shared)
     const svc = new TemplateService()
     const templatesItem = (
@@ -169,6 +172,135 @@ describe('TemplateService', () => {
 
     const valid = await svc.getTemplates()
     expect(valid.map((t) => t.name)).toEqual(['Valid'])
+  })
+
+  it('enforces Free plan limit (max 3 templates, global)', async () => {
+    const svc = new TemplateService()
+
+    const input = {
+      scope: {
+        baseUrlHost: 'a.atlassian.net',
+        project: {
+          id: '1',
+          key: 'PROJ',
+          name: 'Project'
+        },
+        issueType: {
+          id: '10000',
+          name: 'Bug',
+          iconUrl: '',
+          description: '',
+          subtask: false
+        }
+      },
+      fields: []
+    }
+
+    await svc.createTemplate({ name: 'T1', ...input })
+    await svc.createTemplate({ name: 'T2', ...input })
+    await svc.createTemplate({ name: 'T3', ...input })
+
+    await expect(svc.createTemplate({ name: 'T4', ...input })).rejects.toThrow(
+      /Free plan limit reached/i
+    )
+  })
+
+  it('allows Pro to create more than 3 templates', async () => {
+    await getStorageItem('SubscriptionSnapshot').setValue({
+      status: 'active',
+      renewsAt: null,
+      endsAt: null,
+      updatedAt: '2026-01-01T00:00:00.000Z',
+      isPro: true,
+      lastCheckedAt: '2026-01-01T00:00:00.000Z'
+    })
+
+    const svc = new TemplateService()
+
+    const input = {
+      scope: {
+        baseUrlHost: 'a.atlassian.net',
+        project: {
+          id: '1',
+          key: 'PROJ',
+          name: 'Project'
+        },
+        issueType: {
+          id: '10000',
+          name: 'Bug',
+          iconUrl: '',
+          description: '',
+          subtask: false
+        }
+      },
+      fields: []
+    }
+
+    await svc.createTemplate({ name: 'T1', ...input })
+    await svc.createTemplate({ name: 'T2', ...input })
+    await svc.createTemplate({ name: 'T3', ...input })
+    await expect(
+      svc.createTemplate({ name: 'T4', ...input })
+    ).resolves.toBeDefined()
+  })
+
+  it('does not overwrite templates from other Jira sites when creating/updating', async () => {
+    const authItem = getStorageItem('AuthCredentials')
+
+    const svc = new TemplateService()
+
+    const mkInput = (host: string, name: string) => ({
+      name,
+      scope: {
+        baseUrlHost: host,
+        project: {
+          id: '1',
+          key: 'PROJ',
+          name: 'Project'
+        },
+        issueType: {
+          id: '10000',
+          name: 'Bug',
+          iconUrl: '',
+          description: '',
+          subtask: false
+        }
+      },
+      fields: []
+    })
+
+    // Simulate user being connected to site B, then switching to site A
+    await authItem.setValue({
+      type: 'apiKey',
+      host: 'https://b.atlassian.net',
+      userInfo: {
+        accountId: 'abc',
+        email: 'a@a.com',
+        name: 'A'
+      },
+      oauth: null,
+      apiKey: { email: 'a@a.com', apiKey: 'abc' }
+    })
+    await svc.createTemplate(mkInput('b.atlassian.net', 'B1'))
+
+    await authItem.setValue({
+      type: 'apiKey',
+      host: 'https://a.atlassian.net',
+      userInfo: {
+        accountId: 'abc',
+        email: 'a@a.com',
+        name: 'A'
+      },
+      oauth: null,
+      apiKey: { email: 'a@a.com', apiKey: 'abc' }
+    })
+    const a1 = await svc.createTemplate(mkInput('a.atlassian.net', 'A1'))
+
+    // Updating A should not drop B
+    await svc.updateTemplate(a1.id, { name: 'A1-updated' })
+
+    const all = await svc.getTemplates({ includeOtherHosts: true })
+    expect(all.map((t) => t.name).sort()).toEqual(['A1-updated', 'B1'])
   })
 
   it('createTemplate validates input (rejects empty issueTypeName)', async () => {
