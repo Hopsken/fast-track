@@ -16,7 +16,7 @@
    - `{WEBSITE_URL}/api/billing/lemonsqueezy/webhook`
 
 ## Notes
-- LemonSqueezy hosted checkout URLs differ between **test** and **live** mode. Configure:
-  - `LEMONSQUEEZY_PRO_CHECKOUT_URL_TEST` (required for test mode)
-  - `LEMONSQUEEZY_PRO_CHECKOUT_URL_LIVE` (optional override)
+- LemonSqueezy hosted checkout URLs differ between **test** and **live** mode.
+  Configure a single env var per deployment environment:
+  - `LEMONSQUEEZY_PRO_CHECKOUT_URL`
 - We append `checkout[custom][supabase_user_id]` to the checkout URL so the webhook can map the subscription to a Supabase user.
