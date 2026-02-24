@@ -43,24 +43,41 @@ export async function syncEntitlementsOnce(): Promise<SubscriptionSnapshot | nul
     return snapshot
   } catch (error) {
     if (error instanceof HTTPError && error.response.status === 401) {
-      const refreshed = await refreshAccessToken({
-        refreshToken: auth.refreshToken
-      })
+      try {
+        const refreshed = await refreshAccessToken({
+          refreshToken: auth.refreshToken
+        })
 
-      const updatedAuth: ExtensionAuth = {
-        ...auth,
-        accessToken: refreshed.accessToken
+        const updatedAuth: ExtensionAuth = {
+          ...auth,
+          accessToken: refreshed.accessToken
+        }
+        await authStorage.setValue(updatedAuth)
+
+        const me = await fetchMe({ accessToken: refreshed.accessToken })
+        const snapshot = toSnapshot({
+          subscription: me.subscription,
+          isPro: me.isPro,
+          checkedAt: me.checkedAt
+        })
+        await snapshotStorage.setValue(snapshot)
+        return snapshot
+      } catch (refreshError) {
+        // If refresh is rejected (expired/revoked), force a clean sign-in state
+        // instead of showing stale entitlements forever.
+        if (
+          refreshError instanceof HTTPError &&
+          refreshError.response.status === 401
+        ) {
+          await Promise.all([
+            authStorage.removeValue(),
+            snapshotStorage.removeValue()
+          ])
+          return null
+        }
+
+        throw refreshError
       }
-      await authStorage.setValue(updatedAuth)
-
-      const me = await fetchMe({ accessToken: refreshed.accessToken })
-      const snapshot = toSnapshot({
-        subscription: me.subscription,
-        isPro: me.isPro,
-        checkedAt: me.checkedAt
-      })
-      await snapshotStorage.setValue(snapshot)
-      return snapshot
     }
 
     throw error

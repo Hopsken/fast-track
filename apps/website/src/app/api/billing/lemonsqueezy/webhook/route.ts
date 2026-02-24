@@ -149,6 +149,28 @@ export async function POST(request: NextRequest) {
 
   const supabase = createSupabaseAdminClient()
 
+  // Idempotency: if we've already processed this webhook event_id, ignore it.
+  // Important: do this *before* mutating subscription rows so replays can't roll
+  // back state.
+  const eventId = payload.meta?.event_id
+  let insertedMarker = false
+
+  if (eventId) {
+    const { error } = await supabase
+      .from('billing_webhook_events')
+      .insert({ id: eventId })
+
+    if (error) {
+      if (isUniqueViolation(error)) {
+        return new Response('duplicate', { status: 200 })
+      }
+
+      return new Response('Failed to record webhook event', { status: 500 })
+    }
+
+    insertedMarker = true
+  }
+
   const upsertPayload = buildSubscriptionUpsertPayload({ payload, userId })
 
   const { error: upsertError } = await supabase
@@ -156,20 +178,12 @@ export async function POST(request: NextRequest) {
     .upsert(upsertPayload, { onConflict: 'user_id' })
 
   if (upsertError) {
-    return new Response('Failed to persist subscription', { status: 500 })
-  }
-
-  // Best-effort idempotency marker.
-  // Write only after the business update succeeds.
-  const eventId = payload.meta?.event_id
-  if (eventId) {
-    const { error } = await supabase
-      .from('billing_webhook_events')
-      .insert({ id: eventId })
-
-    if (error && !isUniqueViolation(error)) {
-      // no-op
+    // Best-effort rollback of idempotency marker so Lemon can retry.
+    if (eventId && insertedMarker) {
+      await supabase.from('billing_webhook_events').delete().eq('id', eventId)
     }
+
+    return new Response('Failed to persist subscription', { status: 500 })
   }
 
   return new Response('ok', { status: 200 })
