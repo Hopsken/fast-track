@@ -69,7 +69,8 @@ class EntitlementServiceImpl implements EntitlementService {
     const auth: ExtensionAuth = {
       accessToken: res.accessToken,
       refreshToken: res.refreshToken,
-      user: res.user
+      user: res.user,
+      state: 'active'
     }
 
     await this.authStorage.setValue(auth)

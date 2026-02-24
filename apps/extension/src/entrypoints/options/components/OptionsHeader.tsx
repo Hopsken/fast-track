@@ -60,7 +60,9 @@ export function OptionsHeader({ version }: OptionsHeaderProps) {
 
   const [isLinking, setIsLinking] = useState(false)
 
-  const email = auth?.user.email ?? null
+  const needsRelogin = auth?.state === 'relogin_required'
+
+  const email = needsRelogin ? null : (auth?.user.email ?? null)
   const isPro = snapshot?.isPro ?? false
 
   const planLabel = useMemo(() => {
@@ -119,9 +121,18 @@ export function OptionsHeader({ version }: OptionsHeaderProps) {
             variant="outline"
             size="sm"
             onClick={openLinkFlow}
-            disabled={isLinking}>
+            disabled={isLinking}
+            title={
+              needsRelogin
+                ? 'Session expired. Sign in again to continue.'
+                : undefined
+            }>
             <Link2 className="h-4 w-4" />
-            {isLinking ? 'Opening…' : 'Sign in'}
+            {isLinking
+              ? 'Opening…'
+              : needsRelogin
+                ? 'Sign in again'
+                : 'Sign in'}
           </Button>
         ) : (
           <div className="flex items-center gap-2">

@@ -69,10 +69,19 @@ export async function syncEntitlementsOnce(): Promise<SubscriptionSnapshot | nul
           refreshError instanceof HTTPError &&
           refreshError.response.status === 401
         ) {
+          const updatedAuth: ExtensionAuth = {
+            ...auth,
+            state: 'relogin_required',
+            reloginReason: 'refresh_token_rejected',
+            reloginAt: new Date().toISOString()
+          }
+
           await Promise.all([
-            authStorage.removeValue(),
+            authStorage.setValue(updatedAuth),
+            // Fail-safe: treat entitlements as unknown until the user signs in again.
             snapshotStorage.removeValue()
           ])
+
           return null
         }
 

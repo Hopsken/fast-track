@@ -1,3 +1,5 @@
+export type ExtensionAuthState = 'active' | 'relogin_required'
+
 export type ExtensionAuth = {
   accessToken: string
   refreshToken: string
@@ -5,6 +7,12 @@ export type ExtensionAuth = {
     id: string
     email: string | null
   }
+
+  /** Optional for backwards compatibility; missing == active */
+  state?: ExtensionAuthState
+  /** Present when state === relogin_required */
+  reloginReason?: 'refresh_token_rejected'
+  reloginAt?: string
 }
 
 export type SubscriptionSnapshot = {

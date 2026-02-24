@@ -39,6 +39,7 @@ export class SubscriptionSyncService {
       try {
         const auth = await getStorageItem('ExtensionAuth').getValue()
         if (!auth) return
+        if (auth.state === 'relogin_required') return
 
         const snapshot = await getStorageItem('SubscriptionSnapshot').getValue()
         if (!shouldSync(snapshot)) return
@@ -54,6 +55,7 @@ export class SubscriptionSyncService {
       try {
         const auth = await getStorageItem('ExtensionAuth').getValue()
         if (!auth) return
+        if (auth.state === 'relogin_required') return
 
         const snapshot = await getStorageItem('SubscriptionSnapshot').getValue()
         if (!shouldSync(snapshot)) return
