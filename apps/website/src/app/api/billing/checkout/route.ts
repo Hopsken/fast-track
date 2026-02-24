@@ -6,8 +6,9 @@ import { isAllowedLemonSqueezyUrl } from '../../../../lib/billing/lemonsqueezy/u
 import { createSupabaseRouteHandlerClient } from '../../../../lib/supabase/server'
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
-export async function POST(request: NextRequest) {
+async function handleCheckout(request: NextRequest) {
   const supabase = await createSupabaseRouteHandlerClient()
 
   const {
@@ -31,4 +32,12 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.redirect(checkoutUrl, { status: 303 })
+}
+
+export async function POST(request: NextRequest) {
+  return handleCheckout(request)
+}
+
+export async function GET(request: NextRequest) {
+  return handleCheckout(request)
 }

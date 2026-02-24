@@ -6,6 +6,7 @@
 import { defineBackground } from '#imports'
 
 import { registerAuthService } from '~/services/auth-service'
+import { registerEntitlementService } from '~/services/entitlement-service'
 import { registerJiraService } from '~/services/jira-service'
 import { registerSuggestionService } from '~/services/suggestion-service'
 import { registerTemplateService } from '~/services/template-service'
@@ -13,6 +14,7 @@ import { getLogger } from '~/utils/logger'
 
 import { InstallationHandlerService } from './services/installation-handler'
 import { OmniboxHandlerService } from './services/omnibox-handler'
+import { SubscriptionSyncService } from './services/subscription-sync'
 
 const log = getLogger('background')
 
@@ -27,8 +29,10 @@ export default defineBackground(() => {
   registerSuggestionService()
   registerAuthService()
   registerTemplateService()
+  registerEntitlementService()
 
   // Initialize alarms service
+  SubscriptionSyncService.initialize()
 
   // Initialize other services
   OmniboxHandlerService.initialize()

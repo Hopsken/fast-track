@@ -11,7 +11,13 @@ import { buildAuthCallbackUrl } from '../../lib/supabase/redirect-url'
 
 const supabase = createSupabaseBrowserClient()
 
-export function LoginPanel({ error }: { error?: LoginError | null }) {
+export function LoginPanel({
+  error,
+  next
+}: {
+  error?: LoginError | null
+  next?: string | null
+}) {
   const { websiteUrl } = getSupabasePublicEnv()
 
   return (
@@ -47,7 +53,7 @@ export function LoginPanel({ error }: { error?: LoginError | null }) {
         supabaseClient={supabase}
         view="magic_link"
         providers={['google']}
-        redirectTo={buildAuthCallbackUrl(websiteUrl)}
+        redirectTo={buildAuthCallbackUrl(websiteUrl, next)}
         showLinks={false}
         appearance={{
           theme: ThemeSupa,
