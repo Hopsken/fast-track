@@ -112,13 +112,13 @@ export default function PrivacyPage() {
           <div className="flex flex-wrap items-center gap-4">
             <a
               className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 shadow-md shadow-emerald-500/30 transition hover:-translate-y-0.5 hover:bg-emerald-400"
-              href="mailto:support@teamusement.com">
+              href="mailto:support@fast-track.work">
               Contact support
             </a>
             <a
               className="text-sm font-medium text-sky-700 underline-offset-4 transition hover:text-sky-800 hover:underline"
-              href="mailto:support@teamusement.com">
-              support@teamusement.com
+              href="mailto:support@fast-track.work">
+              support@fast-track.work
             </a>
           </div>
         </div>

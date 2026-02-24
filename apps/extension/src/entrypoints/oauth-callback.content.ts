@@ -6,7 +6,7 @@ import { getAuthService } from '@/services/auth-service'
 import { ReceivedTokenPayload } from '@/types'
 
 const log = loglevel.getLogger('OAuthCallbackContentScript')
-const allowedOrigins = ['https://teamusement.com', 'http://localhost:4000']
+const allowedOrigins = ['https://fast-track.work', 'http://localhost:4000']
 
 loglevel.setDefaultLevel('debug')
 
@@ -35,8 +35,8 @@ declare global {
  */
 export default defineContentScript({
   matches: import.meta.env.DEV
-    ? ['https://teamusement.com/auth/jira/callback*', 'http://localhost/*']
-    : ['https://teamusement.com/auth/jira/callback*'],
+    ? ['https://fast-track.work/auth/jira/callback*', 'http://localhost/*']
+    : ['https://fast-track.work/auth/jira/callback*'],
   runAt: 'document_start',
   main() {
     log.debug('Loaded on callback page')

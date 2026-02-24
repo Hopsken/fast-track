@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { getEntitlementService } from '~/services/entitlement-service'
 
 const log = loglevel.getLogger('ExtensionLinkContentScript')
-const allowedOrigins = ['https://teamusement.com', 'http://localhost:4000']
+const allowedOrigins = ['https://fast-track.work', 'http://localhost:4000']
 
 loglevel.setDefaultLevel('debug')
 
@@ -34,10 +34,10 @@ declare global {
 export default defineContentScript({
   matches: import.meta.env.DEV
     ? [
-        'https://teamusement.com/auth/extension*',
+        'https://fast-track.work/auth/extension*',
         'http://localhost:4000/auth/extension*'
       ]
-    : ['https://teamusement.com/auth/extension*'],
+    : ['https://fast-track.work/auth/extension*'],
   runAt: 'document_start',
   main() {
     log.debug('Loaded on extension link page')

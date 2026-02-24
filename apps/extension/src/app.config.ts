@@ -12,7 +12,7 @@ export default defineAppConfig({
       umami({
         apiUrl: 'https://cloud.umami.is/api',
         websiteId: import.meta.env.WXT_UMAMI_WEBSITE_ID,
-        domain: 'teamusement.com'
+        domain: 'fast-track.work'
       })
     ]
   }

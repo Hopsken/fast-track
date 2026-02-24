@@ -84,7 +84,7 @@ function ActivateKey() {
               })
               .catch(() => {
                 setError(
-                  'Something went wrong, please try again later or contact support@teamusement.com for help'
+                  'Something went wrong, please try again later or contact support@fast-track.work for help'
                 )
               })
               .finally(() => setLoading(false))

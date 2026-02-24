@@ -139,7 +139,7 @@ class AuthServiceImpl implements AuthService {
     const isDevelopment = process.env.NODE_ENV === 'development'
     const baseUrl = isDevelopment
       ? 'http://localhost:4000'
-      : 'https://teamusement.com'
+      : 'https://fast-track.work'
 
     return `${baseUrl}/auth/jira?extension_id=${currentExtensionId}`
   }

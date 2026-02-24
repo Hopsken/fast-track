@@ -74,7 +74,7 @@ function ActivateExistingLicense() {
       // eslint-disable-next-line no-console
       console.error('Error activating license:', error)
       setError(
-        'Something went wrong. Please try again later or contact support@teamusement.com for help'
+        'Something went wrong. Please try again later or contact support@fast-track.work for help'
       )
     } finally {
       setIsLoading(false)
