@@ -21,7 +21,7 @@ export function TemplateWizardPage() {
           Connect Jira first to create templates.
         </div>
         <Button asChild variant="secondary">
-          <Link to="/templates">Back to templates</Link>
+          <Link to="/workflow/templates">Back to templates</Link>
         </Button>
       </div>
     )
@@ -32,7 +32,7 @@ export function TemplateWizardPage() {
       mode="create"
       host={currentHost}
       onCreated={() => {
-        navigate(`/templates`)
+        navigate(`/workflow/templates`)
       }}>
       <TemplateWizard.Editor />
     </TemplateWizard.Provider>

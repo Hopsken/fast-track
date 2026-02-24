@@ -19,7 +19,7 @@ export function IssueTemplatesMenu() {
   const navigate = useNavigation()
 
   const handleCreateTemplate = () => {
-    openOptionsPage('/templates')
+    openOptionsPage('/workflow/templates')
   }
 
   const onSelect = useCallback(

@@ -1,5 +1,5 @@
 import { ComponentType } from 'react'
-import { FileText, Info, Settings } from 'lucide-react'
+import { GitBranch, Info, Settings } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
 export interface Tab {
@@ -10,7 +10,7 @@ export interface Tab {
 
 export const tabs: Tab[] = [
   { id: 'general', label: 'General', icon: Settings },
-  { id: 'templates', label: 'Templates', icon: FileText },
+  { id: 'workflow', label: 'Workflow', icon: GitBranch },
   { id: 'about', label: 'About', icon: Info }
 ]
 

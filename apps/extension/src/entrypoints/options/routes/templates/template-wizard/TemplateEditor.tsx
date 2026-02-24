@@ -31,7 +31,7 @@ export function TemplateEditor() {
     <div className="-mt-2 space-y-8">
       {/* Header */}
       <Button size={'sm'} variant={'ghost'} className="-ml-3 mb-4" asChild>
-        <Link to="/templates">
+        <Link to="/workflow/templates">
           <ChevronLeft />
           <span>Issue templates</span>
         </Link>
@@ -88,7 +88,7 @@ export function TemplateEditor() {
         <div className="flex-1" />
 
         <Button asChild variant="secondary">
-          <Link to="/templates">{isEdit ? 'Back' : 'Cancel'}</Link>
+          <Link to="/workflow/templates">{isEdit ? 'Back' : 'Cancel'}</Link>
         </Button>
         <Button
           onClick={() => actions.save().catch(() => {})}

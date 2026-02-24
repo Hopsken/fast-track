@@ -6,8 +6,8 @@ import { UserPreferencesProvider } from '~/stores/useUserPreferences'
 
 import { OptionsHeader, TabNavigation, AboutTab } from './components'
 import { GeneralTab } from './components/tabs/GeneralTab'
+import { WorkflowTab } from './components/tabs/WorkflowTab'
 import { TemplateDetailPage } from './routes/templates/TemplateDetailPage'
-import { TemplatesIndexPage } from './routes/templates/TemplatesIndexPage'
 import { TemplateWizardPage } from './routes/templates/TemplateWizardPage'
 
 import '~/assets/styles/main.css'
@@ -29,9 +29,17 @@ function OptionsPageLayout() {
                 <Route path="/" element={<Navigate to="/general" replace />} />
                 <Route path="/general" element={<GeneralTab />} />
 
-                <Route path="/templates" element={<TemplatesIndexPage />} />
-                <Route path="/templates/new" element={<TemplateWizardPage />} />
-                <Route path="/templates/:id" element={<TemplateDetailPage />} />
+                <Route path="/workflow" element={<WorkflowTab />} />
+
+                <Route path="/workflow/templates" element={<WorkflowTab />} />
+                <Route
+                  path="/workflow/templates/new"
+                  element={<TemplateWizardPage />}
+                />
+                <Route
+                  path="/workflow/templates/:id"
+                  element={<TemplateDetailPage />}
+                />
 
                 <Route path="/about" element={<AboutTab version={version} />} />
                 <Route path="*" element={<Navigate to="/general" replace />} />

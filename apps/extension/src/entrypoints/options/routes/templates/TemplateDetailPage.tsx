@@ -22,7 +22,7 @@ export function TemplateDetailPage() {
   const onDeleteTemplate = useCallback(() => {
     if (id) {
       getTemplateService().deleteTemplate(id)
-      navigate('/templates')
+      navigate('/workflow/templates')
     }
   }, [id, navigate])
 
@@ -65,7 +65,7 @@ export function TemplateDetailPage() {
           {error}
         </div>
         <Button asChild variant="secondary">
-          <Link to="/templates">Back to templates</Link>
+          <Link to="/workflow/templates">Back to templates</Link>
         </Button>
       </div>
     )
@@ -78,7 +78,7 @@ export function TemplateDetailPage() {
           Template not found.
         </div>
         <Button asChild variant="secondary">
-          <Link to="/templates">Back to templates</Link>
+          <Link to="/workflow/templates">Back to templates</Link>
         </Button>
       </div>
     )
@@ -115,7 +115,7 @@ export function TemplateDetailPage() {
         </div>
         <div className="flex items-center justify-between">
           <Button asChild variant="secondary">
-            <Link to="/templates">Back to templates</Link>
+            <Link to="/workflow/templates">Back to templates</Link>
           </Button>
 
           <DeleteTemplateButton onConfirm={onDeleteTemplate} />
@@ -129,8 +129,8 @@ export function TemplateDetailPage() {
       mode="edit"
       host={currentHost}
       template={template}
-      onSaved={() => navigate('/templates')}
-      onDeleted={() => navigate('/templates')}>
+      onSaved={() => navigate('/workflow/templates')}
+      onDeleted={() => navigate('/workflow/templates')}>
       <TemplateWizard.Editor />
     </TemplateWizard.Provider>
   )

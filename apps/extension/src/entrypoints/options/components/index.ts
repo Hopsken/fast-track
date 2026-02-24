@@ -4,6 +4,7 @@ export { TabNavigation, tabs } from './TabNavigation'
 
 // Tab components
 export { GeneralTab } from './tabs/GeneralTab'
+export { WorkflowTab } from './tabs/WorkflowTab'
 export { LicenseTab } from './tabs/LicenseTab'
 export { AboutTab } from './tabs/AboutTab'
 

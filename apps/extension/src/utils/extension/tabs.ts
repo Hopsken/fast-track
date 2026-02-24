@@ -32,7 +32,7 @@ const normalizePath = (path: string): string => {
  * Opens the extension's options page.
  *
  * If `path` is provided, we open the options page URL directly with a hash route
- * (Options uses HashRouter), e.g. `/options.html#/templates/new`.
+ * (Options uses HashRouter), e.g. `/options.html#/workflow/templates/new`.
  */
 export function openOptionsPage(path?: string): void {
   // When navigating to a specific hash route, open the URL directly.

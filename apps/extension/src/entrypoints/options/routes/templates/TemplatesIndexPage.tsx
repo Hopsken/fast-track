@@ -51,7 +51,7 @@ export function TemplatesIndexPage() {
         </div>
 
         <Button asChild disabled={!canCreate}>
-          <Link to="/templates/new">New template</Link>
+          <Link to="/workflow/templates/new">New template</Link>
         </Button>
       </div>
 

@@ -14,7 +14,7 @@ export function TemplateListItem({ template }: TemplateListItemProps) {
   return (
     <li key={template.id}>
       <Link
-        to={`/templates/${template.id}`}
+        to={`/workflow/templates/${template.id}`}
         className={cn(
           'block px-4 py-3 text-sm transition-colors',
           'hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
