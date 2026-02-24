@@ -24,7 +24,12 @@ export function Header() {
           </Link>
         </div>
 
-        <nav className="flex items-center">
+        <nav className="flex items-center gap-6">
+          <Link
+            href="/pricing"
+            className="text-sm font-medium text-stone-600 transition-colors hover:text-stone-900">
+            Pricing
+          </Link>
           <HeaderAuth />
         </nav>
       </div>

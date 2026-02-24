@@ -33,7 +33,7 @@ export function Hero() {
                   href="https://chromewebstore.google.com/detail/jira-boost/cmlkcfgkffidbnpbjmlgplokcacfemhp"
                   target="_blank"
                   rel="noreferrer">
-                  {`Add to Chrome — It's Free`}
+                  Add to Chrome
                 </a>
               </Button>
             </div>

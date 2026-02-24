@@ -1,10 +1,165 @@
+import type { ReactNode } from 'react'
 import { Button } from '@internal/ui/components/button'
-import Link from 'next/link'
+import { CalendarDays } from 'lucide-react'
 import { redirect } from 'next/navigation'
 
+import { Header } from '../../components/landing/Header'
+import { isProFromSubscription } from '../../lib/billing/subscription'
 import { createSupabaseServerClientReadOnly } from '../../lib/supabase/server'
 
-export default async function AccountPage() {
+type AccountSearchParams = Promise<{
+  checkout?: string
+}>
+
+type SubscriptionRow = {
+  status: string
+  renews_at: string | null
+  ends_at: string | null
+  lemonsqueezy_subscription_id: string | null
+  updated_at: string
+}
+
+type BillingSummary = {
+  isPro: boolean
+  planName: 'Pro' | 'Free'
+  nextRenewLabel: string | null
+  cancelsLabel: string | null
+  subscriptionId: string | null
+}
+
+function formatDate(value: string | null | undefined): string | null {
+  if (!value) return null
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
+}
+
+function getBillingSummary(
+  subscription: SubscriptionRow | null
+): BillingSummary {
+  const status = subscription?.status ?? 'unknown'
+
+  const isPro = isProFromSubscription(
+    subscription
+      ? {
+          status,
+          endsAt: subscription.ends_at
+        }
+      : null
+  )
+
+  const nextRenewLabel = formatDate(subscription?.renews_at)
+  const cancelsLabel =
+    status === 'cancelled' ? formatDate(subscription?.ends_at) : null
+
+  const subscriptionId = subscription?.lemonsqueezy_subscription_id ?? null
+
+  return {
+    isPro,
+    planName: isPro ? 'Pro' : 'Free',
+    nextRenewLabel,
+    cancelsLabel,
+    subscriptionId
+  }
+}
+
+function renderNextDateLine(billing: BillingSummary): ReactNode {
+  if (!billing.isPro) return null
+
+  if (billing.cancelsLabel) {
+    return (
+      <p className="flex items-center gap-2 text-sm text-stone-600">
+        <CalendarDays aria-hidden="true" className="h-4 w-4" />
+        Cancels on {billing.cancelsLabel}
+      </p>
+    )
+  }
+
+  if (billing.nextRenewLabel) {
+    return (
+      <p className="flex items-center gap-2 text-sm text-stone-600">
+        <CalendarDays aria-hidden="true" className="h-4 w-4" />
+        Next renewal is on {billing.nextRenewLabel}
+      </p>
+    )
+  }
+
+  return null
+}
+
+function renderSubscriptionActions(options: {
+  billing: BillingSummary
+  subscriptionError: boolean
+}): ReactNode {
+  const { billing, subscriptionError } = options
+
+  if (subscriptionError) {
+    return (
+      <p className="mt-6 text-sm text-stone-700">
+        We couldn’t load your subscription right now. Please try again later.
+      </p>
+    )
+  }
+
+  if (!billing.isPro) {
+    return (
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
+        <p className="text-sm text-stone-600">No active subscription.</p>
+
+        <form action="/api/billing/checkout" method="post">
+          <Button
+            type="submit"
+            variant="default"
+            className="rounded-full bg-stone-900 px-6 text-white shadow-none hover:bg-stone-800">
+            Upgrade
+          </Button>
+        </form>
+      </div>
+    )
+  }
+
+  if (!billing.subscriptionId) {
+    return (
+      <p className="mt-8 text-sm text-stone-600">
+        Manage link will appear after the first webhook sync.
+      </p>
+    )
+  }
+
+  return (
+    <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <Button asChild variant="outline" className="rounded-full">
+        <a href="/api/billing/portal" target="_blank" rel="noopener noreferrer">
+          Manage subscription
+        </a>
+      </Button>
+
+      <Button
+        asChild
+        variant="outline"
+        className="rounded-full border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700">
+        <a
+          href="/api/billing/portal?intent=cancel"
+          target="_blank"
+          rel="noopener noreferrer">
+          Cancel plan
+        </a>
+      </Button>
+    </div>
+  )
+}
+
+export default async function AccountPage({
+  searchParams
+}: {
+  searchParams: AccountSearchParams
+}) {
   const supabase = await createSupabaseServerClientReadOnly()
   const {
     data: { user }
@@ -12,52 +167,40 @@ export default async function AccountPage() {
 
   if (!user) redirect('/login')
 
+  // Keep query param parsing stable for future, even if we don't surface it in UI.
+  await searchParams
+
+  const { data: subscription, error: subscriptionError } = await supabase
+    .from('billing_subscriptions')
+    .select(
+      'status, renews_at, ends_at, lemonsqueezy_subscription_id, updated_at'
+    )
+    .eq('user_id', user.id)
+    .maybeSingle<SubscriptionRow>()
+
+  const billing = getBillingSummary(subscriptionError ? null : subscription)
+
   return (
-    <main className="min-h-dvh bg-[#FDFBF9]">
+    <main className="flex min-h-dvh flex-col">
+      <Header />
+
       <div className="container mx-auto max-w-2xl px-6 py-14">
-        <h1 className="font-serif text-3xl font-semibold tracking-tight text-stone-900">
-          Account
-        </h1>
-        <p className="mt-2 text-sm text-stone-600">
-          Signed in as{' '}
-          <span className="font-medium text-stone-900">{user.email}</span>
-        </p>
+        <section className="rounded-2xl border border-stone-200 bg-white p-6">
+          <div className="flex flex-col gap-4">
+            <h2 className="font-serif text-4xl font-semibold tracking-tight text-stone-900">
+              {billing.planName}
+            </h2>
 
-        <div className="mt-10 rounded-2xl border border-stone-200 bg-white p-6">
-          <dl className="grid gap-4">
-            <div>
-              <dt className="text-xs font-medium uppercase tracking-wide text-stone-500">
-                User ID
-              </dt>
-              <dd className="mt-1 font-mono text-sm text-stone-900">
-                {user.id}
-              </dd>
+            {renderNextDateLine(billing)}
+
+            <div className="mt-2 border-t border-dashed border-stone-200">
+              {renderSubscriptionActions({
+                billing,
+                subscriptionError: Boolean(subscriptionError)
+              })}
             </div>
-            <div>
-              <dt className="text-xs font-medium uppercase tracking-wide text-stone-500">
-                Provider
-              </dt>
-              <dd className="mt-1 text-sm text-stone-900">
-                {user.app_metadata?.provider ?? 'unknown'}
-              </dd>
-            </div>
-          </dl>
-
-          <div className="mt-6 flex items-center justify-between gap-4">
-            <Button asChild variant="ghost" className="rounded-full">
-              <Link href="/">Home</Link>
-            </Button>
-
-            <form action="/auth/signout" method="post">
-              <Button
-                type="submit"
-                variant="default"
-                className="rounded-full bg-stone-900 px-6 text-white shadow-none hover:bg-stone-800">
-                Sign out
-              </Button>
-            </form>
           </div>
-        </div>
+        </section>
       </div>
     </main>
   )
