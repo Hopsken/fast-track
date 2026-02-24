@@ -1,7 +1,4 @@
-function required(name: string, value: string | undefined): string {
-  if (!value) throw new Error(`Missing required environment variable: ${name}`)
-  return value
-}
+import { requiredEnv } from '../../env/required'
 
 /**
  * Single-source checkout URL.
@@ -13,7 +10,7 @@ function required(name: string, value: string | undefined): string {
  * so you can point dev/preview at a test checkout and production at the live checkout.
  */
 export function getProCheckoutUrl(): string {
-  return required(
+  return requiredEnv(
     'LEMONSQUEEZY_PRO_CHECKOUT_URL',
     process.env.LEMONSQUEEZY_PRO_CHECKOUT_URL
   )
