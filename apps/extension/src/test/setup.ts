@@ -12,6 +12,7 @@ vi.mock('@wxt-dev/analytics', () => ({
 vi.mock('wxt/browser', () => ({
   browser: {
     runtime: {
+      id: 'test-extension-id',
       getManifest: vi.fn().mockReturnValue({ version: '0.0.0' })
     }
   }

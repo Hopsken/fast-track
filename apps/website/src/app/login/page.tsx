@@ -9,16 +9,21 @@ import { createSupabaseServerClientReadOnly } from '../../lib/supabase/server'
 export default async function LoginPage({
   searchParams
 }: {
-  searchParams: Promise<{ error?: string }>
+  searchParams: Promise<{ error?: string; next?: string }>
 }) {
   const supabase = await createSupabaseServerClientReadOnly()
   const {
     data: { user }
   } = await supabase.auth.getUser()
 
-  if (user) redirect('/account')
+  const { error, next } = await searchParams
 
-  const { error } = await searchParams
+  if (user) {
+    // If already logged in, honor next if it's a safe relative path.
+    const { sanitizeNextPath } = await import('../../lib/supabase/redirect-url')
+    const safeNext = sanitizeNextPath(next)
+    redirect(safeNext ?? '/account')
+  }
 
   return (
     <main className="min-h-dvh bg-[#FDFBF9]">
@@ -32,7 +37,7 @@ export default async function LoginPage({
           </Button>
         </div>
 
-        <LoginPanel error={formatLoginError(error)} />
+        <LoginPanel error={formatLoginError(error)} next={next ?? null} />
       </div>
     </main>
   )

@@ -16,5 +16,7 @@
    - `{WEBSITE_URL}/api/billing/lemonsqueezy/webhook`
 
 ## Notes
-- The Pro checkout URL is currently hardcoded in `src/lib/billing/lemonsqueezy/constants.ts`.
+- LemonSqueezy hosted checkout URLs differ between **test** and **live** mode.
+  Configure a single env var per deployment environment:
+  - `LEMONSQUEEZY_PRO_CHECKOUT_URL`
 - We append `checkout[custom][supabase_user_id]` to the checkout URL so the webhook can map the subscription to a Supabase user.

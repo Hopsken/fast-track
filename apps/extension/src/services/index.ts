@@ -5,3 +5,7 @@ export {
   type SuggestionService
 } from './suggestion-service'
 export { getTemplateService, type TemplateService } from './template-service'
+export {
+  getEntitlementService,
+  type EntitlementService
+} from './entitlement-service'

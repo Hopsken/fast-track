@@ -7,15 +7,19 @@ export async function GET(request: NextRequest) {
   const code = url.searchParams.get('code')
   const error = url.searchParams.get('error')
   const errorDescription = url.searchParams.get('error_description')
+  const next = url.searchParams.get('next')
 
   if (error) {
     const loginUrl = new URL('/login', url.origin)
     loginUrl.searchParams.set('error', errorDescription ?? error)
+    if (next) loginUrl.searchParams.set('next', next)
     return NextResponse.redirect(loginUrl)
   }
 
   if (!code) {
-    return NextResponse.redirect(new URL('/login', url.origin))
+    const loginUrl = new URL('/login', url.origin)
+    if (next) loginUrl.searchParams.set('next', next)
+    return NextResponse.redirect(loginUrl)
   }
 
   const supabase = await createSupabaseRouteHandlerClient()
@@ -25,8 +29,14 @@ export async function GET(request: NextRequest) {
   if (exchangeError) {
     const loginUrl = new URL('/login', url.origin)
     loginUrl.searchParams.set('error', 'exchange_code_for_session_failed')
+    if (next) loginUrl.searchParams.set('next', next)
     return NextResponse.redirect(loginUrl)
   }
 
-  return NextResponse.redirect(new URL('/account', url.origin))
+  const { sanitizeNextPath } = await import(
+    '../../../lib/supabase/redirect-url'
+  )
+  const safeNext = sanitizeNextPath(next)
+
+  return NextResponse.redirect(new URL(safeNext ?? '/account', url.origin))
 }

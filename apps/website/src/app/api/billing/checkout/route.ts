@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { buildLemonCheckoutUrl } from '../../../../lib/billing/lemonsqueezy/checkout-url'
-import { LEMONSQUEEZY_PRO_CHECKOUT_URL } from '../../../../lib/billing/lemonsqueezy/constants'
+import { getLemonSqueezyEnv } from '../../../../lib/billing/lemonsqueezy/env.server'
 import { isAllowedLemonSqueezyUrl } from '../../../../lib/billing/lemonsqueezy/url'
 import { createSupabaseRouteHandlerClient } from '../../../../lib/supabase/server'
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
-export async function POST(request: NextRequest) {
+async function handleCheckout(request: NextRequest) {
   const supabase = await createSupabaseRouteHandlerClient()
 
   const {
@@ -20,8 +21,10 @@ export async function POST(request: NextRequest) {
     })
   }
 
+  const { proCheckoutUrl } = getLemonSqueezyEnv()
+
   const checkoutUrl = buildLemonCheckoutUrl({
-    checkoutUrl: LEMONSQUEEZY_PRO_CHECKOUT_URL,
+    checkoutUrl: proCheckoutUrl,
     userId: user.id,
     email: user.email
   })
@@ -31,4 +34,12 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.redirect(checkoutUrl, { status: 303 })
+}
+
+export async function POST(request: NextRequest) {
+  return handleCheckout(request)
+}
+
+export async function GET(request: NextRequest) {
+  return handleCheckout(request)
 }

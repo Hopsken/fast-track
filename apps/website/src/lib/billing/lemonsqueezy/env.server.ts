@@ -1,29 +1,34 @@
 import 'server-only'
 
+import { requiredEnv } from '../../env/required'
+
 export interface LemonSqueezyEnv {
   webhookSecret: string
+  proCheckoutUrl: string
 }
 
 export interface LemonSqueezyApiEnv {
   apiKey: string
 }
 
-function required(name: string, value: string | undefined): string {
-  if (!value) throw new Error(`Missing required environment variable: ${name}`)
-  return value
-}
-
 export function getLemonSqueezyEnv(): LemonSqueezyEnv {
   return {
-    webhookSecret: required(
+    webhookSecret: requiredEnv(
       'LEMONSQUEEZY_WEBHOOK_SECRET',
       process.env.LEMONSQUEEZY_WEBHOOK_SECRET
+    ),
+    proCheckoutUrl: requiredEnv(
+      'LEMONSQUEEZY_PRO_CHECKOUT_URL',
+      process.env.LEMONSQUEEZY_PRO_CHECKOUT_URL
     )
   }
 }
 
 export function getLemonSqueezyApiEnv(): LemonSqueezyApiEnv {
   return {
-    apiKey: required('LEMONSQUEEZY_API_KEY', process.env.LEMONSQUEEZY_API_KEY)
+    apiKey: requiredEnv(
+      'LEMONSQUEEZY_API_KEY',
+      process.env.LEMONSQUEEZY_API_KEY
+    )
   }
 }
