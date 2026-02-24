@@ -31,6 +31,7 @@ export async function syncEntitlementsOnce(): Promise<SubscriptionSnapshot | nul
 
   const auth = await authStorage.getValue()
   if (!auth) return null
+  if (auth.state === 'relogin_required') return null
 
   try {
     const me = await fetchMe({ accessToken: auth.accessToken })
