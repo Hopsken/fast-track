@@ -5,7 +5,9 @@ import { Link } from 'react-router-dom'
 
 import { LoadingCursor } from '@/components/LoadingCursor'
 import { useCurrentJiraHost } from '~/hooks/useCurrentJiraHost'
+import { useStorage } from '~/hooks/useStorage'
 import { useTemplates } from '~/hooks/useTemplates'
+import { BOOST_WEBSITE_BASE_URL } from '~/lib/api'
 import type { IssueTemplate } from '~/types/template'
 
 import { TemplateListItem } from './TemplateListItem'
@@ -29,6 +31,11 @@ export function TemplatesIndexPage() {
     includeOtherHosts: true
   })
 
+  const [snapshot, , snapshotState] = useStorage('SubscriptionSnapshot')
+  const isPro = snapshotState === 'success' ? (snapshot?.isPro ?? false) : null
+  const templateCount = templates?.length ?? 0
+  const isAtFreeLimit = isPro === false && templateCount >= 3
+
   const [showOthers, setShowOthers] = useState(false)
 
   const [matching, others] = useMemo(() => {
@@ -38,7 +45,7 @@ export function TemplatesIndexPage() {
     return partition(templates, (t) => t.scope.baseUrlHost === currentHost)
   }, [templates, currentHost])
 
-  const canCreate = Boolean(currentHost)
+  const canCreate = Boolean(currentHost) && !isAtFreeLimit
 
   return (
     <div className="space-y-6">
@@ -50,10 +57,30 @@ export function TemplatesIndexPage() {
           </p>
         </div>
 
-        <Button asChild disabled={!canCreate}>
-          <Link to="/templates/new">New template</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button asChild disabled={!canCreate}>
+            <Link to="/templates/new">New template</Link>
+          </Button>
+
+          {isAtFreeLimit ? (
+            <Button asChild variant="secondary">
+              <a
+                href={`${BOOST_WEBSITE_BASE_URL}/pricing`}
+                target="_blank"
+                rel="noreferrer">
+                Upgrade
+              </a>
+            </Button>
+          ) : null}
+        </div>
       </div>
+
+      {isAtFreeLimit ? (
+        <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          You’ve reached the Free plan limit (3 issue templates). Upgrade to Pro
+          to create more.
+        </div>
+      ) : null}
 
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-3">

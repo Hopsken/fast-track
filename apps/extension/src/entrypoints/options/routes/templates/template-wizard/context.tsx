@@ -383,6 +383,9 @@ export function TemplateWizardProvider(props: ProviderProps) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.issueTemplates.list(false)
       })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.issueTemplates.list(true)
+      })
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : String(e))
     } finally {
