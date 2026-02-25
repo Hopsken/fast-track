@@ -18,7 +18,8 @@ export function TemplateWizardPage() {
   const [snapshot, , snapshotState] = useStorage('SubscriptionSnapshot')
 
   const isPro = snapshotState === 'success' ? (snapshot?.isPro ?? false) : null
-  const templateCount = templates?.length ?? 0
+  const templateCount =
+    templates?.filter((t) => t.scope.baseUrlHost === currentHost).length ?? 0
   const isAtFreeLimit = isPro === false && templateCount >= 3
 
   if (hostLoading || templatesLoading) {
@@ -42,8 +43,8 @@ export function TemplateWizardPage() {
     return (
       <div className="space-y-4">
         <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          You’ve reached the Free plan limit (3 issue templates). Upgrade to Pro
-          to create more.
+          You’ve reached the Free plan limit (3 issue templates per Jira
+          workspace). Upgrade to Pro to create more.
         </div>
 
         <div className="flex items-center gap-2">
