@@ -4,6 +4,26 @@ import { getStorageItem } from '~/lib/storage/schema'
 
 import { TemplateService } from './index'
 
+const mkTemplateInput = (host: string, name: string) => ({
+  name,
+  scope: {
+    baseUrlHost: host,
+    project: {
+      id: '1',
+      key: 'PROJ',
+      name: 'Project'
+    },
+    issueType: {
+      id: '10000',
+      name: 'Bug',
+      iconUrl: '',
+      description: '',
+      subtask: false
+    }
+  },
+  fields: []
+})
+
 describe('TemplateService', () => {
   beforeEach(async () => {
     vi.useFakeTimers()
@@ -174,7 +194,7 @@ describe('TemplateService', () => {
     expect(valid.map((t) => t.name)).toEqual(['Valid'])
   })
 
-  it('enforces Free plan limit (max 3 templates, global)', async () => {
+  it('enforces Free plan limit (max 3 templates) per current Jira host', async () => {
     const svc = new TemplateService()
 
     const input = {
@@ -203,6 +223,35 @@ describe('TemplateService', () => {
     await expect(svc.createTemplate({ name: 'T4', ...input })).rejects.toThrow(
       /Free plan limit reached/i
     )
+  })
+
+  it('allows creating templates on another host after reaching Free limit on current host', async () => {
+    const authItem = getStorageItem('AuthCredentials')
+    const svc = new TemplateService()
+
+    await svc.createTemplate(mkTemplateInput('a.atlassian.net', 'A1'))
+    await svc.createTemplate(mkTemplateInput('a.atlassian.net', 'A2'))
+    await svc.createTemplate(mkTemplateInput('a.atlassian.net', 'A3'))
+
+    await expect(
+      svc.createTemplate(mkTemplateInput('a.atlassian.net', 'A4'))
+    ).rejects.toThrow(/Free plan limit reached/i)
+
+    await authItem.setValue({
+      type: 'apiKey',
+      host: 'https://b.atlassian.net',
+      userInfo: {
+        accountId: 'abc',
+        email: 'a@a.com',
+        name: 'A'
+      },
+      oauth: null,
+      apiKey: { email: 'a@a.com', apiKey: 'abc' }
+    })
+
+    await expect(
+      svc.createTemplate(mkTemplateInput('b.atlassian.net', 'B1'))
+    ).resolves.toBeDefined()
   })
 
   it('allows Pro to create more than 3 templates', async () => {
@@ -249,26 +298,6 @@ describe('TemplateService', () => {
 
     const svc = new TemplateService()
 
-    const mkInput = (host: string, name: string) => ({
-      name,
-      scope: {
-        baseUrlHost: host,
-        project: {
-          id: '1',
-          key: 'PROJ',
-          name: 'Project'
-        },
-        issueType: {
-          id: '10000',
-          name: 'Bug',
-          iconUrl: '',
-          description: '',
-          subtask: false
-        }
-      },
-      fields: []
-    })
-
     // Simulate user being connected to site B, then switching to site A
     await authItem.setValue({
       type: 'apiKey',
@@ -281,7 +310,7 @@ describe('TemplateService', () => {
       oauth: null,
       apiKey: { email: 'a@a.com', apiKey: 'abc' }
     })
-    await svc.createTemplate(mkInput('b.atlassian.net', 'B1'))
+    await svc.createTemplate(mkTemplateInput('b.atlassian.net', 'B1'))
 
     await authItem.setValue({
       type: 'apiKey',
@@ -294,7 +323,9 @@ describe('TemplateService', () => {
       oauth: null,
       apiKey: { email: 'a@a.com', apiKey: 'abc' }
     })
-    const a1 = await svc.createTemplate(mkInput('a.atlassian.net', 'A1'))
+    const a1 = await svc.createTemplate(
+      mkTemplateInput('a.atlassian.net', 'A1')
+    )
 
     // Updating A should not drop B
     await svc.updateTemplate(a1.id, { name: 'A1-updated' })

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useDebounce } from 'ahooks'
-import { UserDetails } from 'jira.js/version2/models/userDetails'
+import type { UserDetails } from 'jira.js/version2/models/userDetails'
 
 import { getJiraService } from '@/services'
 import { queryKeys } from '@/utils/queryKeys'
@@ -16,8 +16,7 @@ export function useProjectUsers(projectKey: string, query: string) {
           debouncedQuery
         )
         return result as UserDetails[]
-      } catch (error) {
-        console.error('Failed to fetch project users:', error)
+      } catch {
         return []
       }
     }

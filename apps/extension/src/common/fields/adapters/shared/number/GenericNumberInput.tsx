@@ -36,7 +36,7 @@ export const GenericNumberInput = (
     return <GenericSelectInput {...props} />
   }
 
-  // TODO: 类似 labels，无限制，但可以有 options
+  // Unrestricted mode falls back to direct number input.
 
   return (
     <CommandNumberInput

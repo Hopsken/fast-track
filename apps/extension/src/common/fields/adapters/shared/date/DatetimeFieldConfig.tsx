@@ -64,6 +64,7 @@ const DateTimeSelect = ({ value, onChange }: SelectComponentProps<string>) => {
 
   useEffect(() => {
     if (value == null || Array.isArray(value)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setInputValue('')
       setSelectedDate(null)
       setTimeValue('09:00:00')

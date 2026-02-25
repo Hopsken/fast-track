@@ -14,7 +14,7 @@ import { FieldInputComponentProps } from '../../../types'
 import { parseNaturalDateTime, toJiraDateTime } from './dateParsing'
 
 export const DateTimeInput = (props: FieldInputComponentProps<ZodString>) => {
-  const { adapter, context, onChange, onConfirm } = props
+  const { onChange, onConfirm } = props
 
   const [search, setSearch] = useState('')
 
