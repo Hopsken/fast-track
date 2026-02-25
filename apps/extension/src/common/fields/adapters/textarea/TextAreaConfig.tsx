@@ -1,5 +1,4 @@
-import { ChangeEvent, useCallback, useState } from 'react'
-import { Input } from '@internal/ui/components/input'
+import { KeyboardEvent, useCallback, useState } from 'react'
 import { Textarea } from '@internal/ui/components/textarea'
 import { z, ZodString } from 'zod'
 
@@ -43,30 +42,53 @@ const TextAreaPresetSelect = ({
 
 const TextAreaRestrictedSelect = ({
   value,
-  onChange
+  onChange,
+  onConfirm
 }: SelectComponentProps<string>) => {
   const [inputValue, setInputValue] = useState(() => {
     if (value == null) return ''
-    if (Array.isArray(value)) return value.join(',')
+    if (Array.isArray(value)) return value.join('\n')
     return value
   })
 
+  const parse = useCallback((raw: string) => {
+    // preserve user formatting; only reject all-whitespace
+    if (!raw.trim()) return null
+    return raw
+  }, [])
+
   const handleInput = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      setInputValue(e.target.value)
-      const next = e.target.value.trim()
-      const parsed = z.string().min(1).safeParse(next).data
-      onChange(parsed ?? null)
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const next = e.target.value
+      setInputValue(next)
+      onChange(parse(next))
     },
-    [onChange]
+    [onChange, parse]
+  )
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLTextAreaElement>) => {
+      // In textarea, Enter should insert a newline.
+      // Use Ctrl/Cmd+Enter as the keyboard "confirm" shortcut.
+      if (e.key !== 'Enter') return
+      if (!e.metaKey && !e.ctrlKey) return
+      if (e.shiftKey || e.altKey) return
+
+      e.preventDefault()
+      const next = parse(e.currentTarget.value)
+      if (!next) return
+      onConfirm?.(next)
+    },
+    [onConfirm, parse]
   )
 
   return (
-    <Input
-      type="text"
-      placeholder="Enter text…"
+    <Textarea
+      className="min-h-24"
+      placeholder="Enter snippet…"
       value={inputValue}
       onChange={handleInput}
+      onKeyDown={handleKeyDown}
     />
   )
 }

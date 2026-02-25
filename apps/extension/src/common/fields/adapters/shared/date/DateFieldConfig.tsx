@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { KeyboardEvent, useMemo } from 'react'
 import { Calendar } from '@internal/ui/components/calendar'
 import {
   InputGroup,
@@ -21,7 +21,11 @@ import { Unsupported } from '../Unsupported'
 
 import { parseJiraDate, toJiraDate } from './dateParsing'
 
-const DateSelect = ({ value, onChange }: SelectComponentProps<string>) => {
+const DateSelect = ({
+  value,
+  onChange,
+  onConfirm
+}: SelectComponentProps<string>) => {
   const singleValue = Array.isArray(value) || value == null ? '' : value
   const selectedDate = useMemo(() => parseJiraDate(singleValue), [singleValue])
 
@@ -38,6 +42,16 @@ const DateSelect = ({ value, onChange }: SelectComponentProps<string>) => {
           }
 
           onChange(z.iso.date().safeParse(nextValue).data ?? null)
+        }}
+        onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
+          if (e.key !== 'Enter') return
+          if (e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return
+
+          const parsed = z.iso
+            .date()
+            .safeParse(e.currentTarget.value.trim()).data
+          if (!parsed) return
+          onConfirm?.(parsed)
         }}
       />
       <InputGroupAddon align="inline-start">
@@ -61,7 +75,9 @@ const DateSelect = ({ value, onChange }: SelectComponentProps<string>) => {
                   return
                 }
 
-                onChange(toJiraDate(date))
+                const next = toJiraDate(date)
+                onChange(next)
+                onConfirm?.(next)
               }}
               defaultMonth={selectedDate ?? undefined}
             />

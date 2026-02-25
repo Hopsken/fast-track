@@ -1,4 +1,11 @@
-import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  ChangeEvent,
+  KeyboardEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState
+} from 'react'
 import { Calendar } from '@internal/ui/components/calendar'
 import { Input } from '@internal/ui/components/input'
 import {
@@ -48,7 +55,11 @@ const withTime = (date: Date, time: string) => {
   return nextDate
 }
 
-const DateTimeSelect = ({ value, onChange }: SelectComponentProps<string>) => {
+const DateTimeSelect = ({
+  value,
+  onChange,
+  onConfirm
+}: SelectComponentProps<string>) => {
   const initialDate = useMemo(() => {
     if (value == null || Array.isArray(value)) return null
     return parseDateTime(value)
@@ -135,6 +146,23 @@ const DateTimeSelect = ({ value, onChange }: SelectComponentProps<string>) => {
     [onChange, selectedDate]
   )
 
+  const commitCurrent = useCallback(() => {
+    const date = parseISO(inputValue.trim())
+    if (!isValid(date)) return
+
+    const merged = withTime(date, timeValue)
+    onConfirm?.(toJiraDateTime(merged))
+  }, [inputValue, onConfirm, timeValue])
+
+  const onKeyDownCommit = useCallback(
+    (e: KeyboardEvent<HTMLInputElement>) => {
+      if (e.key !== 'Enter') return
+      if (e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return
+      commitCurrent()
+    },
+    [commitCurrent]
+  )
+
   return (
     <div className="flex flex-row gap-2">
       <InputGroup>
@@ -142,6 +170,7 @@ const DateTimeSelect = ({ value, onChange }: SelectComponentProps<string>) => {
           placeholder="YYYY-MM-DD"
           value={inputValue}
           onChange={handleInput}
+          onKeyDown={onKeyDownCommit}
         />
         <InputGroupAddon align="inline-start">
           <Popover>
@@ -165,7 +194,13 @@ const DateTimeSelect = ({ value, onChange }: SelectComponentProps<string>) => {
           </Popover>
         </InputGroupAddon>
       </InputGroup>
-      <Input type="time" step={1} value={timeValue} onChange={onChangeTime} />
+      <Input
+        type="time"
+        step={1}
+        value={timeValue}
+        onChange={onChangeTime}
+        onKeyDown={onKeyDownCommit}
+      />
     </div>
   )
 }

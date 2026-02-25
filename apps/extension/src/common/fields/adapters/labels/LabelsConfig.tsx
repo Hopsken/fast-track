@@ -12,7 +12,8 @@ import { GenericFieldConfig } from '../shared/GenericFieldConfig'
 export const LabelsSelector = ({
   isMultiple,
   value,
-  onChange
+  onChange,
+  onConfirm
 }: SelectComponentProps<string>) => {
   const [query, setQuery] = useState('')
   const { adapter, context, config } = useFieldContext<ZodString>()
@@ -38,7 +39,10 @@ export const LabelsSelector = ({
       multiple={isMultiple}
       isLoading={isLoading}
       value={value}
-      onValueChange={onChange}
+      onValueChange={(next) => {
+        onChange(next)
+        onConfirm?.(next)
+      }}
       options={allOptions}
       onCreate={onCreate}
       query={query}

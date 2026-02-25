@@ -20,9 +20,17 @@ export interface JiraFieldContext {
 }
 
 export interface SelectComponentProps<T, Multiple extends boolean = boolean> {
+  /** whether the underlying field supports multiple values */
   isMultiple: Multiple
+
+  /** current draft/selected value */
   value?: Multiple extends true ? T[] : T | null
+
+  /** draft change (may fire on every keystroke) */
   onChange: (newValue: Multiple extends true ? T[] : T | null) => void
+
+  /** commit/confirm current value (fires on Enter / option click, etc.) */
+  onConfirm?: (newValue: Multiple extends true ? T[] : T | null) => void
 }
 
 // Field 组件渲染公共属性
