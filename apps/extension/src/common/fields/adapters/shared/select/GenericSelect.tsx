@@ -13,7 +13,8 @@ import { getIconUrl } from './utils'
 export const GeneralSelect = <S extends FieldValueSchema>({
   isMultiple,
   value,
-  onChange
+  onChange,
+  onConfirm
 }: SelectComponentProps<z.infer<S>>) => {
   type Item = z.infer<S>
 
@@ -43,7 +44,11 @@ export const GeneralSelect = <S extends FieldValueSchema>({
       // 但我们在逻辑上保证了 matches multiple 属性
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       value={value as any}
-      onValueChange={onChange}
+      onValueChange={(next) => {
+        // treat option selection as a commit when onConfirm is provided (restricted builder)
+        onChange(next)
+        onConfirm?.(next)
+      }}
       query={query}
       onQueryChange={setQuery}
       // Adapter 的 keyOf/labelOf 是针对 Item 设计的

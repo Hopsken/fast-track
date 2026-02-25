@@ -1,4 +1,4 @@
-import { ComponentType, useState } from 'react'
+import { ComponentType, useMemo, useState } from 'react'
 import { Button } from '@internal/ui/components/button'
 import { uniqWith } from 'lodash-es'
 import { PlusIcon, XIcon } from 'lucide-react'
@@ -21,6 +21,16 @@ interface BuildProps<T> {
   SelectorComponent: ComponentType<SelectComponentProps<T>>
 }
 
+/**
+ * RestrictedValueBuilder
+ *
+ * Builds the `allowedOptions` list for `behavior=restricted`.
+ *
+ * Important: SelectorComponent.onChange is treated as **draft** updates.
+ * Committing (actually adding an option) happens via:
+ * - SelectorComponent.onConfirm (if the selector supports it; e.g. option pickers)
+ * - explicit "Add" button (works for textarea-like inputs where Enter isn't reliable)
+ */
 export const RestrictedValueBuilder = <
   T extends FieldValueSchema,
   Item extends z.infer<T> = z.infer<T>
@@ -32,6 +42,14 @@ export const RestrictedValueBuilder = <
   const { adapter } = useFieldContext<T>()
 
   const [isAdding, setIsAdding] = useState(false)
+  const [draftItem, setDraftItem] = useState<Item | Item[] | null>(null)
+
+  const canAdd = useMemo(() => {
+    if (!draftItem) return false
+    if (Array.isArray(draftItem)) return draftItem.length > 0
+    if (typeof draftItem === 'string') return draftItem.trim().length > 0
+    return true
+  }, [draftItem])
 
   function renderLabel(item: Item) {
     return adapter.labelOf?.(item) ?? adapter.keyOf(item)
@@ -52,11 +70,13 @@ export const RestrictedValueBuilder = <
     onChange(newValues)
   }
 
-  const handleAdd = (newItem: Item | Item[] | null) => {
+  const commitAdd = (newItem: Item | Item[] | null) => {
     if (!newItem) return
 
     const items = Array.isArray(newItem) ? newItem : [newItem]
     onChange(uniqWith([...values, ...items], isSameValue(adapter.keyOf)))
+
+    setDraftItem(null)
     setIsAdding(false)
   }
 
@@ -86,23 +106,38 @@ export const RestrictedValueBuilder = <
         <div>
           <SelectorComponent
             isMultiple={false}
-            value={null}
-            onChange={handleAdd}
+            value={draftItem as Item | null}
+            onChange={(next) => setDraftItem(next as Item | Item[] | null)}
+            onConfirm={(next) => commitAdd(next as Item | Item[] | null)}
           />
-          <Button
-            variant="ghost"
-            size="xs"
-            className="mt-1"
-            onClick={() => setIsAdding(false)}>
-            Cancel
-          </Button>
+
+          <div className="mt-1 flex items-center gap-1">
+            <Button
+              size="xs"
+              onClick={() => commitAdd(draftItem)}
+              disabled={!canAdd}>
+              Add
+            </Button>
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={() => {
+                setDraftItem(null)
+                setIsAdding(false)
+              }}>
+              Cancel
+            </Button>
+          </div>
         </div>
       ) : (
         <Button
           variant="ghost"
           size="xs"
           className="text-muted-foreground"
-          onClick={() => setIsAdding(true)}>
+          onClick={() => {
+            setDraftItem(null)
+            setIsAdding(true)
+          }}>
           <PlusIcon />
           Add value
         </Button>
