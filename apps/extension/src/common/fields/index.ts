@@ -15,6 +15,7 @@ import { JiraDateAdapter, JiraDatetimeAdapter } from './adapters/shared/date'
 import { JiraSprintAdapter } from './adapters/sprint'
 import { JiraStringAdapter } from './adapters/string'
 import { JiraSummaryAdapter } from './adapters/summary'
+import { JiraTextAreaAdapter } from './adapters/textarea'
 import { JiraUserAdapter } from './adapters/user'
 import { JiraVersionAdapter } from './adapters/version'
 import { registerAdapter, getFieldAdapter } from './registry'
@@ -45,6 +46,7 @@ registerAdapter(JiraSecurityLevelAdapter)
 
 // type-level adapters for custom fields
 registerAdapter(JiraStringAdapter)
+registerAdapter(JiraTextAreaAdapter)
 registerAdapter(JiraNumberAdapter)
 
 export { getFieldAdapter }
