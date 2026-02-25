@@ -2,20 +2,19 @@ import { useMemo, useState } from 'react'
 import { ZodString } from 'zod'
 
 import {
-  ActionPanel,
   ActionGroup,
   ActionItem,
-  ActionList
+  ActionList,
+  ActionPanel
 } from '@/common/commands'
-import { useHotkey } from '@/lib/hotkeys'
 import { formatDateDisplay } from '@/utils/date-format'
 
-import { FieldInputComponentProps } from '../../../types'
+import type { FieldInputComponentProps } from '../../../types'
 
 import { parseNaturalDate, toJiraDate } from './dateParsing'
 
 export const DateInput = (props: FieldInputComponentProps<ZodString>) => {
-  const { adapter, context, value, onChange, onConfirm } = props
+  const { value, onChange, onConfirm } = props
 
   const [search, setSearch] = useState('')
 

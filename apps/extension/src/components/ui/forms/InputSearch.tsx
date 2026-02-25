@@ -149,6 +149,11 @@ export function InputSearch<T = unknown>({
     return null
   }, [options, selectedCache, value, isSameValue])
 
+  // Keep a cache of the last selected option for display purposes.
+  // Note: We intentionally set state in this effect because `selectedCache`
+  // is derived from props and we want to preserve the label when `options`
+  // are temporarily empty.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (value === undefined || value === null) {
       if (selectedCache) setSelectedCache(null)
@@ -160,6 +165,7 @@ export function InputSearch<T = unknown>({
       setSelectedCache(fromOptions)
     }
   }, [options, selectedCache, value])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const displayLabel = selectedOption?.label
 
