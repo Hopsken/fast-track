@@ -68,6 +68,8 @@ export class TemplateService {
     input: Omit<IssueTemplate, 'id' | 'createdAt' | 'updatedAt'>
   ): Promise<IssueTemplate> {
     const templates = await this.getAllValidTemplates()
+    const host = await this.jiraApi.getHost()
+    const currentHost = normalizeBaseUrlHost(host ?? '')
 
     if (templates.length >= MAX_TEMPLATES) {
       throw new Error(
@@ -77,7 +79,10 @@ export class TemplateService {
 
     const snapshot = await this.snapshotItem.getValue()
     const isPro = snapshot?.isPro ?? false
-    if (!isPro && templates.length >= FREE_TEMPLATES_LIMIT) {
+    const templatesInCurrentHost = templates.filter(
+      (template) => template.scope.baseUrlHost === currentHost
+    )
+    if (!isPro && templatesInCurrentHost.length >= FREE_TEMPLATES_LIMIT) {
       throw new Error(
         `Free plan limit reached (${FREE_TEMPLATES_LIMIT} issue templates). Upgrade to Pro to create more.`
       )

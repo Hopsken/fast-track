@@ -23,8 +23,6 @@ export function useCreateIssueForm({ template }: UseCreateIssueFormOptions) {
   const submit = useMemoizedFn(async () => {
     const fieldValues = buildCreateIssueFields(wizardFields, values)
 
-    console.log({ fieldValues })
-
     const toast = showToast({
       style: 'loading',
       title: 'Creating issue...',

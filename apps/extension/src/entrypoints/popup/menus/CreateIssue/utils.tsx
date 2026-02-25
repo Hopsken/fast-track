@@ -3,7 +3,7 @@ import { isEmpty, mapValues } from 'lodash-es'
 
 import { getFieldAdapter } from '@/common/fields'
 import { FieldAdapter } from '@/common/fields/types'
-import { IssueTemplate, JiraFieldMetadata } from '@/repository/schema'
+import { JiraFieldMetadata } from '@/repository/schema'
 import { VisibleField } from '@/services/template-service/gap-analysis'
 import { isNonNullable } from '@/utils/assert'
 

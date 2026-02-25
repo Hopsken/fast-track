@@ -104,4 +104,5 @@ function generateDocs(): string {
 }
 
 // Output to stdout
+// eslint-disable-next-line no-console
 console.log(generateDocs())

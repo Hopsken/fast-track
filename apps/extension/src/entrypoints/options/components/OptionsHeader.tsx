@@ -26,12 +26,14 @@ function initialsFromEmail(email: string): string {
   const name = at > 0 ? value.slice(0, at) : value
 
   const parts = name.split(/[._-]+/).filter(Boolean)
-  const chars =
-    parts.length >= 2
-      ? [parts[0]![0], parts[1]![0]]
-      : name.length > 0
-        ? [name[0]!]
-        : ['?']
+  let chars: string[]
+  if (parts.length >= 2) {
+    chars = [parts[0]?.[0] ?? '?', parts[1]?.[0] ?? '?']
+  } else if (name.length > 0) {
+    chars = [name[0] ?? '?']
+  } else {
+    chars = ['?']
+  }
 
   return chars.join('').toUpperCase()
 }
@@ -74,6 +76,16 @@ export function OptionsHeader({ version }: OptionsHeaderProps) {
     () => (email ? initialsFromEmail(email) : '?'),
     [email]
   )
+  let signInTitle: string | undefined
+  let signInLabel = 'Sign in'
+  if (isLinking) {
+    signInLabel = 'Opening…'
+  } else if (needsRelogin) {
+    signInTitle = 'Session expired. Sign in again to continue.'
+    signInLabel = 'Sign in again'
+  } else {
+    signInTitle = undefined
+  }
 
   const openLinkFlow = useCallback(async () => {
     setIsLinking(true)
@@ -122,17 +134,9 @@ export function OptionsHeader({ version }: OptionsHeaderProps) {
             size="sm"
             onClick={openLinkFlow}
             disabled={isLinking}
-            title={
-              needsRelogin
-                ? 'Session expired. Sign in again to continue.'
-                : undefined
-            }>
+            title={signInTitle}>
             <Link2 className="h-4 w-4" />
-            {isLinking
-              ? 'Opening…'
-              : needsRelogin
-                ? 'Sign in again'
-                : 'Sign in'}
+            {signInLabel}
           </Button>
         ) : (
           <div className="flex items-center gap-2">
