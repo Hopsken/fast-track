@@ -210,6 +210,19 @@ export function createJiraE2EMockAdapter(): AxiosAdapter {
               system: 'description'
             },
             operations: ['set']
+          },
+          {
+            fieldId: 'customfield_10000',
+            key: 'customfield_10000',
+            name: 'Custom notes (textarea)',
+            required: false,
+            hasDefaultValue: false,
+            schema: {
+              type: 'string',
+              custom:
+                'com.atlassian.jira.plugin.system.customfieldtypes:textarea'
+            },
+            operations: ['set']
           }
         ]
       })

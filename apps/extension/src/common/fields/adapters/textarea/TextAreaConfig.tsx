@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { Textarea } from '@internal/ui/components/textarea'
 import { z, ZodString } from 'zod'
 
 import type {
@@ -27,8 +28,8 @@ const TextAreaSelect = ({ value, onChange }: SelectComponentProps<string>) => {
   )
 
   return (
-    <textarea
-      className="border-input bg-background focus-visible:ring-ring/50 min-h-[140px] w-full rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-[3px]"
+    <Textarea
+      className="min-h-36"
       placeholder="Enter text…"
       value={inputValue}
       onChange={handleInput}
