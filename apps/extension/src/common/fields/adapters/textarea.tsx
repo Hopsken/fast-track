@@ -12,7 +12,6 @@ export const JiraTextAreaAdapter = createTextFieldAdapter(
   JIRA_TEXTAREA_CUSTOM_TYPE,
   z.string(),
   {
-    supportModes: ['preset'],
     keyOf: (val) => val,
     InputComponent: TextAreaInput,
     ConfigComponent: TextAreaConfig,

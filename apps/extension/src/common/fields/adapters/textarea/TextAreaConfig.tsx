@@ -38,6 +38,36 @@ const TextAreaSelect = ({ value, onChange }: SelectComponentProps<string>) => {
 }
 
 export const TextAreaConfig = (props: FieldConfigComponentProps<ZodString>) => {
-  // Only meaningful for preset mode; restricted mode doesn't make much sense for multiline text.
+  const { config, onChangeConfig } = props
+
+  if (config.behavior === 'restricted') {
+    const value = (config.allowedOptions ?? []).join('\n')
+
+    return (
+      <div className="space-y-1.5">
+        <Textarea
+          className="min-h-36"
+          placeholder="One allowed value per line…"
+          value={value}
+          onChange={(e) => {
+            const lines = e.target.value
+              .split(/\r?\n/)
+              .map((l) => l.trim())
+              .filter(Boolean)
+
+            onChangeConfig({
+              ...config,
+              allowedOptions: lines
+            })
+          }}
+        />
+        <div className="text-muted-foreground text-xs">
+          Each line becomes an allowed option.
+        </div>
+      </div>
+    )
+  }
+
+  // preset
   return <GenericFieldConfig {...props} SelectorComponent={TextAreaSelect} />
 }
