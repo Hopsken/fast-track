@@ -15,6 +15,7 @@ export interface CommandPanelProps {
   defaultSearch?: string
   search?: string
   onSearchChange?: (search: string) => void
+  searchStateKey?: string
   onSearchConfirm?: () => void
 
   shouldFilter?: boolean
@@ -34,6 +35,7 @@ export const ActionPanel = forwardRef<HTMLDivElement, CommandPanelProps>(
       defaultSearch,
       search,
       onSearchChange,
+      searchStateKey,
       onSearchConfirm,
       shouldFilter,
       children
@@ -50,6 +52,7 @@ export const ActionPanel = forwardRef<HTMLDivElement, CommandPanelProps>(
           defaultSearch={defaultSearch}
           search={search}
           onSearchChange={onSearchChange}
+          searchStateKey={searchStateKey}
           onSearchConfirm={onSearchConfirm}
           placeholder={searchPlaceholder}
           readonly={searchReadonly}

@@ -1,16 +1,22 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Button } from '@internal/ui/components/button'
 
 import { ActionPanel, ActionPanelSlot } from '@/common/commands'
 import { HotkeysScopeProvider } from '@/lib/hotkeys'
+import { usePopupSessionStore } from '@/stores/popup-session/usePopupSessionStore'
 import { openOptionsPage } from '@/utils'
+
+import { POPUP_SEARCH_STATE_KEYS } from '../searchStateKeys'
 
 import { ExtraActionsMenu, openFeedback } from './ExtraActionsMenu'
 import { IssueTemplatesMenu } from './IssueTemplatesMenu'
 import { TicketListMenu } from './TicketListMenu'
 
 export function MainMenu() {
-  const [search, setSearch] = useState('')
+  const search = usePopupSessionStore(
+    (state) => state.inputValues[POPUP_SEARCH_STATE_KEYS.mainMenu] ?? ''
+  )
+  const setInputValue = usePopupSessionStore((state) => state.setInputValue)
 
   const isExtraActionsMenuVisible = search.startsWith('/')
   const isTemplateMenuVisible =
@@ -33,7 +39,10 @@ export function MainMenu() {
     <HotkeysScopeProvider scope="main-menu">
       <ActionPanel
         search={search}
-        onSearchChange={setSearch}
+        onSearchChange={(value) =>
+          setInputValue(POPUP_SEARCH_STATE_KEYS.mainMenu, value)
+        }
+        searchStateKey={POPUP_SEARCH_STATE_KEYS.mainMenu}
         shouldFilter={shouldFilter}
         searchPlaceholder="Type a command or search...">
         {renderMenu()}
