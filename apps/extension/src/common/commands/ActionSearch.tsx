@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@internal/ui/components/button'
 import { CommandInput } from '@internal/ui/components/command'
 import { ArrowLeft } from 'lucide-react'
@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react'
 import { useHotkey } from '@/lib/hotkeys'
 import { cn } from '@/lib/utils'
 
+import { resolveEscapeAction } from './actionSearchEscape'
 import {
   useIsNavigationRoot,
   useNavigateBack,
@@ -22,7 +23,11 @@ export type ActionSearchProps = {
   readonly?: boolean
   placeholder?: string
 
-  onNavigateBack?: () => void
+  /**
+   * If true, and the initial value is non-empty, the whole input will be
+   * selected on mount. Useful when returning to a previous menu.
+   */
+  autoSelectOnMount?: boolean
 }
 
 export function ActionSearch({
@@ -32,7 +37,8 @@ export function ActionSearch({
   onSearchConfirm,
   isLoading,
   readonly,
-  placeholder
+  placeholder,
+  autoSelectOnMount
 }: ActionSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const onNavigateBack = useNavigateBack()
@@ -43,6 +49,7 @@ export function ActionSearch({
   )
 
   const currentValue = isControlled ? search : uncontrolledSearch
+  const initialValueRef = useRef(currentValue)
 
   const onValueChange = useCallback(
     (value: string) => {
@@ -85,17 +92,59 @@ export function ActionSearch({
     </Button>
   ) : null
 
+  const clearCurrentSearch = useCallback(() => {
+    if (readonly) return
+
+    if (isControlled) {
+      onSearchChange?.('')
+    } else {
+      setUncontrolledSearch('')
+    }
+  }, [isControlled, onSearchChange, readonly])
+
+  useEffect(() => {
+    if (!autoSelectOnMount) return
+    if (readonly) return
+
+    // Only auto-select when the input initially mounts with a non-empty value.
+    // This avoids selecting while the user is typing from an empty state.
+    if (!initialValueRef.current) return
+
+    const selectAll = () => {
+      const el = inputRef.current
+      if (!el) return
+
+      el.focus()
+      el.setSelectionRange(0, el.value.length)
+    }
+
+    const timerId = window.setTimeout(selectAll, 0)
+    return () => window.clearTimeout(timerId)
+  }, [autoSelectOnMount, readonly])
+
   useHotkey('global.escape', () => {
-    if (currentValue && !readonly) {
+    const action = resolveEscapeAction({
+      hasSearchValue: !!currentValue,
+      isRoot,
+      readonly
+    })
+
+    if (action === 'clear-search') {
       // clear input value when esc is pressed
       onValueChange('')
-    } else if (isRoot) {
+      return
+    }
+
+    clearCurrentSearch()
+
+    if (action === 'close-popup') {
       // close popup when esc is pressed on root page and input value is empty
       window.close()
-    } else {
-      // pop to previous page when esc is pressed on other pages and input value is empty
-      handleNavigateBack()
+      return
     }
+
+    // pop to previous page when esc is pressed on other pages and input value is empty
+    handleNavigateBack()
   })
 
   return (

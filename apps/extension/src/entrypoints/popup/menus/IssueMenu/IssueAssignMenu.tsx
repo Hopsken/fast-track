@@ -1,5 +1,3 @@
-import { useState } from 'react'
-
 import {
   Action,
   ActionUser,
@@ -7,6 +5,7 @@ import {
   ActionList,
   ActionPanel
 } from '@/common/commands'
+import { useRouteState } from '@/common/commands/navigation'
 import { useAutoCompleteUsers } from '@/hooks/useAutoComplete'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
 import { useMutationAssignIssue } from '@/hooks/useMutationAssignIssue'
@@ -17,7 +16,7 @@ export function IssueAssignMenu({ ticketKey }: { ticketKey: string }) {
   const { data: editMeta, isLoading: isLoadingEditMeta } =
     useIssueEditMeta(ticketKey)
 
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useRouteState('search', '')
 
   const assigneeAutoCompleteUrl =
     editMeta?.fields?.assignee?.autoCompleteUrl || ''
@@ -56,7 +55,10 @@ export function IssueAssignMenu({ ticketKey }: { ticketKey: string }) {
   }
 
   return (
-    <ActionPanel search={search} onSearchChange={setSearch}>
+    <ActionPanel
+      search={search}
+      onSearchChange={setSearch}
+      autoSelectSearchOnMount>
       <ActionList isLoading={isLoading} emptyPlaceholder="No matching users">
         <ActionGroup heading="Assign to...">
           {unassignAction}

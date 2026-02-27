@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Button } from '@internal/ui/components/button'
 
 import { ActionPanel, ActionPanelSlot } from '@/common/commands'
+import { useRouteState } from '@/common/commands/navigation'
 import { HotkeysScopeProvider } from '@/lib/hotkeys'
 import { openOptionsPage } from '@/utils'
 
@@ -10,7 +11,7 @@ import { IssueTemplatesMenu } from './IssueTemplatesMenu'
 import { TicketListMenu } from './TicketListMenu'
 
 export function MainMenu() {
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useRouteState('search', '')
 
   const isExtraActionsMenuVisible = search.startsWith('/')
   const isTemplateMenuVisible =
@@ -34,6 +35,7 @@ export function MainMenu() {
       <ActionPanel
         search={search}
         onSearchChange={setSearch}
+        autoSelectSearchOnMount
         shouldFilter={shouldFilter}
         searchPlaceholder="Type a command or search...">
         {renderMenu()}

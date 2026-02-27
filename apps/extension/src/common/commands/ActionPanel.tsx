@@ -17,6 +17,12 @@ export interface CommandPanelProps {
   onSearchChange?: (search: string) => void
   onSearchConfirm?: () => void
 
+  /**
+   * When true, and the initial search value is non-empty, auto-select the whole
+   * input on mount. Intended for the "back" navigation case.
+   */
+  autoSelectSearchOnMount?: boolean
+
   shouldFilter?: boolean
 
   children?: ReactNode
@@ -35,6 +41,7 @@ export const ActionPanel = forwardRef<HTMLDivElement, CommandPanelProps>(
       search,
       onSearchChange,
       onSearchConfirm,
+      autoSelectSearchOnMount,
       shouldFilter,
       children
     } = props
@@ -54,6 +61,7 @@ export const ActionPanel = forwardRef<HTMLDivElement, CommandPanelProps>(
           placeholder={searchPlaceholder}
           readonly={searchReadonly}
           isLoading={isLoading}
+          autoSelectOnMount={autoSelectSearchOnMount}
         />
         {children}
       </Command>
