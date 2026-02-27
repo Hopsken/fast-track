@@ -37,7 +37,9 @@ describe('FieldList', () => {
       </Command>
     )
 
-    expect(screen.getByText('No fields available for this template')).toBeTruthy()
+    expect(
+      screen.getByText("You're all set. No additional fields required.")
+    ).toBeTruthy()
     expect(screen.queryByText('Loading fields...')).toBeNull()
   })
 })

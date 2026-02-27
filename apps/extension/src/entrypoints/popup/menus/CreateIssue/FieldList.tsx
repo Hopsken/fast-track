@@ -24,7 +24,7 @@ export function FieldList({
     <ActionList
       isLoading={isLoading}
       loadingPlaceholder="Loading fields..."
-      emptyPlaceholder="No fields available for this template">
+      emptyPlaceholder="You're all set. No additional fields required.">
       {fields.length > 0 ? (
         <ActionGroup heading={heading}>
           {fields.map((field) => (
