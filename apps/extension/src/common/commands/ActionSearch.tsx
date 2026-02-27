@@ -5,7 +5,6 @@ import { ArrowLeft } from 'lucide-react'
 
 import { useHotkey } from '@/lib/hotkeys'
 import { cn } from '@/lib/utils'
-import { usePopupSessionStore } from '@/stores/popup-session/usePopupSessionStore'
 
 import { resolveEscapeAction } from './actionSearchEscape'
 import {
@@ -18,21 +17,17 @@ export type ActionSearchProps = {
   defaultSearch?: string
   search?: string
   onSearchChange?: (search: string) => void
-  searchStateKey?: string
   onSearchConfirm?: () => void
 
   isLoading?: boolean
   readonly?: boolean
   placeholder?: string
-
-  onNavigateBack?: () => void
 }
 
 export function ActionSearch({
   defaultSearch,
   search,
   onSearchChange,
-  searchStateKey,
   onSearchConfirm,
   isLoading,
   readonly,
@@ -40,15 +35,10 @@ export function ActionSearch({
 }: ActionSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const onNavigateBack = useNavigateBack()
-  const getCachedSearch = usePopupSessionStore((state) => state.inputValues)
-  const setInputValue = usePopupSessionStore((state) => state.setInputValue)
-  const clearInputValue = usePopupSessionStore((state) => state.clearInputValue)
-
-  const cachedSearch = searchStateKey ? getCachedSearch[searchStateKey] : ''
 
   const isControlled = search !== undefined
   const [uncontrolledSearch, setUncontrolledSearch] = useState(
-    defaultSearch ?? cachedSearch ?? ''
+    defaultSearch ?? ''
   )
 
   const currentValue = isControlled ? search : uncontrolledSearch
@@ -57,13 +47,10 @@ export function ActionSearch({
     (value: string) => {
       if (!isControlled) {
         setUncontrolledSearch(value)
-        if (searchStateKey) {
-          setInputValue(searchStateKey, value)
-        }
       }
       onSearchChange?.(value)
     },
-    [isControlled, onSearchChange, searchStateKey, setInputValue]
+    [isControlled, onSearchChange]
   )
 
   const isRoot = useIsNavigationRoot()
@@ -104,11 +91,8 @@ export function ActionSearch({
       onSearchChange?.('')
     } else {
       setUncontrolledSearch('')
-      if (searchStateKey) {
-        clearInputValue(searchStateKey)
-      }
     }
-  }, [clearInputValue, isControlled, onSearchChange, readonly, searchStateKey])
+  }, [isControlled, onSearchChange, readonly])
 
   useHotkey('global.escape', () => {
     const action = resolveEscapeAction({

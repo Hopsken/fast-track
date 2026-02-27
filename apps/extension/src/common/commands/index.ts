@@ -10,7 +10,8 @@ export {
 export {
   NavigationProvider,
   useNavigation,
-  NavigateBackProvider
+  NavigateBackProvider,
+  useRouteState
 } from './navigation'
 
 export * from './actions'

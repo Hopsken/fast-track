@@ -5,24 +5,18 @@ import {
   ActionList,
   ActionPanel
 } from '@/common/commands'
+import { useRouteState } from '@/common/commands/navigation'
 import { useAutoCompleteUsers } from '@/hooks/useAutoComplete'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
 import { useMutationAssignIssue } from '@/hooks/useMutationAssignIssue'
 import { JiraUserSchema } from '@/repository/schema/jira/user'
-import { usePopupSessionStore } from '@/stores/popup-session/usePopupSessionStore'
 import { AssigneeAvatar } from '~/components/ui/jira'
-
-import { POPUP_SEARCH_STATE_KEYS } from '../searchStateKeys'
 
 export function IssueAssignMenu({ ticketKey }: { ticketKey: string }) {
   const { data: editMeta, isLoading: isLoadingEditMeta } =
     useIssueEditMeta(ticketKey)
 
-  const searchKey = POPUP_SEARCH_STATE_KEYS.issueAssignMenu(ticketKey)
-  const search = usePopupSessionStore(
-    (state) => state.inputValues[searchKey] ?? ''
-  )
-  const setInputValue = usePopupSessionStore((state) => state.setInputValue)
+  const [search, setSearch] = useRouteState('search', '')
 
   const assigneeAutoCompleteUrl =
     editMeta?.fields?.assignee?.autoCompleteUrl || ''
@@ -61,10 +55,7 @@ export function IssueAssignMenu({ ticketKey }: { ticketKey: string }) {
   }
 
   return (
-    <ActionPanel
-      search={search}
-      onSearchChange={(value) => setInputValue(searchKey, value)}
-      searchStateKey={searchKey}>
+    <ActionPanel search={search} onSearchChange={setSearch}>
       <ActionList isLoading={isLoading} emptyPlaceholder="No matching users">
         <ActionGroup heading="Assign to...">
           {unassignAction}
