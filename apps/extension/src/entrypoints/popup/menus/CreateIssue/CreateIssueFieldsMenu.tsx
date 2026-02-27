@@ -70,7 +70,7 @@ export function CreateIssueFieldsMenu() {
       onSearchChange={handleSummaryChange}
       shouldFilter={false}
       isLoading={isLoadingFields}
-      searchPlaceholder="What's this about...">
+      searchPlaceholder="Issue title…">
       {errors['summary'] ? (
         <div className="border-b-2 border-gray-200 px-4 py-2 text-xs text-rose-600">
           {errors['summary']}
@@ -82,6 +82,7 @@ export function CreateIssueFieldsMenu() {
         fields={listFields}
         values={values}
         errors={errors}
+        isLoading={isLoadingFields}
         onSelectField={handleSelectField}
       />
 

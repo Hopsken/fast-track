@@ -8,6 +8,7 @@ export interface FieldListProps {
   fields: VisibleField[]
   values: Record<string, unknown>
   errors: Record<string, string>
+  isLoading?: boolean
   onSelectField: (field: VisibleField) => void
 }
 
@@ -16,24 +17,28 @@ export function FieldList({
   fields,
   values,
   errors,
+  isLoading = false,
   onSelectField
 }: FieldListProps) {
-  if (fields.length === 0) return null
-
   return (
-    <ActionList>
-      <ActionGroup heading={heading}>
-        {fields.map((field) => (
-          <FieldListItem
-            key={field.fieldId}
-            field={field}
-            value={values[field.fieldId]}
-            error={errors[field.fieldId]}
-            required={field.metadata?.required ?? false}
-            onSelect={() => onSelectField(field)}
-          />
-        ))}
-      </ActionGroup>
+    <ActionList
+      isLoading={isLoading}
+      loadingPlaceholder="Loading fields..."
+      emptyPlaceholder="You're all set. No additional fields required.">
+      {fields.length > 0 ? (
+        <ActionGroup heading={heading}>
+          {fields.map((field) => (
+            <FieldListItem
+              key={field.fieldId}
+              field={field}
+              value={values[field.fieldId]}
+              error={errors[field.fieldId]}
+              required={field.metadata?.required ?? false}
+              onSelect={() => onSelectField(field)}
+            />
+          ))}
+        </ActionGroup>
+      ) : null}
     </ActionList>
   )
 }
