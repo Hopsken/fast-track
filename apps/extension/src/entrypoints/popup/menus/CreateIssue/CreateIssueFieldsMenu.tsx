@@ -82,6 +82,7 @@ export function CreateIssueFieldsMenu() {
         fields={listFields}
         values={values}
         errors={errors}
+        isLoading={isLoadingFields}
         onSelectField={handleSelectField}
       />
 

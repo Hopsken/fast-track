@@ -7,6 +7,7 @@ import {
 
 export type ActionListProps = {
   isLoading?: boolean
+  loadingPlaceholder?: ReactNode
   emptyPlaceholder?: ReactNode
   children?: ReactNode
 } & ComponentProps<typeof CommandList>
@@ -14,6 +15,7 @@ export type ActionListProps = {
 export function ActionList(props: ActionListProps) {
   const {
     isLoading,
+    loadingPlaceholder = 'Loading...',
     children,
     emptyPlaceholder = 'No results',
     ...restProps
@@ -21,7 +23,7 @@ export function ActionList(props: ActionListProps) {
   return (
     <CommandList {...restProps}>
       {children}
-      {isLoading && <CommandLoading>Loading...</CommandLoading>}
+      {isLoading && <CommandLoading>{loadingPlaceholder}</CommandLoading>}
       {!isLoading && emptyPlaceholder && (
         <CommandEmpty>{emptyPlaceholder}</CommandEmpty>
       )}
