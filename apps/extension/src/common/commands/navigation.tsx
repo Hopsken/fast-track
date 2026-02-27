@@ -18,37 +18,29 @@ type NavigationEntry = {
 }
 
 type NavigationStoreState = {
+  /**
+   * Root entry state (when no stacks are pushed).
+   * We intentionally do not store the root ReactNode in the store to avoid
+   * lifecycle races (effects) and unnecessary store updates when children change.
+   */
+  rootState: Record<string, unknown>
+
+  /**
+   * Pushed navigation entries (excluding root).
+   */
   stacks: NavigationEntry[]
 
-  setRoot: (target: ReactNode) => void
   push: (target: ReactNode, onPop?: () => void) => void
   pop: (step?: number) => void
+
   setActiveState: (key: string, value: unknown) => void
+  clearActiveState: (key: string) => void
   getActiveState: (key: string) => unknown
 }
 
 const navigationStore = createStore<NavigationStoreState>((set, get) => ({
+  rootState: {},
   stacks: [],
-
-  setRoot: (target: ReactNode) => {
-    set((state) => {
-      if (!state.stacks.length) {
-        return {
-          stacks: [{ target, state: {} }]
-        }
-      }
-
-      const root = state.stacks[0]
-      if (!root) return state
-
-      return {
-        stacks: [
-          { target, onPop: root.onPop, state: root.state },
-          ...state.stacks.slice(1)
-        ]
-      }
-    })
-  },
 
   push: (target: ReactNode, onPop?: () => void) => {
     set((state) => ({
@@ -62,7 +54,7 @@ const navigationStore = createStore<NavigationStoreState>((set, get) => ({
     const currentStacks = get().stacks
     if (!currentStacks.length) return
 
-    const keepLength = Math.max(1, currentStacks.length + step)
+    const keepLength = Math.max(0, currentStacks.length + step)
     const toPop = currentStacks.slice(keepLength)
 
     reverse(toPop).forEach((item) => item.onPop?.())
@@ -74,7 +66,15 @@ const navigationStore = createStore<NavigationStoreState>((set, get) => ({
 
   setActiveState: (key: string, value: unknown) => {
     set((state) => {
-      if (!state.stacks.length) return state
+      if (!state.stacks.length) {
+        return {
+          ...state,
+          rootState: {
+            ...state.rootState,
+            [key]: value
+          }
+        }
+      }
 
       const nextStacks = [...state.stacks]
       const activeIndex = nextStacks.length - 1
@@ -90,30 +90,57 @@ const navigationStore = createStore<NavigationStoreState>((set, get) => ({
       }
 
       return {
+        ...state,
+        stacks: nextStacks
+      }
+    })
+  },
+
+  clearActiveState: (key: string) => {
+    set((state) => {
+      if (!state.stacks.length) {
+        if (!(key in state.rootState)) return state
+        const next = { ...state.rootState }
+        delete next[key]
+        return { ...state, rootState: next }
+      }
+
+      const nextStacks = [...state.stacks]
+      const activeIndex = nextStacks.length - 1
+      const activeRoute = nextStacks[activeIndex]
+      if (!activeRoute) return state
+      if (!(key in activeRoute.state)) return state
+
+      const nextState = { ...activeRoute.state }
+      delete nextState[key]
+
+      nextStacks[activeIndex] = {
+        ...activeRoute,
+        state: nextState
+      }
+
+      return {
+        ...state,
         stacks: nextStacks
       }
     })
   },
 
   getActiveState: (key: string) => {
-    const activeRoute = last(get().stacks)
+    const { stacks, rootState } = get()
+    if (!stacks.length) return rootState[key]
+
+    const activeRoute = last(stacks)
     return activeRoute?.state[key]
   }
 }))
 
 export function NavigationProvider({ children }: PropsWithChildren) {
-  const { stacks, setRoot } = useStore(
-    navigationStore,
-    useShallow((state) => pick(state, ['stacks', 'setRoot']))
-  )
-
-  useEffect(() => {
-    setRoot(children)
-  }, [children, setRoot])
+  const stacks = useStore(navigationStore, (state) => state.stacks)
 
   useEffect(() => {
     return () => {
-      navigationStore.setState({ stacks: [] })
+      navigationStore.setState({ stacks: [], rootState: {} })
     }
   }, [])
 
@@ -131,7 +158,7 @@ export function useNavigation() {
 export function useIsNavigationRoot() {
   return useStore(
     navigationStore,
-    useShallow((s) => s.stacks.length <= 1)
+    useShallow((s) => s.stacks.length === 0)
   )
 }
 
@@ -140,9 +167,12 @@ export function useRouteState<T>(
   initial: T
 ): [T, (value: T) => void] {
   const value = useStore(navigationStore, (state) => {
-    const routeValue = last(state.stacks)?.state[key] as T | undefined
+    const activeRoute = last(state.stacks)
+    const activeState = activeRoute?.state ?? state.rootState
+    const routeValue = activeState[key] as T | undefined
     return routeValue ?? initial
   })
+
   const setActiveState = useStore(
     navigationStore,
     (state) => state.setActiveState
@@ -156,6 +186,17 @@ export function useRouteState<T>(
   )
 
   return [value, setValue]
+}
+
+export function useClearRouteState(key: string) {
+  const clearActiveState = useStore(
+    navigationStore,
+    (state) => state.clearActiveState
+  )
+
+  return useCallback(() => {
+    clearActiveState(key)
+  }, [clearActiveState, key])
 }
 
 const NavigateBackContext = createContext<{

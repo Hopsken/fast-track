@@ -11,7 +11,8 @@ export {
   NavigationProvider,
   useNavigation,
   NavigateBackProvider,
-  useRouteState
+  useRouteState,
+  useClearRouteState
 } from './navigation'
 
 export * from './actions'

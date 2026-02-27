@@ -1,17 +1,24 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import { NavigationProvider, useNavigation, useRouteState } from './navigation'
+import {
+  NavigationProvider,
+  useClearRouteState,
+  useNavigation,
+  useRouteState
+} from './navigation'
 
 function RootMenu() {
   const navigate = useNavigation()
   const [search, setSearch] = useRouteState('search', '')
+  const clearSearch = useClearRouteState('search')
 
   return (
     <div>
       <span data-testid="screen">root</span>
       <span data-testid="search-value">{search}</span>
       <button onClick={() => setSearch('root-search')}>set-root-search</button>
+      <button onClick={clearSearch}>clear-root-search</button>
       <button onClick={() => navigate.push(<ChildMenu label="child" />)}>
         open-child
       </button>
@@ -37,6 +44,20 @@ function ChildMenu({ label }: { label: string }) {
 }
 
 describe('navigation route state', () => {
+  it('clears route state back to initial value', () => {
+    render(
+      <NavigationProvider>
+        <RootMenu />
+      </NavigationProvider>
+    )
+
+    fireEvent.click(screen.getByText('set-root-search'))
+    expect(screen.getByTestId('search-value').textContent).toBe('root-search')
+
+    fireEvent.click(screen.getByText('clear-root-search'))
+    expect(screen.getByTestId('search-value').textContent).toBe('')
+  })
+
   it('keeps previous entry route state after push and pop', () => {
     render(
       <NavigationProvider>
