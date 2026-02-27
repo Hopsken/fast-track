@@ -35,6 +35,7 @@ export function MainMenu() {
       <ActionPanel
         search={search}
         onSearchChange={setSearch}
+        autoSelectSearchOnMount
         shouldFilter={shouldFilter}
         searchPlaceholder="Type a command or search...">
         {renderMenu()}

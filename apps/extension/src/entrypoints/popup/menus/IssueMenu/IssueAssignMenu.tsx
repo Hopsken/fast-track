@@ -55,7 +55,10 @@ export function IssueAssignMenu({ ticketKey }: { ticketKey: string }) {
   }
 
   return (
-    <ActionPanel search={search} onSearchChange={setSearch}>
+    <ActionPanel
+      search={search}
+      onSearchChange={setSearch}
+      autoSelectSearchOnMount>
       <ActionList isLoading={isLoading} emptyPlaceholder="No matching users">
         <ActionGroup heading="Assign to...">
           {unassignAction}
