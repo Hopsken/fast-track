@@ -329,9 +329,18 @@ export function TemplateWizardProvider(props: ProviderProps) {
     const validationErrors: string[] = []
     const fieldMap = new Map(availableFields.map((f) => [f.fieldId, f]))
 
+    // Import lazily to avoid pulling chrono into unrelated code paths.
+    const { parseSemanticDateValue, parseSemanticDateTimeValue } = await import(
+      '@/common/fields/adapters/shared/date/dateParsing'
+    )
+
+    const normalizedFieldsConfig: FieldConfig[] = []
+
     for (const config of fieldsConfig) {
       const field = fieldMap.get(config.fieldId)
       const fieldName = field?.name ?? config.fieldId
+
+      let nextConfig = config
 
       if (config.behavior === 'restricted') {
         // Restricted must have at least one option
@@ -342,42 +351,67 @@ export function TemplateWizardProvider(props: ProviderProps) {
         }
       }
 
-      // TU-56 (date): Block saving when preset/restricted contains an invalid date expression.
-      // We validate only for fields we know are `schema.type === 'date'`.
-      if (field?.schema?.type === 'date') {
-        // Import lazily to avoid pulling chrono into unrelated code paths.
-        const { parseSemanticDateValue } = await import(
-          '@/common/fields/adapters/shared/date/dateParsing'
-        )
+      const schemaType = field?.schema?.type
+      if (schemaType === 'date' || schemaType === 'datetime') {
+        const parse =
+          schemaType === 'date' ? parseSemanticDateValue : parseSemanticDateTimeValue
 
-        const invalidValues: string[] = []
+        const normalizeOne = (raw: string) => {
+          const trimmed = raw.trim()
+          if (!trimmed) return { kind: 'empty' as const, value: '' }
 
-        if (config.behavior === 'preset') {
-          if (typeof config.presetValue === 'string') {
-            const raw = config.presetValue.trim()
-            if (raw) {
-              const parsed = parseSemanticDateValue(raw)
-              if (parsed.status === 'invalid') invalidValues.push(raw)
+          const parsed = parse(trimmed)
+          if (parsed.status === 'invalid') {
+            return { kind: 'invalid' as const, value: trimmed }
+          }
+          if (parsed.status !== 'valid') {
+            return { kind: 'empty' as const, value: '' }
+          }
+
+          return {
+            kind: 'valid' as const,
+            value: parsed.kind === 'absolute' ? parsed.iso : trimmed
+          }
+        }
+
+        if (config.behavior === 'preset' && typeof config.presetValue === 'string') {
+          const out = normalizeOne(config.presetValue)
+          if (out.kind === 'invalid') {
+            validationErrors.push(`${fieldName}: Invalid ${schemaType} preset value.`)
+          } else if (out.kind === 'valid' && out.value !== config.presetValue) {
+            nextConfig = { ...config, presetValue: out.value }
+          }
+        }
+
+        if (
+          config.behavior === 'restricted' &&
+          Array.isArray(config.allowedOptions) &&
+          config.allowedOptions.length > 0
+        ) {
+          let changed = false
+          const nextAllowed = config.allowedOptions.map((opt) => {
+            if (typeof opt !== 'string') return opt
+            const out = normalizeOne(opt)
+            if (out.kind === 'invalid') {
+              validationErrors.push(
+                `${fieldName}: Invalid ${schemaType} restricted option: ${opt}`
+              )
+              return opt
             }
-          }
-        }
+            if (out.kind === 'valid' && out.value !== opt) {
+              changed = true
+              return out.value
+            }
+            return opt
+          })
 
-        if (config.behavior === 'restricted') {
-          for (const opt of config.allowedOptions ?? []) {
-            if (typeof opt !== 'string') continue
-            const raw = opt.trim()
-            if (!raw) continue
-            const parsed = parseSemanticDateValue(raw)
-            if (parsed.status === 'invalid') invalidValues.push(raw)
+          if (changed) {
+            nextConfig = { ...nextConfig, allowedOptions: nextAllowed }
           }
-        }
-
-        if (invalidValues.length > 0) {
-          validationErrors.push(
-            `${fieldName}: Invalid date preset value(s): ${invalidValues.join(', ')}`
-          )
         }
       }
+
+      normalizedFieldsConfig.push(nextConfig)
     }
 
     if (validationErrors.length > 0) {
@@ -398,7 +432,7 @@ export function TemplateWizardProvider(props: ProviderProps) {
         await svc.updateTemplate(existingTemplate.id, {
           name: newName,
           icon: emoji,
-          fields: fieldsConfig,
+          fields: normalizedFieldsConfig,
           description: description.trim()
         })
         props.onSaved()
@@ -411,7 +445,7 @@ export function TemplateWizardProvider(props: ProviderProps) {
             project: scope.project,
             issueType: scope.issueType
           },
-          fields: fieldsConfig,
+          fields: normalizedFieldsConfig,
           description: description.trim()
         })
         ;(props as { onCreated: (id: string) => void })?.onCreated(created.id)

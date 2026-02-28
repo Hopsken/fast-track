@@ -3,6 +3,10 @@ import { isEmpty, mapValues } from 'lodash-es'
 
 import { getFieldAdapter } from '@/common/fields'
 import { FieldAdapter } from '@/common/fields/types'
+import {
+  parseSemanticDateTimeValue,
+  parseSemanticDateValue
+} from '@/common/fields/adapters/shared/date/dateParsing'
 import { JiraFieldMetadata } from '@/repository/schema'
 import { VisibleField } from '@/services/template-service/gap-analysis'
 import { isNonNullable } from '@/utils/assert'
@@ -66,6 +70,32 @@ export function buildInitialValues(
   for (const field of fields) {
     const presetValue = field.config?.presetValue
     if (!presetValue) continue
+
+    // TU-56: resolve semantic date/datetime expressions once at draft init (WYSIWYG)
+    if (typeof presetValue === 'string') {
+      const schemaType = field.metadata.schema.type
+
+      if (schemaType === 'date') {
+        const parsed = parseSemanticDateValue(presetValue, {
+          referenceDate: new Date()
+        })
+        if (parsed.status === 'valid') {
+          values[field.fieldId] = parsed.iso
+          continue
+        }
+      }
+
+      if (schemaType === 'datetime') {
+        const parsed = parseSemanticDateTimeValue(presetValue, {
+          referenceDate: new Date()
+        })
+        if (parsed.status === 'valid') {
+          values[field.fieldId] = parsed.iso
+          continue
+        }
+      }
+    }
+
     values[field.fieldId] = presetValue
   }
   return values
