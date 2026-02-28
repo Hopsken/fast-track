@@ -11,10 +11,29 @@ import { formatDateTimeDisplay, formatDateTimeISO } from '@/utils/date-format'
 
 import { FieldInputComponentProps } from '../../../types'
 
-import { parseNaturalDateTime, toJiraDateTime } from './dateParsing'
+import { GenericSelectInput } from '../select/GenericSelectInput'
+
+import { parseNaturalDateTime, parseSemanticDateTimeValue, toJiraDateTime } from './dateParsing'
 
 export const DateTimeInput = (props: FieldInputComponentProps<ZodString>) => {
   const { onChange, onConfirm } = props
+
+
+  // TU-56: restricted mode should use the curated allowedOptions list.
+  // Resolve semantic expressions to ISO immediately so the draft value is concrete.
+  if (props.config?.behavior === 'restricted' && props.config.allowedOptions?.length) {
+    return (
+      <GenericSelectInput
+        {...props}
+        onChange={(next) => {
+          if (typeof next !== 'string') return onChange(next as any)
+          const parsed = parseSemanticDateTimeValue(next, { referenceDate: new Date() })
+          if (parsed.status === 'valid') return onChange(parsed.iso as any)
+          return onChange(next as any)
+        }}
+      />
+    )
+  }
 
   const [search, setSearch] = useState('')
 
