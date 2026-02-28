@@ -341,6 +341,43 @@ export function TemplateWizardProvider(props: ProviderProps) {
           )
         }
       }
+
+      // TU-56 (date): Block saving when preset/restricted contains an invalid date expression.
+      // We validate only for fields we know are `schema.type === 'date'`.
+      if (field?.schema?.type === 'date') {
+        // Import lazily to avoid pulling chrono into unrelated code paths.
+        const { parseSemanticDateValue } = await import(
+          '@/common/fields/adapters/shared/date/dateParsing'
+        )
+
+        const invalidValues: string[] = []
+
+        if (config.behavior === 'preset') {
+          if (typeof config.presetValue === 'string') {
+            const raw = config.presetValue.trim()
+            if (raw) {
+              const parsed = parseSemanticDateValue(raw)
+              if (parsed.status === 'invalid') invalidValues.push(raw)
+            }
+          }
+        }
+
+        if (config.behavior === 'restricted') {
+          for (const opt of config.allowedOptions ?? []) {
+            if (typeof opt !== 'string') continue
+            const raw = opt.trim()
+            if (!raw) continue
+            const parsed = parseSemanticDateValue(raw)
+            if (parsed.status === 'invalid') invalidValues.push(raw)
+          }
+        }
+
+        if (invalidValues.length > 0) {
+          validationErrors.push(
+            `${fieldName}: Invalid date preset value(s): ${invalidValues.join(', ')}`
+          )
+        }
+      }
     }
 
     if (validationErrors.length > 0) {

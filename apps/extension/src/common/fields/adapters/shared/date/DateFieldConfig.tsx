@@ -1,89 +1,137 @@
-import { KeyboardEvent, useMemo } from 'react'
-import { Calendar } from '@internal/ui/components/calendar'
+import { KeyboardEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import {
   InputGroup,
   InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput
+  InputGroupInput,
+  InputGroupText
 } from '@internal/ui/components/input-group'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from '@internal/ui/components/popover'
-import { CalendarIcon } from 'lucide-react'
-import { z, ZodString } from 'zod'
+import { useDebounce } from 'ahooks'
+import { ZodString } from 'zod'
 
 import { FieldConfigComponentProps, SelectComponentProps } from '../../../types'
 import { isSchemaMulti } from '../../../utils'
 import { GenericFieldConfig } from '../GenericFieldConfig'
 import { Unsupported } from '../Unsupported'
 
-import { parseJiraDate, toJiraDate } from './dateParsing'
+import { parseSemanticDateValue } from './dateParsing'
 
 const DateSelect = ({
   value,
   onChange,
   onConfirm
 }: SelectComponentProps<string>) => {
-  const singleValue = Array.isArray(value) || value == null ? '' : value
-  const selectedDate = useMemo(() => parseJiraDate(singleValue), [singleValue])
+  const initialValue = Array.isArray(value) || value == null ? '' : value
+
+  const [inputValue, setInputValue] = useState(initialValue)
+  const [isFocused, setIsFocused] = useState(false)
+
+  // Keep local input in sync when external value changes (e.g. mode switches)
+  useEffect(() => {
+    if (isFocused) return
+    setInputValue(initialValue)
+  }, [initialValue, isFocused])
+
+  const debouncedInput = useDebounce(inputValue, {
+    wait: 400,
+    leading: false,
+    trailing: true
+  })
+
+  const preview = useMemo(() => {
+    const parsed = parseSemanticDateValue(debouncedInput)
+    if (parsed.status !== 'valid') return null
+    return { iso: parsed.iso, kind: parsed.kind }
+  }, [debouncedInput])
+
+  const isInvalid = useMemo(() => {
+    const trimmed = debouncedInput.trim()
+    if (!trimmed) return false
+    const parsed = parseSemanticDateValue(trimmed)
+    return parsed.status === 'invalid'
+  }, [debouncedInput])
+
+  const commit = useCallback(
+    (triggerConfirm: boolean) => {
+      const trimmed = inputValue.trim()
+
+      if (!trimmed) {
+        setInputValue('')
+        onChange(null)
+        if (triggerConfirm) onConfirm?.(null)
+        return
+      }
+
+      const parsed = parseSemanticDateValue(trimmed)
+
+      if (parsed.status !== 'valid') {
+        // Keep raw user input; validation happens on save.
+        onChange(trimmed)
+        return
+      }
+
+      if (parsed.kind === 'absolute') {
+        setInputValue(parsed.iso)
+        onChange(parsed.iso)
+        if (triggerConfirm) onConfirm?.(parsed.iso)
+        return
+      }
+
+      // relative
+      setInputValue(trimmed)
+      onChange(trimmed)
+      if (triggerConfirm) onConfirm?.(trimmed)
+    },
+    [inputValue, onChange, onConfirm]
+  )
+
+  const onKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLInputElement>) => {
+      if (e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return
+
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        commit(true)
+        return
+      }
+
+      if (e.key === 'Tab') {
+        commit(true)
+      }
+    },
+    [commit]
+  )
 
   return (
     <InputGroup>
       <InputGroupInput
-        placeholder="YYYY-MM-DD"
-        value={singleValue}
+        placeholder='YYYY-MM-DD or "tomorrow"'
+        value={inputValue}
+        aria-invalid={isInvalid}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => {
+          setIsFocused(false)
+          commit(false)
+        }}
         onChange={(e) => {
-          const nextValue = e.target.value.trim()
-          if (!nextValue) {
-            onChange(null)
-            return
-          }
-
-          onChange(z.iso.date().safeParse(nextValue).data ?? null)
+          const next = e.target.value
+          setInputValue(next)
+          onChange(next)
         }}
-        onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
-          if (e.key !== 'Enter') return
-          if (e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return
-
-          const parsed = z.iso
-            .date()
-            .safeParse(e.currentTarget.value.trim()).data
-          if (!parsed) return
-          onConfirm?.(parsed)
-        }}
+        onKeyDown={onKeyDown}
       />
-      <InputGroupAddon align="inline-start">
-        <Popover>
-          <PopoverTrigger asChild>
-            <InputGroupButton
-              variant="ghost"
-              size="icon-xs"
-              aria-label="Select date">
-              <CalendarIcon />
-              <span className="sr-only">Select date</span>
-            </InputGroupButton>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="end">
-            <Calendar
-              mode="single"
-              selected={selectedDate ?? undefined}
-              onSelect={(date) => {
-                if (date == null) {
-                  onChange(null)
-                  return
-                }
 
-                const next = toJiraDate(date)
-                onChange(next)
-                onConfirm?.(next)
-              }}
-              defaultMonth={selectedDate ?? undefined}
-            />
-          </PopoverContent>
-        </Popover>
-      </InputGroupAddon>
+      {(preview || isInvalid) && (
+        <InputGroupAddon align="block-end" className="text-xs">
+          {isInvalid ? (
+            <InputGroupText className="text-destructive">Invalid date</InputGroupText>
+          ) : preview ? (
+            <InputGroupText className="text-muted-foreground">
+              {preview.kind === 'relative' ? 'Resolves to ' : 'ISO '}
+              <span className="font-mono tabular-nums">{preview.iso}</span>
+            </InputGroupText>
+          ) : null}
+        </InputGroupAddon>
+      )}
     </InputGroup>
   )
 }
