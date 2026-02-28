@@ -18,7 +18,8 @@ export const JiraDateAdapter = defineFieldAdapter({
   labelOf: (val) => {
     if (!val) return ''
     const parsed = parseJiraDate(val)
-    if (!parsed) return ''
+    // If it's not an ISO date, keep the raw text (e.g. "next day") so chips remain readable.
+    if (!parsed) return val
     return formatDateInput(parsed)
   },
 
@@ -37,7 +38,8 @@ export const JiraDatetimeAdapter = defineFieldAdapter({
   labelOf: (val) => {
     if (!val) return ''
     const parsed = parseJiraDate(val)
-    if (!parsed) return ''
+    // If it's not an ISO datetime, keep the raw text (e.g. "tomorrow 9am") so chips remain readable.
+    if (!parsed) return val
     return formatDateTimeInput(parsed)
   },
 
