@@ -62,7 +62,10 @@ function isChronoFullMatch(result: chrono.ParsedResult, input: string) {
   return result.index === 0 && result.text.length === input.length
 }
 
-function detectKind(input: string, result?: chrono.ParsedResult): SemanticTemporalKind {
+function detectKind(
+  input: string,
+  result?: chrono.ParsedResult
+): SemanticTemporalKind {
   const trimmed = input.trim()
 
   // Strong text hints
@@ -78,8 +81,13 @@ function detectKind(input: string, result?: chrono.ParsedResult): SemanticTempor
   }
 
   // If user only specified weekday (no explicit calendar date), treat as relative.
-  const known = result?.start?.knownValues
-  if (known && 'weekday' in known && !('day' in known) && !('month' in known)) {
+  // Use chrono's public certainty checks (avoid private `knownValues`).
+  const start = result?.start
+  if (
+    start?.isCertain('weekday') &&
+    !start.isCertain('day') &&
+    !start.isCertain('month')
+  ) {
     return 'relative'
   }
 

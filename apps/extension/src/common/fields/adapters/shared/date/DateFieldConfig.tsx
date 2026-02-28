@@ -37,18 +37,19 @@ const DateSelect = ({
     trailing: true
   })
 
-  const preview = useMemo(() => {
-    const parsed = parseSemanticDateValue(debouncedInput)
-    if (parsed.status !== 'valid') return null
-    return { iso: parsed.iso, kind: parsed.kind }
+  const parseResult = useMemo(() => {
+    return parseSemanticDateValue(debouncedInput)
   }, [debouncedInput])
+  const preview = useMemo(() => {
+    if (parseResult.status !== 'valid') return null
+    return { iso: parseResult.iso, kind: parseResult.kind }
+  }, [parseResult])
 
   const isInvalid = useMemo(() => {
     const trimmed = debouncedInput.trim()
     if (!trimmed) return false
-    const parsed = parseSemanticDateValue(trimmed)
-    return parsed.status === 'invalid'
-  }, [debouncedInput])
+    return parseResult.status === 'invalid'
+  }, [debouncedInput, parseResult])
 
   const commit = useCallback(
     (triggerConfirm: boolean) => {
