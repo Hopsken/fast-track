@@ -149,9 +149,10 @@ export function FieldRow({
               {field.required && <Badge variant="secondary">Required</Badge>}
             </div>
 
-            {(field.schema.type === 'date' || field.schema.type === 'datetime') && (
-              <span className="text-xs text-muted-foreground">
-                Calculated when creating an issue. Preview uses the current time.
+            {(field.schema.type === 'date' ||
+              field.schema.type === 'datetime') && (
+              <span className="text-muted-foreground text-xs">
+                Relative presets resolve when creating an issue.
               </span>
             )}
           </div>

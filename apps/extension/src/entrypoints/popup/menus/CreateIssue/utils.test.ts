@@ -62,7 +62,7 @@ describe('computeWizardSequence', () => {
   })
 })
 
-describe('buildInitialValues (TU-56 semantic temporal presets)', () => {
+describe('buildInitialValues (TU-56 preset key temporal resolution)', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-01-01T00:00:00.000Z'))
@@ -72,7 +72,7 @@ describe('buildInitialValues (TU-56 semantic temporal presets)', () => {
     vi.useRealTimers()
   })
 
-  it('resolves a relative date preset into ISO at draft init', () => {
+  it('resolves @tomorrow preset key into ISO date at draft init', () => {
     const fields: VisibleField[] = [
       {
         fieldId: 'customfield_date',
@@ -88,7 +88,7 @@ describe('buildInitialValues (TU-56 semantic temporal presets)', () => {
         config: {
           fieldId: 'customfield_date',
           behavior: 'preset',
-          presetValue: 'tomorrow'
+          presetValue: '@tomorrow'
         }
       }
     ]
@@ -97,7 +97,7 @@ describe('buildInitialValues (TU-56 semantic temporal presets)', () => {
     expect(values.customfield_date).toBe('2026-01-02')
   })
 
-  it('resolves a relative datetime preset into ISO datetime at draft init', () => {
+  it('resolves @tomorrow preset key into ISO datetime at draft init', () => {
     const fields: VisibleField[] = [
       {
         fieldId: 'customfield_datetime',
@@ -113,7 +113,7 @@ describe('buildInitialValues (TU-56 semantic temporal presets)', () => {
         config: {
           fieldId: 'customfield_datetime',
           behavior: 'preset',
-          presetValue: 'tomorrow 9am'
+          presetValue: '@tomorrow'
         }
       }
     ]
@@ -122,5 +122,55 @@ describe('buildInitialValues (TU-56 semantic temporal presets)', () => {
     expect(String(values.customfield_datetime)).toMatch(
       /^2026-01-02T09:00:00\.000[+-]\d\d:\d\d$/
     )
+  })
+
+  it('passes through absolute ISO date literal as-is', () => {
+    const fields: VisibleField[] = [
+      {
+        fieldId: 'customfield_date',
+        isEditable: true,
+        metadata: {
+          fieldId: 'customfield_date',
+          key: 'customfield_date',
+          name: 'Target date',
+          required: false,
+          hasDefaultValue: false,
+          schema: { type: 'date' }
+        },
+        config: {
+          fieldId: 'customfield_date',
+          behavior: 'preset',
+          presetValue: '2026-03-15'
+        }
+      }
+    ]
+
+    const values = buildInitialValues(fields)
+    expect(values.customfield_date).toBe('2026-03-15')
+  })
+
+  it('leaves unknown preset key in values unchanged (fallback)', () => {
+    const fields: VisibleField[] = [
+      {
+        fieldId: 'customfield_date',
+        isEditable: true,
+        metadata: {
+          fieldId: 'customfield_date',
+          key: 'customfield_date',
+          name: 'Target date',
+          required: false,
+          hasDefaultValue: false,
+          schema: { type: 'date' }
+        },
+        config: {
+          fieldId: 'customfield_date',
+          behavior: 'preset',
+          presetValue: '@unknown_key'
+        }
+      }
+    ]
+
+    const values = buildInitialValues(fields)
+    expect(values.customfield_date).toBe('@unknown_key')
   })
 })

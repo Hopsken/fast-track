@@ -21,7 +21,9 @@ describe('FieldList', () => {
 
     expect(screen.getByText('Loading fields...')).toBeTruthy()
     expect(container.querySelector('[data-slot="command-list"]')).toBeTruthy()
-    expect(screen.queryByText('No fields available for this template')).toBeNull()
+    expect(
+      screen.queryByText('No fields available for this template')
+    ).toBeNull()
   })
 
   it('shows an explicit empty state when no fields are available', () => {

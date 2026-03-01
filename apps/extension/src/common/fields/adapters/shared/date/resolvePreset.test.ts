@@ -1,0 +1,112 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { getTemporalLabel, resolveTemporalValue } from './resolvePreset'
+
+const REF = new Date('2026-01-05T00:00:00.000') // Monday Jan 5 2026, local midnight
+
+describe('resolveTemporalValue — date mode', () => {
+  it('resolves @today preset', () => {
+    const result = resolveTemporalValue('@today', 'date', REF)
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.iso).toBe('2026-01-05')
+    expect(result.label).toBe('Today')
+  })
+
+  it('resolves @tomorrow preset', () => {
+    const result = resolveTemporalValue('@tomorrow', 'date', REF)
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.iso).toBe('2026-01-06')
+    expect(result.label).toBe('Tomorrow')
+  })
+
+  it('resolves @+3d preset', () => {
+    const result = resolveTemporalValue('@+3d', 'date', REF)
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.iso).toBe('2026-01-08')
+  })
+
+  it('resolves @+1w preset', () => {
+    const result = resolveTemporalValue('@+1w', 'date', REF)
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.iso).toBe('2026-01-12')
+  })
+
+  it('passes through ISO literal date', () => {
+    const result = resolveTemporalValue('2026-03-15', 'date', REF)
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.iso).toBe('2026-03-15')
+  })
+
+  it('returns ok:false for unknown preset key', () => {
+    const result = resolveTemporalValue('@unknown', 'date', REF)
+    expect(result.ok).toBe(false)
+  })
+
+  it('returns ok:false for invalid string', () => {
+    const result = resolveTemporalValue('not-a-date', 'date', REF)
+    expect(result.ok).toBe(false)
+  })
+
+  it('returns ok:false for empty string', () => {
+    const result = resolveTemporalValue('', 'date', REF)
+    expect(result.ok).toBe(false)
+  })
+})
+
+describe('resolveTemporalValue — datetime mode', () => {
+  it('resolves @tomorrow preset with 9:00 AM time', () => {
+    const result = resolveTemporalValue('@tomorrow', 'datetime', REF)
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    // ISO should contain 2026-01-06 with time component
+    expect(result.iso).toMatch(/^2026-01-06T09:00:00\.000/)
+    expect(result.label).toBe('Tomorrow')
+  })
+
+  it('passes through ISO datetime literal', () => {
+    const result = resolveTemporalValue(
+      '2026-03-15T14:30:00.000+00:00',
+      'datetime',
+      REF
+    )
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.iso).toMatch(/^2026-03-15T/)
+  })
+})
+
+describe('getTemporalLabel', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(REF)
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('returns preset label for preset key', () => {
+    expect(getTemporalLabel('@tomorrow', 'date')).toBe('Tomorrow')
+    expect(getTemporalLabel('@today', 'date')).toBe('Today')
+  })
+
+  it('returns formatted date for ISO literal', () => {
+    const label = getTemporalLabel('2026-03-15', 'date')
+    expect(label).toBe('Mar 15, 2026')
+  })
+
+  it('returns formatted datetime for ISO datetime literal', () => {
+    const label = getTemporalLabel('2026-03-15T09:00:00.000+00:00', 'datetime')
+    expect(label).toMatch(/Mar 15, 2026/)
+  })
+
+  it('returns raw value for unrecognized input', () => {
+    expect(getTemporalLabel('@unknown', 'date')).toBe('@unknown')
+    expect(getTemporalLabel('garbage', 'date')).toBe('garbage')
+  })
+})

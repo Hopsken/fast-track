@@ -2,13 +2,13 @@ import { z } from 'zod'
 
 import { defineFieldAdapter } from '@/common/fields/types'
 import { JiraDateTimeSchema } from '@/repository/schema'
-import { formatDateInput, formatDateTimeInput } from '@/utils/date-format'
 
 import { DateFieldConfig } from './DateFieldConfig'
 import { DateInput } from './DateInput'
 import { parseJiraDate, toJiraDate, toJiraDateTime } from './dateParsing'
 import { DatetimeFieldConfig } from './DatetimeFieldConfig'
 import { DateTimeInput } from './DateTimeInput'
+import { getTemporalLabel } from './resolvePreset'
 
 // Date and datetime are internally just plain strings
 export const JiraDateAdapter = defineFieldAdapter({
@@ -17,10 +17,7 @@ export const JiraDateAdapter = defineFieldAdapter({
   keyOf: (val) => val,
   labelOf: (val) => {
     if (!val) return ''
-    const parsed = parseJiraDate(val)
-    // If it's not an ISO date, keep the raw text (e.g. "next day") so chips remain readable.
-    if (!parsed) return val
-    return formatDateInput(parsed)
+    return getTemporalLabel(val, 'date')
   },
 
   InputComponent: DateInput,
@@ -37,10 +34,7 @@ export const JiraDatetimeAdapter = defineFieldAdapter({
   keyOf: (val) => val,
   labelOf: (val) => {
     if (!val) return ''
-    const parsed = parseJiraDate(val)
-    // If it's not an ISO datetime, keep the raw text (e.g. "tomorrow 9am") so chips remain readable.
-    if (!parsed) return val
-    return formatDateTimeInput(parsed)
+    return getTemporalLabel(val, 'datetime')
   },
 
   InputComponent: DateTimeInput,

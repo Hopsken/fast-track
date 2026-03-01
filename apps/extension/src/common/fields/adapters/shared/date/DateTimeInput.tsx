@@ -10,30 +10,13 @@ import {
 import { formatDateTimeDisplay, formatDateTimeISO } from '@/utils/date-format'
 
 import { FieldInputComponentProps } from '../../../types'
-
 import { GenericSelectInput } from '../select/GenericSelectInput'
 
-import { parseNaturalDateTime, parseSemanticDateTimeValue, toJiraDateTime } from './dateParsing'
+import { parseNaturalDateTime, toJiraDateTime } from './dateParsing'
+import { resolveTemporalValue } from './resolvePreset'
 
 export const DateTimeInput = (props: FieldInputComponentProps<ZodString>) => {
   const { onChange, onConfirm } = props
-
-
-  // TU-56: restricted mode should use the curated allowedOptions list.
-  // Resolve semantic expressions to ISO immediately so the draft value is concrete.
-  if (props.config?.behavior === 'restricted' && props.config.allowedOptions?.length) {
-    return (
-      <GenericSelectInput
-        {...props}
-        onChange={(next) => {
-          if (typeof next !== 'string') return onChange(next as any)
-          const parsed = parseSemanticDateTimeValue(next, { referenceDate: new Date() })
-          if (parsed.status === 'valid') return onChange(parsed.iso as any)
-          return onChange(next as any)
-        }}
-      />
-    )
-  }
 
   const [search, setSearch] = useState('')
 
@@ -48,6 +31,23 @@ export const DateTimeInput = (props: FieldInputComponentProps<ZodString>) => {
     return formatDateTimeDisplay(parsedDateTime)
   }, [parsedDateTime])
 
+  // TU-56: restricted mode — resolve preset keys to ISO at selection time
+  if (
+    props.config?.behavior === 'restricted' &&
+    props.config.allowedOptions?.length
+  ) {
+    return (
+      <GenericSelectInput
+        {...props}
+        onChange={(next) => {
+          if (typeof next !== 'string') return onChange(next as null)
+          const result = resolveTemporalValue(next, 'datetime')
+          return onChange((result.ok ? result.iso : next) as string)
+        }}
+      />
+    )
+  }
+
   const handleSelect = () => {
     const trimmed = search?.trim()
     if (!trimmed) {
@@ -59,7 +59,6 @@ export const DateTimeInput = (props: FieldInputComponentProps<ZodString>) => {
     if (parsedDateTime) {
       onChange(toJiraDateTime(parsedDateTime))
     } else {
-      // Keep raw input for backward compatibility
       onChange(trimmed)
     }
     onConfirm()

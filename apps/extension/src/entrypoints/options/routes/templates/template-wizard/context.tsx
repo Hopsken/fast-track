@@ -329,10 +329,13 @@ export function TemplateWizardProvider(props: ProviderProps) {
     const validationErrors: string[] = []
     const fieldMap = new Map(availableFields.map((f) => [f.fieldId, f]))
 
-    // Import lazily to avoid pulling chrono into unrelated code paths.
-    const { parseSemanticDateValue, parseSemanticDateTimeValue } = await import(
+    const { isPresetKey, getDatePreset, getDatetimePreset } = await import(
+      '@/common/fields/adapters/shared/date/temporalPresets'
+    )
+    const { parseJiraDate } = await import(
       '@/common/fields/adapters/shared/date/dateParsing'
     )
+    const { isValid, parseISO } = await import('date-fns')
 
     const normalizedFieldsConfig: FieldConfig[] = []
 
@@ -340,7 +343,7 @@ export function TemplateWizardProvider(props: ProviderProps) {
       const field = fieldMap.get(config.fieldId)
       const fieldName = field?.name ?? config.fieldId
 
-      let nextConfig = config
+      const nextConfig = config
 
       if (config.behavior === 'restricted') {
         // Restricted must have at least one option
@@ -353,33 +356,41 @@ export function TemplateWizardProvider(props: ProviderProps) {
 
       const schemaType = field?.schema?.type
       if (schemaType === 'date' || schemaType === 'datetime') {
-        const parse =
-          schemaType === 'date' ? parseSemanticDateValue : parseSemanticDateTimeValue
-
-        const normalizeOne = (raw: string) => {
+        const validateOne = (raw: string) => {
           const trimmed = raw.trim()
-          if (!trimmed) return { kind: 'empty' as const, value: '' }
+          if (!trimmed) return { kind: 'empty' as const }
 
-          const parsed = parse(trimmed)
-          if (parsed.status === 'invalid') {
-            return { kind: 'invalid' as const, value: trimmed }
-          }
-          if (parsed.status !== 'valid') {
-            return { kind: 'empty' as const, value: '' }
+          if (isPresetKey(trimmed)) {
+            const preset =
+              schemaType === 'date'
+                ? getDatePreset(trimmed)
+                : getDatetimePreset(trimmed)
+            if (!preset) return { kind: 'invalid' as const }
+            return { kind: 'valid' as const, value: trimmed }
           }
 
-          return {
-            kind: 'valid' as const,
-            value: parsed.kind === 'absolute' ? parsed.iso : trimmed
+          // ISO literal
+          if (schemaType === 'date') {
+            const parsed = parseJiraDate(trimmed)
+            if (!parsed) return { kind: 'invalid' as const }
+            return { kind: 'valid' as const, value: trimmed }
           }
+
+          // datetime ISO
+          const parsed = parseISO(trimmed)
+          if (!isValid(parsed)) return { kind: 'invalid' as const }
+          return { kind: 'valid' as const, value: trimmed }
         }
 
-        if (config.behavior === 'preset' && typeof config.presetValue === 'string') {
-          const out = normalizeOne(config.presetValue)
+        if (
+          config.behavior === 'preset' &&
+          typeof config.presetValue === 'string'
+        ) {
+          const out = validateOne(config.presetValue)
           if (out.kind === 'invalid') {
-            validationErrors.push(`${fieldName}: Invalid ${schemaType} preset value.`)
-          } else if (out.kind === 'valid' && out.value !== config.presetValue) {
-            nextConfig = { ...config, presetValue: out.value }
+            validationErrors.push(
+              `${fieldName}: Invalid ${schemaType} preset value.`
+            )
           }
         }
 
@@ -388,26 +399,15 @@ export function TemplateWizardProvider(props: ProviderProps) {
           Array.isArray(config.allowedOptions) &&
           config.allowedOptions.length > 0
         ) {
-          let changed = false
-          const nextAllowed = config.allowedOptions.map((opt) => {
-            if (typeof opt !== 'string') return opt
-            const out = normalizeOne(opt)
+          config.allowedOptions.forEach((opt) => {
+            if (typeof opt !== 'string') return
+            const out = validateOne(opt)
             if (out.kind === 'invalid') {
               validationErrors.push(
                 `${fieldName}: Invalid ${schemaType} restricted option: ${opt}`
               )
-              return opt
             }
-            if (out.kind === 'valid' && out.value !== opt) {
-              changed = true
-              return out.value
-            }
-            return opt
           })
-
-          if (changed) {
-            nextConfig = { ...nextConfig, allowedOptions: nextAllowed }
-          }
         }
       }
 
