@@ -152,7 +152,8 @@ export function FieldRow({
             {(field.schema.type === 'date' ||
               field.schema.type === 'datetime') && (
               <span className="text-muted-foreground text-xs">
-                Relative presets resolve when creating an issue.
+                Relative presets resolve when creating an issue — not when
+                editing this template.
               </span>
             )}
           </div>
