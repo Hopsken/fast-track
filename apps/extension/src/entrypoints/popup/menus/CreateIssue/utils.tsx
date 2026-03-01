@@ -71,8 +71,13 @@ export function buildInitialValues(
   }
 
   for (const field of fields) {
-    const presetValue = field.config?.presetValue
-    if (!presetValue) continue
+    // Only preset behavior should auto-fill a value into the draft.
+    if (field.config?.behavior !== 'preset') continue
+
+    const presetValue = field.config.presetValue
+    if (presetValue === undefined || presetValue === null || presetValue === '') {
+      continue
+    }
 
     // TU-56: resolve preset keys / ISO literals once at draft init (WYSIWYG)
     if (typeof presetValue === 'string') {

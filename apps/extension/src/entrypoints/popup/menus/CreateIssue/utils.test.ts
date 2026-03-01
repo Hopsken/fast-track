@@ -173,4 +173,32 @@ describe('buildInitialValues (TU-56 preset key temporal resolution)', () => {
     const values = buildInitialValues(fields)
     expect(values.customfield_date).toBe('@unknown_key')
   })
+
+  it('does not apply presetValue when behavior is restricted', () => {
+    const fields: VisibleField[] = [
+      {
+        fieldId: 'customfield_date',
+        isEditable: true,
+        metadata: {
+          fieldId: 'customfield_date',
+          key: 'customfield_date',
+          name: 'Target date',
+          required: false,
+          hasDefaultValue: false,
+          schema: { type: 'date' }
+        },
+        config: {
+          fieldId: 'customfield_date',
+          behavior: 'restricted',
+          // This can exist due to mode switching; should be ignored.
+          presetValue: '@tomorrow',
+          allowedOptions: ['@tomorrow', '@today']
+        }
+      }
+    ]
+
+    const values = buildInitialValues(fields)
+    expect(values.customfield_date).toBeUndefined()
+  })
+
 })
