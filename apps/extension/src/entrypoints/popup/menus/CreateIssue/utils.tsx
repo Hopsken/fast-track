@@ -102,7 +102,11 @@ export function buildInitialValues(
     if (config.behavior !== 'preset') continue
 
     const presetValue = config.presetValue
-    if (presetValue === undefined || presetValue === null || presetValue === '') {
+    if (
+      presetValue === undefined ||
+      presetValue === null ||
+      presetValue === ''
+    ) {
       continue
     }
 

@@ -201,7 +201,6 @@ describe('buildInitialValues (TU-56 preset key temporal resolution)', () => {
     expect(values.customfield_date).toBeUndefined()
   })
 
-
   it('auto-fills restricted value when there is exactly one allowed option', () => {
     const fields: VisibleField[] = [
       {
@@ -226,5 +225,4 @@ describe('buildInitialValues (TU-56 preset key temporal resolution)', () => {
     const values = buildInitialValues(fields)
     expect(values.customfield_date).toBe('2026-01-02')
   })
-
 })
