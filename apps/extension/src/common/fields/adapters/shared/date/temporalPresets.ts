@@ -1,4 +1,11 @@
-import { addDays, addMonths, addWeeks, nextMonday, startOfDay } from 'date-fns'
+import {
+  addDays,
+  addHours,
+  addMonths,
+  addWeeks,
+  nextMonday,
+  startOfDay
+} from 'date-fns'
 
 export type TemporalPreset = {
   key: string
@@ -50,10 +57,31 @@ export const DATE_PRESETS: TemporalPreset[] = [
   }
 ]
 
-export const DATETIME_PRESETS: TemporalPreset[] = DATE_PRESETS.map((p) => ({
-  ...p,
-  resolve: (ref: Date) => withTime(p.resolve(ref), 9, 0)
-}))
+export const DATETIME_PRESETS: TemporalPreset[] = [
+  { key: '@+1h', label: 'In 1 hour', resolve: (ref) => addHours(ref, 1) },
+  { key: '@+2h', label: 'In 2 hours', resolve: (ref) => addHours(ref, 2) },
+  { key: '@+4h', label: 'In 4 hours', resolve: (ref) => addHours(ref, 4) },
+  {
+    key: '@eod',
+    label: 'End of day',
+    resolve: (ref) => withTime(startOfDay(ref), 17, 0)
+  },
+  {
+    key: '@tomorrow',
+    label: 'Tomorrow 9am',
+    resolve: (ref) => withTime(startOfDay(addDays(ref, 1)), 9, 0)
+  },
+  {
+    key: '@next_monday',
+    label: 'Next Mon 9am',
+    resolve: (ref) => withTime(nextMonday(ref), 9, 0)
+  },
+  {
+    key: '@+1w',
+    label: 'In 1 week',
+    resolve: (ref) => withTime(addWeeks(ref, 1), 9, 0)
+  }
+]
 
 export const isPresetKey = (value: string): boolean => value.startsWith('@')
 

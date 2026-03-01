@@ -1,4 +1,11 @@
-import { addDays, addMonths, addWeeks, nextMonday, startOfDay } from 'date-fns'
+import {
+  addDays,
+  addHours,
+  addMonths,
+  addWeeks,
+  nextMonday,
+  startOfDay
+} from 'date-fns'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -76,26 +83,59 @@ describe('DATE_PRESETS', () => {
 })
 
 describe('DATETIME_PRESETS', () => {
-  it('has the same keys as DATE_PRESETS', () => {
-    expect(DATETIME_PRESETS.map((p) => p.key)).toEqual(
-      DATE_PRESETS.map((p) => p.key)
-    )
+  it('has the expected keys', () => {
+    expect(DATETIME_PRESETS.map((p) => p.key)).toEqual([
+      '@+1h',
+      '@+2h',
+      '@+4h',
+      '@eod',
+      '@tomorrow',
+      '@next_monday',
+      '@+1w'
+    ])
+  })
+
+  it('@+1h resolves to ref + 1 hour', () => {
+    const preset = getDatetimePreset('@+1h')!
+    expect(preset.resolve(REF)).toEqual(addHours(REF, 1))
+  })
+
+  it('@+2h resolves to ref + 2 hours', () => {
+    const preset = getDatetimePreset('@+2h')!
+    expect(preset.resolve(REF)).toEqual(addHours(REF, 2))
+  })
+
+  it('@+4h resolves to ref + 4 hours', () => {
+    const preset = getDatetimePreset('@+4h')!
+    expect(preset.resolve(REF)).toEqual(addHours(REF, 4))
+  })
+
+  it('@eod resolves to today at 17:00', () => {
+    const preset = getDatetimePreset('@eod')!
+    const expected = startOfDay(REF)
+    expected.setHours(17, 0, 0, 0)
+    expect(preset.resolve(REF)).toEqual(expected)
   })
 
   it('@tomorrow resolves to next day at 9:00 AM', () => {
     const preset = getDatetimePreset('@tomorrow')!
-    const resolved = preset.resolve(REF)
     const expected = startOfDay(addDays(REF, 1))
     expected.setHours(9, 0, 0, 0)
-    expect(resolved).toEqual(expected)
+    expect(preset.resolve(REF)).toEqual(expected)
   })
 
-  it('@today resolves to today at 9:00 AM', () => {
-    const preset = getDatetimePreset('@today')!
-    const resolved = preset.resolve(REF)
-    const expected = startOfDay(REF)
+  it('@next_monday resolves to next Monday at 9:00 AM', () => {
+    const preset = getDatetimePreset('@next_monday')!
+    const expected = new Date(nextMonday(REF))
     expected.setHours(9, 0, 0, 0)
-    expect(resolved).toEqual(expected)
+    expect(preset.resolve(REF)).toEqual(expected)
+  })
+
+  it('@+1w resolves to 1 week from ref at 9:00 AM', () => {
+    const preset = getDatetimePreset('@+1w')!
+    const expected = addWeeks(REF, 1)
+    expected.setHours(9, 0, 0, 0)
+    expect(preset.resolve(REF)).toEqual(expected)
   })
 })
 

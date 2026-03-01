@@ -59,13 +59,28 @@ describe('resolveTemporalValue — date mode', () => {
 })
 
 describe('resolveTemporalValue — datetime mode', () => {
+  it('resolves @+1h preset to ref + 1 hour', () => {
+    const result = resolveTemporalValue('@+1h', 'datetime', REF)
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.iso).toMatch(/^2026-01-05T01:00:00\.000/)
+    expect(result.label).toBe('In 1 hour')
+  })
+
+  it('resolves @eod preset to today at 17:00', () => {
+    const result = resolveTemporalValue('@eod', 'datetime', REF)
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.iso).toMatch(/^2026-01-05T17:00:00\.000/)
+    expect(result.label).toBe('End of day')
+  })
+
   it('resolves @tomorrow preset with 9:00 AM time', () => {
     const result = resolveTemporalValue('@tomorrow', 'datetime', REF)
     expect(result.ok).toBe(true)
     if (!result.ok) return
-    // ISO should contain 2026-01-06 with time component
     expect(result.iso).toMatch(/^2026-01-06T09:00:00\.000/)
-    expect(result.label).toBe('Tomorrow')
+    expect(result.label).toBe('Tomorrow 9am')
   })
 
   it('passes through ISO datetime literal', () => {
