@@ -6,7 +6,7 @@ import {
   PopoverTrigger
 } from '@internal/ui/components/popover'
 import { cn } from '@internal/ui/lib/utils'
-import { CalendarIcon, ClockIcon } from 'lucide-react'
+import { CalendarIcon, ClockIcon, InfoIcon } from 'lucide-react'
 
 import { SelectComponentProps } from '../../../types'
 

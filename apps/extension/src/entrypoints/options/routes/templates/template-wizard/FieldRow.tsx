@@ -148,14 +148,6 @@ export function FieldRow({
               <span className="text-sm font-medium">{field.name}</span>
               {field.required && <Badge variant="secondary">Required</Badge>}
             </div>
-
-            {(field.schema.type === 'date' ||
-              field.schema.type === 'datetime') && (
-              <span className="text-muted-foreground text-xs">
-                Relative presets resolve when creating an issue — not when
-                editing this template.
-              </span>
-            )}
           </div>
 
           {/* Right: mode toggle + reorder + remove */}
