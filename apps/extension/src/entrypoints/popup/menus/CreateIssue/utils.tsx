@@ -2,6 +2,7 @@ import { ReactNode } from 'react'
 import { isEmpty, mapValues } from 'lodash-es'
 
 import { getFieldAdapter } from '@/common/fields'
+import { resolveTemporalValue } from '@/common/fields/adapters/shared/date/resolvePreset'
 import { FieldAdapter } from '@/common/fields/types'
 import { JiraFieldMetadata } from '@/repository/schema'
 import { VisibleField } from '@/services/template-service/gap-analysis'
@@ -31,7 +32,10 @@ export function formatValuePreview(
 
   if (Array.isArray(value)) {
     const labels = value
-      .map((v) => adapter.labelOf?.(v) ?? adapter.keyOf(v))
+      .map(
+        (v) =>
+          (adapter.semanticLabelOf ?? adapter.labelOf)?.(v) ?? adapter.keyOf(v)
+      )
       .map((label) => label.trim())
       .filter(Boolean)
 
@@ -52,7 +56,10 @@ export function formatValuePreview(
     )
   }
 
-  return adapter.labelOf?.(value) ?? adapter.keyOf(value)
+  return (
+    (adapter.semanticLabelOf ?? adapter.labelOf)?.(value) ??
+    adapter.keyOf(value)
+  )
 }
 
 export function buildInitialValues(
@@ -66,6 +73,23 @@ export function buildInitialValues(
   for (const field of fields) {
     const presetValue = field.config?.presetValue
     if (!presetValue) continue
+
+    // TU-56: resolve preset keys / ISO literals once at draft init (WYSIWYG)
+    if (typeof presetValue === 'string') {
+      const schemaType = field.metadata.schema.type
+
+      if (schemaType === 'date' || schemaType === 'datetime') {
+        const result = resolveTemporalValue(
+          presetValue,
+          schemaType as 'date' | 'datetime'
+        )
+        if (result.ok) {
+          values[field.fieldId] = result.iso
+          continue
+        }
+      }
+    }
+
     values[field.fieldId] = presetValue
   }
   return values

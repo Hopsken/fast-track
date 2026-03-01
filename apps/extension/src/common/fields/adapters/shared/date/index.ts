@@ -2,13 +2,13 @@ import { z } from 'zod'
 
 import { defineFieldAdapter } from '@/common/fields/types'
 import { JiraDateTimeSchema } from '@/repository/schema'
-import { formatDateInput, formatDateTimeInput } from '@/utils/date-format'
 
 import { DateFieldConfig } from './DateFieldConfig'
 import { DateInput } from './DateInput'
 import { parseJiraDate, toJiraDate, toJiraDateTime } from './dateParsing'
 import { DatetimeFieldConfig } from './DatetimeFieldConfig'
 import { DateTimeInput } from './DateTimeInput'
+import { getSemanticTemporalLabel, getTemporalLabel } from './resolvePreset'
 
 // Date and datetime are internally just plain strings
 export const JiraDateAdapter = defineFieldAdapter({
@@ -17,9 +17,11 @@ export const JiraDateAdapter = defineFieldAdapter({
   keyOf: (val) => val,
   labelOf: (val) => {
     if (!val) return ''
-    const parsed = parseJiraDate(val)
-    if (!parsed) return ''
-    return formatDateInput(parsed)
+    return getTemporalLabel(val, 'date')
+  },
+  semanticLabelOf: (val) => {
+    if (!val) return ''
+    return getSemanticTemporalLabel(val, 'date')
   },
 
   InputComponent: DateInput,
@@ -36,9 +38,11 @@ export const JiraDatetimeAdapter = defineFieldAdapter({
   keyOf: (val) => val,
   labelOf: (val) => {
     if (!val) return ''
-    const parsed = parseJiraDate(val)
-    if (!parsed) return ''
-    return formatDateTimeInput(parsed)
+    return getTemporalLabel(val, 'datetime')
+  },
+  semanticLabelOf: (val) => {
+    if (!val) return ''
+    return getSemanticTemporalLabel(val, 'datetime')
   },
 
   InputComponent: DateTimeInput,

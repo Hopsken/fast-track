@@ -329,9 +329,21 @@ export function TemplateWizardProvider(props: ProviderProps) {
     const validationErrors: string[] = []
     const fieldMap = new Map(availableFields.map((f) => [f.fieldId, f]))
 
+    const { isPresetKey, getDatePreset, getDatetimePreset } = await import(
+      '@/common/fields/adapters/shared/date/temporalPresets'
+    )
+    const { parseJiraDate } = await import(
+      '@/common/fields/adapters/shared/date/dateParsing'
+    )
+    const { isValid, parseISO } = await import('date-fns')
+
+    const normalizedFieldsConfig: FieldConfig[] = []
+
     for (const config of fieldsConfig) {
       const field = fieldMap.get(config.fieldId)
       const fieldName = field?.name ?? config.fieldId
+
+      const nextConfig = config
 
       if (config.behavior === 'restricted') {
         // Restricted must have at least one option
@@ -341,6 +353,65 @@ export function TemplateWizardProvider(props: ProviderProps) {
           )
         }
       }
+
+      const schemaType = field?.schema?.type
+      if (schemaType === 'date' || schemaType === 'datetime') {
+        const validateOne = (raw: string) => {
+          const trimmed = raw.trim()
+          if (!trimmed) return { kind: 'empty' as const }
+
+          if (isPresetKey(trimmed)) {
+            const preset =
+              schemaType === 'date'
+                ? getDatePreset(trimmed)
+                : getDatetimePreset(trimmed)
+            if (!preset) return { kind: 'invalid' as const }
+            return { kind: 'valid' as const, value: trimmed }
+          }
+
+          // ISO literal
+          if (schemaType === 'date') {
+            const parsed = parseJiraDate(trimmed)
+            if (!parsed) return { kind: 'invalid' as const }
+            return { kind: 'valid' as const, value: trimmed }
+          }
+
+          // datetime ISO
+          const parsed = parseISO(trimmed)
+          if (!isValid(parsed)) return { kind: 'invalid' as const }
+          return { kind: 'valid' as const, value: trimmed }
+        }
+
+        if (
+          config.behavior === 'preset' &&
+          typeof config.presetValue === 'string'
+        ) {
+          const out = validateOne(config.presetValue)
+          if (out.kind === 'invalid') {
+            validationErrors.push(
+              `${fieldName}: Invalid ${schemaType} preset value.`
+            )
+          }
+        }
+
+        if (
+          config.behavior === 'restricted' &&
+          Array.isArray(config.allowedOptions) &&
+          config.allowedOptions.length > 0
+        ) {
+          config.allowedOptions.forEach((opt) => {
+            if (typeof opt !== 'string') return
+            const out = validateOne(opt)
+            if (out.kind === 'invalid') {
+              validationErrors.push(
+                `${fieldName}: Invalid ${schemaType} restricted option: ${opt}`
+              )
+            }
+          })
+        }
+      }
+
+      normalizedFieldsConfig.push(nextConfig)
     }
 
     if (validationErrors.length > 0) {
@@ -361,7 +432,7 @@ export function TemplateWizardProvider(props: ProviderProps) {
         await svc.updateTemplate(existingTemplate.id, {
           name: newName,
           icon: emoji,
-          fields: fieldsConfig,
+          fields: normalizedFieldsConfig,
           description: description.trim()
         })
         props.onSaved()
@@ -374,7 +445,7 @@ export function TemplateWizardProvider(props: ProviderProps) {
             project: scope.project,
             issueType: scope.issueType
           },
-          fields: fieldsConfig,
+          fields: normalizedFieldsConfig,
           description: description.trim()
         })
         ;(props as { onCreated: (id: string) => void })?.onCreated(created.id)

@@ -10,8 +10,10 @@ import {
 import { formatDateTimeDisplay, formatDateTimeISO } from '@/utils/date-format'
 
 import { FieldInputComponentProps } from '../../../types'
+import { GenericSelectInput } from '../select/GenericSelectInput'
 
 import { parseNaturalDateTime, toJiraDateTime } from './dateParsing'
+import { resolveTemporalValue } from './resolvePreset'
 
 export const DateTimeInput = (props: FieldInputComponentProps<ZodString>) => {
   const { onChange, onConfirm } = props
@@ -29,6 +31,23 @@ export const DateTimeInput = (props: FieldInputComponentProps<ZodString>) => {
     return formatDateTimeDisplay(parsedDateTime)
   }, [parsedDateTime])
 
+  // TU-56: restricted mode — resolve preset keys to ISO at selection time
+  if (
+    props.config?.behavior === 'restricted' &&
+    props.config.allowedOptions?.length
+  ) {
+    return (
+      <GenericSelectInput
+        {...props}
+        onChange={(next) => {
+          if (typeof next !== 'string') return onChange(next as null)
+          const result = resolveTemporalValue(next, 'datetime')
+          return onChange((result.ok ? result.iso : next) as string)
+        }}
+      />
+    )
+  }
+
   const handleSelect = () => {
     const trimmed = search?.trim()
     if (!trimmed) {
@@ -40,7 +59,6 @@ export const DateTimeInput = (props: FieldInputComponentProps<ZodString>) => {
     if (parsedDateTime) {
       onChange(toJiraDateTime(parsedDateTime))
     } else {
-      // Keep raw input for backward compatibility
       onChange(trimmed)
     }
     onConfirm()

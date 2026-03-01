@@ -7,11 +7,12 @@ import {
   ActionList,
   ActionPanel
 } from '@/common/commands'
-import { formatDateDisplay } from '@/utils/date-format'
 
 import type { FieldInputComponentProps } from '../../../types'
+import { GenericSelectInput } from '../select/GenericSelectInput'
 
 import { parseNaturalDate, toJiraDate } from './dateParsing'
+import { getSemanticTemporalLabel, resolveTemporalValue } from './resolvePreset'
 
 export const DateInput = (props: FieldInputComponentProps<ZodString>) => {
   const { value, onChange, onConfirm } = props
@@ -26,8 +27,25 @@ export const DateInput = (props: FieldInputComponentProps<ZodString>) => {
 
   const displayDate = useMemo(() => {
     if (!parsedDate) return null
-    return formatDateDisplay(parsedDate)
+    return getSemanticTemporalLabel(toJiraDate(parsedDate), 'date')
   }, [parsedDate])
+
+  // TU-56: restricted mode — resolve preset keys to ISO at selection time
+  if (
+    props.config?.behavior === 'restricted' &&
+    props.config.allowedOptions?.length
+  ) {
+    return (
+      <GenericSelectInput
+        {...props}
+        onChange={(next) => {
+          if (typeof next !== 'string') return onChange(next as null)
+          const result = resolveTemporalValue(next, 'date')
+          return onChange((result.ok ? result.iso : next) as string)
+        }}
+      />
+    )
+  }
 
   const handleSelect = () => {
     const trimmed = search.trim()
@@ -40,7 +58,6 @@ export const DateInput = (props: FieldInputComponentProps<ZodString>) => {
     if (parsedDate) {
       onChange(toJiraDate(parsedDate))
     } else {
-      // Keep raw input for backward compatibility
       onChange(trimmed)
     }
     onConfirm()

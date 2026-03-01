@@ -87,13 +87,14 @@ export const RestrictedValueBuilder = <
           {values.map((item, index) => (
             <div
               key={adapter.keyOf(item)}
-              className="bg-muted text-foreground flex h-[calc(--spacing(5.5))] w-fit items-center justify-center gap-1 whitespace-nowrap rounded-sm px-1.5 text-xs font-medium">
+              className="bg-muted text-foreground flex h-7 w-fit items-center justify-center gap-1.5 whitespace-nowrap rounded-sm px-2 text-xs font-medium">
               {renderIcon(item)}
               {renderLabel(item)}
               <Button
                 variant="ghost"
                 size="icon-xs"
-                className="-ml-1 opacity-50 hover:opacity-100"
+                aria-label="Remove"
+                className="-ml-0.5 opacity-50 hover:opacity-100"
                 onClick={() => handleRemove(index)}>
                 <XIcon className="pointer-events-none" />
               </Button>
@@ -111,16 +112,16 @@ export const RestrictedValueBuilder = <
             onConfirm={(next) => commitAdd(next as Item | Item[] | null)}
           />
 
-          <div className="mt-1 flex items-center gap-1">
+          <div className="mt-2 flex items-center gap-1.5">
             <Button
-              size="xs"
+              size="sm"
               onClick={() => commitAdd(draftItem)}
               disabled={!canAdd}>
               Add
             </Button>
             <Button
               variant="ghost"
-              size="xs"
+              size="sm"
               onClick={() => {
                 setDraftItem(null)
                 setIsAdding(false)
@@ -132,7 +133,7 @@ export const RestrictedValueBuilder = <
       ) : (
         <Button
           variant="ghost"
-          size="xs"
+          size="sm"
           className="text-muted-foreground"
           onClick={() => {
             setDraftItem(null)
