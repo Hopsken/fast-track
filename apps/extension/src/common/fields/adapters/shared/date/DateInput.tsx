@@ -7,13 +7,12 @@ import {
   ActionList,
   ActionPanel
 } from '@/common/commands'
-import { formatDateDisplay } from '@/utils/date-format'
 
 import type { FieldInputComponentProps } from '../../../types'
 import { GenericSelectInput } from '../select/GenericSelectInput'
 
 import { parseNaturalDate, toJiraDate } from './dateParsing'
-import { resolveTemporalValue } from './resolvePreset'
+import { getSemanticTemporalLabel, resolveTemporalValue } from './resolvePreset'
 
 export const DateInput = (props: FieldInputComponentProps<ZodString>) => {
   const { value, onChange, onConfirm } = props
@@ -28,7 +27,7 @@ export const DateInput = (props: FieldInputComponentProps<ZodString>) => {
 
   const displayDate = useMemo(() => {
     if (!parsedDate) return null
-    return formatDateDisplay(parsedDate)
+    return getSemanticTemporalLabel(toJiraDate(parsedDate), 'date')
   }, [parsedDate])
 
   // TU-56: restricted mode — resolve preset keys to ISO at selection time

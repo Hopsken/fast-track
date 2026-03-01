@@ -153,16 +153,53 @@ describe('getSemanticTemporalLabel', () => {
     expect(getSemanticTemporalLabel('2026-01-05', 'date')).toBe('Today')
   })
 
-  it('ISO tomorrow → "Tomorrow, Jan 6" (date mode)', () => {
-    expect(getSemanticTemporalLabel('2026-01-06', 'date')).toBe(
-      'Tomorrow, Jan 6'
+  it('ISO tomorrow → "Tomorrow" (date mode)', () => {
+    expect(getSemanticTemporalLabel('2026-01-06', 'date')).toBe('Tomorrow')
+  })
+
+  it('ISO yesterday → "Yesterday" (date mode)', () => {
+    expect(getSemanticTemporalLabel('2026-01-04', 'date')).toBe('Yesterday')
+  })
+
+  // Current week: diff +2 to +6 → weekday only
+  it('ISO +2 days (Wed Jan 7) → "Wednesday" (date mode)', () => {
+    expect(getSemanticTemporalLabel('2026-01-07', 'date')).toBe('Wednesday')
+  })
+
+  it('ISO +6 days (Sun Jan 11) → "Sunday" (date mode)', () => {
+    expect(getSemanticTemporalLabel('2026-01-11', 'date')).toBe('Sunday')
+  })
+
+  // Jan 3 (Sat) is in the previous calendar week from Jan 5 (Mon) → Last prefix
+  it('ISO -2 days (Sat Jan 3) → "Last Saturday, Jan 3" (date mode)', () => {
+    expect(getSemanticTemporalLabel('2026-01-03', 'date')).toBe(
+      'Last Saturday, Jan 3'
     )
   })
 
-  it('ISO yesterday → "Yesterday, Jan 4" (date mode)', () => {
-    expect(getSemanticTemporalLabel('2026-01-04', 'date')).toBe(
-      'Yesterday, Jan 4'
+  // Next week: diff +7 to +13 → "Next Weekday, MMM d"
+  it('ISO +7 days (Mon Jan 12) → "Next Monday, Jan 12" (date mode)', () => {
+    expect(getSemanticTemporalLabel('2026-01-12', 'date')).toBe(
+      'Next Monday, Jan 12'
     )
+  })
+
+  it('ISO +13 days (Sun Jan 18) → "Next Sunday, Jan 18" (date mode)', () => {
+    expect(getSemanticTemporalLabel('2026-01-18', 'date')).toBe(
+      'Next Sunday, Jan 18'
+    )
+  })
+
+  // Last week: diff -7 to -13 → "Last Weekday, MMM d"
+  it('ISO -7 days (Mon Dec 29) → "Last Monday, Dec 29" (date mode)', () => {
+    expect(getSemanticTemporalLabel('2025-12-29', 'date')).toBe(
+      'Last Monday, Dec 29'
+    )
+  })
+
+  // Beyond ±14: fallback to MMM d or MMM d, yyyy
+  it('ISO +14 days (Mon Jan 19) → "Jan 19" (date mode)', () => {
+    expect(getSemanticTemporalLabel('2026-01-19', 'date')).toBe('Jan 19')
   })
 
   it('ISO same-year non-near → "MMM d" no year (date mode)', () => {

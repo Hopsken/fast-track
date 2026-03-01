@@ -1,4 +1,5 @@
 import {
+  differenceInCalendarWeeks,
   format,
   getYear,
   isToday,
@@ -78,12 +79,21 @@ export function getSemanticTemporalLabel(
   if (!result.ok) return value
 
   const { date } = result
-  const currentYear = getYear(now ?? new Date())
+  const ref = now ?? new Date()
+  const currentYear = getYear(ref)
 
   if (mode === 'date') {
     if (isToday(date)) return 'Today'
-    if (isTomorrow(date)) return `Tomorrow, ${format(date, 'MMM d')}`
-    if (isYesterday(date)) return `Yesterday, ${format(date, 'MMM d')}`
+    if (isTomorrow(date)) return 'Tomorrow'
+    if (isYesterday(date)) return 'Yesterday'
+
+    const weekDiff = differenceInCalendarWeeks(date, ref, { weekStartsOn: 1 })
+    const weekday = format(date, 'EEEE')
+
+    if (weekDiff === 0) return weekday
+    if (weekDiff === 1) return `Next ${weekday}, ${format(date, 'MMM d')}`
+    if (weekDiff === -1) return `Last ${weekday}, ${format(date, 'MMM d')}`
+
     if (getYear(date) === currentYear) return format(date, 'MMM d')
     return format(date, 'MMM d, yyyy')
   }
