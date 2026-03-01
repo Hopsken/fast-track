@@ -87,6 +87,7 @@ export interface FieldAdapter<
   schema: ValueSchema
   keyOf: (val: Value) => string
   labelOf?: (val: Value) => string
+  semanticLabelOf?: (val: Value) => string
   keywords?: (val: Value) => string[]
   supportModes?: Array<FieldConfig['behavior']>
 

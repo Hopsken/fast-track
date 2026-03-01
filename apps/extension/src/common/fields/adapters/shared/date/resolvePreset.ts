@@ -1,4 +1,12 @@
-import { isValid, parseISO } from 'date-fns'
+import {
+  format,
+  getYear,
+  isToday,
+  isTomorrow,
+  isValid,
+  isYesterday,
+  parseISO
+} from 'date-fns'
 
 import { formatDateInput, formatDateTimeInput } from '@/utils/date-format'
 
@@ -56,6 +64,37 @@ export function resolveTemporalValue(
     iso: toJiraDateTime(parsed),
     label: formatDateTimeInput(parsed)
   }
+}
+
+export function getSemanticTemporalLabel(
+  value: string,
+  mode: 'date' | 'datetime',
+  now?: Date
+): string {
+  if (!value) return value
+  if (isPresetKey(value)) return getTemporalLabel(value, mode)
+
+  const result = resolveTemporalValue(value, mode)
+  if (!result.ok) return value
+
+  const { date } = result
+  const currentYear = getYear(now ?? new Date())
+
+  if (mode === 'date') {
+    if (isToday(date)) return 'Today'
+    if (isTomorrow(date)) return `Tomorrow, ${format(date, 'MMM d')}`
+    if (isYesterday(date)) return `Yesterday, ${format(date, 'MMM d')}`
+    if (getYear(date) === currentYear) return format(date, 'MMM d')
+    return format(date, 'MMM d, yyyy')
+  }
+
+  // datetime
+  const time = format(date, 'h:mm a')
+  if (isToday(date)) return `Today at ${time}`
+  if (isTomorrow(date)) return `Tomorrow at ${time}`
+  if (isYesterday(date)) return `Yesterday at ${time}`
+  if (getYear(date) === currentYear) return format(date, "MMM d 'at' h:mm a")
+  return format(date, "MMM d, yyyy 'at' h:mm a")
 }
 
 export function getTemporalLabel(

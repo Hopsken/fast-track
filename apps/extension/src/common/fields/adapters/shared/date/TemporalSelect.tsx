@@ -6,6 +6,7 @@ import {
   PopoverTrigger
 } from '@internal/ui/components/popover'
 import { cn } from '@internal/ui/lib/utils'
+import { format } from 'date-fns'
 import { CalendarIcon, ClockIcon, InfoIcon } from 'lucide-react'
 
 import { SelectComponentProps } from '../../../types'
@@ -57,6 +58,15 @@ export function TemporalSelect({
     }
   }
 
+  const resolvedHint = useMemo(() => {
+    if (!currentValue || !isPresetKey(currentValue)) return null
+    const result = resolveTemporalValue(currentValue, mode)
+    if (!result.ok) return null
+    return mode === 'date'
+      ? format(result.date, 'MMM d')
+      : format(result.date, "MMM d 'at' h:mm a")
+  }, [currentValue, mode])
+
   const calendarSelected = useMemo(() => {
     if (!currentValue || isPresetKey(currentValue)) return undefined
     const result = resolveTemporalValue(currentValue, mode)
@@ -79,8 +89,15 @@ export function TemporalSelect({
               <CalendarIcon className="size-3.5 shrink-0 opacity-50" />
             )}
             {currentValue ? (
-              <span className="text-foreground truncate font-medium">
-                {getTemporalLabel(currentValue, mode)}
+              <span className="text-foreground flex min-w-0 items-center gap-1 font-medium">
+                <span className="truncate">
+                  {getTemporalLabel(currentValue, mode)}
+                </span>
+                {resolvedHint && (
+                  <span className="text-muted-foreground/70 shrink-0 font-normal">
+                    · {resolvedHint}
+                  </span>
+                )}
               </span>
             ) : (
               <span className="truncate">

@@ -8,7 +8,7 @@ import { DateInput } from './DateInput'
 import { parseJiraDate, toJiraDate, toJiraDateTime } from './dateParsing'
 import { DatetimeFieldConfig } from './DatetimeFieldConfig'
 import { DateTimeInput } from './DateTimeInput'
-import { getTemporalLabel } from './resolvePreset'
+import { getSemanticTemporalLabel, getTemporalLabel } from './resolvePreset'
 
 // Date and datetime are internally just plain strings
 export const JiraDateAdapter = defineFieldAdapter({
@@ -18,6 +18,10 @@ export const JiraDateAdapter = defineFieldAdapter({
   labelOf: (val) => {
     if (!val) return ''
     return getTemporalLabel(val, 'date')
+  },
+  semanticLabelOf: (val) => {
+    if (!val) return ''
+    return getSemanticTemporalLabel(val, 'date')
   },
 
   InputComponent: DateInput,
@@ -35,6 +39,10 @@ export const JiraDatetimeAdapter = defineFieldAdapter({
   labelOf: (val) => {
     if (!val) return ''
     return getTemporalLabel(val, 'datetime')
+  },
+  semanticLabelOf: (val) => {
+    if (!val) return ''
+    return getSemanticTemporalLabel(val, 'datetime')
   },
 
   InputComponent: DateTimeInput,

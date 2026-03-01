@@ -32,7 +32,10 @@ export function formatValuePreview(
 
   if (Array.isArray(value)) {
     const labels = value
-      .map((v) => adapter.labelOf?.(v) ?? adapter.keyOf(v))
+      .map(
+        (v) =>
+          (adapter.semanticLabelOf ?? adapter.labelOf)?.(v) ?? adapter.keyOf(v)
+      )
       .map((label) => label.trim())
       .filter(Boolean)
 
@@ -53,7 +56,10 @@ export function formatValuePreview(
     )
   }
 
-  return adapter.labelOf?.(value) ?? adapter.keyOf(value)
+  return (
+    (adapter.semanticLabelOf ?? adapter.labelOf)?.(value) ??
+    adapter.keyOf(value)
+  )
 }
 
 export function buildInitialValues(
