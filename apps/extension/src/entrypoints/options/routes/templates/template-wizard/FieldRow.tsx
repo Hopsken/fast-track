@@ -19,6 +19,47 @@ import type { FieldConfig } from '~/types/template'
 
 type FieldMode = FieldConfig['behavior']
 
+/**
+ * Build the next FieldConfig when the user switches mode.
+ *
+ * Key invariant: prior values (`presetValue`, `allowedOptions`) are
+ * preserved across mode switches so users don't lose work.
+ *
+ * `allowedOptions` is only initialised from Jira `allowedValues` when
+ * no prior value exists (first time entering restricted mode).
+ */
+export function buildConfigForMode(
+  mode: FieldMode,
+  fieldId: string,
+  currentConfig: FieldConfig,
+  jiraAllowedValues: unknown[] | undefined
+): FieldConfig {
+  switch (mode) {
+    case 'preset':
+      return {
+        fieldId,
+        behavior: 'preset',
+        presetValue: currentConfig.presetValue,
+        allowedOptions: currentConfig.allowedOptions
+      }
+    case 'restricted': {
+      // Preserve existing allowedOptions if the user already configured them
+      const allowedOptions =
+        currentConfig.allowedOptions ??
+        (jiraAllowedValues && jiraAllowedValues.length > 0
+          ? jiraAllowedValues
+          : [])
+
+      return {
+        fieldId,
+        behavior: 'restricted',
+        presetValue: currentConfig.presetValue,
+        allowedOptions
+      }
+    }
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /*  3-way toggle                                                       */
 /* ------------------------------------------------------------------ */
@@ -105,35 +146,11 @@ export function FieldRow({
 
   const handleModeChange = useCallback(
     (mode: FieldMode) => {
-      switch (mode) {
-        case 'preset':
-          onConfigChange({
-            fieldId,
-            behavior: 'preset',
-            presetValue: undefined
-          })
-          break
-        case 'restricted':
-          // Default depends on whether field has Jira-provided allowedValues
-          if (field.allowedValues && field.allowedValues.length > 0) {
-            // Start with all Jira options selected
-            onConfigChange({
-              fieldId,
-              behavior: 'restricted',
-              allowedOptions: field.allowedValues
-            })
-          } else {
-            // User-defined options (number, text, user) — start empty, force user to add
-            onConfigChange({
-              fieldId,
-              behavior: 'restricted',
-              allowedOptions: []
-            })
-          }
-          break
-      }
+      onConfigChange(
+        buildConfigForMode(mode, fieldId, config, field.allowedValues)
+      )
     },
-    [field.allowedValues, fieldId, onConfigChange]
+    [config, field.allowedValues, fieldId, onConfigChange]
   )
 
   const ConfigComponent = adapter.ConfigComponent
