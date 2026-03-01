@@ -143,9 +143,17 @@ export function FieldRow({
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex items-center justify-between gap-2">
           {/* Left: field info */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-sm font-medium">{field.name}</span>
-            {field.required && <Badge variant="secondary">Required</Badge>}
+          <div className="flex flex-col gap-0.5">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-medium">{field.name}</span>
+              {field.required && <Badge variant="secondary">Required</Badge>}
+            </div>
+
+            {(field.schema.type === 'date' || field.schema.type === 'datetime') && (
+              <span className="text-xs text-muted-foreground">
+                Calculated when creating an issue. Preview uses the current time.
+              </span>
+            )}
           </div>
 
           {/* Right: mode toggle + reorder + remove */}

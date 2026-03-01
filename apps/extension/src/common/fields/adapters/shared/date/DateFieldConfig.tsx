@@ -124,11 +124,10 @@ const DateSelect = ({
       {(preview || isInvalid) && (
         <InputGroupAddon align="block-end" className="text-xs">
           {isInvalid ? (
-            <InputGroupText className="text-destructive">Invalid date</InputGroupText>
+            <InputGroupText className="text-destructive">Couldn't parse</InputGroupText>
           ) : preview ? (
             <InputGroupText className="text-muted-foreground">
-              {preview.kind === 'relative' ? 'Resolves to ' : 'ISO '}
-              <span className="font-mono tabular-nums">{preview.iso}</span>
+              Preview → <span className="font-mono tabular-nums">{preview.iso}</span>
             </InputGroupText>
           ) : null}
         </InputGroupAddon>
