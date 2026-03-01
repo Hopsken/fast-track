@@ -71,8 +71,40 @@ export function buildInitialValues(
   }
 
   for (const field of fields) {
-    const presetValue = field.config?.presetValue
-    if (!presetValue) continue
+    const config = field.config
+    if (!config) continue
+
+    // TU-58: If restricted mode has exactly one allowed option, auto-fill it.
+    if (config.behavior === 'restricted') {
+      const only =
+        config.allowedOptions?.length === 1 ? config.allowedOptions[0] : null
+
+      if (only != null) {
+        // For temporal fields, resolve preset keys/ISO into a concrete ISO value.
+        if (
+          typeof only === 'string' &&
+          (field.metadata.schema.type === 'date' ||
+            field.metadata.schema.type === 'datetime')
+        ) {
+          const result = resolveTemporalValue(
+            only,
+            field.metadata.schema.type as 'date' | 'datetime'
+          )
+          values[field.fieldId] = result.ok ? result.iso : only
+        } else {
+          values[field.fieldId] = only
+        }
+      }
+      continue
+    }
+
+    // Only preset behavior should auto-fill a value into the draft.
+    if (config.behavior !== 'preset') continue
+
+    const presetValue = config.presetValue
+    if (presetValue === undefined || presetValue === null || presetValue === '') {
+      continue
+    }
 
     // TU-56: resolve preset keys / ISO literals once at draft init (WYSIWYG)
     if (typeof presetValue === 'string') {
