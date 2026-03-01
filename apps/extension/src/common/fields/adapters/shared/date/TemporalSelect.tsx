@@ -30,17 +30,6 @@ export function TemporalSelect({
 
   const presets = mode === 'date' ? DATE_PRESETS : DATETIME_PRESETS
 
-  const preview = useMemo(() => {
-    if (!currentValue) return null
-    const result = resolveTemporalValue(currentValue, mode)
-    return result.ok ? result.iso : null
-  }, [currentValue, mode])
-
-  const previewShort = useMemo(() => {
-    if (!preview) return null
-    return mode === 'date' ? preview.split('T')[0] : preview
-  }, [mode, preview])
-
   const activePreset = isPresetKey(currentValue) ? currentValue : null
 
   const handlePreset = (key: string) => {
@@ -102,7 +91,7 @@ export function TemporalSelect({
           {currentValue && (
             <span
               className={cn(
-                'ml-2 shrink-0 rounded-[4px] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider',
+                'ml-2 shrink-0 rounded-sm px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider',
                 isPresetKey(currentValue)
                   ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
                   : 'bg-muted text-muted-foreground'
@@ -117,9 +106,9 @@ export function TemporalSelect({
         className="w-auto border-0 bg-transparent p-0 shadow-none"
         align="start">
         <div className="bg-card overflow-hidden rounded-md border shadow-lg">
-          <div className="flex w-fit flex-col gap-0 sm:flex-row">
+          <div className="flex w-fit flex-row gap-0">
             {/* Presets Sidebar */}
-            <div className="bg-muted/30 flex w-full flex-col gap-1 border-b p-2 sm:w-[140px] sm:border-b-0 sm:border-r">
+            <div className="bg-muted/30 flex w-[140px] flex-col gap-1 border-r p-2">
               <span className="text-muted-foreground mb-1 px-2 text-[10px] font-semibold uppercase">
                 Presets
               </span>
