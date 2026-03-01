@@ -71,25 +71,37 @@ export function buildInitialValues(
   }
 
   for (const field of fields) {
-    const behavior = field.config?.behavior
+    const config = field.config
+    if (!config) continue
 
     // TU-58: If restricted mode has exactly one allowed option, auto-fill it.
-    if (behavior === 'restricted') {
+    if (config.behavior === 'restricted') {
       const only =
-        field.config?.allowedOptions?.length === 1
-          ? field.config.allowedOptions[0]
-          : null
+        config.allowedOptions?.length === 1 ? config.allowedOptions[0] : null
 
       if (only != null) {
-        values[field.fieldId] = only
+        // For temporal fields, resolve preset keys/ISO into a concrete ISO value.
+        if (
+          typeof only === 'string' &&
+          (field.metadata.schema.type === 'date' ||
+            field.metadata.schema.type === 'datetime')
+        ) {
+          const result = resolveTemporalValue(
+            only,
+            field.metadata.schema.type as 'date' | 'datetime'
+          )
+          values[field.fieldId] = result.ok ? result.iso : only
+        } else {
+          values[field.fieldId] = only
+        }
       }
       continue
     }
 
     // Only preset behavior should auto-fill a value into the draft.
-    if (behavior !== 'preset') continue
+    if (config.behavior !== 'preset') continue
 
-    const presetValue = field.config.presetValue
+    const presetValue = config.presetValue
     if (presetValue === undefined || presetValue === null || presetValue === '') {
       continue
     }

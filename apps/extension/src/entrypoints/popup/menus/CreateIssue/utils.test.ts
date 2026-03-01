@@ -224,7 +224,7 @@ describe('buildInitialValues (TU-56 preset key temporal resolution)', () => {
     ]
 
     const values = buildInitialValues(fields)
-    expect(values.customfield_date).toBe('@tomorrow')
+    expect(values.customfield_date).toBe('2026-01-02')
   })
 
 })
