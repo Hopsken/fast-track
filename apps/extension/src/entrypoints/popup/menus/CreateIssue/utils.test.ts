@@ -201,4 +201,30 @@ describe('buildInitialValues (TU-56 preset key temporal resolution)', () => {
     expect(values.customfield_date).toBeUndefined()
   })
 
+
+  it('auto-fills restricted value when there is exactly one allowed option', () => {
+    const fields: VisibleField[] = [
+      {
+        fieldId: 'customfield_date',
+        isEditable: true,
+        metadata: {
+          fieldId: 'customfield_date',
+          key: 'customfield_date',
+          name: 'Target date',
+          required: false,
+          hasDefaultValue: false,
+          schema: { type: 'date' }
+        },
+        config: {
+          fieldId: 'customfield_date',
+          behavior: 'restricted',
+          allowedOptions: ['@tomorrow']
+        }
+      }
+    ]
+
+    const values = buildInitialValues(fields)
+    expect(values.customfield_date).toBe('@tomorrow')
+  })
+
 })

@@ -71,8 +71,23 @@ export function buildInitialValues(
   }
 
   for (const field of fields) {
+    const behavior = field.config?.behavior
+
+    // TU-58: If restricted mode has exactly one allowed option, auto-fill it.
+    if (behavior === 'restricted') {
+      const only =
+        field.config?.allowedOptions?.length === 1
+          ? field.config.allowedOptions[0]
+          : null
+
+      if (only != null) {
+        values[field.fieldId] = only
+      }
+      continue
+    }
+
     // Only preset behavior should auto-fill a value into the draft.
-    if (field.config?.behavior !== 'preset') continue
+    if (behavior !== 'preset') continue
 
     const presetValue = field.config.presetValue
     if (presetValue === undefined || presetValue === null || presetValue === '') {
