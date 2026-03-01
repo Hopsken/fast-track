@@ -85,30 +85,31 @@ export function TemporalSelect({
           )}>
           <div className="flex items-center gap-2 truncate">
             {mode === 'datetime' ? (
-              <ClockIcon className="size-3.5 opacity-50" />
+              <ClockIcon className="size-3.5 shrink-0 opacity-50" />
             ) : (
-              <CalendarIcon className="size-3.5 opacity-50" />
+              <CalendarIcon className="size-3.5 shrink-0 opacity-50" />
             )}
             {currentValue ? (
-              <div className="flex items-center gap-1.5 truncate">
-                <span className="text-foreground font-medium">
-                  {getTemporalLabel(currentValue, mode)}
-                </span>
-                {isPresetKey(currentValue) && previewShort && (
-                  <>
-                    <span className="text-muted-foreground/40">·</span>
-                    <span
-                      className="text-muted-foreground font-mono text-[10px] tabular-nums"
-                      title="Preview if the issue were created now">
-                      ≈ {previewShort}
-                    </span>
-                  </>
-                )}
-              </div>
+              <span className="text-foreground truncate font-medium">
+                {getTemporalLabel(currentValue, mode)}
+              </span>
             ) : (
-              <span>Pick a {mode === 'datetime' ? 'date & time' : 'date'}</span>
+              <span className="truncate">
+                Pick a {mode === 'datetime' ? 'date & time' : 'date'}
+              </span>
             )}
           </div>
+          {currentValue && (
+            <span
+              className={cn(
+                'ml-2 shrink-0 rounded-[4px] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider',
+                isPresetKey(currentValue)
+                  ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                  : 'bg-muted text-muted-foreground'
+              )}>
+              {isPresetKey(currentValue) ? 'Dynamic' : 'Fixed'}
+            </span>
+          )}
         </button>
       </PopoverTrigger>
 
@@ -116,12 +117,6 @@ export function TemporalSelect({
         className="w-auto border-0 bg-transparent p-0 shadow-none"
         align="start">
         <div className="bg-card overflow-hidden rounded-md border shadow-lg">
-          <div className="bg-muted/20 text-muted-foreground border-b px-3 py-2 text-xs">
-            Relative presets resolve{' '}
-            <span className="font-medium">when creating an issue</span>.{' '}
-            <span className="font-medium">Preview</span> is “if created now”.
-          </div>
-
           <div className="flex w-fit flex-col gap-0 sm:flex-row">
             {/* Presets Sidebar */}
             <div className="bg-muted/30 flex w-full flex-col gap-1 border-b p-2 sm:w-[140px] sm:border-b-0 sm:border-r">
@@ -145,38 +140,50 @@ export function TemporalSelect({
             </div>
 
             {/* Calendar Area */}
-            <div className="bg-card flex flex-col p-1">
-              <Calendar
-                mode="single"
-                selected={calendarSelected}
-                onSelect={handleCalendarSelect}
-                initialFocus
-              />
-              {mode === 'datetime' && (
-                <div className="bg-muted/10 mt-1 flex items-center gap-2 border-t px-3 py-2">
-                  <span className="text-muted-foreground text-xs font-medium">
-                    Time
-                  </span>
-                  <input
-                    type="time"
-                    value={calTime}
-                    onChange={(e) => {
-                      setCalTime(e.target.value)
-                      // Auto update the value if a date is already selected
-                      if (calendarSelected) {
-                        const newDate = new Date(calendarSelected)
-                        const [h, m] = e.target.value.split(':').map(Number)
-                        newDate.setHours(h ?? 9, m ?? 0, 0, 0)
-                        const iso = toJiraDateTime(newDate)
-                        onChange(iso)
-                        onConfirm?.(iso)
-                      }
-                    }}
-                    className="border-input focus-visible:ring-ring bg-background shadow-xs flex h-7 w-full rounded-md border px-2 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-1"
-                  />
-                </div>
-              )}
+            <div className="bg-card flex flex-col p-2">
+              <span className="text-muted-foreground mb-1 px-2 text-[10px] font-semibold uppercase">
+                Fixed
+              </span>
+              <div className="-m-1 flex flex-col">
+                <Calendar
+                  mode="single"
+                  selected={calendarSelected}
+                  onSelect={handleCalendarSelect}
+                  initialFocus
+                />
+                {mode === 'datetime' && (
+                  <div className="bg-muted/10 mt-1 flex items-center gap-2 border-t px-3 py-2">
+                    <span className="text-muted-foreground text-xs font-medium">
+                      Time
+                    </span>
+                    <input
+                      type="time"
+                      value={calTime}
+                      onChange={(e) => {
+                        setCalTime(e.target.value)
+                        // Auto update the value if a date is already selected
+                        if (calendarSelected) {
+                          const newDate = new Date(calendarSelected)
+                          const [h, m] = e.target.value.split(':').map(Number)
+                          newDate.setHours(h ?? 9, m ?? 0, 0, 0)
+                          const iso = toJiraDateTime(newDate)
+                          onChange(iso)
+                          onConfirm?.(iso)
+                        }
+                      }}
+                      className="border-input focus-visible:ring-ring bg-background shadow-xs flex h-7 w-full rounded-md border px-2 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-1"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
+          </div>
+
+          <div className="bg-muted/20 text-muted-foreground flex items-start gap-2 border-t px-3 py-2.5 text-xs">
+            <InfoIcon className="mt-0.5 size-3.5 shrink-0 opacity-70" />
+            <p className="leading-tight">
+              Relative presets resolve dynamically when the issue is created.
+            </p>
           </div>
         </div>
       </PopoverContent>
