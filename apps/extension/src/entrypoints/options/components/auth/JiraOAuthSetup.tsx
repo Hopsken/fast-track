@@ -72,6 +72,11 @@ export const JiraOAuthSetup: React.FC<JiraOAuthSetupProps> = ({
         <Separator />
 
         <div className="space-y-3">
+          <p className="text-muted-foreground text-center text-xs">
+            You&apos;ll be redirected to Atlassian to select your workspace and
+            authorize the extension. No passwords are stored.
+          </p>
+
           {error && (
             <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
               {error}
@@ -88,11 +93,6 @@ export const JiraOAuthSetup: React.FC<JiraOAuthSetupProps> = ({
               'Connect to Jira'
             )}
           </Button>
-
-          <p className="text-muted-foreground text-center text-xs">
-            You&apos;ll be redirected to Atlassian to select your workspace and
-            authorize the extension. No passwords are stored.
-          </p>
 
           {showPostConnectFallback && (
             <Button
