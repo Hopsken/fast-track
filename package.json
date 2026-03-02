@@ -1,7 +1,7 @@
 {
   "name": "fast-track",
   "displayName": "Fast Track",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "private": true,
   "type": "module",
   "description": "Quick search and access to your Jira tickets with enhanced board experience. Search by ticket key, summary, assignee, or status with lightning-fast results.",
