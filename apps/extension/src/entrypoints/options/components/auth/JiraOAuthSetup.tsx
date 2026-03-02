@@ -72,7 +72,7 @@ export const JiraOAuthSetup: React.FC<JiraOAuthSetupProps> = ({
         <Separator />
 
         <div className="space-y-3">
-          <p className="text-muted-foreground text-center text-xs">
+          <p className="text-muted-foreground text-xs">
             You&apos;ll be redirected to Atlassian to select your workspace and
             authorize the extension. No passwords are stored.
           </p>
@@ -95,13 +95,19 @@ export const JiraOAuthSetup: React.FC<JiraOAuthSetupProps> = ({
           </Button>
 
           {showPostConnectFallback && (
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={onSwitchToApiKey}
-              disabled={!onSwitchToApiKey}>
-              Use API key instead
-            </Button>
+            <div className="space-y-3">
+              <p className="text-muted-foreground text-xs">
+                Your org may require admin approval/allowlisting for OAuth. Try
+                API token login instead.
+              </p>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={onSwitchToApiKey}
+                disabled={!onSwitchToApiKey}>
+                Use API key instead
+              </Button>
+            </div>
           )}
         </div>
       </CardContent>
