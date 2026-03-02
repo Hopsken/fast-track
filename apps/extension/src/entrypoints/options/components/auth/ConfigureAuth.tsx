@@ -102,6 +102,13 @@ export function ConfigureAuth() {
       <TabsContent value="oauth">
         <JiraOAuthSetup
           onConnect={handleConnect}
+          onSwitchToApiKey={() => {
+            trackEvent('connect_fallback_click', {
+              from: 'oauth',
+              to: 'apiKey'
+            })
+            setSelectedAuthType('apiKey')
+          }}
           isLoading={connectingMethod === 'oauth'}
           error={selectedAuthType === 'oauth' ? error : null}
         />

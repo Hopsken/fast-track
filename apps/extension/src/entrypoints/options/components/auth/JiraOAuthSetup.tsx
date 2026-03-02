@@ -17,12 +17,14 @@ import {
 
 export interface JiraOAuthSetupProps {
   onConnect: () => void
+  onSwitchToApiKey?: () => void
   isLoading: boolean
   error?: string | null
 }
 
 export const JiraOAuthSetup: React.FC<JiraOAuthSetupProps> = ({
   onConnect,
+  onSwitchToApiKey,
   isLoading = false,
   error
 }) => {
@@ -88,6 +90,17 @@ export const JiraOAuthSetup: React.FC<JiraOAuthSetupProps> = ({
           <p className="text-muted-foreground text-center text-xs">
             You&apos;ll be redirected to Atlassian to select your workspace and
             authorize the extension. No passwords are stored.
+          </p>
+
+          <p className="text-muted-foreground text-center text-xs">
+            Having trouble connecting?{' '}
+            <button
+              type="button"
+              className="text-foreground underline underline-offset-2"
+              onClick={onSwitchToApiKey}
+              disabled={!onSwitchToApiKey}>
+              Switch to API key login.
+            </button>
           </p>
         </div>
       </CardContent>

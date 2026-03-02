@@ -247,6 +247,13 @@ export default async function JiraCallbackPage(props: PageProps) {
               {status === 'error' && 'Authentication Failed'}
             </h3>
             <p className="mt-1 text-sm text-gray-500">{message}</p>
+
+            {status === 'error' && (
+              <p className="mt-2 text-sm text-gray-700">
+                Having trouble connecting? Switch to API key login.
+              </p>
+            )}
+
             <CloseButton show={status === 'error' || status === 'success'} />
           </div>
         </div>
