@@ -18,6 +18,7 @@ import {
 export interface JiraOAuthSetupProps {
   onConnect: () => void
   onSwitchToApiKey?: () => void
+  showPostConnectFallback?: boolean
   isLoading: boolean
   error?: string | null
 }
@@ -25,6 +26,7 @@ export interface JiraOAuthSetupProps {
 export const JiraOAuthSetup: React.FC<JiraOAuthSetupProps> = ({
   onConnect,
   onSwitchToApiKey,
+  showPostConnectFallback = false,
   isLoading = false,
   error
 }) => {
@@ -91,6 +93,16 @@ export const JiraOAuthSetup: React.FC<JiraOAuthSetupProps> = ({
             You&apos;ll be redirected to Atlassian to select your workspace and
             authorize the extension. No passwords are stored.
           </p>
+
+          {showPostConnectFallback && (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={onSwitchToApiKey}
+              disabled={!onSwitchToApiKey}>
+              Use API key instead
+            </Button>
+          )}
 
           <p className="text-muted-foreground text-center text-xs">
             Having trouble connecting?{' '}
