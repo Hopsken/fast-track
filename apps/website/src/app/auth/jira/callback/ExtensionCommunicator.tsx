@@ -139,15 +139,22 @@ export default function ExtensionCommunicator({
 
   if (communicationStatus === 'error') {
     return (
-      <div className="mt-2 text-sm text-red-600">⚠ Error: {errorMessage}</div>
+      <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+        <div className="font-medium">Connection failed</div>
+        <div className="mt-1 text-amber-800">{errorMessage}</div>
+        <div className="mt-2 text-amber-900">Use API key login instead.</div>
+      </div>
     )
   }
 
   if (communicationStatus === 'timeout') {
     return (
-      <div className="mt-2 text-sm text-yellow-600">
-        ⚠ Extension communication timeout. Tokens may have been received.
-        Closing window...
+      <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+        <div className="font-medium">Connection may be stuck</div>
+        <div className="mt-1 text-amber-800">
+          Extension communication timed out.
+        </div>
+        <div className="mt-2 text-amber-900">Use API key login instead.</div>
       </div>
     )
   }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Tabs,
   TabsContent,
@@ -34,8 +34,18 @@ export function ConfigureAuth() {
     null
   )
 
+  const [showOAuthFallback, setShowOAuthFallback] = useState(false)
+  const oauthFallbackTimerRef = useRef<number | null>(null)
+
   const handleSelectAuthType = useCallback((next: string) => {
     setError(null)
+
+    setShowOAuthFallback(false)
+    if (oauthFallbackTimerRef.current) {
+      window.clearTimeout(oauthFallbackTimerRef.current)
+      oauthFallbackTimerRef.current = null
+    }
+
     setSelectedAuthType(next as AuthType)
   }, [])
 
@@ -44,6 +54,16 @@ export function ConfigureAuth() {
 
     setConnectingMethod('oauth')
     setError(null)
+
+    setShowOAuthFallback(false)
+    if (oauthFallbackTimerRef.current) {
+      window.clearTimeout(oauthFallbackTimerRef.current)
+      oauthFallbackTimerRef.current = null
+    }
+    // After the user starts OAuth, show a more visible API key fallback CTA.
+    oauthFallbackTimerRef.current = window.setTimeout(() => {
+      setShowOAuthFallback(true)
+    }, 2500)
 
     try {
       const nextUrl = await getAuthService().connect()
@@ -84,6 +104,15 @@ export function ConfigureAuth() {
     []
   )
 
+  useEffect(() => {
+    return () => {
+      if (oauthFallbackTimerRef.current) {
+        window.clearTimeout(oauthFallbackTimerRef.current)
+        oauthFallbackTimerRef.current = null
+      }
+    }
+  }, [])
+
   const apiKeyDefaults = credentials?.apiKey
     ? {
         host: credentials.host,
@@ -102,7 +131,15 @@ export function ConfigureAuth() {
       <TabsContent value="oauth">
         <JiraOAuthSetup
           onConnect={handleConnect}
+          onSwitchToApiKey={() => {
+            trackEvent('connect_fallback_click', {
+              from: 'oauth',
+              to: 'apiKey'
+            })
+            setSelectedAuthType('apiKey')
+          }}
           isLoading={connectingMethod === 'oauth'}
+          showPostConnectFallback={showOAuthFallback}
           error={selectedAuthType === 'oauth' ? error : null}
         />
       </TabsContent>

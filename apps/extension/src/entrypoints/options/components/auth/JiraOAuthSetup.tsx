@@ -17,12 +17,16 @@ import {
 
 export interface JiraOAuthSetupProps {
   onConnect: () => void
+  onSwitchToApiKey?: () => void
+  showPostConnectFallback?: boolean
   isLoading: boolean
   error?: string | null
 }
 
 export const JiraOAuthSetup: React.FC<JiraOAuthSetupProps> = ({
   onConnect,
+  onSwitchToApiKey,
+  showPostConnectFallback = false,
   isLoading = false,
   error
 }) => {
@@ -68,6 +72,11 @@ export const JiraOAuthSetup: React.FC<JiraOAuthSetupProps> = ({
         <Separator />
 
         <div className="space-y-3">
+          <p className="text-muted-foreground text-center text-xs">
+            You&apos;ll be redirected to Atlassian to select your workspace and
+            authorize the extension. No passwords are stored.
+          </p>
+
           {error && (
             <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
               {error}
@@ -85,10 +94,15 @@ export const JiraOAuthSetup: React.FC<JiraOAuthSetupProps> = ({
             )}
           </Button>
 
-          <p className="text-muted-foreground text-center text-xs">
-            You&apos;ll be redirected to Atlassian to select your workspace and
-            authorize the extension. No passwords are stored.
-          </p>
+          {showPostConnectFallback && (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={onSwitchToApiKey}
+              disabled={!onSwitchToApiKey}>
+              Use API key instead
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
