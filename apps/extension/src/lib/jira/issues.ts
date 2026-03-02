@@ -274,15 +274,20 @@ export class JiraIssueService {
     options?: {
       source?: IssueSource
       limit?: number
+      reconcileIssues?: number[]
     }
   ): Promise<JiraIssue[]> => {
-    const { source, limit = 30 } = options ?? {}
+    const { source, limit = 30, reconcileIssues } = options ?? {}
     const client = await this.getClient()
     const response =
       await client.issueSearch.searchForIssuesUsingJqlEnhancedSearchPost({
         jql,
         fields: issueFields,
-        maxResults: limit
+        maxResults: limit,
+        // Jira Enhanced Search can lag behind writes (eventual consistency).
+        // reconcileIssues forces strong-consistency reads for known issue IDs,
+        // preventing the API from returning stale empty results.
+        ...(reconcileIssues?.length ? { reconcileIssues } : {})
       })
 
     return (
@@ -295,17 +300,23 @@ export class JiraIssueService {
    * Fetches in-progress and open sprint issues separately to improve resilience
    * when openSprints() isn't available.
    */
-  async getMySuggestedIssues(limit = 50): Promise<JiraIssue[]> {
+  async getMySuggestedIssues(
+    limit = 50,
+    options?: { reconcileIssues?: number[] }
+  ): Promise<JiraIssue[]> {
+    const { reconcileIssues } = options ?? {}
     const assigneeClause = 'assignee = currentUser()'
     const inProgressJql = `${assigneeClause} AND statusCategory = "In Progress"`
     const openSprintJql = `${assigneeClause} AND sprint in openSprints()`
 
     const results = await Promise.allSettled([
       this.searchIssuesUsingJql(`${inProgressJql} ORDER BY updated DESC`, {
-        limit
+        limit,
+        reconcileIssues
       }),
       this.searchIssuesUsingJql(`${openSprintJql} ORDER BY updated DESC`, {
-        limit
+        limit,
+        reconcileIssues
       })
     ])
 

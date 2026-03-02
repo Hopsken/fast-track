@@ -71,9 +71,11 @@ const collectSuggestionProjects = (suggestions?: IssueSuggestion) => {
 export class SuggestionService {
   private jira = JiraAPI.getInstance()
 
-  async getIssueSuggestions(): Promise<IssueSuggestion> {
+  async getIssueSuggestions(options?: {
+    reconcileIssues?: number[]
+  }): Promise<IssueSuggestion> {
     const [tickets, historyTickets] = await Promise.all([
-      this.getMySuggestedTickets(),
+      this.getMySuggestedTickets(options),
       this.getRecentHistoryTickets()
     ])
 
@@ -92,8 +94,11 @@ export class SuggestionService {
     }
   }
 
-  private async getMySuggestedTickets(limit = 50): Promise<JiraIssue[]> {
-    return this.jira.issues.getMySuggestedIssues(limit)
+  private async getMySuggestedTickets(
+    options?: { reconcileIssues?: number[] },
+    limit = 50
+  ): Promise<JiraIssue[]> {
+    return this.jira.issues.getMySuggestedIssues(limit, options)
   }
 
   private async getRecentHistoryTickets(limit = 7): Promise<JiraIssue[]> {
