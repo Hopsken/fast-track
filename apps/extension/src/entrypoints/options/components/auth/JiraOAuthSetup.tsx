@@ -103,19 +103,6 @@ export const JiraOAuthSetup: React.FC<JiraOAuthSetupProps> = ({
               Use API key instead
             </Button>
           )}
-
-          {!showPostConnectFallback && (
-            <p className="text-muted-foreground text-center text-xs">
-              Having trouble connecting?{' '}
-              <button
-                type="button"
-                className="text-foreground underline underline-offset-2"
-                onClick={onSwitchToApiKey}
-                disabled={!onSwitchToApiKey}>
-                Switch to API key login.
-              </button>
-            </p>
-          )}
         </div>
       </CardContent>
     </Card>

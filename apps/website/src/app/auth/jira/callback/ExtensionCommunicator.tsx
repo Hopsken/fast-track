@@ -142,9 +142,7 @@ export default function ExtensionCommunicator({
       <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
         <div className="font-medium">Connection failed</div>
         <div className="mt-1 text-amber-800">{errorMessage}</div>
-        <div className="mt-2 text-amber-900">
-          Having trouble connecting? Switch to API key login.
-        </div>
+        <div className="mt-2 text-amber-900">Use API key login instead.</div>
       </div>
     )
   }
@@ -156,9 +154,7 @@ export default function ExtensionCommunicator({
         <div className="mt-1 text-amber-800">
           Extension communication timed out.
         </div>
-        <div className="mt-2 text-amber-900">
-          Having trouble connecting? Switch to API key login.
-        </div>
+        <div className="mt-2 text-amber-900">Use API key login instead.</div>
       </div>
     )
   }

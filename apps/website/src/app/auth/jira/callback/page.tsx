@@ -250,7 +250,7 @@ export default async function JiraCallbackPage(props: PageProps) {
 
             {status === 'error' && (
               <p className="mt-2 text-sm text-gray-700">
-                Having trouble connecting? Switch to API key login.
+                Use API key login instead.
               </p>
             )}
 
