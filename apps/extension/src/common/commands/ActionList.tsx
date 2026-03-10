@@ -17,7 +17,7 @@ export function ActionList(props: ActionListProps) {
     isLoading,
     loadingPlaceholder = 'Loading...',
     children,
-    emptyPlaceholder = 'No results',
+    emptyPlaceholder = 'No results found',
     ...restProps
   } = props
   return (

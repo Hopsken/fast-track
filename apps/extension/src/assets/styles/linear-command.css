@@ -146,10 +146,13 @@
 
   [cmdk-empty] {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 64px;
+    gap: 2px;
+    height: 48px;
     white-space: pre-wrap;
     color: var(--gray11);
+    font-size: 0.8125rem;
   }
 }

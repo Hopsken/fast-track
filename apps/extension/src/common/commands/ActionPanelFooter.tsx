@@ -152,7 +152,7 @@ export function ActionPanelFooter() {
           <img
             src={logoPNG}
             alt="Fast Track"
-            className="size-4 rounded grayscale transition group-hover:grayscale-0"
+            className="size-4 rounded grayscale transition group-hover:scale-105 group-hover:grayscale-0"
           />
 
           <span className="flex-1 text-xs">Fast Track</span>
@@ -164,7 +164,7 @@ export function ActionPanelFooter() {
   return (
     <div
       className={cn(
-        'bg-linear-to-r h-11 border-t border-gray-200 px-5 py-2',
+        'bg-linear-to-r h-10 border-t border-gray-100 bg-gray-50/60 px-5 py-2',
         activeToastContainerCls
       )}>
       <div className="flex h-6 items-center justify-between">

@@ -77,7 +77,7 @@ export function TicketItem({
         <HighlightedText
           text={ticket.key}
           searchQuery={searchQuery}
-          className="ml-2 whitespace-nowrap text-gray-500"
+          className="ml-2 whitespace-nowrap tabular-nums text-gray-500"
         />
       </div>
 
