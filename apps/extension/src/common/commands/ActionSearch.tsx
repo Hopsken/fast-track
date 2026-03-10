@@ -65,7 +65,7 @@ export function ActionSearch({
   const navigate = useNavigation()
 
   const inputContainerClassName = cn(
-    'relative flex h-[52px] items-center gap-3 pl-4 pr-4 border-b-2 border-gray-200',
+    'relative flex h-[52px] items-center gap-3 pl-4 pr-4 border-b border-gray-200',
     isLoading && 'command-input-loading'
   )
 

@@ -78,11 +78,11 @@
     user-select: none;
     will-change: background, color;
     transition: all 150ms ease;
-    transition-property: none;
+    transition-property: background-color;
     position: relative;
 
     &[data-selected='true'] {
-      background: var(--gray3);
+      background: #eef2ff;
 
       svg {
         color: var(--gray12);
@@ -124,6 +124,11 @@
     padding-bottom: 0;
   }
 
+  [cmdk-group] + [cmdk-group] {
+    border-top: 1px solid var(--gray4);
+    margin-top: 2px;
+  }
+
   [cmdk-group-heading] {
     user-select: none;
     font-size: 0.75rem;
@@ -136,6 +141,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    letter-spacing: 0.03em;
   }
 
   [cmdk-empty] {
