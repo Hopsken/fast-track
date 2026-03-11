@@ -64,7 +64,9 @@ export function FooterShortcutHints({ hints }: FooterShortcutHintsProps) {
     return () => clearInterval(timer)
   }, [hints.length])
 
-  const hint = hints[activeIndex]
+  const safeIndex =
+    hints.length > 0 ? Math.min(activeIndex, hints.length - 1) : 0
+  const hint = hints[safeIndex]
   if (!hint) return null
 
   return (

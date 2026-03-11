@@ -58,4 +58,29 @@ describe('FooterShortcutHints', () => {
     const { container } = render(<FooterShortcutHints hints={[]} />)
     expect(container.firstChild).toBeNull()
   })
+
+  it('clamps activeIndex when hints pool shrinks', () => {
+    const extendedHints: ShortcutHint[] = [
+      { keys: ['/'], label: 'Commands' },
+      { keys: ['C'], label: 'New Issue' },
+      { keys: ['⌘', '⇧', 'S'], label: 'Status' }
+    ]
+    const { rerender } = render(<FooterShortcutHints hints={extendedHints} />)
+
+    // Advance to index 2 (Status)
+    act(() => {
+      vi.advanceTimersByTime(4000 + 300 + 300)
+      vi.advanceTimersByTime(4000 + 300 + 300)
+    })
+
+    // Shrink to 2 hints — index 2 is now out of bounds
+    const shortenedHints: ShortcutHint[] = [
+      { keys: ['/'], label: 'Commands' },
+      { keys: ['C'], label: 'New Issue' }
+    ]
+    rerender(<FooterShortcutHints hints={shortenedHints} />)
+
+    // Should clamp to last valid hint, not render nothing
+    expect(screen.getByText('New Issue')).toBeDefined()
+  })
 })
