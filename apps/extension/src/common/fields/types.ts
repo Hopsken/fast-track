@@ -103,6 +103,9 @@ export interface FieldAdapter<
   // 这是一个“受控组件”，输入逻辑由 Adapter 内部封装
   InputComponent: FieldInputComponent<ValueSchema>
 
+  // When true, treat as single-select even if Jira schema reports type: "array"
+  forceSingleSelect?: boolean
+
   // 6. 序列化：将内部值转换为 Jira API 需要的 JSON 格式
   toDTO: (value: Value) => unknown
 

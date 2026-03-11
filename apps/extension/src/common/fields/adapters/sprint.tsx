@@ -7,6 +7,7 @@ export const JiraSprintAdapter = createSelectFieldAdapter(
   'com.pyxis.greenhopper.jira:gh-sprint',
   JiraSprintSchema,
   {
+    forceSingleSelect: true,
     keyOf: (val) => String(val.id),
     labelOf: (val) => val.name,
 
@@ -15,7 +16,7 @@ export const JiraSprintAdapter = createSelectFieldAdapter(
       return getJiraService().agile.getSprints(project.id)
     },
 
-    toDTO: (val) => ({ id: val.id }),
+    toDTO: (val) => val.id,
     fromDTO: (dto) => JiraSprintSchema.safeParse(dto).data ?? null
   }
 )
