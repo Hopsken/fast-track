@@ -15,7 +15,9 @@ export const GenericSelectInput = <S extends FieldValueSchema>({
   onConfirm
 }: FieldInputComponentProps<S>) => {
   const [search, setSearch] = useState('')
-  const isMultiple = context.metadata.schema.type === 'array'
+  const isMultiple = adapter.forceSingleSelect
+    ? false
+    : context.metadata.schema.type === 'array'
 
   const { options, isLoading } = useFieldOptions({
     adapter,

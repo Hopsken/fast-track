@@ -25,7 +25,9 @@ export const GenericFieldConfig = <T extends FieldValueSchema>(
   const { adapter, config, context, SelectorComponent, onChangeConfig } = props
 
   const { metadata } = context
-  const isFieldMulti = isSchemaMulti(metadata)
+  const isFieldMulti = adapter.forceSingleSelect
+    ? false
+    : isSchemaMulti(metadata)
 
   function renderConfig() {
     const { behavior } = config
