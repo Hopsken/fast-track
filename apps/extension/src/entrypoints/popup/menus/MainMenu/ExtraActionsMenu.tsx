@@ -6,20 +6,24 @@ import {
   Action,
   ActionItem,
   ActionList,
-  useRouteState
+  useNavigation
 } from '@/common/commands'
 import { openInNewTab, openOptionsPage } from '@/utils'
+
+import { IssueTemplatesMenu } from './IssueTemplatesMenu'
 
 export const openFeedback = () => {
   openInNewTab('https://fasttrack.featurebase.app')
 }
 
 export function ExtraActionsMenu() {
-  const [, setSearch] = useRouteState('search', '')
+  const navigate = useNavigation()
 
   return (
     <ActionList>
-      <ActionItem value="/new-issue" onSelect={() => setSearch('C')}>
+      <ActionItem
+        value="/new-issue"
+        onSelect={() => navigate.push(<IssueTemplatesMenu />)}>
         <span>
           <FilePlus size={16} />
         </span>
