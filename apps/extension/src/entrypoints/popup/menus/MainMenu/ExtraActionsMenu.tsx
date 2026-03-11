@@ -6,6 +6,7 @@ import {
   Action,
   ActionItem,
   ActionList,
+  ActionPanel,
   useNavigation
 } from '@/common/commands'
 import { openInNewTab, openOptionsPage } from '@/utils'
@@ -23,7 +24,13 @@ export function ExtraActionsMenu() {
     <ActionList>
       <ActionItem
         value="/new-issue"
-        onSelect={() => navigate.push(<IssueTemplatesMenu />)}>
+        onSelect={() =>
+          navigate.push(
+            <ActionPanel>
+              <IssueTemplatesMenu />
+            </ActionPanel>
+          )
+        }>
         <span>
           <FilePlus size={16} />
         </span>
