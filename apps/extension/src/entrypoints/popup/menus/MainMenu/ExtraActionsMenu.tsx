@@ -1,10 +1,7 @@
-import { CommandShortcut } from '@internal/ui/components/command'
-import { Kbd } from '@internal/ui/components/kbd'
 import { Cog, FilePlus, MessageSquareWarning } from 'lucide-react'
 
 import {
   Action,
-  ActionItem,
   ActionList,
   ActionPanel,
   useNavigation
@@ -22,25 +19,20 @@ export function ExtraActionsMenu() {
 
   return (
     <ActionList>
-      <ActionItem
-        value="/new-issue"
+      <Action
+        value="/create-issue"
+        icon={FilePlus}
+        title="Create Issue"
+        description="Type C from home to quick create"
+        exitOnSelect={false}
         onSelect={() =>
           navigate.push(
             <ActionPanel>
               <IssueTemplatesMenu />
             </ActionPanel>
           )
-        }>
-        <span>
-          <FilePlus size={16} />
-        </span>
-        <div className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
-          New Issue
-        </div>
-        <CommandShortcut>
-          <Kbd>C</Kbd>
-        </CommandShortcut>
-      </ActionItem>
+        }
+      />
 
       <Action
         value="/settings"

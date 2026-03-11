@@ -12,6 +12,7 @@ export interface ActionProps {
   icon?: LucideIcon
   prefix?: ReactNode
   title: ReactNode
+  description?: ReactNode
   keywords?: string[]
   onSelect?: () => void
   hotkeyId?: HotkeyId
@@ -23,6 +24,7 @@ export function Action({
   icon,
   prefix,
   title,
+  description,
   keywords,
   onSelect,
   hotkeyId,
@@ -47,10 +49,19 @@ export function Action({
       role="button"
       keywords={keywords}
       onSelect={onSelectItem}>
-      {prefixEl && <span>{prefixEl}</span>}
+      {prefixEl && (
+        <span className={description ? 'mt-[2px] self-start' : undefined}>
+          {prefixEl}
+        </span>
+      )}
 
-      <div className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
-        {title}
+      <div className="flex-1 overflow-hidden">
+        <div className="text-ellipsis whitespace-nowrap">{title}</div>
+        {description && (
+          <div className="text-muted-foreground text-ellipsis whitespace-nowrap text-[11px]">
+            {description}
+          </div>
+        )}
       </div>
 
       {hotkeyId && (
