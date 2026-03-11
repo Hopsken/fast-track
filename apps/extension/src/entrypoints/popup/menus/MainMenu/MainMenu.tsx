@@ -40,7 +40,7 @@ export function MainMenu() {
         onSearchChange={setSearch}
         autoSelectSearchOnMount
         shouldFilter={shouldFilter}
-        searchPlaceholder="Type a command or search...">
+        searchPlaceholder="Search  ·  / commands  ·  C new issue">
         {renderMenu()}
 
         {isDefaultView && (
