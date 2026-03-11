@@ -1,6 +1,13 @@
-import { Cog, MessageSquareWarning } from 'lucide-react'
+import { CommandShortcut } from '@internal/ui/components/command'
+import { Kbd } from '@internal/ui/components/kbd'
+import { Cog, FilePlus, MessageSquareWarning } from 'lucide-react'
 
-import { Action, ActionList } from '@/common/commands'
+import {
+  Action,
+  ActionItem,
+  ActionList,
+  useRouteState
+} from '@/common/commands'
 import { openInNewTab, openOptionsPage } from '@/utils'
 
 export const openFeedback = () => {
@@ -8,8 +15,22 @@ export const openFeedback = () => {
 }
 
 export function ExtraActionsMenu() {
+  const [, setSearch] = useRouteState('search', '')
+
   return (
     <ActionList>
+      <ActionItem value="/new-issue" onSelect={() => setSearch('C')}>
+        <span>
+          <FilePlus size={16} />
+        </span>
+        <div className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+          New Issue
+        </div>
+        <CommandShortcut>
+          <Kbd>C</Kbd>
+        </CommandShortcut>
+      </ActionItem>
+
       <Action
         value="/settings"
         icon={Cog}

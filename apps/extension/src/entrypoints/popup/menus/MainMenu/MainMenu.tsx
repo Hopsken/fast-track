@@ -40,7 +40,7 @@ export function MainMenu() {
         onSearchChange={setSearch}
         autoSelectSearchOnMount
         shouldFilter={shouldFilter}
-        searchPlaceholder="Search  ·  / commands  ·  C new issue">
+        searchPlaceholder="Search or / for commands">
         {renderMenu()}
 
         {isDefaultView && (
@@ -58,10 +58,7 @@ function HintsSlot() {
   const hasTicket = isTicketKey(ticketKey)
 
   const hints = useMemo<ShortcutHint[]>(() => {
-    const base: ShortcutHint[] = [
-      { keys: ['/'], label: 'Commands' },
-      { keys: ['C'], label: 'New Issue' }
-    ]
+    const base: ShortcutHint[] = [{ keys: ['/'], label: 'Commands' }]
 
     if (hasTicket) {
       base.push(
