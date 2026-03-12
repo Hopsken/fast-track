@@ -15,8 +15,8 @@ import { slugify } from '../string'
 
 const TICKET_KEY_PATTERN = /^[A-Z]+-\d+$/i
 
-export const isTicketKey = (value: string) =>
-  TICKET_KEY_PATTERN.test(value.trim())
+export const isTicketKey = (value: string | undefined | null) =>
+  !!value && TICKET_KEY_PATTERN.test(value.trim())
 
 export function getIssueTitleLink(ticket: JiraIssue) {
   return `[${ticket.summary}](${ticket.url})`

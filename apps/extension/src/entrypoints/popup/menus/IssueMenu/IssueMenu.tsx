@@ -6,10 +6,15 @@ import {
   ActionItem,
   ActionList,
   ActionPanel,
+  ActionPanelSlot,
   ActionSeparator
 } from '@/common/commands'
 import { PrefetchProvider } from '@/components/PrefetchQuery'
 import { TicketBasicFields } from '@/components/tickets'
+import {
+  FooterShortcutHints,
+  ShortcutHint
+} from '@/entrypoints/popup/menus/MainMenu/FooterShortcutHints'
 import { useIssueEditMeta } from '@/hooks/useIssueEditMeta'
 import { useIssuePriorities } from '@/hooks/useIssuePriorities'
 import { useIssueTransitions } from '@/hooks/useIssueTransitions'
@@ -18,6 +23,12 @@ import { JiraIssueDetail, JiraIssue } from '@/types'
 import { openJiraIssue } from '@/utils/open-jira-issue'
 
 import { IssueActions } from './IssueActions'
+
+const ISSUE_HINTS: ShortcutHint[] = [
+  { keys: ['⌘', '⇧', 'S'], label: 'Status' },
+  { keys: ['⌘', '⇧', 'P'], label: 'Priority' },
+  { keys: ['⌘', '⇧', 'A'], label: 'Assign' }
+]
 
 export const IssueMenu = memo(function IssueMenu({
   ticketKey
@@ -29,6 +40,10 @@ export const IssueMenu = memo(function IssueMenu({
   return (
     <ActionPanel isLoading={isLoading}>
       {ticket ? <IssueMainMenuInner ticket={ticket} /> : null}
+
+      <ActionPanelSlot>
+        <FooterShortcutHints hints={ISSUE_HINTS} />
+      </ActionPanelSlot>
     </ActionPanel>
   )
 })

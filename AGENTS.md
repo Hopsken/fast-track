@@ -50,6 +50,7 @@
 
 - Conventional Commits: `feat(scope):`, `fix:`, etc.
 - PRs: clear description, linked issues, screenshots/GIFs for UI, note permission changes
+- **Always use feature branches** — no direct commits to `master`. Branch → PR → merge.
 
 ## Security
 

@@ -1,12 +1,13 @@
 import { useMemo } from 'react'
-import { Button } from '@internal/ui/components/button'
+import { useCommandState } from '@internal/ui/components/command'
 
 import { ActionPanel, ActionPanelSlot } from '@/common/commands'
 import { useRouteState } from '@/common/commands/navigation'
 import { HotkeysScopeProvider } from '@/lib/hotkeys'
-import { openOptionsPage } from '@/utils'
+import { isTicketKey } from '@/utils/jira/issues'
 
-import { ExtraActionsMenu, openFeedback } from './ExtraActionsMenu'
+import { ExtraActionsMenu } from './ExtraActionsMenu'
+import { FooterShortcutHints, ShortcutHint } from './FooterShortcutHints'
 import { IssueTemplatesMenu } from './IssueTemplatesMenu'
 import { TicketListMenu } from './TicketListMenu'
 
@@ -16,6 +17,8 @@ export function MainMenu() {
   const isExtraActionsMenuVisible = search.startsWith('/')
   const isTemplateMenuVisible =
     search.startsWith('+') || search.startsWith('C') || search.startsWith('c')
+
+  const isDefaultView = !isExtraActionsMenuVisible && !isTemplateMenuVisible
 
   const shouldFilter = useMemo(() => {
     return !!(isExtraActionsMenuVisible || isTemplateMenuVisible)
@@ -37,21 +40,36 @@ export function MainMenu() {
         onSearchChange={setSearch}
         autoSelectSearchOnMount
         shouldFilter={shouldFilter}
-        searchPlaceholder="Type a command or search...">
+        searchPlaceholder="Search or / for commands">
         {renderMenu()}
 
-        <ActionPanelSlot>
-          <Button variant={'ghost'} size={'xs'} onClick={openFeedback}>
-            <span>Feedback</span>
-          </Button>
-          <Button
-            variant={'ghost'}
-            size={'xs'}
-            onClick={() => openOptionsPage()}>
-            <span>Settings</span>
-          </Button>
-        </ActionPanelSlot>
+        {isDefaultView && (
+          <ActionPanelSlot>
+            <HintsSlot />
+          </ActionPanelSlot>
+        )}
       </ActionPanel>
     </HotkeysScopeProvider>
   )
+}
+
+function HintsSlot() {
+  const ticketKey = useCommandState((s) => s.value)
+  const hasTicket = isTicketKey(ticketKey)
+
+  const hints = useMemo<ShortcutHint[]>(() => {
+    const base: ShortcutHint[] = [{ keys: ['/'], label: 'Commands' }]
+
+    if (hasTicket) {
+      base.push(
+        { keys: ['⌘', '⇧', 'S'], label: 'Status' },
+        { keys: ['⌘', '⇧', 'P'], label: 'Priority' },
+        { keys: ['⌘', '⇧', 'A'], label: 'Assign' }
+      )
+    }
+
+    return base
+  }, [hasTicket])
+
+  return <FooterShortcutHints hints={hints} />
 }

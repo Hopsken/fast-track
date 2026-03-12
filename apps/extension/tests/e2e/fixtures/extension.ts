@@ -80,6 +80,22 @@ export const test = base.extend<ExtensionFixture>({
     // The extension opens the options page on first install. In E2E we use a fresh
     // userDataDir per test, so this happens every time and can interrupt our
     // navigations (popup/options). Close the auto-opened page if it appears.
+    //
+    // The install handler fires very early — often before waitForEvent('page') is
+    // registered — so check already-open pages first, then listen for one more.
+    const optionsUrl = `chrome-extension://${extensionId}/options.html`
+
+    for (const page of context.pages()) {
+      try {
+        await page.waitForLoadState('domcontentloaded')
+        if (page.url().startsWith(optionsUrl)) {
+          await page.close().catch(() => {})
+        }
+      } catch {
+        // ignore
+      }
+    }
+
     try {
       const autoPage = await context.waitForEvent('page', { timeout: 2_000 })
       // Only close if it is (or becomes) an options page.
@@ -119,10 +135,22 @@ export const test = base.extend<ExtensionFixture>({
         })
       }, MOCK_AUTH_CREDENTIALS)
 
+      // Close any lingering options pages left over from the first-install handler
+      // in case the extensionId fixture's auto-close raced and missed them.
+      for (const page of context.pages()) {
+        if (page.url().includes(`${extensionId}/options.html`)) {
+          await page.close().catch(() => {})
+        }
+      }
+
       // Now open the popup - it will read the auth credentials on initial load
       const popup = await context.newPage()
+
       await popup.goto(`chrome-extension://${extensionId}/popup.html`)
       await popup.waitForLoadState('domcontentloaded')
+
+      // Bring the popup to front to ensure it receives focus events correctly.
+      await popup.bringToFront()
 
       return popup
     }
