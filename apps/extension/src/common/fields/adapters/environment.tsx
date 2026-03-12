@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+import { adfToText, textToAdf } from './shared/adf'
 import { createTextFieldAdapter } from './shared/text'
 
 export const JiraEnvironmentAdapter = createTextFieldAdapter(
@@ -7,7 +8,7 @@ export const JiraEnvironmentAdapter = createTextFieldAdapter(
   z.string(),
   {
     keyOf: (val) => val,
-    toDTO: (val) => val,
-    fromDTO: (dto) => (typeof dto === 'string' ? dto : null)
+    toDTO: (val) => textToAdf(val),
+    fromDTO: (dto) => adfToText(dto) ?? (typeof dto === 'string' ? dto : null)
   }
 )

@@ -4,11 +4,7 @@ import { ZodString } from 'zod'
 import { ActionGroup, ActionList, ActionPanel } from '@/common/commands'
 import type { FieldInputComponentProps } from '@/common/fields/types'
 
-/**
- * Multiline text input for Jira textarea custom fields.
- *
- * Jira stores these fields as plain strings (not ADF), so we keep the value as-is.
- */
+/** Multiline text input for Jira textarea custom fields. */
 export function TextAreaInput(props: FieldInputComponentProps<ZodString>) {
   const { adapter, context, value, onChange } = props
 
