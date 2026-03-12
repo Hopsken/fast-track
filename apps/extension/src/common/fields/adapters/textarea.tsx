@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+import { adfToText, textToAdf } from './shared/adf'
 import { createTextFieldAdapter } from './shared/text'
 import { TextAreaConfig } from './textarea/TextAreaConfig'
 import { TextAreaInput } from './textarea/TextAreaInput'
@@ -15,7 +16,7 @@ export const JiraTextAreaAdapter = createTextFieldAdapter(
     keyOf: (val) => val,
     InputComponent: TextAreaInput,
     ConfigComponent: TextAreaConfig,
-    toDTO: (val) => val,
-    fromDTO: (dto) => (typeof dto === 'string' ? dto : null)
+    toDTO: (val) => textToAdf(val),
+    fromDTO: (dto) => adfToText(dto) ?? (typeof dto === 'string' ? dto : null)
   }
 )
