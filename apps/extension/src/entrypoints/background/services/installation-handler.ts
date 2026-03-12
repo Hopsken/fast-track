@@ -51,6 +51,11 @@ export class InstallationHandlerService {
   private static handleFirstInstall(): void {
     this.log.info('👋 Welcome! Opening options page for first-time setup')
 
+    // Skip in E2E test builds to prevent the install-time options page from
+    // navigating the test popup page (browser.runtime.openOptionsPage queues
+    // a tab navigation that fires asynchronously into the active page).
+    if (import.meta.env.VITE_E2E_MOCKS === '1') return
+
     try {
       openOptionsPage()
     } catch (error) {

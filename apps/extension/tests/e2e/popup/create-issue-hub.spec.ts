@@ -113,11 +113,11 @@ test.describe('Popup - Create issue hub', () => {
     // ESC should cancel (go back), not clear summary
     await summaryInput.press('Escape')
 
-    // Back to MainMenu root (ActionPanel with Feedback/Settings).
+    // Back to template list (ESC pops CreateIssueMenu, returns to IssueTemplatesMenu).
     // This ensures ESC did *not* just clear the summary input in-place.
     const mainInputAfterCancel = popup.locator('[data-slot="command-input"]')
     await expect(mainInputAfterCancel).toBeVisible({ timeout: 15_000 })
-    await expect(popup.getByRole('button', { name: 'Feedback' })).toBeVisible({
+    await expect(popup.getByText('Smoke Template')).toBeVisible({
       timeout: 15_000
     })
 
