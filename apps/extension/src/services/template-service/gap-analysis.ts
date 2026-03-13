@@ -127,3 +127,71 @@ export function computeVisibleFields(
 
   return visible
 }
+
+const COMMON_OPTIONAL_FIELD_IDS = ['priority', 'assignee', 'labels']
+
+/**
+ * Template-less variant: computes visible fields from createmeta only.
+ * Always includes summary + description, all required fields without server
+ * defaults, and common optional fields (priority, assignee, labels).
+ */
+export function computeVisibleFieldsFromMeta(
+  fieldsMetadata: JiraFieldMetadata[]
+): VisibleField[] {
+  const shouldSkipField = (fieldId: string) =>
+    fieldId === 'summary' || fieldId === 'project' || fieldId === 'issuetype'
+
+  const visible: VisibleField[] = [
+    {
+      fieldId: 'summary',
+      metadata: DEFAULT_SCHEMAS.summary,
+      isEditable: true
+    }
+  ]
+
+  // Add description if present in meta
+  const descMeta = fieldsMetadata.find((f) => f.fieldId === 'description')
+  if (descMeta) {
+    visible.push({
+      fieldId: 'description',
+      metadata: descMeta,
+      isEditable: true
+    })
+  } else {
+    visible.push({
+      fieldId: 'description',
+      metadata: DEFAULT_SCHEMAS.description,
+      isEditable: true
+    })
+  }
+
+  // Required fields without server defaults
+  for (const field of fieldsMetadata) {
+    if (!field.required) continue
+    if (shouldSkipField(field.fieldId)) continue
+    if (field.fieldId === 'description') continue
+    if (field.hasDefaultValue) continue
+
+    const alreadyVisible = visible.some((f) => f.fieldId === field.fieldId)
+    if (!alreadyVisible) {
+      visible.push({
+        fieldId: field.fieldId,
+        metadata: field,
+        isEditable: true
+      })
+    }
+  }
+
+  // Common optional fields if present in createmeta
+  for (const fieldId of COMMON_OPTIONAL_FIELD_IDS) {
+    const meta = fieldsMetadata.find((f) => f.fieldId === fieldId)
+    if (!meta) continue
+
+    const alreadyVisible = visible.some((f) => f.fieldId === fieldId)
+    if (!alreadyVisible) {
+      visible.push({ fieldId, metadata: meta, isEditable: true })
+    }
+  }
+
+  return visible
+}

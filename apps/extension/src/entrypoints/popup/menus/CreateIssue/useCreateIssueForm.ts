@@ -4,6 +4,7 @@ import { useNavigation } from '@/common/commands'
 import { getJiraService } from '@/services/jira-service'
 import { getTemplateService } from '@/services/template-service'
 import { showToast } from '@/stores/command/useToastStore'
+import type { CreateIssueScope } from '@/types/create-issue'
 import { nextTick } from '@/utils/nextTick'
 import type { IssueTemplate } from '~/types/template'
 import { formatErrorMessage } from '~/utils/formatError'
@@ -12,10 +13,14 @@ import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 import { extractJiraFieldErrors, buildCreateIssueFields } from './utils'
 
 export interface UseCreateIssueFormOptions {
-  template: IssueTemplate
+  scope: CreateIssueScope
+  template?: IssueTemplate
 }
 
-export function useCreateIssueForm({ template }: UseCreateIssueFormOptions) {
+export function useCreateIssueForm({
+  scope,
+  template
+}: UseCreateIssueFormOptions) {
   const navigate = useNavigation()
   const { values, wizardFields, setErrors, promoteFields, reset } =
     useCreateIssueDraftStore()
@@ -32,8 +37,8 @@ export function useCreateIssueForm({ template }: UseCreateIssueFormOptions) {
     try {
       const jira = getJiraService()
       const created = await jira.issues.createIssue({
-        projectKey: template.scope.project.key,
-        issueTypeId: template.scope.issueType.id,
+        projectKey: scope.project.key,
+        issueTypeId: scope.issueType.id,
         fields: {
           ...fieldValues,
           summary: (values['summary'] ?? '') as string
@@ -45,9 +50,11 @@ export function useCreateIssueForm({ template }: UseCreateIssueFormOptions) {
           ? created.key
           : 'created'
 
-      nextTick(() => {
-        getTemplateService().markTemplateUsed(template.id)
-      })
+      if (template) {
+        nextTick(() => {
+          getTemplateService().markTemplateUsed(template.id)
+        })
+      }
 
       toast.update({
         style: 'success',
@@ -57,7 +64,11 @@ export function useCreateIssueForm({ template }: UseCreateIssueFormOptions) {
 
       reset()
 
-      navigate.pop()
+      if (template) {
+        navigate.pop()
+      } else {
+        navigate.pop(-Infinity)
+      }
     } catch (e) {
       const errorsMap = extractJiraFieldErrors(e)
 

@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { Settings } from 'lucide-react'
+import { Settings, Zap } from 'lucide-react'
 
 import {
   Action,
@@ -13,6 +13,7 @@ import { IssueTemplate } from '@/types/template'
 import { openOptionsPage } from '@/utils'
 
 import { CreateIssueMenu } from '../CreateIssue'
+import { ProjectPickerMenu } from '../QuickCreate/ProjectPickerMenu'
 
 export function IssueTemplatesMenu() {
   const { data: templates, isLoading } = useTemplates()
@@ -24,13 +25,26 @@ export function IssueTemplatesMenu() {
 
   const onSelect = useCallback(
     (template: IssueTemplate) => {
-      navigate.push(<CreateIssueMenu template={template} />)
+      navigate.push(
+        <CreateIssueMenu scope={template.scope} template={template} />
+      )
     },
     [navigate]
   )
 
   return (
     <ActionList isLoading={isLoading} emptyPlaceholder="No templates">
+      <ActionGroup heading="Quick Create">
+        <Action
+          value="quick-create"
+          icon={Zap}
+          title="Quick create"
+          keywords={['new', 'issue', 'create']}
+          onSelect={() => navigate.push(<ProjectPickerMenu />)}
+          exitOnSelect={false}
+        />
+      </ActionGroup>
+
       <ActionGroup heading="Issue Templates">
         {templates?.map((template) => (
           <Action

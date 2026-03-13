@@ -13,18 +13,18 @@ import { useWizardNavigation } from './useWizardNavigation'
 export function FieldInputMenu({ field }: { field: VisibleField }) {
   const { fieldId } = field
 
-  const { template, values, setValue } = useCreateIssueDraftStore()
+  const { scope, template, values, setValue } = useCreateIssueDraftStore()
   const { goBackToFieldsMenu } = useWizardNavigation()
   const currentValue = values[fieldId]
 
   const adapter = useFieldAdapter(field.metadata)
-  const fieldConfig = template.fields.find((c) => c.fieldId === fieldId)
+  const fieldConfig = template?.fields.find((c) => c.fieldId === fieldId)
   const fieldContext = useMemo<JiraFieldContext>(
     () => ({
-      ...template.scope,
+      ...scope,
       metadata: field.metadata
     }),
-    [field.metadata, template.scope]
+    [field.metadata, scope]
   )
 
   const onChange = useMemoizedFn((value: unknown) => {

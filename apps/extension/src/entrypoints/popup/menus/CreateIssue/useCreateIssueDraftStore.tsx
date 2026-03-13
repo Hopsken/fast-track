@@ -3,13 +3,15 @@ import { useStore } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { createStore, StoreApi } from 'zustand/vanilla'
 
+import type { CreateIssueScope } from '@/types/create-issue'
 import { IssueTemplate } from '@/types/template'
 import type { VisibleField } from '~/services/template-service/gap-analysis'
 
 import { buildInitialValues } from './utils'
 
 export interface CreateIssueDraftState {
-  template: IssueTemplate
+  scope: CreateIssueScope
+  template?: IssueTemplate
 
   values: Record<string, unknown>
   errors: Record<string, string>
@@ -31,10 +33,14 @@ export interface CreateIssueDraftState {
 
 type IssueDraftStore = StoreApi<CreateIssueDraftState>
 
-export const createIssueDraftStore = (template: IssueTemplate) =>
+export const createIssueDraftStore = (
+  scope: CreateIssueScope,
+  template?: IssueTemplate
+) =>
   createStore<CreateIssueDraftState>()(
     devtools(
       (set) => ({
+        scope,
         template,
         values: {},
         errors: {},
@@ -110,9 +116,14 @@ export const createIssueDraftStore = (template: IssueTemplate) =>
 const IssueDraftStoreContext = createContext<IssueDraftStore | null>(null)
 
 export const CreateIssueDraftStoreProvider = (
-  props: PropsWithChildren<{ template: IssueTemplate }>
+  props: PropsWithChildren<{
+    scope: CreateIssueScope
+    template?: IssueTemplate
+  }>
 ) => {
-  const [store] = useState(() => createIssueDraftStore(props.template))
+  const [store] = useState(() =>
+    createIssueDraftStore(props.scope, props.template)
+  )
 
   return (
     <IssueDraftStoreContext.Provider value={store}>
