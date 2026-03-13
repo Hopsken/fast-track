@@ -64,12 +64,12 @@ export function CreateIssueFieldsMenu() {
 
   const listFields = wizardFields
 
-  const activeListItemValue =
+  const initialListItemValue =
     lastVisitedFieldId == null ? undefined : `field:${lastVisitedFieldId}`
 
   return (
     <ActionPanel
-      value={activeListItemValue}
+      defaultValue={initialListItemValue}
       ref={hotkeyRef}
       search={summary}
       onSearchChange={handleSummaryChange}
