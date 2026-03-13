@@ -18,6 +18,7 @@ import { WizardProgressBar } from './WizardProgressBar'
 
 export function CreateIssueFieldsMenu() {
   const {
+    scope,
     template,
     values,
     errors,
@@ -31,17 +32,13 @@ export function CreateIssueFieldsMenu() {
   const navigate = useNavigation()
 
   // Metadata & conflicts
-  const {
-    project: { key: projectKey },
-    issueType: { id: issueTypeId }
-  } = template.scope
   const { isLoading: isLoadingFields } = useIssueCreateMeta(
-    projectKey,
-    issueTypeId
+    scope.project.key,
+    scope.issueType.id
   )
 
   // Form submission
-  const { submit } = useCreateIssueForm({ template })
+  const { submit } = useCreateIssueForm({ scope, template })
 
   // Hotkeys
   useHotkey('issue.create.cancel', () => navigate.pop())
@@ -83,7 +80,7 @@ export function CreateIssueFieldsMenu() {
       ) : null}
 
       <FieldList
-        heading={template.name ? `Review · ${template.name}` : 'Review'}
+        heading={template?.name ? `Review · ${template.name}` : 'New Issue'}
         fields={listFields}
         values={values}
         errors={errors}

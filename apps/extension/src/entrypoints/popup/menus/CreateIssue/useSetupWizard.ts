@@ -2,25 +2,30 @@ import { useEffect, useMemo } from 'react'
 import { keyBy, merge, unionBy } from 'lodash-es'
 
 import { useIssueCreateMeta } from '@/hooks/useIssueCreateMeta'
-import { computeVisibleFields } from '@/services/template-service/gap-analysis'
+import {
+  computeVisibleFields,
+  computeVisibleFieldsFromMeta
+} from '@/services/template-service/gap-analysis'
 
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 import { computePromotedFields, computeWizardSequence } from './utils'
 
 export const useSetupWizard = () => {
-  const { template, promotedFieldIds, setWizardFields } =
+  const { scope, template, promotedFieldIds, setWizardFields } =
     useCreateIssueDraftStore()
 
   // Metadata & conflicts
-  const {
-    project: { key: projectKey },
-    issueType: { id: issueTypeId }
-  } = template.scope
-  const { data: fieldsMetadata } = useIssueCreateMeta(projectKey, issueTypeId)
+  const { data: fieldsMetadata } = useIssueCreateMeta(
+    scope.project.key,
+    scope.issueType.id
+  )
 
   // Compute visible fields
   const visibleFieldsBase = useMemo(() => {
-    return computeVisibleFields(template, fieldsMetadata ?? [])
+    if (template) {
+      return computeVisibleFields(template, fieldsMetadata ?? [])
+    }
+    return computeVisibleFieldsFromMeta(fieldsMetadata ?? [])
   }, [fieldsMetadata, template])
 
   const visibleFields = useMemo(() => {
@@ -31,7 +36,7 @@ export const useSetupWizard = () => {
     })
 
     return unionBy(visibleFieldsBase, promotedFields, 'fieldId').map((field) =>
-      merge({}, fieldConfigById[field.fieldId], field)
+      merge({}, fieldConfigById[field.fieldId] ?? {}, field)
     )
   }, [visibleFieldsBase, promotedFieldIds, fieldsMetadata])
 

@@ -1,5 +1,6 @@
 import { NavigateBackProvider } from '@/common/commands'
 import { HotkeysScopeProvider } from '@/lib/hotkeys'
+import type { CreateIssueScope } from '@/types/create-issue'
 import type { VisibleField } from '~/services/template-service/gap-analysis'
 import type { IssueTemplate } from '~/types/template'
 
@@ -55,9 +56,15 @@ function CreateIssueMenuInner() {
   return <FieldInputMenuRouter field={activeField} />
 }
 
-export function CreateIssueMenu({ template }: { template: IssueTemplate }) {
+export function CreateIssueMenu({
+  scope,
+  template
+}: {
+  scope: CreateIssueScope
+  template?: IssueTemplate
+}) {
   return (
-    <CreateIssueDraftStoreProvider template={template}>
+    <CreateIssueDraftStoreProvider scope={scope} template={template}>
       <CreateIssueMenuInner />
     </CreateIssueDraftStoreProvider>
   )
