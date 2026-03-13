@@ -90,7 +90,7 @@ export function CreateIssueFieldsMenu() {
 
       <ActionPanelSlot>
         <div className="flex items-center gap-2">
-          <WizardProgressBar />
+          {/*<WizardProgressBar />*/}
           <Button
             variant={'ghost'}
             size={'sm'}

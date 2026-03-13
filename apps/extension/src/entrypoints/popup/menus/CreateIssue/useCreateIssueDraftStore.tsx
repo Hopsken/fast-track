@@ -33,7 +33,7 @@ export interface CreateIssueDraftState {
 
 type IssueDraftStore = StoreApi<CreateIssueDraftState>
 
-const createIssueDraftStore = (
+export const createIssueDraftStore = (
   scope: CreateIssueScope,
   template?: IssueTemplate
 ) =>

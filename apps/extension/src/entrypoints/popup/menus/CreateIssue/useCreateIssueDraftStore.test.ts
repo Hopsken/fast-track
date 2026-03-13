@@ -45,7 +45,7 @@ function createVisibleField(fieldId: string): VisibleField {
 
 describe('createIssueDraftStore', () => {
   it('keeps the last visited field highlighted after returning to review menu', () => {
-    const store = createIssueDraftStore(template)
+    const store = createIssueDraftStore(template.scope, template)
 
     const wizardFields = [
       createVisibleField('summary'),
@@ -60,7 +60,7 @@ describe('createIssueDraftStore', () => {
   })
 
   it('clears last visited field when field list no longer contains it', () => {
-    const store = createIssueDraftStore(template)
+    const store = createIssueDraftStore(template.scope, template)
 
     store
       .getState()
