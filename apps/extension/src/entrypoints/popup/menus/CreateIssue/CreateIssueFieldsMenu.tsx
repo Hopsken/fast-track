@@ -24,7 +24,8 @@ export function CreateIssueFieldsMenu() {
     clearError,
     setValue,
     wizardFields,
-    setWizardIndex
+    setWizardIndex,
+    lastVisitedFieldId
   } = useCreateIssueDraftStore()
 
   const navigate = useNavigation()
@@ -63,8 +64,12 @@ export function CreateIssueFieldsMenu() {
 
   const listFields = wizardFields
 
+  const activeListItemValue =
+    lastVisitedFieldId == null ? undefined : `field:${lastVisitedFieldId}`
+
   return (
     <ActionPanel
+      value={activeListItemValue}
       ref={hotkeyRef}
       search={summary}
       onSearchChange={handleSummaryChange}

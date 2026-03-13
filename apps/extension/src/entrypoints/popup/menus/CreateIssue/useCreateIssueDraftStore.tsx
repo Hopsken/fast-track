@@ -18,6 +18,7 @@ export interface CreateIssueDraftState {
   // Wizard state
   wizardFields: VisibleField[]
   wizardIndex: number
+  lastVisitedFieldId: string | null
 
   setValue: (fieldId: string, value: unknown) => void
   setErrors: (errors: Record<string, string>) => void
@@ -30,7 +31,7 @@ export interface CreateIssueDraftState {
 
 type IssueDraftStore = StoreApi<CreateIssueDraftState>
 
-const createIssueDraftStore = (template: IssueTemplate) =>
+export const createIssueDraftStore = (template: IssueTemplate) =>
   createStore<CreateIssueDraftState>()(
     devtools(
       (set) => ({
@@ -41,6 +42,7 @@ const createIssueDraftStore = (template: IssueTemplate) =>
 
         wizardFields: [],
         wizardIndex: -1,
+        lastVisitedFieldId: null,
 
         setValue: (fieldId, value) => {
           set((state) => ({
@@ -70,6 +72,11 @@ const createIssueDraftStore = (template: IssueTemplate) =>
         setWizardFields: (fields) => {
           set((prev) => ({
             wizardFields: fields,
+            lastVisitedFieldId: fields.some(
+              (field) => field.fieldId === prev.lastVisitedFieldId
+            )
+              ? prev.lastVisitedFieldId
+              : null,
             values: {
               ...buildInitialValues(fields),
               ...prev.values
@@ -77,7 +84,13 @@ const createIssueDraftStore = (template: IssueTemplate) =>
           }))
         },
         setWizardIndex: (index) => {
-          set({ wizardIndex: index })
+          set((state) => ({
+            wizardIndex: index,
+            lastVisitedFieldId:
+              index >= 0
+                ? (state.wizardFields[index]?.fieldId ?? null)
+                : state.lastVisitedFieldId
+          }))
         },
 
         reset: () =>
@@ -86,7 +99,8 @@ const createIssueDraftStore = (template: IssueTemplate) =>
             errors: {},
             promotedFieldIds: [],
             wizardFields: [],
-            wizardIndex: -1
+            wizardIndex: -1,
+            lastVisitedFieldId: null
           }))
       }),
       { name: 'create-issue-draft-store' }
