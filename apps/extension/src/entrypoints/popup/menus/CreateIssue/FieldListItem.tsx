@@ -85,7 +85,7 @@ export function FieldListItem({
   const valuePreview = formatValuePreview(value, adapter)
   const hasError = !!error
 
-  const searchValue = `field:${fieldId} ${fieldName}`
+  const actionItemValue = `field:${fieldId}`
 
   const display = getDisplayText({
     fieldName,
@@ -118,7 +118,8 @@ export function FieldListItem({
 
   return (
     <ActionItem
-      value={searchValue}
+      value={actionItemValue}
+      keywords={[fieldName]}
       onSelect={() => onSelect(fieldId)}
       className={cn(hasError && 'border-l-2 border-l-rose-500')}>
       <div className="flex flex-1 items-center gap-2">
