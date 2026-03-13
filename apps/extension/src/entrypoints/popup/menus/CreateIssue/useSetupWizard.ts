@@ -15,7 +15,7 @@ export const useSetupWizard = () => {
     useCreateIssueDraftStore()
 
   // Metadata & conflicts
-  const { data: fieldsMetadata } = useIssueCreateMeta(
+  const { data: fieldsMetadata, isSuccess: isMetaLoaded } = useIssueCreateMeta(
     scope.project.key,
     scope.issueType.id
   )
@@ -25,8 +25,13 @@ export const useSetupWizard = () => {
     if (template) {
       return computeVisibleFields(template, fieldsMetadata ?? [])
     }
+
+    if (!isMetaLoaded) {
+      return []
+    }
+
     return computeVisibleFieldsFromMeta(fieldsMetadata ?? [])
-  }, [fieldsMetadata, template])
+  }, [fieldsMetadata, isMetaLoaded, template])
 
   const visibleFields = useMemo(() => {
     const fieldConfigById = keyBy(visibleFieldsBase, 'fieldId')
@@ -45,5 +50,5 @@ export const useSetupWizard = () => {
     if (visibleFields.length > 0) {
       setWizardFields(computeWizardSequence(visibleFields))
     }
-  }, [visibleFields, setWizardFields])
+  }, [setWizardFields, visibleFields])
 }
