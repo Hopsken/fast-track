@@ -103,4 +103,55 @@ describe('useCreateIssueForm', () => {
       type: 'all'
     })
   })
+
+  it('does not wait for suggestions invalidation before navigation', async () => {
+    const pop = vi.fn()
+    const reset = vi.fn()
+
+    mockUseNavigation.mockReturnValue({ pop })
+    mockCreateIssue.mockResolvedValue({ key: 'ABC-456' })
+    mockBuildCreateIssueFields.mockReturnValue({})
+    mockInvalidateQueries.mockReturnValue(new Promise(() => {}))
+    mockUseCreateIssueDraftStore.mockReturnValue({
+      values: { summary: 'Issue summary' },
+      wizardFields: [
+        {
+          fieldId: 'summary',
+          required: true
+        }
+      ],
+      setErrors: vi.fn(),
+      promoteFields: vi.fn(),
+      reset
+    })
+
+    mockUseMutation.mockImplementation(
+      (options: {
+        mutationFn: (variables: unknown) => Promise<unknown>
+        onSuccess?: (data: unknown) => Promise<void> | void
+      }) => ({
+        mutateAsync: async (variables: unknown) => {
+          const result = await options.mutationFn(variables)
+          await options.onSuccess?.(result)
+          return result
+        }
+      })
+    )
+
+    const { result } = renderHook(() =>
+      useCreateIssueForm({
+        scope: {
+          project: { key: 'ABC' },
+          issueType: { id: '10001' }
+        } as unknown as Parameters<typeof useCreateIssueForm>[0]['scope']
+      })
+    )
+
+    await act(async () => {
+      await result.current.submit()
+    })
+
+    expect(pop).toHaveBeenCalledWith(-Infinity)
+    expect(reset).toHaveBeenCalled()
+  })
 })

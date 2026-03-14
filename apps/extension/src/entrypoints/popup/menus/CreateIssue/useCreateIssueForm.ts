@@ -41,8 +41,8 @@ export function useCreateIssueForm({
         }
       })
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
         queryKey: queryKeys.tickets.suggestions,
         type: 'all'
       })
