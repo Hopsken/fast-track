@@ -1,3 +1,4 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useMemoizedFn } from 'ahooks'
 
 import { useNavigation } from '@/common/commands'
@@ -6,6 +7,7 @@ import { getTemplateService } from '@/services/template-service'
 import { showToast } from '@/stores/command/useToastStore'
 import type { CreateIssueScope } from '@/types/create-issue'
 import { nextTick } from '@/utils/nextTick'
+import { queryKeys } from '@/utils/queryKeys'
 import type { IssueTemplate } from '~/types/template'
 import { formatErrorMessage } from '~/utils/formatError'
 
@@ -22,8 +24,30 @@ export function useCreateIssueForm({
   template
 }: UseCreateIssueFormOptions) {
   const navigate = useNavigation()
+  const queryClient = useQueryClient()
   const { values, wizardFields, setErrors, promoteFields, reset } =
     useCreateIssueDraftStore()
+
+  const createIssueMutation = useMutation({
+    mutationFn: async (fieldValues: Record<string, unknown>) => {
+      const jira = getJiraService()
+
+      return jira.issues.createIssue({
+        projectKey: scope.project.key,
+        issueTypeId: scope.issueType.id,
+        fields: {
+          ...fieldValues,
+          summary: (values['summary'] ?? '') as string
+        }
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.tickets.suggestions,
+        type: 'all'
+      })
+    }
+  })
 
   const submit = useMemoizedFn(async () => {
     const fieldValues = buildCreateIssueFields(wizardFields, values)
@@ -35,15 +59,7 @@ export function useCreateIssueForm({
     })
 
     try {
-      const jira = getJiraService()
-      const created = await jira.issues.createIssue({
-        projectKey: scope.project.key,
-        issueTypeId: scope.issueType.id,
-        fields: {
-          ...fieldValues,
-          summary: (values['summary'] ?? '') as string
-        }
-      })
+      const created = await createIssueMutation.mutateAsync(fieldValues)
 
       const issueKey =
         typeof created?.key === 'string' && created.key.length > 0
