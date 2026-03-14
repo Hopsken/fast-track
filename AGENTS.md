@@ -40,7 +40,7 @@
 
 ## Quality Gates
 
-- `pnpm lint`, `pnpm typecheck`, `pnpm test` must pass.
+- `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm test:e2e` must pass.
 - For lint issues, don't worry about style/format issues, they can be autofixed. Focus on functional ones.
 - No `any`, `@ts-ignore`, or disabled lint rules without justification
 - UI changes: reuse `packages/ui`, verify across surfaces + browsers
