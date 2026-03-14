@@ -89,17 +89,15 @@ export function CreateIssueFieldsMenu() {
       />
 
       <ActionPanelSlot>
-        <div className="flex items-center gap-2">
+        <Button
+          variant={'ghost'}
+          size={'sm'}
+          onClick={submit}
+          className="-my-1 -mr-4">
           <WizardProgressBar />
-          <Button
-            variant={'ghost'}
-            size={'sm'}
-            onClick={submit}
-            className="-my-1 -mr-4">
-            <span>Create issue</span>
-            <ActionShortcut hotkeyId="issue.create.proceed" />
-          </Button>
-        </div>
+          <span>Create issue</span>
+          <ActionShortcut hotkeyId="issue.create.proceed" />
+        </Button>
       </ActionPanelSlot>
     </ActionPanel>
   )

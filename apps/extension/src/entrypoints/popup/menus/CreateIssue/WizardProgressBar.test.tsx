@@ -10,7 +10,7 @@ vi.mock('./useCreateIssueDraftStore', () => ({
 }))
 
 describe('WizardProgressBar', () => {
-  it('renders a quarter-step pie progress state', () => {
+  it('renders a pie progress state without visible step text', () => {
     mockUseCreateIssueDraftStore.mockReturnValue({
       wizardFields: [
         { fieldId: 'description' },
@@ -29,7 +29,10 @@ describe('WizardProgressBar', () => {
 
     const progressbar = screen.getByRole('progressbar')
     expect(progressbar.getAttribute('aria-valuenow')).toBe('1')
-    expect(progressbar.getAttribute('aria-valuetext')).toContain('1/4')
+    expect(progressbar.getAttribute('aria-valuetext')).toContain(
+      '1 of 4 fields completed'
+    )
+    expect(screen.queryByText('1/4')).toBeNull()
   })
 
   it('does not report all set before every field is completed', () => {
@@ -52,8 +55,10 @@ describe('WizardProgressBar', () => {
     render(<WizardProgressBar />)
 
     const progressbar = screen.getByRole('progressbar')
-    expect(progressbar.getAttribute('aria-valuenow')).toBe('3')
-    expect(progressbar.getAttribute('aria-valuetext')).toContain('3/4')
+    expect(progressbar.getAttribute('aria-valuenow')).toBe('4')
+    expect(progressbar.getAttribute('aria-valuetext')).toContain(
+      '4 of 5 fields completed'
+    )
     expect(screen.queryByText('All set')).toBeNull()
   })
 
@@ -69,7 +74,10 @@ describe('WizardProgressBar', () => {
     render(<WizardProgressBar />)
 
     const progressbar = screen.getByRole('progressbar')
-    expect(progressbar.getAttribute('aria-valuenow')).toBe('4')
-    expect(screen.getByText('All set')).toBeTruthy()
+    expect(progressbar.getAttribute('aria-valuenow')).toBe('2')
+    expect(progressbar.getAttribute('aria-valuetext')).toContain(
+      'All fields completed (2 of 2)'
+    )
+    expect(screen.queryByText('All set')).toBeNull()
   })
 })

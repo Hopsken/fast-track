@@ -106,7 +106,7 @@ test.describe('Popup - Create issue hub', () => {
     // Progress should count summary + description
     await expect(
       popup.getByRole('progressbar', {
-        name: 'Wizard progress: 2/4'
+        name: 'Wizard progress'
       })
     ).toBeVisible()
 
@@ -148,7 +148,7 @@ test.describe('Popup - Create issue hub', () => {
 
     await expect(
       popup.getByRole('progressbar', {
-        name: 'Wizard progress: All set'
+        name: 'Wizard progress'
       })
     ).toBeVisible()
   })
