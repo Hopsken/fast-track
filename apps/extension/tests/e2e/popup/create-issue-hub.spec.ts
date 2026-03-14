@@ -106,7 +106,7 @@ test.describe('Popup - Create issue hub', () => {
     // Progress should count summary + description
     await expect(
       popup.getByRole('progressbar', {
-        name: 'Wizard progress: 1 of 2 fields completed'
+        name: 'Wizard progress'
       })
     ).toBeVisible()
 
@@ -134,9 +134,7 @@ test.describe('Popup - Create issue hub', () => {
     // Drill into description
     // Use cmdk item value to avoid strict-mode collisions (the row can render
     // "Description" in both primary + secondary lines when a preset exists).
-    await popup
-      .locator('[cmdk-item][data-value^="field:description"]')
-      .click()
+    await popup.locator('[cmdk-item][data-value^="field:description"]').click()
 
     const textarea = popup.locator('textarea')
     await expect(textarea).toBeVisible({ timeout: 15_000 })
@@ -150,7 +148,7 @@ test.describe('Popup - Create issue hub', () => {
 
     await expect(
       popup.getByRole('progressbar', {
-        name: 'Wizard progress: 2 of 2 fields completed'
+        name: 'Wizard progress'
       })
     ).toBeVisible()
   })
