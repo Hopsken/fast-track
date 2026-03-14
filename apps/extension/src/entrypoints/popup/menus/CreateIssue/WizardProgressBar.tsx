@@ -7,12 +7,11 @@ import { isEmptyValue } from './utils'
 const PROGRESS_STEPS = 4
 
 function getQuarterProgressStep(filledCount: number, totalCount: number) {
-  if (totalCount === 0) return 0
+  if (totalCount === 0 || filledCount === 0) return 0
+  if (filledCount >= totalCount) return PROGRESS_STEPS
 
-  return Math.min(
-    PROGRESS_STEPS,
-    Math.ceil((filledCount / totalCount) * PROGRESS_STEPS)
-  )
+  const coarseStep = Math.ceil((filledCount / totalCount) * PROGRESS_STEPS)
+  return Math.min(PROGRESS_STEPS - 1, coarseStep)
 }
 
 export function WizardProgressBar() {

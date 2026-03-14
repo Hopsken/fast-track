@@ -32,6 +32,31 @@ describe('WizardProgressBar', () => {
     expect(progressbar.getAttribute('aria-valuetext')).toContain('1/4')
   })
 
+  it('does not report all set before every field is completed', () => {
+    mockUseCreateIssueDraftStore.mockReturnValue({
+      wizardFields: [
+        { fieldId: 'description' },
+        { fieldId: 'priority' },
+        { fieldId: 'labels' },
+        { fieldId: 'assignee' }
+      ],
+      values: {
+        summary: 'Test summary',
+        description: 'Details',
+        priority: 'High',
+        labels: ['release'],
+        assignee: ''
+      }
+    })
+
+    render(<WizardProgressBar />)
+
+    const progressbar = screen.getByRole('progressbar')
+    expect(progressbar.getAttribute('aria-valuenow')).toBe('3')
+    expect(progressbar.getAttribute('aria-valuetext')).toContain('3/4')
+    expect(screen.queryByText('All set')).toBeNull()
+  })
+
   it('shows all set when all wizard fields are complete', () => {
     mockUseCreateIssueDraftStore.mockReturnValue({
       wizardFields: [{ fieldId: 'description' }],
