@@ -61,11 +61,6 @@ export function WizardProgressBar() {
         <div className="h-full w-full rounded-full bg-white" />
       </div>
       <span className="text-xs font-medium text-gray-500">{progressLabel}</span>
-      {segments.map((segment) => (
-        <span key={segment.fieldId} className="sr-only">
-          {segment.fieldId}: {segment.isFilled ? 'completed' : 'pending'}
-        </span>
-      ))}
     </div>
   )
 }
