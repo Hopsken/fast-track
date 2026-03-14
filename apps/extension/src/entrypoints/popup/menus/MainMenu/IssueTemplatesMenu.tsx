@@ -34,7 +34,7 @@ export function IssueTemplatesMenu() {
 
   return (
     <ActionList isLoading={isLoading} emptyPlaceholder="No templates">
-      <ActionGroup heading="Quick Create">
+      <ActionGroup heading="New issue">
         <Action
           value="quick-create"
           icon={Zap}
