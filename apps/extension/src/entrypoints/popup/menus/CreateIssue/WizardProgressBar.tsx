@@ -11,6 +11,9 @@ import {
 import { useCreateIssueDraftStore } from './useCreateIssueDraftStore'
 import { isEmptyValue } from './utils'
 
+const PIE_RADIUS = 2
+const PIE_CIRCUMFERENCE = 2 * Math.PI * PIE_RADIUS
+
 export function WizardProgressBar() {
   const { wizardFields, values } = useCreateIssueDraftStore()
   const segments = useMemo(
@@ -39,13 +42,11 @@ export function WizardProgressBar() {
     damping: reducedMotion ? 60 : 30,
     mass: 0.4
   })
-  const pieRadius = 2
-  const pieCircumference = 2 * Math.PI * pieRadius
   const pieDashArray = useTransform(progress, (value) => {
     const visibleLength =
-      value <= 0 ? 0.0001 : Math.min(value, 1) * pieCircumference
+      value <= 0 ? 0.0001 : Math.min(value, 1) * PIE_CIRCUMFERENCE
 
-    return `${visibleLength} ${pieCircumference}`
+    return `${visibleLength} ${PIE_CIRCUMFERENCE}`
   })
 
   useEffect(() => {
@@ -121,7 +122,7 @@ export function WizardProgressBar() {
               <motion.circle
                 cx="7"
                 cy="7"
-                r={pieRadius}
+                r={PIE_RADIUS}
                 fill="none"
                 stroke={accentColor}
                 strokeWidth="4"
