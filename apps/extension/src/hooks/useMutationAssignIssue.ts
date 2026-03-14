@@ -7,6 +7,7 @@ import { useCurrentUser } from '@/stores/useCurrentUser'
 import { JiraUserInfo } from '@/types'
 import { mapUserToAssignee } from '@/utils/jira/issues'
 import { queryKeys } from '@/utils/queryKeys'
+import { addReconcileId } from '@/utils/reconcile-ids'
 import { formatErrorMessage } from '~/utils/formatError'
 
 export function useMutationAssignIssue() {
@@ -129,9 +130,14 @@ export function useMutationAssignMyself() {
         }
       }
     },
-    onSuccess: (_, { ticketKey, assign }, context) => {
+    onSuccess: (result, { ticketKey, assign }, context) => {
+      if (result?.id) addReconcileId(Number(result.id))
       queryClient.invalidateQueries({
         queryKey: queryKeys.tickets.keys(ticketKey)
+      })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.tickets.suggestions,
+        type: 'all'
       })
       context?.toast.update({
         style: 'success',

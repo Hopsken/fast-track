@@ -8,6 +8,7 @@ import { uniq } from 'lodash-es'
 import { getSuggestionService } from '@/services'
 import { IssueSuggestion } from '@/services/suggestion-service'
 import { queryKeys } from '@/utils/queryKeys'
+import { clearReconcileIds, getReconcileIds } from '@/utils/reconcile-ids'
 import { days, minutes } from '@/utils/time'
 
 export function useIssueSuggestions() {
@@ -27,7 +28,7 @@ export function useIssueSuggestions() {
       )
       // Prioritise by relevance: in-progress > upcoming > done > recent history.
       // uniq preserves order so the most actionable issues fill the 50-slot limit.
-      const reconcileIssues = cached
+      const cachedIds = cached
         ? uniq([
             ...(cached.inProgress ?? []),
             ...(cached.todo ?? []),
@@ -36,8 +37,13 @@ export function useIssueSuggestions() {
           ])
             .map((key) => Number(cached.tickets[key]?.id))
             .filter(Boolean)
-            .slice(0, 50)
         : []
+
+      // Pending IDs go first so they fill the 50-slot cap with priority.
+      const reconcileIssues = uniq([...getReconcileIds(), ...cachedIds]).slice(
+        0,
+        50
+      )
 
       const result = await getSuggestionService().getIssueSuggestions(
         reconcileIssues.length ? { reconcileIssues } : undefined
@@ -49,6 +55,9 @@ export function useIssueSuggestions() {
       if (!Object.keys(result.tickets).length) {
         throw new Error('Empty suggestions — retrying for Jira consistency')
       }
+
+      // Clear pending IDs only on success — persist across retries.
+      clearReconcileIds()
 
       return result
     },

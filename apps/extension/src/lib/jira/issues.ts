@@ -116,7 +116,9 @@ export class JiraIssueService {
     return fields ?? []
   }
 
-  async createIssue(input: CreateIssuePayload): Promise<{ key: string }> {
+  async createIssue(
+    input: CreateIssuePayload
+  ): Promise<{ id: string; key: string }> {
     const client = await this.getClient()
     return client.issues.createIssue({
       fields: {
