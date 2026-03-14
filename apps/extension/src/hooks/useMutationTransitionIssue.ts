@@ -12,6 +12,7 @@ import { useCurrentUser } from '@/stores/useCurrentUser'
 import { UserPreferences } from '@/types'
 import { generateBranchName } from '@/utils/jira/issues'
 import { queryKeys } from '@/utils/queryKeys'
+import { addReconcileId } from '@/utils/reconcile-ids'
 import { useUserPreferences } from '~/stores/useUserPreferences'
 import { formatErrorMessage } from '~/utils/formatError'
 
@@ -101,6 +102,7 @@ export function useMutationTransitionIssue() {
       return { toast, nextStatus, optimisticData }
     },
     onSuccess: async (_, { ticket }, context) => {
+      if (ticket.id) addReconcileId(Number(ticket.id))
       queryClient.invalidateQueries({
         queryKey: queryKeys.tickets.keys(ticket.key)
       })

@@ -8,6 +8,7 @@ import { showToast } from '@/stores/command/useToastStore'
 import type { CreateIssueScope } from '@/types/create-issue'
 import { nextTick } from '@/utils/nextTick'
 import { queryKeys } from '@/utils/queryKeys'
+import { addReconcileId } from '@/utils/reconcile-ids'
 import type { IssueTemplate } from '~/types/template'
 import { formatErrorMessage } from '~/utils/formatError'
 
@@ -41,7 +42,8 @@ export function useCreateIssueForm({
         }
       })
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      if (data?.id) addReconcileId(Number(data.id))
       queryClient.invalidateQueries({
         queryKey: queryKeys.tickets.suggestions,
         type: 'all'
