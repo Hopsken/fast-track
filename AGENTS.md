@@ -23,6 +23,20 @@
 
 ## Design
 
+Full design context lives in `.impeccable.md` at the project root — read it before any UI work.
+
+**Personality:** "Fast, precise, quiet." Anti-Jira. References: Linear, Raycast, Arc.
+
+**Palette:** OKLCH neutral monochrome. Zero new hues outside token set — use weight/size/motion for emphasis, never color.
+
+**Typography:** Inter for all UI; Crimson Pro (serif) for website display only.
+
+**Motion:** motion v12, Emil Kowalski style. Spring: `{ stiffness: 340, damping: 30, mass: 0.4 }`. One hero moment per surface. Always gate with `useReducedMotion()`.
+
+**Components:** Shadcn new-york, neutral base. `<Empty>` for empty states. `data-slot` for CSS overrides. Lucide icons only.
+
+**Anti-patterns:** no purple gradients, no animate-everything mounts, no color-coded status rainbows, no pill buttons on actions.
+
 - Use skill design-motion-principles, prefer Emil Kowalski style.
 
 #### Framework
