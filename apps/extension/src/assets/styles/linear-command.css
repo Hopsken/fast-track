@@ -21,14 +21,6 @@
     box-shadow: var(--cmdk-shadow);
     outline: none;
     font-size: 0.875rem;
-
-    .dark & {
-      background: linear-gradient(
-        136.61deg,
-        rgb(39, 40, 43) 13.72%,
-        rgb(45, 46, 49) 74.3%
-      );
-    }
   }
 
   [cmdk-linear-shortcuts],
@@ -55,7 +47,7 @@
     font-weight: 400;
     background: var(--bg);
     color: var(--gray12);
-    caret-color: #6e5ed2;
+    caret-color: var(--gray12);
     margin: 0;
 
     &::placeholder {
@@ -76,13 +68,13 @@
     color: var(--gray12);
 
     user-select: none;
-    will-change: background, color;
     transition: all 150ms ease;
     transition-property: background-color;
     position: relative;
 
     &[data-selected='true'] {
-      background: #eef2ff;
+      background: var(--gray4);
+      border-radius: 6px;
 
       svg {
         color: var(--gray12);
@@ -136,11 +128,10 @@
     color: var(--gray11);
     padding: 0px 13px;
     height: 30px;
-    display: flex;
-    align-items: center;
+    line-height: 30px;
     overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
+    text-overflow: ellipsis;
     letter-spacing: 0.03em;
   }
 

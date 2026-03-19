@@ -15,9 +15,9 @@ export type ActionListProps = {
 export function ActionList(props: ActionListProps) {
   const {
     isLoading,
-    loadingPlaceholder = 'Loading...',
+    loadingPlaceholder = 'Searching...',
     children,
-    emptyPlaceholder = 'No results found',
+    emptyPlaceholder = 'No matching issues',
     ...restProps
   } = props
   return (

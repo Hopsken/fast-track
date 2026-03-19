@@ -21,7 +21,7 @@ Options (pick one):
 
 ---
 
-### [ ] 2. Footer is underutilized / distracting
+### [x] 2. Footer is underutilized / distracting
 
 - Logo as settings trigger is non-discoverable — no user clicks a brand logo expecting settings
 - Rotating shortcut hints cycle every 4s, causing peripheral visual noise

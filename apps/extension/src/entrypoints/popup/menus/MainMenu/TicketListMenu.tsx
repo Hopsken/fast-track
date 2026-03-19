@@ -16,12 +16,12 @@ import { SearchResultMenu } from './SearchResultMenu'
 export function TicketListMenu({ searchQuery }: { searchQuery: string }) {
   const shouldShowSuggestions = !searchQuery.trim()
 
-  const { data: issueSuggestions } = useIssueSuggestions()
+  const { data: issueSuggestions, isLoading } = useIssueSuggestions()
 
   useQuickNavigate()
 
   return shouldShowSuggestions ? (
-    <SuggestedTickets issues={issueSuggestions} />
+    <SuggestedTickets issues={issueSuggestions} isLoading={isLoading} />
   ) : (
     <SearchResultMenu
       searchQuery={searchQuery}

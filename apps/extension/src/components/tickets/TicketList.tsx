@@ -26,7 +26,7 @@ export function TicketList({
           searchQuery={searchQuery}
         />
       ))}
-      {showEmptyNotice && <CommandEmpty>No tickets found</CommandEmpty>}
+      {showEmptyNotice && <CommandEmpty>No matching tickets</CommandEmpty>}
     </Fragment>
   )
 }
