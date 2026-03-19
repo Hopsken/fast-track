@@ -161,7 +161,11 @@ export function NavigationProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     return () => {
-      navigationStore.setState({ stacks: [], rootState: {} })
+      navigationStore.setState({
+        stacks: [],
+        rootState: {},
+        lastNavAction: null
+      })
     }
   }, [])
 
