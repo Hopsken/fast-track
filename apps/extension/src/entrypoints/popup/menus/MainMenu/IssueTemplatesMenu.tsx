@@ -26,7 +26,8 @@ export function IssueTemplatesMenu() {
   const onSelect = useCallback(
     (template: IssueTemplate) => {
       navigate.push(
-        <CreateIssueMenu scope={template.scope} template={template} />
+        <CreateIssueMenu scope={template.scope} template={template} />,
+        { title: template.name }
       )
     },
     [navigate]
@@ -40,7 +41,9 @@ export function IssueTemplatesMenu() {
           icon={Zap}
           title="Quick create"
           keywords={['new', 'issue', 'create']}
-          onSelect={() => navigate.push(<ProjectPickerMenu />)}
+          onSelect={() =>
+            navigate.push(<ProjectPickerMenu />, { title: 'Quick create' })
+          }
           exitOnSelect={false}
         />
       </ActionGroup>

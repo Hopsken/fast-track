@@ -9,9 +9,12 @@ import { cn } from '@/lib/utils'
 import { resolveEscapeAction } from './actionSearchEscape'
 import {
   useIsNavigationRoot,
+  useLastNavAction,
   useNavigateBack,
-  useNavigation
+  useNavigation,
+  useNavigationBreadcrumb
 } from './navigation'
+import { NavigationBreadcrumb } from './NavigationBreadcrumb'
 
 export type ActionSearchProps = {
   defaultSearch?: string
@@ -63,6 +66,10 @@ export function ActionSearch({
 
   const isRoot = useIsNavigationRoot()
   const navigate = useNavigation()
+  const breadcrumb = useNavigationBreadcrumb()
+  const lastNavAction = useLastNavAction()
+  const newSegmentIndex =
+    lastNavAction === 'push' ? breadcrumb.length - 1 : undefined
 
   const inputContainerClassName = cn(
     'relative flex h-[52px] items-center gap-3 pl-4 pr-4 border-b border-gray-200',
@@ -150,6 +157,15 @@ export function ActionSearch({
   return (
     <div className={inputContainerClassName}>
       {previousPageButton}
+      {breadcrumb.length > 0 && (
+        <div className="flex shrink-0 items-center gap-2">
+          <NavigationBreadcrumb
+            segments={breadcrumb}
+            newSegmentIndex={newSegmentIndex}
+          />
+          <div className="bg-border h-4 w-px" />
+        </div>
+      )}
       <CommandInput
         autoFocus
         ref={inputRef}

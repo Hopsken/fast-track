@@ -29,7 +29,8 @@ export function ExtraActionsMenu() {
           navigate.push(
             <ActionPanel>
               <IssueTemplatesMenu />
-            </ActionPanel>
+            </ActionPanel>,
+            { title: 'Create issue' }
           )
         }
       />

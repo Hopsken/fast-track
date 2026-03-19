@@ -13,35 +13,43 @@ export function useIssueMenus() {
 
   const openIssueMenu = useCallback(
     (ticketKey: string) => {
-      navigate.push(<IssueMenu ticketKey={ticketKey} />)
+      navigate.push(<IssueMenu ticketKey={ticketKey} />, { title: ticketKey })
     },
     [navigate]
   )
 
   const openIssueAssignMenu = useCallback(
     (ticketKey: string) => {
-      navigate.push(<IssueAssignMenu ticketKey={ticketKey} />)
+      navigate.push(<IssueAssignMenu ticketKey={ticketKey} />, {
+        breadcrumb: [ticketKey, 'Assign']
+      })
     },
     [navigate]
   )
 
   const openIssueMergeRequestsMenu = useCallback(
     (ticketKey: string) => {
-      navigate.push(<IssueMergeRequestsMenu ticketKey={ticketKey} />)
+      navigate.push(<IssueMergeRequestsMenu ticketKey={ticketKey} />, {
+        breadcrumb: [ticketKey, 'Merge requests']
+      })
     },
     [navigate]
   )
 
   const openIssuePriorityMenu = useCallback(
     (ticketKey: string) => {
-      navigate.push(<IssuePriorityMenu ticketKey={ticketKey} />)
+      navigate.push(<IssuePriorityMenu ticketKey={ticketKey} />, {
+        breadcrumb: [ticketKey, 'Priority']
+      })
     },
     [navigate]
   )
 
   const openIssueStatusMenu = useCallback(
     (ticketKey: string) => {
-      navigate.push(<IssueStatusMenu ticketKey={ticketKey} />)
+      navigate.push(<IssueStatusMenu ticketKey={ticketKey} />, {
+        breadcrumb: [ticketKey, 'Status']
+      })
     },
     [navigate]
   )

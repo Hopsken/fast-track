@@ -15,7 +15,9 @@ export function IssueTypePickerMenu({ project }: { project: JiraProject }) {
   const issueTypes = (project.issueTypes ?? []).filter((it) => !it.subtask)
 
   const onSelect = (issueType: JiraIssueType) => {
-    navigate.push(<CreateIssueMenu scope={{ project, issueType }} />)
+    navigate.push(<CreateIssueMenu scope={{ project, issueType }} />, {
+      title: issueType.name
+    })
   }
 
   return (

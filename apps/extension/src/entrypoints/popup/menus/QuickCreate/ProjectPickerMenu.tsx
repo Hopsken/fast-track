@@ -43,7 +43,9 @@ export function ProjectPickerMenu() {
     useRecentProjects()
 
   const onSelect = (project: JiraProject) => {
-    navigate.push(<IssueTypePickerMenu project={project} />)
+    navigate.push(<IssueTypePickerMenu project={project} />, {
+      title: project.key
+    })
   }
 
   const isLoading = isSearching ? isSearchLoading : isRecentLoading

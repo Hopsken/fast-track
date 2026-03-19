@@ -14,7 +14,17 @@ import { useShallow } from 'zustand/shallow'
 type NavigationEntry = {
   target: ReactNode
   onPop?: () => void
+  /** Breadcrumb segments contributed by this entry (1 for normal push, 2+ for direct deep navigation). */
+  breadcrumb?: string[]
   state: Record<string, unknown>
+}
+
+type PushOptions = {
+  onPop?: () => void
+  /** Single breadcrumb label for this entry. */
+  title?: string
+  /** Multi-segment breadcrumb — use when skipping intermediate levels (e.g. directly opening Status from the ticket list). Takes precedence over `title`. */
+  breadcrumb?: string[]
 }
 
 type NavigationStoreState = {
@@ -30,7 +40,10 @@ type NavigationStoreState = {
    */
   stacks: NavigationEntry[]
 
-  push: (target: ReactNode, onPop?: () => void) => void
+  /** Direction of the most recent navigation action. Used to animate only new breadcrumb segments. */
+  lastNavAction: 'push' | 'pop' | null
+
+  push: (target: ReactNode, options?: PushOptions) => void
   pop: (step?: number) => void
 
   setActiveState: (key: string, value: unknown) => void
@@ -41,10 +54,17 @@ type NavigationStoreState = {
 const navigationStore = createStore<NavigationStoreState>((set, get) => ({
   rootState: {},
   stacks: [],
+  lastNavAction: null,
 
-  push: (target: ReactNode, onPop?: () => void) => {
+  push: (target: ReactNode, options?: PushOptions) => {
+    const breadcrumb =
+      options?.breadcrumb ?? (options?.title ? [options.title] : undefined)
     set((state) => ({
-      stacks: [...state.stacks, { target, onPop, state: {} }]
+      stacks: [
+        ...state.stacks,
+        { target, onPop: options?.onPop, breadcrumb, state: {} }
+      ],
+      lastNavAction: 'push'
     }))
   },
 
@@ -60,7 +80,8 @@ const navigationStore = createStore<NavigationStoreState>((set, get) => ({
     reverse(toPop).forEach((item) => item.onPop?.())
 
     set(() => ({
-      stacks: currentStacks.slice(0, keepLength)
+      stacks: currentStacks.slice(0, keepLength),
+      lastNavAction: 'pop'
     }))
   },
 
@@ -219,3 +240,14 @@ export const NavigateBackProvider = ({
 
 export const useNavigateBack = () =>
   useContext(NavigateBackContext).onNavigateBack
+
+export function useLastNavAction() {
+  return useStore(navigationStore, (s) => s.lastNavAction)
+}
+
+export function useNavigationBreadcrumb(): string[] {
+  return useStore(
+    navigationStore,
+    useShallow((s) => s.stacks.flatMap((e) => e.breadcrumb ?? []))
+  )
+}
