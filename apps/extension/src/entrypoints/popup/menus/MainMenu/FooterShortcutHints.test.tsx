@@ -1,4 +1,4 @@
-import { render, screen, act } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { FooterShortcutHints, ShortcutHint } from './FooterShortcutHints'
@@ -11,34 +11,28 @@ const hints: ShortcutHint[] = [
 
 describe('FooterShortcutHints', () => {
   beforeEach(() => {
-    vi.useFakeTimers()
     // Pin Math.random so initial index is deterministic (index 0)
     vi.spyOn(Math, 'random').mockReturnValue(0)
   })
 
   afterEach(() => {
     vi.restoreAllMocks()
-    vi.useRealTimers()
   })
 
-  it('renders the first hint on mount', () => {
+  it('renders the hint selected on mount', () => {
     render(<FooterShortcutHints hints={hints} />)
 
     expect(screen.getByText('/')).toBeDefined()
     expect(screen.getByText('Commands')).toBeDefined()
   })
 
-  it('cycles to the next hint after ~4s', () => {
+  it('renders exactly one hint even when multiple provided', () => {
     render(<FooterShortcutHints hints={hints} />)
 
-    act(() => {
-      vi.advanceTimersByTime(4000) // trigger interval → exiting phase
-      vi.advanceTimersByTime(300) // entering phase
-      vi.advanceTimersByTime(300) // visible phase
-    })
-
-    expect(screen.getByText('C')).toBeDefined()
-    expect(screen.getByText('New Issue')).toBeDefined()
+    // Only the first hint's label should appear (random pinned to 0)
+    expect(screen.getByText('Commands')).toBeDefined()
+    expect(screen.queryByText('New Issue')).toBeNull()
+    expect(screen.queryByText('Status')).toBeNull()
   })
 
   it('renders all keys from a hint', () => {
@@ -57,30 +51,5 @@ describe('FooterShortcutHints', () => {
   it('renders nothing when hints array is empty', () => {
     const { container } = render(<FooterShortcutHints hints={[]} />)
     expect(container.firstChild).toBeNull()
-  })
-
-  it('clamps activeIndex when hints pool shrinks', () => {
-    const extendedHints: ShortcutHint[] = [
-      { keys: ['/'], label: 'Commands' },
-      { keys: ['C'], label: 'New Issue' },
-      { keys: ['⌘', '⇧', 'S'], label: 'Status' }
-    ]
-    const { rerender } = render(<FooterShortcutHints hints={extendedHints} />)
-
-    // Advance to index 2 (Status)
-    act(() => {
-      vi.advanceTimersByTime(4000 + 300 + 300)
-      vi.advanceTimersByTime(4000 + 300 + 300)
-    })
-
-    // Shrink to 2 hints — index 2 is now out of bounds
-    const shortenedHints: ShortcutHint[] = [
-      { keys: ['/'], label: 'Commands' },
-      { keys: ['C'], label: 'New Issue' }
-    ]
-    rerender(<FooterShortcutHints hints={shortenedHints} />)
-
-    // Should clamp to last valid hint, not render nothing
-    expect(screen.getByText('New Issue')).toBeDefined()
   })
 })

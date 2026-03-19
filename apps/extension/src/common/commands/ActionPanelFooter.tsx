@@ -16,7 +16,6 @@ import {
   useToastState,
   useToastStore
 } from '@/stores/command/useToastStore'
-import { openOptionsPage } from '@/utils'
 import { formatErrorMessage } from '@/utils/formatError'
 import logoPNG from '~/assets/logo.png'
 
@@ -144,19 +143,15 @@ export function ActionPanelFooter() {
   function renderFooter() {
     return (
       <div className="flex items-center justify-between">
-        <button
-          onClick={() => openOptionsPage()}
-          className={cn(
-            'text-foreground group flex cursor-pointer items-center gap-2 text-xs'
-          )}>
+        <div className="text-foreground flex items-center gap-2 text-xs">
           <img
             src={logoPNG}
             alt="Fast Track"
-            className="size-4 rounded grayscale transition group-hover:scale-105 group-hover:grayscale-0"
+            className="size-4 rounded grayscale"
           />
 
           <span className="flex-1 text-xs">Fast Track</span>
-        </button>
+        </div>
       </div>
     )
   }

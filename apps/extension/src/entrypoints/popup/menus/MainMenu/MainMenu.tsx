@@ -62,8 +62,8 @@ function HintsSlot() {
 
     if (hasTicket) {
       base.push(
-        { keys: ['⌘', '⇧', 'S'], label: 'Status' },
-        { keys: ['⌘', '⇧', 'P'], label: 'Priority' },
+        { keys: ['⌘', '⇧', 'S'], label: 'Set status' },
+        { keys: ['⌘', '⇧', 'P'], label: 'Set priority' },
         { keys: ['⌘', '⇧', 'A'], label: 'Assign' }
       )
     }

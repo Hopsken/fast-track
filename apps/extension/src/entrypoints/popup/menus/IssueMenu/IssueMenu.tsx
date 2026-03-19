@@ -25,8 +25,8 @@ import { openJiraIssue } from '@/utils/open-jira-issue'
 import { IssueActions } from './IssueActions'
 
 const ISSUE_HINTS: ShortcutHint[] = [
-  { keys: ['⌘', '⇧', 'S'], label: 'Status' },
-  { keys: ['⌘', '⇧', 'P'], label: 'Priority' },
+  { keys: ['⌘', '⇧', 'S'], label: 'Set status' },
+  { keys: ['⌘', '⇧', 'P'], label: 'Set priority' },
   { keys: ['⌘', '⇧', 'A'], label: 'Assign' }
 ]
 
