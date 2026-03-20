@@ -57,8 +57,8 @@ export function TemplatesIndexPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
-          <h2 className="text-lg font-semibold text-gray-900">Templates</h2>
-          <p className="text-sm text-gray-600">
+          <h2 className="text-foreground text-lg font-semibold">Templates</h2>
+          <p className="text-muted-foreground text-sm">
             Reusable starting points for new issues.
           </p>
         </div>
@@ -82,7 +82,7 @@ export function TemplatesIndexPage() {
       </div>
 
       {isAtFreeLimit ? (
-        <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        <div className="border-border bg-muted text-foreground rounded-md border p-4 text-sm">
           You’ve reached the Free plan limit (3 issue templates). Upgrade to Pro
           to create more.
         </div>
@@ -90,7 +90,9 @@ export function TemplatesIndexPage() {
 
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-3">
-          <h3 className="text-sm font-medium text-gray-900">Your templates</h3>
+          <h3 className="text-foreground text-sm font-medium">
+            Your templates
+          </h3>
 
           {others.length > 0 ? (
             <Button
@@ -102,7 +104,7 @@ export function TemplatesIndexPage() {
           ) : null}
         </div>
 
-        <div className="rounded-md border bg-white">
+        <div className="bg-card rounded-md border">
           {templatesLoading && <LoadingCursor />}
 
           {!templatesLoading && matching.length === 0 ? (
@@ -130,14 +132,14 @@ export function TemplatesIndexPage() {
 
       {showOthers ? (
         <div className="space-y-3">
-          <h3 className="text-sm font-medium text-gray-900">
+          <h3 className="text-foreground text-sm font-medium">
             Other Jira sites
           </h3>
 
           <div className="space-y-4">
             {groupByHost(others).map(([host, items]) => (
-              <div key={host} className="rounded-md border bg-white">
-                <div className="border-b px-4 py-2 text-xs font-medium text-gray-700">
+              <div key={host} className="bg-card rounded-md border">
+                <div className="text-muted-foreground border-b px-4 py-2 text-xs font-medium">
                   {host || 'Unknown host'}
                 </div>
                 <ul className="divide-y">

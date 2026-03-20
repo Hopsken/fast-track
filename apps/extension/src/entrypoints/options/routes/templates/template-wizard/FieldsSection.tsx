@@ -145,7 +145,7 @@ export function FieldsSection() {
       {areFieldsLoading && <LoadingCursor />}
 
       {!areFieldsLoading && fieldsError && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="bg-destructive/10 text-destructive border-destructive/30 rounded-md border p-4 text-sm">
           Failed to load fields: {fieldsError}
         </div>
       )}

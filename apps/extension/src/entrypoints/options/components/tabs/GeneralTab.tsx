@@ -12,6 +12,14 @@ import { useUserPreferences } from '~/stores/useUserPreferences'
 import { ConfigureAuth, JiraConnectionCard } from '../auth'
 import { ShortcutManagement } from '../sections/QuickAccess/ShortcutManagement'
 
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="text-muted-foreground mb-3 text-xs font-medium uppercase tracking-wider">
+      {children}
+    </h2>
+  )
+}
+
 export function GeneralTab() {
   const [credentials] = useStorage('AuthCredentials')
   const userInfo = useMemo(() => credentials?.userInfo ?? null, [credentials])
@@ -38,36 +46,37 @@ export function GeneralTab() {
 
   return (
     <div className="space-y-8">
-      {userInfo ? (
-        <JiraConnectionCard
-          user={userInfo}
-          jiraHost={jiraHost}
-          onDisconnect={handleDisconnect}
-        />
-      ) : (
-        <ConfigureAuth />
-      )}
-
+      {/* Jira Connection — visually dominant, first thing users see */}
       <div>
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">
-          Quick Access
-        </h2>
-        <div className="space-y-6">
-          <ShortcutManagement />
-        </div>
+        <SectionLabel>Jira Connection</SectionLabel>
+        {userInfo ? (
+          <JiraConnectionCard
+            user={userInfo}
+            jiraHost={jiraHost}
+            onDisconnect={handleDisconnect}
+          />
+        ) : (
+          <ConfigureAuth />
+        )}
       </div>
 
       <div>
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">Workflow</h2>
-        <div className="space-y-6">
-          <div className="rounded-lg border border-gray-200 p-4">
+        <SectionLabel>Quick Access</SectionLabel>
+        <ShortcutManagement />
+      </div>
+
+      <div>
+        <SectionLabel>Workflow</SectionLabel>
+        <div className="border-border rounded-lg border">
+          {/* Branch name format */}
+          <div className="p-4">
             <div className="space-y-2">
               <label
-                className="text-sm font-medium text-gray-900"
+                className="text-foreground text-sm font-medium"
                 htmlFor="branch-name-format">
                 Branch name format
               </label>
-              <p className="text-xs text-gray-500">
+              <p className="text-muted-foreground text-xs">
                 Copy a git branch name for issues using the{' '}
                 {'Copy git branch name'} action. Formats:{' '}
                 {`{key}, {summary}, {summaryShort}`}.
@@ -81,7 +90,7 @@ export function GeneralTab() {
                 }
                 placeholder="{key}-{summary}"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-muted-foreground text-xs">
                 Preview:{' '}
                 {generateBranchName(
                   {
@@ -94,18 +103,19 @@ export function GeneralTab() {
               </p>
             </div>
           </div>
-          <div className="rounded-lg border border-gray-200 p-4">
+
+          {/* Copy branch on In Progress */}
+          <div className="border-border border-t p-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h3 className="text-sm font-medium text-gray-900">
+                <h3 className="text-foreground text-sm font-medium">
                   On move to In Progress, copy git branch name
                 </h3>
-                <p className="mt-1 text-sm text-gray-600">
+                <p className="text-muted-foreground mt-1 text-sm">
                   Automatically copy the git branch name when moving a ticket
                   from To Do to In Progress.
                 </p>
               </div>
-
               <div className="flex items-center gap-3">
                 <Switch
                   id="auto-copy-branch-name"
@@ -116,24 +126,25 @@ export function GeneralTab() {
                 />
                 <Label
                   htmlFor="auto-copy-branch-name"
-                  className="text-gray-700">
+                  className="text-muted-foreground">
                   {preferences.autoCopyBranchNameOnTransition ? 'On' : 'Off'}
                 </Label>
               </div>
             </div>
           </div>
-          <div className="rounded-lg border border-gray-200 p-4">
+
+          {/* Assign on In Progress */}
+          <div className="border-border border-t p-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h3 className="text-sm font-medium text-gray-900">
+                <h3 className="text-foreground text-sm font-medium">
                   On move to In Progress, assign to yourself
                 </h3>
-                <p className="mt-1 text-sm text-gray-600">
+                <p className="text-muted-foreground mt-1 text-sm">
                   Automatically assign yourself when moving an unassigned ticket
                   from To Do to In Progress.
                 </p>
               </div>
-
               <div className="flex items-center gap-3">
                 <Switch
                   id="auto-assign-on-in-progress"
@@ -144,7 +155,7 @@ export function GeneralTab() {
                 />
                 <Label
                   htmlFor="auto-assign-on-in-progress"
-                  className="text-gray-700">
+                  className="text-muted-foreground">
                   {preferences.autoAssignOnInProgress ? 'On' : 'Off'}
                 </Label>
               </div>
@@ -154,37 +165,35 @@ export function GeneralTab() {
       </div>
 
       <div>
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">Privacy</h2>
-        <div className="space-y-6">
-          <div className="rounded-lg border border-gray-200 p-4">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h3 className="text-sm font-medium text-gray-900">
-                  Anonymous analytics
-                </h3>
-                <p className="mt-1 text-sm text-gray-600">
-                  Help us improve Jira Boost by sending anonymous usage data. No
-                  issue content or personal data is collected.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <Switch
-                  id="analytics-enabled"
-                  checked={analyticsEnabled}
-                  onCheckedChange={handleAnalyticsChange}
-                />
-                <Label htmlFor="analytics-enabled" className="text-gray-700">
-                  {analyticsEnabled ? 'On' : 'Off'}
-                </Label>
-              </div>
+        <SectionLabel>Privacy</SectionLabel>
+        <div className="border-border rounded-lg border p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h3 className="text-foreground text-sm font-medium">
+                Anonymous analytics
+              </h3>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Help us improve Fast Track by sending anonymous usage data. No
+                issue content or personal data is collected.
+              </p>
             </div>
-
-            <p className="mt-3 text-xs text-gray-500">
-              You can change this anytime. Analytics are anonymous and help us
-              prioritize improvements.
-            </p>
+            <div className="flex items-center gap-3">
+              <Switch
+                id="analytics-enabled"
+                checked={analyticsEnabled}
+                onCheckedChange={handleAnalyticsChange}
+              />
+              <Label
+                htmlFor="analytics-enabled"
+                className="text-muted-foreground">
+                {analyticsEnabled ? 'On' : 'Off'}
+              </Label>
+            </div>
           </div>
+          <p className="text-muted-foreground mt-3 text-xs">
+            You can change this anytime. Analytics are anonymous and help us
+            prioritize improvements.
+          </p>
         </div>
       </div>
     </div>

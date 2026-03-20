@@ -41,7 +41,7 @@ function initialsFromEmail(email: string): string {
 function PlanPill(props: { isPro: boolean; planLabel: 'Pro' | 'Free' }) {
   if (props.isPro) {
     return (
-      <Badge className="rounded-full border border-gray-900 bg-gray-900 px-2 py-0.5 text-[11px] font-semibold text-white">
+      <Badge className="border-foreground bg-foreground text-background rounded-full border px-2 py-0.5 text-[11px] font-semibold">
         {props.planLabel}
       </Badge>
     )
@@ -50,7 +50,7 @@ function PlanPill(props: { isPro: boolean; planLabel: 'Pro' | 'Free' }) {
   return (
     <Badge
       variant="outline"
-      className="rounded-full border-gray-200 bg-white px-2 py-0.5 text-[11px] font-medium text-gray-600">
+      className="border-border bg-background text-muted-foreground rounded-full px-2 py-0.5 text-[11px] font-medium">
       {props.planLabel}
     </Badge>
   )
@@ -121,9 +121,9 @@ export function OptionsHeader({ version }: OptionsHeaderProps) {
         <img src={logoUrl} className="h-12 w-12 rounded-xl" alt="Fast Track" />
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold text-gray-900">Fast Track</h1>
+            <h1 className="text-foreground text-3xl font-bold">Fast Track</h1>
           </div>
-          <p className="text-gray-600">v{version} Settings</p>
+          <p className="text-muted-foreground">v{version} Settings</p>
         </div>
       </div>
 
@@ -148,9 +148,9 @@ export function OptionsHeader({ version }: OptionsHeaderProps) {
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-2 rounded-full border border-gray-200 bg-white py-1 pl-3 pr-1 text-xs font-medium text-gray-900 shadow-none transition-colors hover:border-gray-300 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/20 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-50"
+                  className="border-border bg-background text-foreground hover:border-foreground/30 hover:bg-muted focus-visible:ring-ring/20 focus-visible:ring-offset-background flex items-center gap-2 rounded-full border py-1 pl-3 pr-1 text-xs font-medium shadow-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                   aria-label="Account">
-                  <span className="max-w-52 truncate text-gray-700">
+                  <span className="text-muted-foreground max-w-52 truncate">
                     {email}
                   </span>
                   <span className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-gray-900 to-gray-600 text-[11px] font-semibold text-white">
@@ -181,13 +181,13 @@ export function OptionsHeader({ version }: OptionsHeaderProps) {
                     </Button>
                   ) : null}
 
-                  <div className="my-1 h-px bg-gray-200" />
+                  <div className="bg-border my-1 h-px" />
 
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={signOut}
-                    className="justify-between text-red-600/80 hover:text-red-700">
+                    className="text-destructive/80 hover:text-destructive justify-between">
                     Sign out
                     <LogOut className="h-4 w-4" />
                   </Button>

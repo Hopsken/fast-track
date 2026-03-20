@@ -55,13 +55,13 @@ export function TemplateDetailPage() {
   }, [id])
 
   if (isLoading || hostLoading) {
-    return <div className="text-sm text-gray-600">Loading…</div>
+    return <div className="text-muted-foreground text-sm">Loading…</div>
   }
 
   if (error) {
     return (
       <div className="space-y-4">
-        <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="bg-destructive/10 text-destructive border-destructive/30 rounded-md border p-4 text-sm">
           {error}
         </div>
         <Button asChild variant="secondary">
@@ -74,7 +74,7 @@ export function TemplateDetailPage() {
   if (!template) {
     return (
       <div className="space-y-4">
-        <div className="rounded-md border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
+        <div className="border-border bg-muted text-muted-foreground rounded-md border p-4 text-sm">
           Template not found.
         </div>
         <Button asChild variant="secondary">
@@ -97,7 +97,7 @@ export function TemplateDetailPage() {
           </p>
         </div>
 
-        <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        <div className="border-border bg-muted text-foreground rounded-md border p-4 text-sm">
           {currentHost
             ? `This template is on ${template.scope.baseUrlHost}. Switch sites to edit.`
             : `This template is on ${template.scope.baseUrlHost}. Connect to that site to edit.`}

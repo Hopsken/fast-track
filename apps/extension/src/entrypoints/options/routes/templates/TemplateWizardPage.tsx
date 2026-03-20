@@ -29,7 +29,7 @@ export function TemplateWizardPage() {
   if (!currentHost) {
     return (
       <div className="space-y-4">
-        <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        <div className="border-border bg-muted text-foreground rounded-md border p-4 text-sm">
           Connect Jira first to create templates.
         </div>
         <Button asChild variant="secondary">
@@ -42,7 +42,7 @@ export function TemplateWizardPage() {
   if (isAtFreeLimit) {
     return (
       <div className="space-y-4">
-        <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        <div className="border-border bg-muted text-foreground rounded-md border p-4 text-sm">
           You’ve reached the Free plan limit (3 issue templates per Jira
           workspace). Upgrade to Pro to create more.
         </div>

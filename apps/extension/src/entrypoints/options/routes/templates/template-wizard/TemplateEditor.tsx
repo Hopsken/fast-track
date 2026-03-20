@@ -68,7 +68,7 @@ export function TemplateEditor() {
 
       {/* Save error */}
       {state.saveError && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <div className="bg-destructive/10 text-destructive border-destructive/30 rounded-md border p-3 text-sm">
           {state.saveError}
         </div>
       )}
