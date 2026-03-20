@@ -37,7 +37,7 @@ export function DeleteTemplateButton({
         <AlertDialogHeader>
           <AlertDialogTitle>Delete template?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action can&apos;t be undone.
+            This template will be permanently removed.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

@@ -65,7 +65,7 @@ export function ScopeSection() {
             options={projectOptions}
             isLoading={isProjectOptionsLoading}
             loadingText="Loading…"
-            emptyText={projectError ?? 'No projects'}
+            emptyText={projectError ?? 'No projects found'}
             renderOptionIcon={(opt) =>
               opt.data.avatarUrl ? (
                 <GeneralIcon alt={opt.label} iconUrl={opt.data.avatarUrl} />

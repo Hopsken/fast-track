@@ -160,8 +160,8 @@ export function FieldsSection() {
                 </EmptyTitle>
                 <EmptyDescription>
                   Click &ldquo;Add field&rdquo; to include fields in this
-                  template. Use Show for default behavior, Fill to auto-fill
-                  values, or Limit to restrict available options.
+                  template. Use Fill to set default values, or Limit to restrict
+                  available options.
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>

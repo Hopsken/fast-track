@@ -67,9 +67,9 @@ export function buildConfigForMode(
 const MODE_META: Record<FieldMode, { label: string; title: string }> = {
   preset: {
     label: 'Fill',
-    title: 'Auto-fill value with default value '
+    title: 'Auto-fill a default value'
   },
-  restricted: { label: 'Limit', title: 'Restrict to subset of options' }
+  restricted: { label: 'Limit', title: 'Limit which options are available' }
 }
 
 function ModeToggle({

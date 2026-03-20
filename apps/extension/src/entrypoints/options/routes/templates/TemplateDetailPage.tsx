@@ -98,20 +98,9 @@ export function TemplateDetailPage() {
         </div>
 
         <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          <div>
-            This template belongs to{' '}
-            <span className="font-medium">{template.scope.baseUrlHost}</span>.
-            {currentHost ? (
-              <span>
-                {' '}
-                You are currently connected to{' '}
-                <span className="font-medium">{currentHost}</span>.
-              </span>
-            ) : (
-              <span> You are not currently connected.</span>
-            )}{' '}
-            Editing is disabled.
-          </div>
+          {currentHost
+            ? `This template is on ${template.scope.baseUrlHost}. Switch sites to edit.`
+            : `This template is on ${template.scope.baseUrlHost}. Connect to that site to edit.`}
         </div>
         <div className="flex items-center justify-between">
           <Button asChild variant="secondary">

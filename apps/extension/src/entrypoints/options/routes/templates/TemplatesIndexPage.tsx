@@ -1,5 +1,11 @@
 import { useMemo, useState } from 'react'
 import { Button } from '@internal/ui/components/button'
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle
+} from '@internal/ui/components/empty'
 import { partition } from 'lodash-es'
 import { Link } from 'react-router-dom'
 
@@ -53,7 +59,7 @@ export function TemplatesIndexPage() {
         <div className="space-y-1">
           <h2 className="text-lg font-semibold text-gray-900">Templates</h2>
           <p className="text-sm text-gray-600">
-            Templates are scoped to the currently connected Jira site.
+            Reusable starting points for new issues.
           </p>
         </div>
 
@@ -100,11 +106,16 @@ export function TemplatesIndexPage() {
           {templatesLoading && <LoadingCursor />}
 
           {!templatesLoading && matching.length === 0 ? (
-            <div className="p-4 text-sm text-gray-600">
-              {currentHost
-                ? 'No templates for this Jira site yet.'
-                : 'No templates shown (not connected).'}
-            </div>
+            <Empty className="py-8">
+              <EmptyHeader>
+                <EmptyTitle className="text-sm">No templates</EmptyTitle>
+                <EmptyDescription>
+                  {currentHost
+                    ? 'Create a template to speed up issue creation.'
+                    : 'Connect a Jira site to see your templates.'}
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           ) : null}
 
           {!templatesLoading && matching.length > 0 ? (
