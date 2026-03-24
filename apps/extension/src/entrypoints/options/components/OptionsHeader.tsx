@@ -153,7 +153,7 @@ export function OptionsHeader({ version }: OptionsHeaderProps) {
                   <span className="text-muted-foreground max-w-52 truncate">
                     {email}
                   </span>
-                  <span className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-gray-900 to-gray-600 text-[11px] font-semibold text-white">
+                  <span className="from-foreground to-foreground/60 text-background grid size-9 place-items-center rounded-full bg-gradient-to-br text-[11px] font-semibold">
                     {avatar}
                   </span>
                 </button>

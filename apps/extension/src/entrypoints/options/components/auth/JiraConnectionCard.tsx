@@ -29,7 +29,7 @@ export const JiraConnectionCard: React.FC<JiraConnectionCardProps> = ({
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           {/* Avatar */}
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-gray-900 to-gray-600">
+          <div className="from-foreground to-foreground/60 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br">
             {user.avatarUrl ? (
               <img
                 src={user.avatarUrl}
@@ -37,7 +37,7 @@ export const JiraConnectionCard: React.FC<JiraConnectionCardProps> = ({
                 className="h-12 w-12 rounded-full object-cover"
               />
             ) : (
-              <span className="text-lg font-semibold text-white">
+              <span className="text-background text-lg font-semibold">
                 {user.name
                   .split(' ')
                   .map((n) => n[0])
