@@ -6,7 +6,6 @@
 - [Hotkey System](./hotkeys.md) — Scoped, priority-aware hotkeys built on `react-hotkeys-hook`.
 - [Menu Tree](./menus.md) — All menus live under `src/entrypoints/popup/menus/`.
 - [Navigation System](./navigation.md) — Stack-based navigation via a module-level Zustand store.
-- [Options Page Design Critique — Handoff Doc](./options-page-critique.md) — > **Date:** 2026-03-20
 - [React DevTools for Chrome Extension Development](./react-devtools.md) — Since Chrome extensions run in isolated contexts, the regular React DevTools browser extension cannot inspect React components in popup, options, or other extension pages. This guide explains how to use the **standalone version** of React DevTools.
 - [Pro unlock via Website Subscription (Extension)](./subscription-pro.md) — This extension unlocks Pro based on the user's **website subscription**.
 
