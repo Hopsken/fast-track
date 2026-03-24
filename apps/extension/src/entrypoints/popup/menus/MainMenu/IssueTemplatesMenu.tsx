@@ -35,15 +35,13 @@ export function IssueTemplatesMenu() {
 
   return (
     <ActionList isLoading={isLoading} emptyPlaceholder="No templates">
-      <ActionGroup heading="New issue">
+      <ActionGroup>
         <Action
-          value="quick-create"
+          value="new-issue"
           icon={Zap}
-          title="Quick create"
+          title="New issue"
           keywords={['new', 'issue', 'create']}
-          onSelect={() =>
-            navigate.push(<ProjectPickerMenu />, { title: 'Quick create' })
-          }
+          onSelect={() => navigate.push(<ProjectPickerMenu />)}
           exitOnSelect={false}
         />
       </ActionGroup>
