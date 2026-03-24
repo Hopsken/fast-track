@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import {
   HashRouter,
   Navigate,
@@ -21,8 +21,8 @@ import '~/assets/styles/main.css'
 
 const SPRING = {
   type: 'spring' as const,
-  stiffness: 340,
-  damping: 30,
+  stiffness: 520,
+  damping: 60,
   mass: 0.4
 }
 
@@ -31,27 +31,24 @@ function AnimatedRoutes({ version }: { version: string }) {
   const shouldReduceMotion = useReducedMotion()
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.div
-        key={location.pathname}
-        initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={shouldReduceMotion ? {} : { opacity: 0, y: -6 }}
-        transition={SPRING}
-        className="p-6">
-        <Routes location={location}>
-          <Route path="/" element={<Navigate to="/general" replace />} />
-          <Route path="/general" element={<GeneralTab />} />
+    <motion.div
+      key={location.pathname}
+      initial={shouldReduceMotion ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={SPRING}
+      className="p-6">
+      <Routes location={location}>
+        <Route path="/" element={<Navigate to="/general" replace />} />
+        <Route path="/general" element={<GeneralTab />} />
 
-          <Route path="/templates" element={<TemplatesIndexPage />} />
-          <Route path="/templates/new" element={<TemplateWizardPage />} />
-          <Route path="/templates/:id" element={<TemplateDetailPage />} />
+        <Route path="/templates" element={<TemplatesIndexPage />} />
+        <Route path="/templates/new" element={<TemplateWizardPage />} />
+        <Route path="/templates/:id" element={<TemplateDetailPage />} />
 
-          <Route path="/about" element={<AboutTab version={version} />} />
-          <Route path="*" element={<Navigate to="/general" replace />} />
-        </Routes>
-      </motion.div>
-    </AnimatePresence>
+        <Route path="/about" element={<AboutTab version={version} />} />
+        <Route path="*" element={<Navigate to="/general" replace />} />
+      </Routes>
+    </motion.div>
   )
 }
 
