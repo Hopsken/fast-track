@@ -5,6 +5,7 @@ import { motion } from 'motion/react'
 import Image from 'next/image'
 
 import heroImage from '../../assets/hero.png'
+import { CHROME_WEB_STORE_URL } from '../../lib/pricing'
 
 export function Hero() {
   return (
@@ -29,10 +30,7 @@ export function Hero() {
                 size="lg"
                 className="h-12 rounded-full bg-stone-900 px-8 text-base text-white shadow-xl shadow-stone-900/10 hover:bg-stone-800"
                 asChild>
-                <a
-                  href="https://chromewebstore.google.com/detail/jira-boost/cmlkcfgkffidbnpbjmlgplokcacfemhp"
-                  target="_blank"
-                  rel="noreferrer">
+                <a href={CHROME_WEB_STORE_URL} target="_blank" rel="noreferrer">
                   Add to Chrome
                 </a>
               </Button>

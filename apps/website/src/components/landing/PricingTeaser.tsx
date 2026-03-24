@@ -2,15 +2,12 @@ import { Button } from '@internal/ui/components/button'
 import { Check } from 'lucide-react'
 import Link from 'next/link'
 
+import {
+  CHROME_WEB_STORE_URL,
+  freeFeatures,
+  proFeatures
+} from '../../lib/pricing'
 import { createSupabaseServerClientReadOnly } from '../../lib/supabase/server'
-
-const included = [
-  'Unlimited issue templates',
-  'Sync (coming soon)',
-  'All future Pro features',
-  'Support development',
-  'Cancel anytime'
-]
 
 export async function PricingTeaser() {
   const supabase = await createSupabaseServerClientReadOnly()
@@ -23,55 +20,105 @@ export async function PricingTeaser() {
   return (
     <section className="border-t border-stone-200/60 bg-[#FDFBF9] py-20 sm:py-24">
       <div className="container mx-auto px-4">
-        <div className="mx-auto grid max-w-5xl gap-10 rounded-3xl border border-stone-200 bg-white p-8 shadow-sm sm:p-10 lg:grid-cols-[1.4fr_0.8fr] lg:items-center">
+        <div className="mx-auto grid max-w-5xl gap-12 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-16">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
-              Pro
+              Free to start
             </p>
-            <h2 className="mt-3 text-balance font-serif text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">
-              $29 / year
+            <h2 className="mt-3 max-w-xl text-balance font-serif text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">
+              Start with Fast Track for free.
             </h2>
-            <p className="mt-4 max-w-xl text-pretty text-sm leading-6 text-stone-600">
-              One plan. No tiers. If it ships, you get it.
+            <p className="mt-4 max-w-2xl text-pretty text-sm leading-6 text-stone-600 sm:text-[15px]">
+              Search Jira, automate common workflow steps, and save up to 3
+              issue templates per Jira site before you pay anything.
             </p>
 
-            <ul className="mt-7 flex flex-col gap-3 text-sm text-stone-700">
-              {included.map((item) => (
+            <ul className="mt-8 space-y-3 border-t border-stone-200 pt-6 text-sm text-stone-700">
+              {freeFeatures.map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <Check
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-none text-emerald-700"
+                    className="mt-0.5 h-4 w-4 flex-none text-stone-900"
                   />
                   <span>{item}</span>
                 </li>
               ))}
             </ul>
-          </div>
 
-          <div className="rounded-2xl bg-stone-50 p-6 sm:p-7">
-            {isSignedIn ? (
-              <form action="/api/billing/checkout" method="post">
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="h-12 w-full rounded-full bg-stone-900 text-white shadow-none hover:bg-stone-800">
-                  Upgrade to Pro
-                </Button>
-              </form>
-            ) : (
+            <p className="mt-6 max-w-xl text-sm leading-6 text-stone-600">
+              Pro removes the template limit. It does not gate the whole
+              product.
+            </p>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Button
                 asChild
                 size="lg"
-                className="h-12 w-full rounded-full bg-stone-900 text-white shadow-none hover:bg-stone-800">
-                <Link href="/login">Sign in</Link>
+                className="h-12 rounded-full bg-stone-900 px-6 text-white shadow-none hover:bg-stone-800">
+                <a href={CHROME_WEB_STORE_URL} target="_blank" rel="noreferrer">
+                  Add to Chrome
+                </a>
               </Button>
-            )}
 
-            <p className="mt-3 text-center text-xs leading-5 text-stone-500">
-              <Link href="/pricing" className="underline underline-offset-4">
-                See details
+              <Link
+                href="/pricing"
+                className="inline-flex items-center text-sm font-medium text-stone-600 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-stone-900">
+                See what Pro adds
               </Link>
+            </div>
+          </div>
+
+          <div className="border-t border-stone-200 pt-8 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
+              Pro
             </p>
+            <div className="mt-3 flex items-end gap-2">
+              <h3 className="font-serif text-4xl font-semibold tracking-tight text-stone-900">
+                $29
+              </h3>
+              <span className="pb-1 text-sm font-medium text-stone-500">
+                / year
+              </span>
+            </div>
+            <p className="mt-4 text-sm leading-6 text-stone-600">
+              Best if you want more than 3 templates per Jira site.
+            </p>
+
+            <ul className="mt-6 flex flex-col gap-3 text-sm text-stone-700">
+              {proFeatures.map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <Check
+                    aria-hidden="true"
+                    className="mt-0.5 h-4 w-4 flex-none text-stone-900"
+                  />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-7">
+              {isSignedIn ? (
+                <form action="/api/billing/checkout" method="post">
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="h-12 w-full rounded-full bg-stone-900 text-white shadow-none hover:bg-stone-800">
+                    Upgrade to Pro
+                  </Button>
+                </form>
+              ) : (
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-12 w-full rounded-full bg-stone-900 text-white shadow-none hover:bg-stone-800">
+                  <Link href="/login">Sign in to upgrade</Link>
+                </Button>
+              )}
+
+              <p className="mt-3 text-xs leading-5 text-stone-500">
+                One paid plan. No tiers or feature bundles.
+              </p>
+            </div>
           </div>
         </div>
       </div>
