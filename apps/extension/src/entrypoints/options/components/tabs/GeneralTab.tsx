@@ -23,7 +23,7 @@ export function GeneralTab() {
 
   const handleDisconnect = useCallback(() => {
     const confirmed = window.confirm(
-      'Disconnect from Jira? You will need to reconnect to use the extension.'
+      'Disconnect from Jira? You’ll need to sign in again to use Fast Track.'
     )
     if (!confirmed) return
     getAuthService().disconnect()
@@ -69,9 +69,8 @@ export function GeneralTab() {
                 Branch name format
               </label>
               <p className="text-muted-foreground text-xs">
-                Copy a git branch name for issues using the{' '}
-                {'Copy git branch name'} action. Formats:{' '}
-                {`{key}, {summary}, {summaryShort}`}.
+                Used when you copy a branch name from an issue. Available
+                tokens: {`{key}, {summary}, {summaryShort}`}.
               </p>
               <Input
                 name="branch-name-format"
@@ -83,7 +82,7 @@ export function GeneralTab() {
                 placeholder="{key}-{summary}"
               />
               <p className="text-muted-foreground text-xs">
-                Preview:{' '}
+                Example:{' '}
                 {generateBranchName(
                   {
                     key: 'JIRA-123',
@@ -98,8 +97,8 @@ export function GeneralTab() {
 
           <SwitchRow
             id="auto-copy-branch-name"
-            title="On move to In Progress, copy git branch name"
-            description="Automatically copy the git branch name when moving a ticket from To Do to In Progress."
+            title="Copy branch name when moving to In Progress"
+            description="Automatically copy a branch name when you move an issue from To Do to In Progress."
             checked={preferences.autoCopyBranchNameOnTransition}
             onCheckedChange={(checked) =>
               setPreference('autoCopyBranchNameOnTransition', checked)
@@ -108,8 +107,8 @@ export function GeneralTab() {
 
           <SwitchRow
             id="auto-assign-on-in-progress"
-            title="On move to In Progress, assign to yourself"
-            description="Automatically assign yourself when moving an unassigned ticket from To Do to In Progress."
+            title="Assign yourself when moving to In Progress"
+            description="Automatically assign unassigned issues to you when you move them from To Do to In Progress."
             checked={preferences.autoAssignOnInProgress}
             onCheckedChange={(checked) =>
               setPreference('autoAssignOnInProgress', checked)
@@ -124,13 +123,12 @@ export function GeneralTab() {
           <SwitchRow
             id="analytics-enabled"
             title="Anonymous analytics"
-            description="Help us improve Fast Track by sending anonymous usage data. No issue content or personal data is collected."
+            description="Help improve Fast Track by sharing anonymous usage data. We never collect issue content."
             checked={analyticsEnabled}
             onCheckedChange={handleAnalyticsChange}
             footer={
               <p className="text-muted-foreground mt-3 text-xs">
-                You can change this anytime. Analytics are anonymous and help us
-                prioritize improvements.
+                You can turn this off anytime.
               </p>
             }
           />
