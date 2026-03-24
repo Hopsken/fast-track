@@ -1,7 +1,5 @@
 import { useCallback, useMemo } from 'react'
 import { Input } from '@internal/ui/components/input'
-import { Label } from '@internal/ui/components/label'
-import { Switch } from '@internal/ui/components/switch'
 
 import { JiraIssue } from '@/types'
 import { generateBranchName } from '@/utils/jira/issues'
@@ -10,15 +8,9 @@ import { getAuthService } from '~/services'
 import { useUserPreferences } from '~/stores/useUserPreferences'
 
 import { ConfigureAuth, JiraConnectionCard } from '../auth'
+import { SectionLabel } from '../SectionLabel'
 import { ShortcutManagement } from '../sections/QuickAccess/ShortcutManagement'
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 className="text-muted-foreground mb-3 text-xs font-medium uppercase tracking-wider">
-      {children}
-    </h2>
-  )
-}
+import { SwitchRow } from '../SwitchRow'
 
 export function GeneralTab() {
   const [credentials] = useStorage('AuthCredentials')
@@ -104,96 +96,44 @@ export function GeneralTab() {
             </div>
           </div>
 
-          {/* Copy branch on In Progress */}
-          <div className="border-border border-t p-4">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h3 className="text-foreground text-sm font-medium">
-                  On move to In Progress, copy git branch name
-                </h3>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  Automatically copy the git branch name when moving a ticket
-                  from To Do to In Progress.
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Switch
-                  id="auto-copy-branch-name"
-                  checked={preferences.autoCopyBranchNameOnTransition}
-                  onCheckedChange={(checked) =>
-                    setPreference('autoCopyBranchNameOnTransition', checked)
-                  }
-                />
-                <Label
-                  htmlFor="auto-copy-branch-name"
-                  className="text-muted-foreground">
-                  {preferences.autoCopyBranchNameOnTransition ? 'On' : 'Off'}
-                </Label>
-              </div>
-            </div>
-          </div>
+          <SwitchRow
+            id="auto-copy-branch-name"
+            title="On move to In Progress, copy git branch name"
+            description="Automatically copy the git branch name when moving a ticket from To Do to In Progress."
+            checked={preferences.autoCopyBranchNameOnTransition}
+            onCheckedChange={(checked) =>
+              setPreference('autoCopyBranchNameOnTransition', checked)
+            }
+          />
 
-          {/* Assign on In Progress */}
-          <div className="border-border border-t p-4">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h3 className="text-foreground text-sm font-medium">
-                  On move to In Progress, assign to yourself
-                </h3>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  Automatically assign yourself when moving an unassigned ticket
-                  from To Do to In Progress.
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Switch
-                  id="auto-assign-on-in-progress"
-                  checked={preferences.autoAssignOnInProgress}
-                  onCheckedChange={(checked) =>
-                    setPreference('autoAssignOnInProgress', checked)
-                  }
-                />
-                <Label
-                  htmlFor="auto-assign-on-in-progress"
-                  className="text-muted-foreground">
-                  {preferences.autoAssignOnInProgress ? 'On' : 'Off'}
-                </Label>
-              </div>
-            </div>
-          </div>
+          <SwitchRow
+            id="auto-assign-on-in-progress"
+            title="On move to In Progress, assign to yourself"
+            description="Automatically assign yourself when moving an unassigned ticket from To Do to In Progress."
+            checked={preferences.autoAssignOnInProgress}
+            onCheckedChange={(checked) =>
+              setPreference('autoAssignOnInProgress', checked)
+            }
+          />
         </div>
       </div>
 
       <div>
         <SectionLabel>Privacy</SectionLabel>
-        <div className="border-border rounded-lg border p-4">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h3 className="text-foreground text-sm font-medium">
-                Anonymous analytics
-              </h3>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Help us improve Fast Track by sending anonymous usage data. No
-                issue content or personal data is collected.
+        <div className="border-border rounded-lg border">
+          <SwitchRow
+            id="analytics-enabled"
+            title="Anonymous analytics"
+            description="Help us improve Fast Track by sending anonymous usage data. No issue content or personal data is collected."
+            checked={analyticsEnabled}
+            onCheckedChange={handleAnalyticsChange}
+            footer={
+              <p className="text-muted-foreground mt-3 text-xs">
+                You can change this anytime. Analytics are anonymous and help us
+                prioritize improvements.
               </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Switch
-                id="analytics-enabled"
-                checked={analyticsEnabled}
-                onCheckedChange={handleAnalyticsChange}
-              />
-              <Label
-                htmlFor="analytics-enabled"
-                className="text-muted-foreground">
-                {analyticsEnabled ? 'On' : 'Off'}
-              </Label>
-            </div>
-          </div>
-          <p className="text-muted-foreground mt-3 text-xs">
-            You can change this anytime. Analytics are anonymous and help us
-            prioritize improvements.
-          </p>
+            }
+          />
         </div>
       </div>
     </div>

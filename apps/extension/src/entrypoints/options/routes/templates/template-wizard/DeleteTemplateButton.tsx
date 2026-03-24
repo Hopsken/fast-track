@@ -1,7 +1,3 @@
-/* ------------------------------------------------------------------ */
-/*  Delete confirmation dialog                                         */
-/* ------------------------------------------------------------------ */
-
 import { useState } from 'react'
 import {
   AlertDialog,
@@ -20,7 +16,6 @@ export function DeleteTemplateButton({
   onConfirm,
   isDeleting
 }: {
-  templateId?: string
   onConfirm?: () => void
   isDeleting?: boolean
 }) {

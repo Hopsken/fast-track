@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom'
 
 import { LoadingCursor } from '@/components/LoadingCursor'
 import { useCurrentJiraHost } from '~/hooks/useCurrentJiraHost'
-import { useStorage } from '~/hooks/useStorage'
+import { useFreeLimitStatus } from '~/hooks/useFreeLimitStatus'
 import { useTemplates } from '~/hooks/useTemplates'
 import { BOOST_WEBSITE_BASE_URL } from '~/lib/api'
 import type { IssueTemplate } from '~/types/template'
@@ -37,10 +37,7 @@ export function TemplatesIndexPage() {
     includeOtherHosts: true
   })
 
-  const [snapshot, , snapshotState] = useStorage('SubscriptionSnapshot')
-  const isPro = snapshotState === 'success' ? (snapshot?.isPro ?? false) : null
-  const templateCount = templates?.length ?? 0
-  const isAtFreeLimit = isPro === false && templateCount >= 3
+  const { isAtFreeLimit } = useFreeLimitStatus()
 
   const [showOthers, setShowOthers] = useState(false)
 
@@ -83,7 +80,7 @@ export function TemplatesIndexPage() {
 
       {isAtFreeLimit ? (
         <div className="border-border bg-muted text-foreground rounded-md border p-4 text-sm">
-          You’ve reached the Free plan limit (3 issue templates). Upgrade to Pro
+          You've reached the Free plan limit (3 issue templates). Upgrade to Pro
           to create more.
         </div>
       ) : null}
