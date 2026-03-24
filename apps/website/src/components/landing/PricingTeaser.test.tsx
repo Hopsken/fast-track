@@ -30,9 +30,11 @@ describe('PricingTeaser', () => {
     render(await PricingTeaser())
 
     expect(
-      screen.getByRole('heading', { name: 'Start with Fast Track for free.' })
+      screen.getByRole('heading', {
+        name: 'Try the faster way to use Jira before you pay for it.'
+      })
     ).not.toBeNull()
-    expect(screen.getByText('Search Jira from the address bar')).not.toBeNull()
+    expect(screen.getByText('Search Jira faster')).not.toBeNull()
     expect(
       screen.getByRole('link', { name: 'Add to Chrome' }).getAttribute('href')
     ).toBe(CHROME_WEB_STORE_URL)

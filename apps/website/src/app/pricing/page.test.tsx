@@ -15,13 +15,20 @@ describe('PricingPage', () => {
 
     expect(
       screen.getByRole('heading', {
-        name: 'Start free. Upgrade when limits matter.'
+        name: 'Get through Jira faster. Pay only when templates save you enough time to matter.'
       })
+    ).not.toBeNull()
+    expect(
+      screen.getByText(
+        'Start free. Upgrade when templates become part of your daily work.'
+      )
     ).not.toBeNull()
     expect(screen.getByRole('heading', { name: 'Free' })).not.toBeNull()
     expect(screen.getByRole('heading', { name: 'Pro' })).not.toBeNull()
     expect(
-      screen.getByRole('link', { name: 'Add to Chrome' }).getAttribute('href')
+      screen
+        .getByRole('link', { name: 'Add to Chrome free' })
+        .getAttribute('href')
     ).toBe(CHROME_WEB_STORE_URL)
     expect(
       container.querySelector('form[action="/api/billing/checkout"]')

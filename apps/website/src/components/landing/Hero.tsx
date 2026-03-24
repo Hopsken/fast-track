@@ -21,9 +21,8 @@ export function Hero() {
               <span className="italic text-stone-600">the friction.</span>
             </h1>
             <p className="mx-auto mb-10 max-w-2xl text-pretty text-xl font-light leading-relaxed text-stone-600">
-              Stop clicking through endless menus. Search, transition, and
-              manage tickets directly from your keyboard. Built for developers
-              who value flow.
+              Find the right issue, take the next step, and reuse repeat work
+              without digging through Jira.
             </p>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Button
@@ -31,7 +30,7 @@ export function Hero() {
                 className="h-12 rounded-full bg-stone-900 px-8 text-base text-white shadow-xl shadow-stone-900/10 hover:bg-stone-800"
                 asChild>
                 <a href={CHROME_WEB_STORE_URL} target="_blank" rel="noreferrer">
-                  Add to Chrome
+                  Add to Chrome - It's free
                 </a>
               </Button>
             </div>

@@ -8,7 +8,7 @@ import { PricingTeaser } from '../components/landing/PricingTeaser'
 
 export const metadata: Metadata = {
   description:
-    'Fast Track helps you search, open, and manage Jira issues without breaking flow.',
+    'Fast Track helps you find issues, move work forward, and reuse repeat work without digging through Jira.',
   title: 'Fast Track | Accelerated Jira workflow'
 }
 

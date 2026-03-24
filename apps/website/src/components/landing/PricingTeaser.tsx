@@ -26,11 +26,10 @@ export async function PricingTeaser() {
               Free to start
             </p>
             <h2 className="mt-3 max-w-xl text-balance font-serif text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">
-              Start with Fast Track for free.
+              Try the faster way to use Jira before you pay for it.
             </h2>
             <p className="mt-4 max-w-2xl text-pretty text-sm leading-6 text-stone-600 sm:text-[15px]">
-              Search Jira, automate common workflow steps, and save up to 3
-              issue templates per Jira site before you pay anything.
+              Search faster, act faster, and try 3 templates free.
             </p>
 
             <ul className="mt-8 space-y-3 border-t border-stone-200 pt-6 text-sm text-stone-700">
@@ -46,8 +45,9 @@ export async function PricingTeaser() {
             </ul>
 
             <p className="mt-6 max-w-xl text-sm leading-6 text-stone-600">
-              Pro removes the template limit. It does not gate the whole
-              product.
+              Pro is for people who create the same kinds of tickets often
+              enough that templates become a daily shortcut. The core product
+              stays free.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -81,7 +81,7 @@ export async function PricingTeaser() {
               </span>
             </div>
             <p className="mt-4 text-sm leading-6 text-stone-600">
-              Best if you want more than 3 templates per Jira site.
+              Best if you create repeat tickets every week.
             </p>
 
             <ul className="mt-6 flex flex-col gap-3 text-sm text-stone-700">

@@ -7,7 +7,8 @@ import { CHROME_WEB_STORE_URL, pricingPlans } from '../../lib/pricing'
 
 export const metadata: Metadata = {
   title: 'Pricing | Fast Track',
-  description: 'Start free. Upgrade to Pro only when you need higher limits.'
+  description:
+    'Use Fast Track for free to get through Jira faster. Upgrade to Pro when issue templates become part of your daily work.'
 }
 
 export default function PricingPage() {
@@ -25,12 +26,11 @@ export default function PricingPage() {
               Pricing
             </p>
             <h1 className="text-balance font-serif text-5xl font-semibold tracking-tight text-stone-900 sm:text-6xl">
-              Start free. Upgrade when limits matter.
+              Get through Jira faster. Pay only when templates save you enough
+              time to matter.
             </h1>
             <p className="mt-6 max-w-xl text-pretty text-lg leading-relaxed text-stone-600">
-              The core workflow is free. Upgrade when you want higher limits,
-              upcoming Pro features, and a simple paid plan that grows with the
-              product.
+              Start free. Upgrade when templates become part of your daily work.
             </p>
           </div>
 
@@ -62,7 +62,7 @@ export default function PricingPage() {
                 size="lg"
                 className="mt-10 h-12 rounded-full bg-stone-900 px-8 text-white shadow-none hover:bg-stone-800">
                 <a href={CHROME_WEB_STORE_URL} target="_blank" rel="noreferrer">
-                  Add to Chrome
+                  Add to Chrome free
                 </a>
               </Button>
             </article>
@@ -114,8 +114,7 @@ export default function PricingPage() {
 
           <div className="mt-8 border-t border-stone-200 pt-4">
             <p className="text-xs leading-5 text-stone-500">
-              Free includes up to 3 issue templates per Jira site. You only need
-              to sign in when you upgrade.
+              No account needed. Sign in only to upgrade.
             </p>
           </div>
         </div>
