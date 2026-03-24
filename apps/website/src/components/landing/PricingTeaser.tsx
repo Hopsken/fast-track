@@ -26,7 +26,7 @@ export async function PricingTeaser() {
               Free to start
             </p>
             <h2 className="mt-3 max-w-xl text-balance font-serif text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">
-              Try the faster way to use Jira before you pay for it.
+              Try the faster way to use Jira.
             </h2>
             <p className="mt-4 max-w-2xl text-pretty text-sm leading-6 text-stone-600 sm:text-[15px]">
               Search faster, act faster, and try 3 templates free.
