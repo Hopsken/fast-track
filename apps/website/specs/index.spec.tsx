@@ -1,12 +1,49 @@
 import React from 'react'
-import { render } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 
 import Page from '../src/app/page'
 
+vi.mock('next/image', () => ({
+  __esModule: true,
+  default: ({
+    alt,
+    fill,
+    ...props
+  }: React.ImgHTMLAttributes<HTMLImageElement> & {
+    alt: string
+    fill?: boolean
+  }) =>
+    React.createElement('img', { alt, ...props })
+}))
+
+vi.mock('../src/components/landing/Header', () => ({
+  Header: () => <div>Header</div>
+}))
+
+vi.mock('../src/components/landing/Hero', () => ({
+  Hero: () => <div>Hero</div>
+}))
+
+vi.mock('../src/components/landing/PricingTeaser', () => ({
+  PricingTeaser: () => <div>Pricing</div>
+}))
+
+vi.mock('../src/components/landing/Footer', () => ({
+  Footer: () => <div>Footer</div>
+}))
+
 describe('Page', () => {
-  it.skip('should render successfully', () => {
-    const { baseElement } = render(<Page />)
-    expect(baseElement).toBeTruthy()
+  it('highlights issue templates as a homepage feature', async () => {
+    render(<Page />)
+
+    expect(
+      screen.getByRole('heading', {
+        name: /quick create from issue templates/i
+      })
+    ).toBeTruthy()
+    expect(
+      screen.getByText(/pick a template and ship a fully formed issue/i)
+    ).toBeTruthy()
   })
 })

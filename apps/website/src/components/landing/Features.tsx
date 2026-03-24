@@ -1,8 +1,21 @@
 import { cn } from '@internal/ui/lib/utils'
-import { Search, Zap, Command, GitBranch, User, ArrowRight } from 'lucide-react'
+import { Search, Command, FileText } from 'lucide-react'
 import Image from 'next/image'
 
 import commandsImage from '../../assets/commands.png'
+import issueTemplatePickerImage from '../../assets/issue-template-picker.png'
+import issueTemplateReviewImage from '../../assets/issue-template-review.png'
+
+const issueTemplateSlides = [
+  {
+    image: issueTemplatePickerImage,
+    alt: 'Fast Track issue template picker listing Bug triage, Release follow-up, and Customer escalation'
+  },
+  {
+    image: issueTemplateReviewImage,
+    alt: 'Fast Track review screen with a prefilled bug triage issue ready to create'
+  }
+] as const
 
 const features = [
   {
@@ -22,50 +35,57 @@ const features = [
     )
   },
   {
-    title: 'Automations that anticipate your next move',
+    title: 'Quick create from issue templates',
     description:
-      'Why repeat yourself? Fast Track handles the tedious stuff: automatically copying branch names on transition, or assigning tickets to yourself when you start working.',
-    icon: Zap,
+      'Pick a template and ship a fully formed issue in seconds. Scope, defaults, and repeated fields are already filled, so you start from structure instead of another blank Jira form.',
+    icon: FileText,
     align: 'right' as const,
     visual: (
-      <div className="flex h-full w-full items-center justify-center rounded-lg border border-stone-100 bg-stone-50 p-8">
-        <div className="flex w-full max-w-sm flex-col gap-4">
-          {/* Step 1: Trigger */}
-          <div className="flex items-center justify-between rounded-lg border border-stone-200 bg-white p-4 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded bg-blue-100 text-blue-600">
-                <Command className="h-4 w-4" />
+      <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_top,rgba(28,28,28,0.04),transparent_58%)] p-4 md:p-6">
+        <div className="w-full max-w-4xl">
+          <div
+            className="relative overflow-hidden rounded-[1.4rem] border border-stone-200/90 bg-white shadow-[0_22px_60px_-38px_rgba(28,28,28,0.32)]"
+            style={{ aspectRatio: '1154 / 740' }}>
+            {issueTemplateSlides.map((slide, index) => (
+              <div
+                key={slide.alt}
+                className={cn(
+                  'absolute inset-0 motion-reduce:first:relative motion-reduce:first:block',
+                  index === 0 ? 'opacity-100' : 'opacity-0',
+                  index === 1 && 'motion-reduce:hidden'
+                )}
+                style={{
+                  animation: `issue-template-slide 8s ease-in-out infinite`,
+                  animationDelay: `${index * 4}s`
+                }}>
+                <figure className="absolute inset-0 overflow-hidden">
+                  <Image
+                    src={slide.image}
+                    alt={slide.alt}
+                    className="h-full w-full object-cover object-center"
+                    fill
+                    sizes="(min-width: 1024px) 42vw, 100vw"
+                  />
+                </figure>
               </div>
-              <div className="text-sm">
-                <div className="font-medium text-stone-900">
-                  Transition to &quot;In Progress&quot;
-                </div>
-                <div className="text-xs text-stone-500">User Action</div>
-              </div>
-            </div>
+            ))}
           </div>
 
-          <div className="flex justify-center">
-            <ArrowRight className="h-5 w-5 rotate-90 text-stone-300" />
-          </div>
-
-          {/* Step 2: Automation */}
-          <div className="space-y-3 rounded-lg border border-stone-800 bg-stone-900 p-4 shadow-lg">
-            <div className="flex items-center gap-3">
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500/20">
-                <User className="h-3 w-3 text-green-400" />
-              </div>
-              <span className="text-sm text-stone-200">
-                Auto-assigned to you
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-500/20">
-                <GitBranch className="h-3 w-3 text-purple-400" />
-              </div>
-              <span className="text-sm text-stone-200">
-                Branch name copied to clipboard
-              </span>
+          <div className="hidden justify-center pt-4 motion-reduce:hidden sm:flex">
+            <div className="flex items-center gap-2">
+              {issueTemplateSlides.map((slide, index) => (
+                <span
+                  key={slide.alt}
+                  className="h-1.5 w-10 overflow-hidden rounded-full bg-stone-200">
+                  <span
+                    className="block h-full w-full origin-left rounded-full bg-stone-900/80"
+                    style={{
+                      animation: `issue-template-progress 8s linear infinite`,
+                      animationDelay: `${index * 4}s`
+                    }}
+                  />
+                </span>
+              ))}
             </div>
           </div>
         </div>
@@ -112,6 +132,41 @@ const features = [
 export function Features() {
   return (
     <section className="bg-white py-24">
+      <style>{`
+        @keyframes issue-template-slide {
+          0%, 42% {
+            opacity: 1;
+            transform: scale(1);
+          }
+
+          50%, 92% {
+            opacity: 0;
+            transform: scale(1.004);
+          }
+
+          100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        @keyframes issue-template-progress {
+          0% {
+            transform: scaleX(0);
+            opacity: 1;
+          }
+
+          42% {
+            transform: scaleX(1);
+            opacity: 1;
+          }
+
+          50%, 100% {
+            transform: scaleX(1);
+            opacity: 0.22;
+          }
+        }
+      `}</style>
       <div className="container mx-auto space-y-32 px-4">
         {features.map((feature, index) => (
           <div
@@ -133,7 +188,7 @@ export function Features() {
             </div>
 
             <div className="flex-1">
-              <div className="aspect-square w-full overflow-hidden rounded-2xl border border-stone-100 shadow-sm transition-all duration-500 hover:shadow-md md:aspect-[4/3]">
+              <div className="aspect-square w-full overflow-hidden md:aspect-[4/3]">
                 {feature.visual}
               </div>
             </div>
