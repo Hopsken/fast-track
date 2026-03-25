@@ -1,5 +1,8 @@
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+import { Footer } from '../../components/landing/Footer'
+import { Header } from '../../components/landing/Header'
 
 export const metadata: Metadata = {
   description:
@@ -9,120 +12,134 @@ export const metadata: Metadata = {
 
 const sections = [
   {
-    items: [
-      'Jira content you search or open (issue keys, summaries, status).',
-      'Account identifiers needed for Atlassian authentication (email, username).',
-      'Error and performance signals to keep the extension reliable.'
+    title: 'What Fast Track accesses',
+    body: [
+      'Fast Track only accesses the Jira data it needs to help you find issues, open them, and take the next step.',
+      'That includes issue details like keys, summaries, and status, plus the account details needed to sign in with Atlassian.'
     ],
-    title: 'Information we process'
+    items: [
+      'Issue details used for search and quick actions.',
+      'Account details needed to complete Atlassian sign-in.',
+      'Basic diagnostics used to fix reliability problems.'
+    ]
   },
   {
-    items: [
-      'Search history and Jira responses stay on your device.',
-      'Browser storage is scoped to the extension and never sold or shared.',
-      'No advertising identifiers or cross-site tracking cookies are used.'
+    title: 'What stays on your device',
+    body: [
+      'Search history, cached Jira responses, and similar working data stay in browser storage used by the extension.',
+      'Fast Track does not use advertising trackers, cross-site tracking cookies, or sell your activity data.'
     ],
-    title: 'How we store data'
+    items: [
+      'No advertising IDs or third-party tracking cookies.',
+      'No selling or sharing of your extension activity data.',
+      'Cached data can be cleared from your browser settings at any time.'
+    ]
   },
   {
-    items: [
-      'Encryption-in-transit for all Jira calls (HTTPS).',
-      'Local-only caches that can be cleared from your browser settings.',
-      'Minimal permissions: storage, tabs, and Atlassian host access.'
+    title: 'Security and permissions',
+    body: [
+      'All Jira requests use HTTPS, and the extension asks for the minimum browser permissions it needs to work inside Jira.',
+      'We keep the permission set narrow so the extension can stay useful without reading more than it needs.'
     ],
-    title: 'Protection and security'
+    items: [
+      'Browser permissions are limited to storage, tabs, and Atlassian host access.',
+      'Local caches exist to keep Fast Track fast, not to build a profile of your work.',
+      'If you send logs or screenshots to support, we only use them to investigate that issue.'
+    ]
   },
   {
-    items: [
-      'Sign out or revoke the Jira token from your Atlassian account.',
-      'Clear the extension storage to remove cached results.',
-      'Contact us to delete diagnostic data if you shared it voluntarily.'
+    title: 'Your choices and contact',
+    body: [
+      'You can sign out, revoke access in Atlassian, and clear extension storage whenever you want.',
+      'If you have a privacy question or want support to delete diagnostics you shared, email us directly.'
     ],
-    title: 'Your choices'
+    items: [
+      'Sign out of Fast Track or revoke access in Atlassian.',
+      'Clear local extension data from your browser settings.',
+      'Email support with privacy questions or deletion requests.'
+    ]
   }
-]
+] as const
 
 export default function PrivacyPage() {
   return (
-    <main className="relative min-h-screen overflow-hidden">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-[-10%] top-[-25%] h-80 w-80 rounded-full bg-emerald-200/50 blur-3xl" />
-        <div className="absolute right-[-10%] top-1/4 h-96 w-96 rounded-full bg-amber-200/40 blur-3xl" />
-        <div className="absolute bottom-[-15%] left-1/3 h-72 w-72 rounded-full bg-sky-200/40 blur-3xl" />
-      </div>
+    <main className="flex min-h-dvh flex-col bg-[#FDFBF9]">
+      <Header />
 
-      <div className="relative mx-auto max-w-5xl px-6 py-16 sm:py-24">
-        <div className="mb-10 flex items-center justify-between gap-6">
-          <div className="space-y-3">
-            <p className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800 ring-1 ring-emerald-200">
-              Privacy first
+      <section className="px-6 py-20 sm:py-28">
+        <div className="mx-auto w-full max-w-5xl">
+          <div className="max-w-3xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
+              Privacy
             </p>
-            <div className="space-y-2">
-              <h1 className="text-4xl font-semibold leading-tight text-slate-900 sm:text-5xl">
-                Privacy Policy
-              </h1>
-              <p className="max-w-2xl text-lg text-slate-700">
-                Fast Track is built to keep your Jira data confined to your
-                browser. This page explains what we process, why, and how you
-                stay in control.
-              </p>
+            <h1 className="mt-4 text-balance font-serif text-5xl font-semibold tracking-tight text-stone-900 sm:text-6xl">
+              Private by default.
+            </h1>
+            <p className="mt-6 max-w-2xl text-pretty text-lg leading-relaxed text-stone-600">
+              Fast Track helps you move through Jira faster without turning your
+              work into another dataset.
+            </p>
+            <p className="mt-4 max-w-2xl text-pretty text-base leading-7 text-stone-600 sm:text-lg">
+              Here is what the extension accesses, what stays local, and what
+              control you keep over sign-in, search, and diagnostics.
+            </p>
+          </div>
+
+          <div className="mt-16 border-t border-stone-200 pt-10 sm:mt-20">
+            <div className="space-y-12 sm:space-y-14">
+              {sections.map((section) => (
+                <section
+                  key={section.title}
+                  className="grid gap-6 border-t border-stone-200 pt-8 sm:gap-8 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)]">
+                  <div>
+                    <h2 className="text-balance font-serif text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
+                      {section.title}
+                    </h2>
+                  </div>
+
+                  <div className="max-w-2xl">
+                    <div className="space-y-4 text-sm leading-7 text-stone-600 sm:text-[15px]">
+                      {section.body.map((paragraph) => (
+                        <p key={paragraph}>{paragraph}</p>
+                      ))}
+                    </div>
+
+                    <ul className="mt-6 space-y-3 text-sm leading-7 text-stone-700 sm:text-[15px]">
+                      {section.items.map((item) => (
+                        <li key={item} className="flex gap-3">
+                          <span
+                            aria-hidden="true"
+                            className="mt-3 h-1.5 w-1.5 flex-none rounded-full bg-stone-900"
+                          />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </section>
+              ))}
             </div>
           </div>
-          <Link
-            href="/"
-            className="shrink-0 rounded-full bg-white/80 px-4 py-2 text-sm font-medium text-slate-900 shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:bg-white hover:ring-emerald-400/60">
-            Back home
-          </Link>
-        </div>
 
-        <div className="grid gap-6 sm:grid-cols-2">
-          {sections.map((section) => (
-            <article
-              key={section.title}
-              className="rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-xl shadow-slate-200/80 ring-1 ring-white/60 backdrop-blur">
-              <h2 className="mb-4 text-xl font-semibold text-slate-900">
-                {section.title}
-              </h2>
-              <ul className="space-y-3 text-sm leading-relaxed text-slate-700">
-                {section.items.map((item) => (
-                  <li
-                    key={item}
-                    className="flex gap-3 rounded-xl bg-white px-3 py-2 ring-1 ring-slate-200">
-                    <span className="mt-1 h-2 w-2 rounded-full bg-emerald-500" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </article>
-          ))}
-        </div>
-
-        <div className="mt-10 space-y-4 rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-lg shadow-slate-200/80 ring-1 ring-white/60 backdrop-blur">
-          <div className="flex flex-wrap items-center gap-3">
-            <p className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-700 ring-1 ring-amber-200">
-              Last updated
+          <section className="mt-16 border-t border-stone-200 pt-6 sm:mt-20">
+            <p className="text-sm leading-6 text-stone-500">
+              Last updated: March 25, 2026
             </p>
-            <p className="text-sm text-slate-700">January 8, 2025</p>
-          </div>
-          <p className="max-w-3xl text-sm leading-relaxed text-slate-700">
-            We update this policy when we add features or refine data handling.
-            Substantial changes are announced in release notes. If you have
-            questions or need a data export, reach us anytime.
-          </p>
-          <div className="flex flex-wrap items-center gap-4">
-            <a
-              className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 shadow-md shadow-emerald-500/30 transition hover:-translate-y-0.5 hover:bg-emerald-400"
-              href="mailto:support@fast-track.work">
-              Contact support
-            </a>
-            <a
-              className="text-sm font-medium text-sky-700 underline-offset-4 transition hover:text-sky-800 hover:underline"
-              href="mailto:support@fast-track.work">
-              support@fast-track.work
-            </a>
-          </div>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-600 sm:text-[15px]">
+              We update this page when product changes affect what data the
+              extension uses or how it handles it. Questions? Email{' '}
+              <Link
+                href="mailto:support@fast-track.work"
+                className="font-medium text-stone-700 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-stone-900">
+                support@fast-track.work
+              </Link>
+              .
+            </p>
+          </section>
         </div>
-      </div>
+      </section>
+
+      <Footer />
     </main>
   )
 }
