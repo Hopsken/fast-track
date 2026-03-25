@@ -1,4 +1,9 @@
-import { ChevronDown } from 'lucide-react'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '@internal/ui/components/accordion'
 import Link from 'next/link'
 
 const faqItems = [
@@ -39,31 +44,26 @@ export function Faq() {
             <h2 className="mt-4 text-balance font-serif text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">
               Before you install.
             </h2>
-            <p className="mt-4 max-w-xl text-pretty text-lg leading-relaxed text-stone-600">
-              Quick answers on safety, storage, and pricing.
-            </p>
           </div>
 
-          <div className="mt-12 border-t border-stone-200">
+          <Accordion
+            type="single"
+            collapsible
+            className="mt-12 border-t border-stone-200">
             {faqItems.map((item) => (
-              <details
+              <AccordionItem
                 key={item.question}
-                className="group border-b border-stone-200 py-5">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-left">
-                  <span className="text-base font-medium leading-7 text-stone-900 sm:text-lg">
-                    {item.question}
-                  </span>
-                  <ChevronDown
-                    aria-hidden="true"
-                    className="h-5 w-5 flex-none text-stone-500 transition-transform duration-200 group-open:rotate-180"
-                  />
-                </summary>
-                <p className="mt-4 max-w-2xl pr-8 text-sm leading-7 text-stone-600 sm:text-[15px]">
+                value={item.question}
+                className="border-stone-200">
+                <AccordionTrigger className="text-base leading-7 text-stone-900 no-underline hover:no-underline sm:text-lg">
+                  {item.question}
+                </AccordionTrigger>
+                <AccordionContent className="max-w-2xl pr-8 text-sm leading-7 text-stone-600 sm:text-[15px]">
                   {item.answer}
-                </p>
-              </details>
+                </AccordionContent>
+              </AccordionItem>
             ))}
-          </div>
+          </Accordion>
 
           <p className="mt-6 text-sm leading-6 text-stone-500">
             Need more? Read the{' '}

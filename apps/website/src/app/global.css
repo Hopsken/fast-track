@@ -2,7 +2,7 @@
 @import '@internal/tailwind-config';
 /* @import '@internal/ui/globals.css'; */
 
-@source "../../../node_modules/@internal/ui/**/*.{ts,tsx}";
+@source "../../../../node_modules/@internal/ui/**/*.{ts,tsx}";
 
 @theme {
   --font-sans: var(--font-sans);
@@ -21,4 +21,4 @@
 }
 
 /* Re-add the workspace source if needed, but standard tailwind 4 might just scan content in the roots */
-@source "../../../packages/ui/src/**/*.{ts,tsx}";
+@source "../../../../packages/ui/src/**/*.{ts,tsx}";

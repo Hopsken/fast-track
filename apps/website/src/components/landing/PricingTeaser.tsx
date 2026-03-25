@@ -57,12 +57,6 @@ export async function PricingTeaser() {
                   Add to Chrome
                 </a>
               </Button>
-
-              <Link
-                href="/pricing"
-                className="inline-flex items-center text-sm font-medium text-stone-600 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-stone-900">
-                See what Pro adds
-              </Link>
             </div>
           </div>
 
@@ -101,7 +95,7 @@ export async function PricingTeaser() {
                     type="submit"
                     size="lg"
                     className="h-12 w-full rounded-full bg-stone-900 text-white shadow-none hover:bg-stone-800">
-                    Upgrade to Pro
+                    Upgrade
                   </Button>
                 </form>
               ) : (
@@ -109,7 +103,7 @@ export async function PricingTeaser() {
                   asChild
                   size="lg"
                   className="h-12 w-full rounded-full bg-stone-900 text-white shadow-none hover:bg-stone-800">
-                  <Link href="/login">Sign in to upgrade</Link>
+                  <Link href="/login">Upgrade</Link>
                 </Button>
               )}
 
