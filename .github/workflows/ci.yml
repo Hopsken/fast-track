@@ -16,32 +16,8 @@ env:
   WXT_UMAMI_WEBSITE_ID: ${{ vars.WXT_UMAMI_WEBSITE_ID }}
 
 jobs:
-  changes:
-    runs-on: ubuntu-latest
-    outputs:
-      extension: ${{ steps.filter.outputs.extension }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Detect changed areas
-        id: filter
-        uses: dorny/paths-filter@v3
-        with:
-          filters: |
-            extension:
-              - 'apps/extension/**'
-              - 'packages/**'
-              - 'pnpm-lock.yaml'
-              - 'turbo.json'
-              - 'package.json'
-
   quality:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        task: [lint, typecheck, test]
 
     steps:
       - name: Checkout code
@@ -57,17 +33,24 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+
+      - name: Cache Turbo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-ci-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-ci-${{ hashFiles('pnpm-lock.yaml') }}-
+            ${{ runner.os }}-turbo-ci-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run ${{ matrix.task }}
-        run: pnpm run ${{ matrix.task }}
+      - name: Run lint, typecheck and unit tests
+        run: pnpm exec turbo run lint typecheck test --continue=never
 
   e2e:
     runs-on: ubuntu-latest
-    needs: changes
-    if: needs.changes.outputs.extension == 'true'
 
     steps:
       - name: Checkout code
@@ -83,6 +66,15 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+
+      - name: Cache Turbo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-e2e-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-e2e-${{ hashFiles('pnpm-lock.yaml') }}-
+            ${{ runner.os }}-turbo-e2e-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
