@@ -1,33 +1,29 @@
-name: 'Build and Release'
+name: Release
 
 on:
   workflow_dispatch:
     inputs:
       create_release:
-        description: 'Create GitHub release'
+        description: Create GitHub release or publish to stores
         required: false
-        default: false
+        default: true
         type: boolean
   push:
-    branches: [master, main]
     tags:
       - 'v*'
-  pull_request:
-    branches: [master, main]
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+  WXT_UMAMI_WEBSITE_ID: ${{ vars.WXT_UMAMI_WEBSITE_ID }}
 
 jobs:
-  build:
+  validate:
     runs-on: ubuntu-latest
-
-    outputs:
-      version: ${{ steps.package_version.outputs.version }}
-      is_beta: ${{ steps.release_type.outputs.is_beta }}
-
-    env:
-      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
-      WXT_UMAMI_WEBSITE_ID: ${{ vars.WXT_UMAMI_WEBSITE_ID }}
-      PNPM_STORE_PATH: ~/.pnpm-store
 
     steps:
       - name: Checkout code
@@ -38,22 +34,57 @@ jobs:
         with:
           run_install: false
 
-      - name: Ensure pnpm store directory
-        run: mkdir -p "$PNPM_STORE_PATH"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Cache Turbo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-release-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-release-${{ hashFiles('pnpm-lock.yaml') }}-
+            ${{ runner.os }}-turbo-release-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run lint, typecheck and unit tests
+        run: pnpm exec turbo run lint typecheck test --continue=never
+
+  package:
+    runs-on: ubuntu-latest
+    needs: validate
+    outputs:
+      version: ${{ steps.package_version.outputs.version }}
+      is_beta: ${{ steps.release_type.outputs.is_beta }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
+          cache: pnpm
 
-      - name: Cache pnpm modules
+      - name: Cache Turbo
         uses: actions/cache@v4
         with:
-          path: ${{ env.PNPM_STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: .turbo
+          key: ${{ runner.os }}-turbo-release-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-
+            ${{ runner.os }}-turbo-release-${{ hashFiles('pnpm-lock.yaml') }}-
+            ${{ runner.os }}-turbo-release-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -69,27 +100,7 @@ jobs:
       - name: Install Playwright Chromium
         run: pnpm --filter extension exec playwright install --with-deps chromium
 
-      - name: Get package version
-        id: package_version
-        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-
-      - name: Detect release type
-        id: release_type
-        run: |
-          if [[ $GITHUB_REF == refs/tags/v*-beta.* ]]; then
-            echo "is_beta=true" >> $GITHUB_OUTPUT
-            echo "release_type=beta" >> $GITHUB_OUTPUT
-          else
-            echo "is_beta=false" >> $GITHUB_OUTPUT
-            echo "release_type=stable" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Quality checkout
-        run: pnpm exec turbo run typecheck lint test
-
       - name: Run extension e2e tests
-        env:
-          IS_BETA: ${{ steps.release_type.outputs.is_beta }}
         run: pnpm test:e2e
 
       - name: Upload Playwright report artifact
@@ -100,12 +111,23 @@ jobs:
           path: apps/extension/playwright-report/
           retention-days: 30
 
+      - name: Get package version
+        id: package_version
+        run: echo "version=$(node -p \"require('./package.json').version\")" >> "$GITHUB_OUTPUT"
+
+      - name: Detect release type
+        id: release_type
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v*-beta.* ]]; then
+            echo "is_beta=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_beta=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Create zip artifacts
-        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         run: pnpm run zip
 
       - name: Upload Chrome extension artifact
-        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
           name: fast-track-chrome-v${{ steps.package_version.outputs.version }}${{ steps.release_type.outputs.is_beta == 'true' && '-beta' || '' }}
@@ -113,23 +135,16 @@ jobs:
           retention-days: 30
 
       - name: Upload Firefox extension artifact
-        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
           name: fast-track-firefox-v${{ steps.package_version.outputs.version }}${{ steps.release_type.outputs.is_beta == 'true' && '-beta' || '' }}
           path: apps/extension/.output/extension-${{ steps.package_version.outputs.version }}-firefox.zip
           retention-days: 30
 
-      - name: List build outputs
-        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
-        run: |
-          echo "Build outputs:"
-          ls -la apps/extension/.output/
-
-  release:
-    needs: build
+  publish:
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.create_release == 'true')
+    needs: package
+    if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.create_release == 'true'
 
     steps:
       - name: Checkout code
@@ -142,23 +157,21 @@ jobs:
           path: ./artifacts/
           merge-multiple: true
 
-      # Publish stable releases to both Chrome and Firefox stores
       - name: Browser Platform Publish (Stable)
-        if: needs.build.outputs.is_beta != 'true'
+        if: needs.package.outputs.is_beta != 'true'
         uses: PlasmoHQ/bpp@v3
         with:
           keys: ${{ secrets.SUBMIT_KEYS }}
-          chrome-file: ./artifacts/extension-${{ needs.build.outputs.version }}-chrome.zip
-          firefox-file: ./artifacts/extension-${{ needs.build.outputs.version }}-firefox.zip
+          chrome-file: ./artifacts/extension-${{ needs.package.outputs.version }}-chrome.zip
+          firefox-file: ./artifacts/extension-${{ needs.package.outputs.version }}-firefox.zip
 
-      # Create GitHub Release for beta versions with both artifacts
       - name: Create GitHub Release (Beta)
-        if: needs.build.outputs.is_beta == 'true'
+        if: needs.package.outputs.is_beta == 'true'
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            ./artifacts/extension-${{ needs.build.outputs.version }}-chrome.zip
-            ./artifacts/extension-${{ needs.build.outputs.version }}-firefox.zip
+            ./artifacts/extension-${{ needs.package.outputs.version }}-chrome.zip
+            ./artifacts/extension-${{ needs.package.outputs.version }}-firefox.zip
           prerelease: true
           generate_release_notes: true
-          name: ${{ needs.build.outputs.version }} (Beta)
+          name: ${{ needs.package.outputs.version }} (Beta)
