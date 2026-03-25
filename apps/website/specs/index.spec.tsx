@@ -39,11 +39,13 @@ describe('Page', () => {
 
     expect(
       screen.getByRole('heading', {
-        name: /quick create from issue templates/i
+        name: /make repeat tickets one step/i
       })
     ).toBeTruthy()
     expect(
-      screen.getByText(/pick a template and ship a fully formed issue/i)
+      screen.getByText(
+        /save templates for repeat work so scope, fields, and defaults are ready before you start typing/i
+      )
     ).toBeTruthy()
   })
 })
