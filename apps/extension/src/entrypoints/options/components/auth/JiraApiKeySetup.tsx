@@ -128,23 +128,23 @@ export const JiraApiKeySetup: React.FC<JiraApiKeySetupProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>API token</FormLabel>
-                  <FormControl>
-                    <div className="flex gap-2">
+                  <div className="flex gap-2">
+                    <FormControl>
                       <Input
                         type={showKey ? 'text' : 'password'}
                         autoComplete="off"
                         placeholder="Paste your Atlassian API token"
                         {...field}
                       />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setShowKey((prev) => !prev)}
-                        className="min-w-[100px]">
-                        {showKey ? 'Hide' : 'Show'}
-                      </Button>
-                    </div>
-                  </FormControl>
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowKey((prev) => !prev)}
+                      className="min-w-[100px]">
+                      {showKey ? 'Hide' : 'Show'}
+                    </Button>
+                  </div>
                   <FormDescription className="text-xs">
                     Generate a token from your Atlassian account: Account
                     settings &gt; Security &gt; Create and manage API tokens.
