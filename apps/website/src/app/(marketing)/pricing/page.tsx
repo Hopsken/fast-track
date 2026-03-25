@@ -22,11 +22,10 @@ export default function PricingPage() {
             Pricing
           </p>
           <h1 className="text-balance font-serif text-5xl font-semibold tracking-tight text-stone-900 sm:text-6xl">
-            Get through Jira faster. Pay only when templates save you enough
-            time to matter.
+            Start getting through Jira faster for free.
           </h1>
           <p className="mt-6 max-w-xl text-pretty text-lg leading-relaxed text-stone-600">
-            Start free. Upgrade when templates become part of your daily work.
+            Upgrade when we save you enough time to matter.
           </p>
         </div>
 
