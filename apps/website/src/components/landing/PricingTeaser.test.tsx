@@ -31,7 +31,7 @@ describe('PricingTeaser', () => {
 
     expect(
       screen.getByRole('heading', {
-        name: 'Try the faster way to use Jira before you pay for it.'
+        name: 'Try the faster way to use Jira.'
       })
     ).not.toBeNull()
     expect(screen.getByText('Search Jira faster')).not.toBeNull()

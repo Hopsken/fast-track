@@ -29,7 +29,7 @@ export async function PricingTeaser() {
               Try the faster way to use Jira.
             </h2>
             <p className="mt-4 max-w-2xl text-pretty text-sm leading-6 text-stone-600 sm:text-[15px]">
-              Search faster, act faster, and try 3 templates free.
+              Search faster, act faster, and get 3 templates free.
             </p>
 
             <ul className="mt-8 space-y-3 border-t border-stone-200 pt-6 text-sm text-stone-700">
@@ -45,9 +45,7 @@ export async function PricingTeaser() {
             </ul>
 
             <p className="mt-6 max-w-xl text-sm leading-6 text-stone-600">
-              Pro is for people who create the same kinds of tickets often
-              enough that templates become a daily shortcut. The core product
-              stays free.
+              Pro is for repeat work. The core product stays free.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
