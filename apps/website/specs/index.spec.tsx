@@ -2,7 +2,7 @@ import React from 'react'
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
-import Page from '../src/app/page'
+import Page from '../src/app/(marketing)/page'
 
 vi.mock('next/image', () => ({
   __esModule: true,

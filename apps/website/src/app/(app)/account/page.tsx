@@ -3,9 +3,8 @@ import { Button } from '@internal/ui/components/button'
 import { CalendarDays } from 'lucide-react'
 import { redirect } from 'next/navigation'
 
-import { Header } from '../../components/landing/Header'
-import { isProFromSubscription } from '../../lib/billing/subscription'
-import { createSupabaseServerClientReadOnly } from '../../lib/supabase/server'
+import { isProFromSubscription } from '../../../lib/billing/subscription'
+import { createSupabaseServerClientReadOnly } from '../../../lib/supabase/server'
 
 type AccountSearchParams = Promise<{
   checkout?: string
@@ -181,19 +180,25 @@ export default async function AccountPage({
   const billing = getBillingSummary(subscriptionError ? null : subscription)
 
   return (
-    <main className="flex min-h-dvh flex-col">
-      <Header />
+    <section className="px-6 py-14 sm:py-16">
+      <div className="mx-auto max-w-3xl">
+        <div className="max-w-xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
+            Account
+          </p>
+          <h1 className="mt-4 font-serif text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">
+            {billing.planName}
+          </h1>
+          <p className="mt-4 text-sm leading-7 text-stone-600 sm:text-[15px]">
+            Billing and plan controls for your Fast Track account.
+          </p>
+        </div>
 
-      <div className="container mx-auto max-w-2xl px-6 py-14">
-        <section className="rounded-2xl border border-stone-200 bg-white p-6">
+        <section className="mt-10 rounded-2xl border border-stone-200 bg-white p-6 sm:p-8">
           <div className="flex flex-col gap-4">
-            <h2 className="font-serif text-4xl font-semibold tracking-tight text-stone-900">
-              {billing.planName}
-            </h2>
-
             {renderNextDateLine(billing)}
 
-            <div className="mt-2 border-t border-dashed border-stone-200">
+            <div className="border-t border-dashed border-stone-200 pt-2">
               {renderSubscriptionActions({
                 billing,
                 subscriptionError: Boolean(subscriptionError)
@@ -202,6 +207,6 @@ export default async function AccountPage({
           </div>
         </section>
       </div>
-    </main>
+    </section>
   )
 }

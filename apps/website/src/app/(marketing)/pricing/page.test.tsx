@@ -1,13 +1,9 @@
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
-import { CHROME_WEB_STORE_URL } from '../../lib/pricing'
+import { CHROME_WEB_STORE_URL } from '../../../lib/pricing'
 
 import PricingPage from './page'
-
-vi.mock('../../components/landing/Header', () => ({
-  Header: () => <div data-testid="header" />
-}))
 
 describe('PricingPage', () => {
   it('renders both Free and Pro plans with the expected CTAs', () => {
