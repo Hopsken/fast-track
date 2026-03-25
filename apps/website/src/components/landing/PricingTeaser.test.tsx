@@ -1,7 +1,11 @@
 import { render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { CHROME_WEB_STORE_URL } from '../../lib/pricing'
+import {
+  CHROME_WEB_STORE_URL,
+  freeFeatures,
+  proFeatures
+} from '../../lib/pricing'
 
 import { PricingTeaser } from './PricingTeaser'
 
@@ -29,19 +33,20 @@ describe('PricingTeaser', () => {
 
     render(await PricingTeaser())
 
-    expect(
-      screen.getByRole('heading', {
-        name: 'Try the faster way to use Jira.'
-      })
-    ).not.toBeNull()
-    expect(screen.getByText('Search Jira faster')).not.toBeNull()
+    expect(screen.getByRole('heading', { level: 2 })).not.toBeNull()
+    expect(screen.getByText('Free to start')).not.toBeNull()
+    expect(screen.getByText('Pro')).not.toBeNull()
+    for (const feature of freeFeatures) {
+      expect(screen.getByText(feature)).not.toBeNull()
+    }
+    for (const feature of proFeatures) {
+      expect(screen.getByText(feature)).not.toBeNull()
+    }
     expect(
       screen.getByRole('link', { name: 'Add to Chrome' }).getAttribute('href')
     ).toBe(CHROME_WEB_STORE_URL)
     expect(
-      screen
-        .getByRole('link', { name: 'Sign in to upgrade' })
-        .getAttribute('href')
+      screen.getByRole('link', { name: 'Upgrade' }).getAttribute('href')
     ).toBe('/login')
   })
 
@@ -56,9 +61,8 @@ describe('PricingTeaser', () => {
 
     const { container } = render(await PricingTeaser())
 
-    expect(
-      screen.getByRole('button', { name: 'Upgrade to Pro' })
-    ).not.toBeNull()
+    expect(screen.getByRole('button', { name: 'Upgrade' })).not.toBeNull()
+    expect(screen.queryByRole('link', { name: 'Upgrade' })).toBeNull()
     expect(
       container.querySelector('form[action="/api/billing/checkout"]')
     ).not.toBeNull()
