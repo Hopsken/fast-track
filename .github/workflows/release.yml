@@ -60,7 +60,6 @@ jobs:
     needs: validate
     outputs:
       version: ${{ steps.package_version.outputs.version }}
-      is_beta: ${{ steps.release_type.outputs.is_beta }}
 
     steps:
       - name: Checkout code
@@ -113,16 +112,8 @@ jobs:
 
       - name: Get package version
         id: package_version
-        run: echo "version=$(node -p \"require('./package.json').version\")" >> "$GITHUB_OUTPUT"
-
-      - name: Detect release type
-        id: release_type
         run: |
-          if [[ "$GITHUB_REF" == refs/tags/v*-beta.* ]]; then
-            echo "is_beta=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "is_beta=false" >> "$GITHUB_OUTPUT"
-          fi
+          echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
 
       - name: Create zip artifacts
         run: pnpm run zip
@@ -130,14 +121,14 @@ jobs:
       - name: Upload Chrome extension artifact
         uses: actions/upload-artifact@v4
         with:
-          name: fast-track-chrome-v${{ steps.package_version.outputs.version }}${{ steps.release_type.outputs.is_beta == 'true' && '-beta' || '' }}
+          name: fast-track-chrome-v${{ steps.package_version.outputs.version }}
           path: apps/extension/.output/extension-${{ steps.package_version.outputs.version }}-chrome.zip
           retention-days: 30
 
       - name: Upload Firefox extension artifact
         uses: actions/upload-artifact@v4
         with:
-          name: fast-track-firefox-v${{ steps.package_version.outputs.version }}${{ steps.release_type.outputs.is_beta == 'true' && '-beta' || '' }}
+          name: fast-track-firefox-v${{ steps.package_version.outputs.version }}
           path: apps/extension/.output/extension-${{ steps.package_version.outputs.version }}-firefox.zip
           retention-days: 30
 
@@ -157,21 +148,9 @@ jobs:
           path: ./artifacts/
           merge-multiple: true
 
-      - name: Browser Platform Publish (Stable)
-        if: needs.package.outputs.is_beta != 'true'
+      - name: Browser Platform Publish
         uses: PlasmoHQ/bpp@v3
         with:
           keys: ${{ secrets.SUBMIT_KEYS }}
           chrome-file: ./artifacts/extension-${{ needs.package.outputs.version }}-chrome.zip
           firefox-file: ./artifacts/extension-${{ needs.package.outputs.version }}-firefox.zip
-
-      - name: Create GitHub Release (Beta)
-        if: needs.package.outputs.is_beta == 'true'
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            ./artifacts/extension-${{ needs.package.outputs.version }}-chrome.zip
-            ./artifacts/extension-${{ needs.package.outputs.version }}-firefox.zip
-          prerelease: true
-          generate_release_notes: true
-          name: ${{ needs.package.outputs.version }} (Beta)
