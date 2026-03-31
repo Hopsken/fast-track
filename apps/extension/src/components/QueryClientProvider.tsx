@@ -1,14 +1,17 @@
 import { PropsWithChildren } from 'react'
 import { QueryNormalizerProvider } from '@normy/react-query'
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
-import { QueryClient } from '@tanstack/react-query'
+import { hashKey, QueryClient } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import {
+  PersistedClient,
   PersistQueryClientProvider,
   PersistQueryClientProviderProps
 } from '@tanstack/react-query-persist-client'
 import { browser } from 'wxt/browser'
 
+import type { IssueSuggestion } from '@/services/suggestion-service'
+import { queryKeys } from '@/utils/queryKeys'
 import { days, minutes } from '@/utils/time'
 
 const queryClient = new QueryClient({
@@ -20,7 +23,9 @@ const queryClient = new QueryClient({
   }
 })
 
-const asyncStoragePersister = createAsyncStoragePersister({
+const suggestionsHash = hashKey(queryKeys.tickets.suggestions)
+
+const rawPersister = createAsyncStoragePersister({
   storage: {
     getItem: async (key) => {
       const item = await browser.storage.local.get(key)
@@ -30,6 +35,26 @@ const asyncStoragePersister = createAsyncStoragePersister({
     removeItem: (key) => browser.storage.local.remove(key)
   }
 })
+
+// Wrap persistClient to strip empty suggestion caches before writing to storage.
+// Prevents an empty Jira response from surviving across popup open/close cycles.
+const asyncStoragePersister = {
+  ...rawPersister,
+  persistClient: (client: PersistedClient) => {
+    const filtered: PersistedClient = {
+      ...client,
+      clientState: {
+        ...client.clientState,
+        queries: client.clientState.queries.filter((query) => {
+          if (query.queryHash !== suggestionsHash) return true
+          const data = query.state.data as IssueSuggestion | undefined
+          return data != null && Object.keys(data.tickets).length > 0
+        })
+      }
+    }
+    return rawPersister.persistClient(filtered)
+  }
+}
 
 // eslint-disable-next-line turbo/no-undeclared-env-vars
 const queryClientBuster = `${import.meta.env.MODE}-${browser.runtime.getManifest().version}`

@@ -1,5 +1,6 @@
 import {
   keepPreviousData,
+  replaceEqualDeep,
   useQuery,
   useQueryClient
 } from '@tanstack/react-query'
@@ -49,10 +50,14 @@ export function useIssueSuggestions() {
         reconcileIssues.length ? { reconcileIssues } : undefined
       )
 
-      // Fallback for cold-start (no cache yet): if Jira still returns empty,
-      // throw so React Query retries. React Query keeps data = last successful
-      // value while retrying, so existing users never see a blank list.
+      // Guard against Jira's eventual-consistency lag returning empty arrays.
+      // If we have good cached data, return it — Jira just flaked.
+      // Only throw (to trigger retries) on cold-start when there's nothing to fall back on.
       if (!Object.keys(result.tickets).length) {
+        const cached = queryClient.getQueryData<IssueSuggestion>(queryKey)
+        if (cached && Object.keys(cached.tickets).length > 0) {
+          return cached
+        }
         throw new Error('Empty suggestions — retrying for Jira consistency')
       }
 
@@ -68,6 +73,22 @@ export function useIssueSuggestions() {
     retryDelay: 2000,
     // Show previous data during any loading phase (e.g. hydration gap on
     // extension open before persist layer restores the cache).
-    placeholderData: keepPreviousData
+    placeholderData: keepPreviousData,
+    // Secondary guard: refuse to replace non-empty cached data with an empty
+    // result. Catches edge cases where the queryFn guard is bypassed (e.g.
+    // query subscriptions, cache hydration). Preserves normy normalization for
+    // real updates by delegating to replaceEqualDeep in the normal path.
+    structuralSharing: (oldData: unknown, newData: unknown) => {
+      const prev = oldData as IssueSuggestion | undefined
+      const next = newData as IssueSuggestion
+      if (
+        prev &&
+        Object.keys(prev.tickets).length > 0 &&
+        !Object.keys(next.tickets).length
+      ) {
+        return prev
+      }
+      return replaceEqualDeep(oldData, newData)
+    }
   })
 }
