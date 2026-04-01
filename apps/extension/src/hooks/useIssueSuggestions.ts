@@ -1,5 +1,6 @@
 import {
   keepPreviousData,
+  replaceEqualDeep,
   useQuery,
   useQueryClient
 } from '@tanstack/react-query'
@@ -15,7 +16,7 @@ export function useIssueSuggestions() {
   const queryKey = queryKeys.tickets.suggestions
   const queryClient = useQueryClient()
 
-  return useQuery<IssueSuggestion>({
+  const query = useQuery<IssueSuggestion>({
     queryKey,
     queryFn: async () => {
       // Pass cached issue IDs as reconcileIssues so Jira's Enhanced Search
@@ -49,9 +50,11 @@ export function useIssueSuggestions() {
         reconcileIssues.length ? { reconcileIssues } : undefined
       )
 
-      // Fallback for cold-start (no cache yet): if Jira still returns empty,
-      // throw so React Query retries. React Query keeps data = last successful
-      // value while retrying, so existing users never see a blank list.
+      // Throw on empty so React Query retries — Jira's Enhanced Search index
+      // has eventual-consistency lag and recovers within seconds. Throwing
+      // keeps retries alive; returning here would mark the query fresh for
+      // staleTime (5 min) and suppress subsequent retry attempts, which breaks
+      // the mutation flow (invalidateQueries → refetch → empty → no retry).
       if (!Object.keys(result.tickets).length) {
         throw new Error('Empty suggestions — retrying for Jira consistency')
       }
@@ -68,6 +71,35 @@ export function useIssueSuggestions() {
     retryDelay: 2000,
     // Show previous data during any loading phase (e.g. hydration gap on
     // extension open before persist layer restores the cache).
-    placeholderData: keepPreviousData
+    placeholderData: keepPreviousData,
+    // Secondary guard: refuse to replace non-empty cached data with an empty
+    // result. Catches edge cases where the queryFn guard is bypassed (e.g.
+    // query subscriptions, cache hydration). Preserves normy normalization for
+    // real updates by delegating to replaceEqualDeep in the normal path.
+    structuralSharing: (oldData: unknown, newData: unknown) => {
+      const prev = oldData as IssueSuggestion | undefined
+      const next = newData as IssueSuggestion
+      if (
+        prev &&
+        Object.keys(prev.tickets).length > 0 &&
+        !Object.keys(next.tickets).length
+      ) {
+        return prev
+      }
+      return replaceEqualDeep(oldData, newData)
+    }
   })
+
+  // When retries exhaust, React Query sets status=error and clears result.data.
+  // The internal query cache still holds the last successful data — read it
+  // directly to show stale tickets rather than a blank list. Retries remain
+  // active and will recover as soon as Jira's index catches up.
+  const staleData = query.isError
+    ? queryClient.getQueryData<IssueSuggestion>(queryKey)
+    : undefined
+
+  return {
+    ...query,
+    data: query.data ?? staleData
+  }
 }
