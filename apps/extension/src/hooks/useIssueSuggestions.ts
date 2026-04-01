@@ -16,7 +16,7 @@ export function useIssueSuggestions() {
   const queryKey = queryKeys.tickets.suggestions
   const queryClient = useQueryClient()
 
-  return useQuery<IssueSuggestion>({
+  const query = useQuery<IssueSuggestion>({
     queryKey,
     queryFn: async () => {
       // Pass cached issue IDs as reconcileIssues so Jira's Enhanced Search
@@ -50,14 +50,12 @@ export function useIssueSuggestions() {
         reconcileIssues.length ? { reconcileIssues } : undefined
       )
 
-      // Guard against Jira's eventual-consistency lag returning empty arrays.
-      // If we have good cached data, return it — Jira just flaked.
-      // Only throw (to trigger retries) on cold-start when there's nothing to fall back on.
+      // Throw on empty so React Query retries — Jira's Enhanced Search index
+      // has eventual-consistency lag and recovers within seconds. Throwing
+      // keeps retries alive; returning here would mark the query fresh for
+      // staleTime (5 min) and suppress subsequent retry attempts, which breaks
+      // the mutation flow (invalidateQueries → refetch → empty → no retry).
       if (!Object.keys(result.tickets).length) {
-        const cached = queryClient.getQueryData<IssueSuggestion>(queryKey)
-        if (cached && Object.keys(cached.tickets).length > 0) {
-          return cached
-        }
         throw new Error('Empty suggestions — retrying for Jira consistency')
       }
 
@@ -91,4 +89,17 @@ export function useIssueSuggestions() {
       return replaceEqualDeep(oldData, newData)
     }
   })
+
+  // When retries exhaust, React Query sets status=error and clears result.data.
+  // The internal query cache still holds the last successful data — read it
+  // directly to show stale tickets rather than a blank list. Retries remain
+  // active and will recover as soon as Jira's index catches up.
+  const staleData = query.isError
+    ? queryClient.getQueryData<IssueSuggestion>(queryKey)
+    : undefined
+
+  return {
+    ...query,
+    data: query.data ?? staleData
+  }
 }

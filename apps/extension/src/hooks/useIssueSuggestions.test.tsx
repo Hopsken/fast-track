@@ -113,47 +113,58 @@ describe('useIssueSuggestions', () => {
     expect(result.current.error).toBeInstanceOf(Error)
   })
 
-  it('returns cached data when Jira returns empty but cache has good data', async () => {
-    // Pre-seed the cache with good data
-    queryClient.setQueryData(queryKeys.tickets.suggestions, goodResult)
-
+  it('serves stale cached data when Jira returns empty and retries exhaust', async () => {
+    // Step 1: establish a successful fetch with good data
     vi.mocked(getSuggestionService).mockReturnValue({
-      getIssueSuggestions: vi.fn().mockResolvedValue(emptyResult)
+      getIssueSuggestions: vi.fn().mockResolvedValue(goodResult)
     } as unknown as ReturnType<typeof getSuggestionService>)
 
     const { result } = renderHook(() => useIssueSuggestions(), {
       wrapper: makeWrapper(queryClient)
     })
 
-    // Should succeed and serve the cached good data — never show empty
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    // Step 2: Jira now returns empty — simulate post-mutation reconciliation lag
+    vi.mocked(getSuggestionService).mockReturnValue({
+      getIssueSuggestions: vi.fn().mockResolvedValue(emptyResult)
+    } as unknown as ReturnType<typeof getSuggestionService>)
+
+    vi.useFakeTimers()
+    queryClient.invalidateQueries({ queryKey: queryKeys.tickets.suggestions })
+
+    // Advance past all retryDelays so the query exhausts retries and enters error state
+    await vi.runAllTimersAsync()
+    vi.useRealTimers()
+
+    // Query is in error state — retries ran and Jira kept returning empty
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    // But data is surfaced from the internal cache (last successful fetch) — no blank list
     expect(result.current.data).toEqual(goodResult)
   })
 
-  it('does not replace good cached data with empty via structuralSharing', async () => {
-    // First fetch: good data
+  it('structuralSharing guard blocks empty data from overwriting good cache state', async () => {
+    // This guard catches edge cases where queryFn returns empty without throwing
+    // (e.g. cache hydration race, or a future code path). structuralSharing only
+    // runs with an active observer — so we mount the hook first.
     vi.mocked(getSuggestionService).mockReturnValue({
       getIssueSuggestions: vi.fn().mockResolvedValue(goodResult)
     } as unknown as ReturnType<typeof getSuggestionService>)
 
-    const { result, rerender } = renderHook(() => useIssueSuggestions(), {
+    const { result } = renderHook(() => useIssueSuggestions(), {
       wrapper: makeWrapper(queryClient)
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(result.current.data).toEqual(goodResult)
 
-    // Second fetch: Jira returns empty — structuralSharing should preserve good data
-    vi.mocked(getSuggestionService).mockReturnValue({
-      getIssueSuggestions: vi.fn().mockResolvedValue(emptyResult)
-    } as unknown as ReturnType<typeof getSuggestionService>)
+    // Force an empty result into the cache while the hook is observing —
+    // structuralSharing should reject it and preserve the good data
+    queryClient.setQueryData(queryKeys.tickets.suggestions, emptyResult)
 
-    // Invalidate to trigger a fresh fetch
-    queryClient.invalidateQueries({ queryKey: queryKeys.tickets.suggestions })
-    rerender()
-
-    // Data must not degrade to empty
-    await waitFor(() => expect(result.current.isFetching).toBe(false))
+    expect(queryClient.getQueryData(queryKeys.tickets.suggestions)).toEqual(
+      goodResult
+    )
     expect(result.current.data).toEqual(goodResult)
   })
 })
