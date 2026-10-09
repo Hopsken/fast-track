@@ -8,12 +8,9 @@ import { WxtStorageItem, storage } from '#imports'
 import type {
   AuthCredentials,
   AuthType,
-  ExtensionAuth,
   JiraApiKeyConfig,
   JiraOAuthConfig,
   JiraUserInfo,
-  LicenseInfo,
-  SubscriptionSnapshot,
   UserPreferences
 } from '~/types'
 import type {
@@ -164,12 +161,6 @@ async function migrateFromLegacyAuthKeys(): Promise<AuthCredentials | null> {
 }
 
 type StorageItems = {
-  License: LicenseInfo | null
-
-  // Website subscription entitlements (v2+)
-  ExtensionAuth: ExtensionAuth | null
-  SubscriptionSnapshot: SubscriptionSnapshot | null
-
   // Consolidated auth storage (v1+)
   AuthCredentials: AuthCredentials | null
 
@@ -205,9 +196,6 @@ export type StorageValue<T extends StorageKey> = StorageItems[T]
  * Default values for storage items
  */
 const STORAGE_DEFAULTS: Omit<StorageItems, 'AuthCredentials'> = {
-  License: null,
-  ExtensionAuth: null,
-  SubscriptionSnapshot: null,
   REACT_QUERY_OFFLINE_CACHE: null,
   DevMode: false,
   UserPreferences: {
@@ -228,13 +216,7 @@ const STORAGE_DEFAULTS: Omit<StorageItems, 'AuthCredentials'> = {
 // Enhanced storage key groups with logical organization
 export const STORAGE_GROUPS = {
   // Consolidated authentication
-  AUTH: ['AuthCredentials'],
-
-  // Website subscription entitlements
-  ENTITLEMENTS: ['ExtensionAuth', 'SubscriptionSnapshot'],
-
-  // License management (legacy)
-  LICENSE: ['License']
+  AUTH: ['AuthCredentials']
 } satisfies Record<string, (keyof StorageItems)[]>
 
 /**

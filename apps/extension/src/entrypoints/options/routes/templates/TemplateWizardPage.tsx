@@ -3,21 +3,14 @@ import { Link, useNavigate } from 'react-router-dom'
 
 import { LoadingCursor } from '@/components/LoadingCursor'
 import { useCurrentJiraHost } from '~/hooks/useCurrentJiraHost'
-import { useFreeLimitStatus } from '~/hooks/useFreeLimitStatus'
-import { useTemplates } from '~/hooks/useTemplates'
-import { BOOST_WEBSITE_BASE_URL } from '~/lib/api'
 
 import { TemplateWizard } from './template-wizard'
 
 export function TemplateWizardPage() {
   const navigate = useNavigate()
   const { data: currentHost, isLoading: hostLoading } = useCurrentJiraHost()
-  const { isLoading: templatesLoading } = useTemplates({
-    includeOtherHosts: true
-  })
-  const { isAtFreeLimit } = useFreeLimitStatus()
 
-  if (hostLoading || templatesLoading) {
+  if (hostLoading) {
     return <LoadingCursor />
   }
 
@@ -30,32 +23,6 @@ export function TemplateWizardPage() {
         <Button asChild variant="secondary">
           <Link to="/templates">Back to templates</Link>
         </Button>
-      </div>
-    )
-  }
-
-  if (isAtFreeLimit) {
-    return (
-      <div className="space-y-4">
-        <div className="border-border bg-muted text-foreground rounded-md border p-4 text-sm">
-          You've reached the Free plan limit (3 issue templates per Jira
-          workspace). Upgrade to Pro to create more.
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button asChild variant="secondary">
-            <Link to="/templates">Back to templates</Link>
-          </Button>
-
-          <Button asChild>
-            <a
-              href={`${BOOST_WEBSITE_BASE_URL}/pricing`}
-              target="_blank"
-              rel="noreferrer">
-              Upgrade
-            </a>
-          </Button>
-        </div>
       </div>
     )
   }

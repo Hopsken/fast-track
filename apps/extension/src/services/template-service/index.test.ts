@@ -43,9 +43,6 @@ describe('TemplateService', () => {
       apiKey: { email: 'a@a.com', apiKey: 'abc' }
     })
 
-    // Default: treat as Free unless a test sets Pro explicitly
-    await getStorageItem('SubscriptionSnapshot').setValue(null)
-
     // Clear persisted storage between tests (WXT fake storage is shared)
     const svc = new TemplateService()
     const templatesItem = (
@@ -194,39 +191,7 @@ describe('TemplateService', () => {
     expect(valid.map((t) => t.name)).toEqual(['Valid'])
   })
 
-  it('enforces Free plan limit (max 3 templates) per current Jira host', async () => {
-    const svc = new TemplateService()
-
-    const input = {
-      scope: {
-        baseUrlHost: 'a.atlassian.net',
-        project: {
-          id: '1',
-          key: 'PROJ',
-          name: 'Project'
-        },
-        issueType: {
-          id: '10000',
-          name: 'Bug',
-          iconUrl: '',
-          description: '',
-          subtask: false
-        }
-      },
-      fields: []
-    }
-
-    await svc.createTemplate({ name: 'T1', ...input })
-    await svc.createTemplate({ name: 'T2', ...input })
-    await svc.createTemplate({ name: 'T3', ...input })
-
-    await expect(svc.createTemplate({ name: 'T4', ...input })).rejects.toThrow(
-      /Free plan limit reached/i
-    )
-  })
-
-  it('allows creating templates on another host after reaching Free limit on current host', async () => {
-    const authItem = getStorageItem('AuthCredentials')
+  it('allows creating more than 3 templates per Jira host', async () => {
     const svc = new TemplateService()
 
     await svc.createTemplate(mkTemplateInput('a.atlassian.net', 'A1'))
@@ -235,61 +200,6 @@ describe('TemplateService', () => {
 
     await expect(
       svc.createTemplate(mkTemplateInput('a.atlassian.net', 'A4'))
-    ).rejects.toThrow(/Free plan limit reached/i)
-
-    await authItem.setValue({
-      type: 'apiKey',
-      host: 'https://b.atlassian.net',
-      userInfo: {
-        accountId: 'abc',
-        email: 'a@a.com',
-        name: 'A'
-      },
-      oauth: null,
-      apiKey: { email: 'a@a.com', apiKey: 'abc' }
-    })
-
-    await expect(
-      svc.createTemplate(mkTemplateInput('b.atlassian.net', 'B1'))
-    ).resolves.toBeDefined()
-  })
-
-  it('allows Pro to create more than 3 templates', async () => {
-    await getStorageItem('SubscriptionSnapshot').setValue({
-      status: 'active',
-      renewsAt: null,
-      endsAt: null,
-      updatedAt: '2026-01-01T00:00:00.000Z',
-      isPro: true,
-      lastCheckedAt: '2026-01-01T00:00:00.000Z'
-    })
-
-    const svc = new TemplateService()
-
-    const input = {
-      scope: {
-        baseUrlHost: 'a.atlassian.net',
-        project: {
-          id: '1',
-          key: 'PROJ',
-          name: 'Project'
-        },
-        issueType: {
-          id: '10000',
-          name: 'Bug',
-          iconUrl: '',
-          description: '',
-          subtask: false
-        }
-      },
-      fields: []
-    }
-
-    await svc.createTemplate({ name: 'T1', ...input })
-    await svc.createTemplate({ name: 'T2', ...input })
-    await svc.createTemplate({ name: 'T3', ...input })
-    await expect(
-      svc.createTemplate({ name: 'T4', ...input })
     ).resolves.toBeDefined()
   })
 
