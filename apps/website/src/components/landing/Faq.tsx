@@ -18,13 +18,12 @@ const faqItems = [
     question: 'How does Fast Track store my data?'
   },
   {
-    answer: 'No. Start without an account. Sign in only if you upgrade to Pro.',
-    question: 'Do I need an account to try it?'
+    answer: 'No. Install it and connect your Jira site. That is all.',
+    question: 'Do I need an account?'
   },
   {
-    answer:
-      'Free includes the core speed improvements and up to 3 issue templates per Jira site. Pro adds unlimited templates and future Pro features.',
-    question: "What's free, and what changes with Pro?"
+    answer: 'Yes. Every feature is free.',
+    question: 'Is Fast Track free?'
   },
   {
     answer: 'No, not for now.',

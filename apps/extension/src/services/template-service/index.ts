@@ -8,7 +8,6 @@ import { getStorageItem } from '~/lib/storage/schema'
 import { type IssueTemplate } from '~/types/template'
 
 const MAX_TEMPLATES = 50
-const FREE_TEMPLATES_LIMIT = 3
 
 /**
  * Template service implementation (proxy-service style)
@@ -18,7 +17,6 @@ const FREE_TEMPLATES_LIMIT = 3
  */
 export class TemplateService {
   private templatesItem = getStorageItem('IssueTemplates')
-  private snapshotItem = getStorageItem('SubscriptionSnapshot')
   private jiraApi = JiraAPI.getInstance()
 
   private async getAllValidTemplates(): Promise<IssueTemplate[]> {
@@ -68,23 +66,10 @@ export class TemplateService {
     input: Omit<IssueTemplate, 'id' | 'createdAt' | 'updatedAt'>
   ): Promise<IssueTemplate> {
     const templates = await this.getAllValidTemplates()
-    const host = await this.jiraApi.getHost()
-    const currentHost = normalizeBaseUrlHost(host ?? '')
 
     if (templates.length >= MAX_TEMPLATES) {
       throw new Error(
         `Maximum template limit reached (${MAX_TEMPLATES}). Please delete unused templates.`
-      )
-    }
-
-    const snapshot = await this.snapshotItem.getValue()
-    const isPro = snapshot?.isPro ?? false
-    const templatesInCurrentHost = templates.filter(
-      (template) => template.scope.baseUrlHost === currentHost
-    )
-    if (!isPro && templatesInCurrentHost.length >= FREE_TEMPLATES_LIMIT) {
-      throw new Error(
-        `Free plan limit reached (${FREE_TEMPLATES_LIMIT} issue templates). Upgrade to Pro to create more.`
       )
     }
 

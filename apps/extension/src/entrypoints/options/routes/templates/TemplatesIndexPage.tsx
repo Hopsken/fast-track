@@ -11,9 +11,7 @@ import { Link } from 'react-router-dom'
 
 import { LoadingCursor } from '@/components/LoadingCursor'
 import { useCurrentJiraHost } from '~/hooks/useCurrentJiraHost'
-import { useFreeLimitStatus } from '~/hooks/useFreeLimitStatus'
 import { useTemplates } from '~/hooks/useTemplates'
-import { BOOST_WEBSITE_BASE_URL } from '~/lib/api'
 import type { IssueTemplate } from '~/types/template'
 
 import { TemplateListItem } from './TemplateListItem'
@@ -37,8 +35,6 @@ export function TemplatesIndexPage() {
     includeOtherHosts: true
   })
 
-  const { isAtFreeLimit } = useFreeLimitStatus()
-
   const [showOthers, setShowOthers] = useState(false)
 
   const [matching, others] = useMemo(() => {
@@ -48,7 +44,7 @@ export function TemplatesIndexPage() {
     return partition(templates, (t) => t.scope.baseUrlHost === currentHost)
   }, [templates, currentHost])
 
-  const canCreate = Boolean(currentHost) && !isAtFreeLimit
+  const canCreate = Boolean(currentHost)
 
   return (
     <div className="space-y-6">
@@ -60,30 +56,10 @@ export function TemplatesIndexPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button asChild disabled={!canCreate}>
-            <Link to="/templates/new">New template</Link>
-          </Button>
-
-          {isAtFreeLimit ? (
-            <Button asChild variant="secondary">
-              <a
-                href={`${BOOST_WEBSITE_BASE_URL}/pricing`}
-                target="_blank"
-                rel="noreferrer">
-                Upgrade
-              </a>
-            </Button>
-          ) : null}
-        </div>
+        <Button asChild disabled={!canCreate}>
+          <Link to="/templates/new">New template</Link>
+        </Button>
       </div>
-
-      {isAtFreeLimit ? (
-        <div className="border-border bg-muted text-foreground rounded-md border p-4 text-sm">
-          You've reached the Free plan limit (3 issue templates). Upgrade to Pro
-          to create more.
-        </div>
-      ) : null}
 
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-3">

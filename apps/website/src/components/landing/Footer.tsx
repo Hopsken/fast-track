@@ -32,13 +32,6 @@ export function Footer() {
             <ul className="flex flex-wrap gap-x-6 gap-y-3 text-sm text-stone-600">
               <li>
                 <Link
-                  href="/pricing"
-                  className="transition-colors hover:text-stone-900">
-                  Pricing
-                </Link>
-              </li>
-              <li>
-                <Link
                   href="/privacy"
                   className="transition-colors hover:text-stone-900">
                   Privacy Policy

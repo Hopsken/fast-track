@@ -25,10 +25,6 @@ vi.mock('../src/components/landing/Hero', () => ({
   Hero: () => <div>Hero</div>
 }))
 
-vi.mock('../src/components/landing/PricingTeaser', () => ({
-  PricingTeaser: () => <div>Pricing</div>
-}))
-
 vi.mock('../src/components/landing/Footer', () => ({
   Footer: () => <div>Footer</div>
 }))

@@ -96,7 +96,7 @@ export default defineConfig({
     omnibox: {
       keyword: 'jj'
     },
-    permissions: ['storage', 'tabs', 'alarms'],
+    permissions: ['storage', 'tabs'],
     browser_specific_settings: {
       gecko: {
         id: '{df6c8f8c-469a-4c88-8b45-23ff390f1d7d}'
