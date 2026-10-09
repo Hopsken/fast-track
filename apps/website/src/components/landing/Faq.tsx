@@ -6,10 +6,28 @@ import {
 } from '@internal/ui/components/accordion'
 import Link from 'next/link'
 
+import { GITHUB_REPO_URL } from '../../lib/constants'
+
+const linkClassName =
+  'font-medium text-stone-700 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-stone-900'
+
 const faqItems = [
   {
-    answer:
-      'Yes. Search history and Jira responses stay on your device, and Fast Track does not sell or share that data.',
+    answer: (
+      <>
+        Yes. Search history and Jira responses stay on your device, and Fast
+        Track does not sell or share that data. The source code is{' '}
+        <a
+          href={GITHUB_REPO_URL}
+          target="_blank"
+          rel="noreferrer"
+          className={linkClassName}>
+          public on GitHub
+        </a>
+        , so you can see exactly how your data is handled, or ask your favorite
+        AI agent to check it for you.
+      </>
+    ),
     question: 'Is Fast Track safe to use with my Jira data?'
   },
   {
@@ -66,9 +84,7 @@ export function Faq() {
 
           <p className="mt-6 text-sm leading-6 text-stone-500">
             Need more? Read the{' '}
-            <Link
-              href="/privacy"
-              className="font-medium text-stone-700 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-stone-900">
+            <Link href="/privacy" className={linkClassName}>
               privacy policy
             </Link>
             .
