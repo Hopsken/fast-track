@@ -1,5 +1,7 @@
 import { FormField } from '~/components/ui/forms'
 
+const GITHUB_REPO_URL = 'https://github.com/Hopsken/fast-track'
+
 interface AboutSectionProps {
   version: string
 }
@@ -78,6 +80,19 @@ export function AboutSection({ version }: AboutSectionProps) {
             v{version}
           </span>
         </div>
+      </FormField>
+
+      <FormField
+        size="lg"
+        title="Source code"
+        description="Browse the code or report an issue on GitHub">
+        <a
+          href={GITHUB_REPO_URL}
+          target="_blank"
+          rel="noreferrer"
+          className="text-muted-foreground hover:text-foreground font-mono text-sm underline-offset-4 transition-colors hover:underline">
+          github.com/Hopsken/fast-track
+        </a>
       </FormField>
     </div>
   )
