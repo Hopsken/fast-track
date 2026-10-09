@@ -6,6 +6,7 @@
   "type": "module",
   "description": "Quick search and access to your Jira tickets with enhanced board experience. Search by ticket key, summary, assignee, or status with lightning-fast results.",
   "author": "hopsken",
+  "license": "FSL-1.1-MIT",
   "workspaces": [
     "apps/*",
     "packages/*"
