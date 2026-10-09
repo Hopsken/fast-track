@@ -213,12 +213,6 @@ const STORAGE_DEFAULTS: Omit<StorageItems, 'AuthCredentials'> = {
   TemplateConflicts: {}
 }
 
-// Enhanced storage key groups with logical organization
-export const STORAGE_GROUPS = {
-  // Consolidated authentication
-  AUTH: ['AuthCredentials']
-} satisfies Record<string, (keyof StorageItems)[]>
-
 /**
  * AuthCredentials storage item with init-based migration
  *
