@@ -13,14 +13,7 @@
     "website#build": {
       "env": [
         "NEXT_PUBLIC_API_URL",
-        "NEXT_PUBLIC_SUPABASE_URL",
-        "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
         "NEXT_PUBLIC_WEBSITE_URL",
-        "SUPABASE_SECRET_KEY",
-        "LEMONSQUEEZY_WEBHOOK_SECRET",
-        "LEMONSQUEEZY_API_KEY",
-        "LEMONSQUEEZY_PRO_CHECKOUT_URL",
-        "EXTENSION_JWT_SECRET",
         "JIRA_CLIENT_ID",
         "JIRA_CLIENT_SECRET"
       ],

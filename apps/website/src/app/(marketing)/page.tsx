@@ -3,7 +3,6 @@ import { Metadata } from 'next'
 import { Faq } from '../../components/landing/Faq'
 import { Features } from '../../components/landing/Features'
 import { Hero } from '../../components/landing/Hero'
-import { PricingTeaser } from '../../components/landing/PricingTeaser'
 
 export const metadata: Metadata = {
   description:
@@ -16,7 +15,6 @@ export default function Index() {
     <>
       <Hero />
       <Features />
-      <PricingTeaser />
       <Faq />
     </>
   )

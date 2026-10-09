@@ -2,7 +2,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import logoUrl from '../../assets/logo.png'
-import { HeaderAuth } from '../auth/HeaderAuth'
 
 export function Header() {
   return (
@@ -23,15 +22,6 @@ export function Header() {
             </span>
           </Link>
         </div>
-
-        <nav className="flex items-center gap-6">
-          <Link
-            href="/pricing"
-            className="text-sm font-medium text-stone-600 transition-colors hover:text-stone-900">
-            Pricing
-          </Link>
-          <HeaderAuth />
-        </nav>
       </div>
     </header>
   )

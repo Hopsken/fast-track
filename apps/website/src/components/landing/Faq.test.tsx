@@ -25,12 +25,12 @@ describe('Faq', () => {
     ).not.toBeNull()
     expect(
       screen.getByRole('button', {
-        name: 'Do I need an account to try it?'
+        name: 'Do I need an account?'
       })
     ).not.toBeNull()
     expect(
       screen.getByRole('button', {
-        name: "What's free, and what changes with Pro?"
+        name: 'Is Fast Track free?'
       })
     ).not.toBeNull()
     expect(

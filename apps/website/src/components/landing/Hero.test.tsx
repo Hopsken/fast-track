@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { CHROME_WEB_STORE_URL } from '../../lib/pricing'
+import { CHROME_WEB_STORE_URL } from '../../lib/constants'
 
 import { Hero } from './Hero'
 

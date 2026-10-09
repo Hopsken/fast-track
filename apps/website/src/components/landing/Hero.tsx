@@ -5,7 +5,7 @@ import { motion } from 'motion/react'
 import Image from 'next/image'
 
 import heroImage from '../../assets/hero.png'
-import { CHROME_WEB_STORE_URL } from '../../lib/pricing'
+import { CHROME_WEB_STORE_URL } from '../../lib/constants'
 
 export function Hero() {
   return (
