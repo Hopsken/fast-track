@@ -22,7 +22,7 @@ const faqItems = [
     question: 'Do I need an account?'
   },
   {
-    answer: 'Yes. Every feature is free, including issue templates.',
+    answer: 'Yes. Every feature is free.',
     question: 'Is Fast Track free?'
   },
   {
