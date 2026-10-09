@@ -1,6 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
+import { GITHUB_REPO_URL } from '../../lib/constants'
+
 import { Faq } from './Faq'
 
 describe('Faq', () => {
@@ -51,6 +53,12 @@ describe('Faq', () => {
     expect(
       screen.getByText(/Search history and Jira responses stay on your device/i)
     ).not.toBeNull()
+    expect(
+      screen
+        .getByRole('link', { name: 'public on GitHub' })
+        .getAttribute('href')
+    ).toBe(GITHUB_REPO_URL)
+    expect(screen.getByText(/your favorite AI agent/i)).not.toBeNull()
     expect(
       screen.getByRole('link', { name: 'privacy policy' }).getAttribute('href')
     ).toBe('/privacy')

@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import logoUrl from '../../assets/logo.png'
+import { GITHUB_REPO_URL } from '../../lib/constants'
 
 export function Footer() {
   return (
@@ -36,6 +37,15 @@ export function Footer() {
                   className="transition-colors hover:text-stone-900">
                   Privacy Policy
                 </Link>
+              </li>
+              <li>
+                <a
+                  href={GITHUB_REPO_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="transition-colors hover:text-stone-900">
+                  GitHub
+                </a>
               </li>
             </ul>
           </nav>
