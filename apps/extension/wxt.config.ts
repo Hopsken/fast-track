@@ -106,7 +106,19 @@ export default defineConfig({
     permissions: ['storage', 'tabs'],
     browser_specific_settings: {
       gecko: {
-        id: '{df6c8f8c-469a-4c88-8b45-23ff390f1d7d}'
+        id: '{df6c8f8c-469a-4c88-8b45-23ff390f1d7d}',
+        // Built-in data consent needs Firefox 140+
+        strict_min_version: '140.0',
+        // https://extensionworkshop.com/documentation/develop/firefox-builtin-data-consent/
+        data_collection_permissions: {
+          // OAuth refresh tokens go through fast-track.work/api/auth/jira/refresh
+          required: ['authenticationInfo'],
+          // Anonymous Umami analytics, see lib/analytics/data-collection.ts
+          optional: ['technicalAndInteraction']
+        }
+      },
+      gecko_android: {
+        strict_min_version: '142.0'
       }
     },
     action: {

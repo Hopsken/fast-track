@@ -4,6 +4,7 @@ import { Input } from '@internal/ui/components/input'
 import { JiraIssue } from '@/types'
 import { generateBranchName } from '@/utils/jira/issues'
 import { useStorage } from '~/hooks'
+import { useAnalyticsSetting } from '~/hooks/useAnalyticsSetting'
 import { getAuthService } from '~/services'
 import { useUserPreferences } from '~/stores/useUserPreferences'
 
@@ -18,8 +19,7 @@ export function GeneralTab() {
   const jiraHost = useMemo(() => credentials?.host ?? '', [credentials])
 
   const [preferences, setPreference] = useUserPreferences()
-  const [analyticsEnabled, setAnalyticsEnabled] =
-    useStorage('analytics-enabled')
+  const [analyticsEnabled, setAnalyticsEnabled] = useAnalyticsSetting()
 
   const handleDisconnect = useCallback(() => {
     const confirmed = window.confirm(
@@ -28,13 +28,6 @@ export function GeneralTab() {
     if (!confirmed) return
     getAuthService().disconnect()
   }, [])
-
-  const handleAnalyticsChange = useCallback(
-    (checked: boolean) => {
-      setAnalyticsEnabled(checked)
-    },
-    [setAnalyticsEnabled]
-  )
 
   return (
     <div className="space-y-8">
@@ -125,7 +118,7 @@ export function GeneralTab() {
             title="Anonymous analytics"
             description="Help improve Fast Track by sharing anonymous usage data. We never collect issue content."
             checked={analyticsEnabled}
-            onCheckedChange={handleAnalyticsChange}
+            onCheckedChange={setAnalyticsEnabled}
             footer={
               <p className="text-muted-foreground mt-3 text-xs">
                 You can turn this off anytime.

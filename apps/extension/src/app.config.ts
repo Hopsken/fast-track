@@ -1,13 +1,14 @@
 import { umami } from '@wxt-dev/analytics/providers/umami'
 import { defineAppConfig } from 'wxt/utils/define-app-config'
 
+import { withAnalyticsConsent } from './lib/analytics/data-collection'
 import { getStorageItem } from './lib/storage'
 
 export default defineAppConfig({
   analytics: {
     debug: true,
     userId: getStorageItem('DeviceId'),
-    enabled: getStorageItem('analytics-enabled'),
+    enabled: withAnalyticsConsent(getStorageItem('analytics-enabled')),
     providers: [
       umami({
         apiUrl: 'https://cloud.umami.is/api',
