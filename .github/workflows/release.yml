@@ -8,6 +8,11 @@ on:
         required: false
         default: true
         type: boolean
+      dry_run:
+        description: Only validate store credentials, skip upload and publish
+        required: false
+        default: false
+        type: boolean
   push:
     tags:
       - 'v*'
@@ -141,6 +146,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Download artifacts
         uses: actions/download-artifact@v5
         with:
@@ -148,9 +167,22 @@ jobs:
           path: ./artifacts/
           merge-multiple: true
 
-      - name: Browser Platform Publish
-        uses: PlasmoHQ/bpp@v3
-        with:
-          keys: ${{ secrets.SUBMIT_KEYS }}
-          chrome-file: ./artifacts/extension-${{ needs.package.outputs.version }}-chrome.zip
-          firefox-file: ./artifacts/extension-${{ needs.package.outputs.version }}-firefox.zip
+      - name: Submit to Chrome Web Store and Firefox Add-ons
+        working-directory: apps/extension
+        env:
+          DRY_RUN: ${{ github.event.inputs.dry_run == 'true' }}
+          CHROME_API_VERSION: v2
+          CHROME_EXTENSION_ID: cmlkcfgkffidbnpbjmlgplokcacfemhp
+          CHROME_PUBLISHER_ID: ${{ vars.CHROME_PUBLISHER_ID }}
+          # Raw JSON key file downloaded for the CWS service account
+          CHROME_SERVICE_ACCOUNT_JSON: ${{ secrets.CHROME_SERVICE_ACCOUNT_JSON }}
+          FIREFOX_EXTENSION_ID: '{df6c8f8c-469a-4c88-8b45-23ff390f1d7d}'
+          FIREFOX_JWT_ISSUER: ${{ secrets.FIREFOX_JWT_ISSUER }}
+          FIREFOX_JWT_SECRET: ${{ secrets.FIREFOX_JWT_SECRET }}
+          VERSION: ${{ needs.package.outputs.version }}
+        run: |
+          export CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL="$(jq -r .client_email <<< "$CHROME_SERVICE_ACCOUNT_JSON")"
+          export CHROME_SERVICE_ACCOUNT_PRIVATE_KEY="$(jq -r .private_key <<< "$CHROME_SERVICE_ACCOUNT_JSON")"
+          pnpm exec wxt submit \
+            --chrome-zip "$GITHUB_WORKSPACE/artifacts/extension-$VERSION-chrome.zip" \
+            --firefox-zip "$GITHUB_WORKSPACE/artifacts/extension-$VERSION-firefox.zip"

@@ -41,6 +41,13 @@ export default defineConfig({
   ],
   imports: false,
 
+  // Version comes from the root package.json (see `fullVersion`), not this
+  // package's, so keep the pre-0.21 template instead of `{{packageVersion}}`.
+  zip: {
+    artifactTemplate: '{{name}}-{{versionName}}-{{browser}}.zip',
+    sourcesTemplate: '{{name}}-{{versionName}}-sources.zip'
+  },
+
   vite: () => ({
     plugins: [
       tailwindcss(),

@@ -1,8 +1,7 @@
 import { createAnalytics } from '@wxt-dev/analytics'
-import { useAppConfig } from 'wxt/utils/app-config'
+import { getAppConfig } from 'wxt/utils/app-config'
 
-// eslint-disable-next-line react-hooks/rules-of-hooks
-const analytics = createAnalytics(useAppConfig().analytics)
+const analytics = createAnalytics(getAppConfig().analytics)
 
 export const trackEvent = (
   name: string,
