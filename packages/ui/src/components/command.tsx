@@ -193,4 +193,4 @@ export {
   CommandSeparator
 }
 
-export { useCommandState } from 'cmdk'
+export { defaultFilter, useCommandState } from 'cmdk'

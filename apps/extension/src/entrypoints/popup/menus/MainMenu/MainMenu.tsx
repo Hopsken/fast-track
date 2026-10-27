@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useCommandState } from '@internal/ui/components/command'
+import { defaultFilter, useCommandState } from '@internal/ui/components/command'
 
 import { ActionPanel, ActionPanelSlot } from '@/common/commands'
 import { useRouteState } from '@/common/commands/navigation'
@@ -40,6 +40,7 @@ export function MainMenu() {
         onSearchChange={setSearch}
         autoSelectSearchOnMount
         shouldFilter={shouldFilter}
+        filter={filterIgnoringTemplatePrefix}
         searchPlaceholder="Search or / for commands">
         {renderMenu()}
 
@@ -51,6 +52,15 @@ export function MainMenu() {
       </ActionPanel>
     </HotkeysScopeProvider>
   )
+}
+
+// No item contains "+", so score only the text after it. A bare "+" lists every template.
+function filterIgnoringTemplatePrefix(
+  value: string,
+  search: string,
+  keywords?: string[]
+) {
+  return defaultFilter(value, search.replace(/^\+\s*/, ''), keywords)
 }
 
 function HintsSlot() {

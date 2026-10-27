@@ -1,3 +1,5 @@
+import type { BrowserContext } from '@playwright/test'
+
 import { expect, test } from '../fixtures'
 
 const MOCK_AUTH_CREDENTIALS = {
@@ -15,11 +17,7 @@ const MOCK_AUTH_CREDENTIALS = {
   }
 }
 
-test.describe('Popup - Create issue hub', () => {
-  test('edits summary in hub without filtering fields; ESC cancels; drill-in description and Done returns to hub', async ({
-    context,
-    extensionId
-  }) => {
+async function seedSmokeTemplate(context: BrowserContext) {
     const serviceWorker =
       context.serviceWorkers()[0] ??
       (await context.waitForEvent('serviceworker', { timeout: 30_000 }))
@@ -72,6 +70,14 @@ test.describe('Popup - Create issue hub', () => {
         ]
       }
     )
+}
+
+test.describe('Popup - Create issue hub', () => {
+  test('edits summary in hub without filtering fields; ESC cancels; drill-in description and Done returns to hub', async ({
+    context,
+    extensionId
+  }) => {
+    await seedSmokeTemplate(context)
 
     const popup = await context.newPage()
     await popup.goto(`chrome-extension://${extensionId}/popup.html`)
@@ -151,5 +157,32 @@ test.describe('Popup - Create issue hub', () => {
         name: 'Wizard progress'
       })
     ).toBeVisible()
+  })
+
+  test('+ prefix lists templates and filters them by the text after +', async ({
+    context,
+    extensionId
+  }) => {
+    await seedSmokeTemplate(context)
+
+    const popup = await context.newPage()
+    await popup.goto(`chrome-extension://${extensionId}/popup.html`)
+
+    const input = popup.locator('[data-slot="command-input"]')
+    await expect(input).toBeVisible({ timeout: 15_000 })
+
+    await input.fill('+')
+    await expect(popup.getByRole('option', { name: 'New issue' })).toBeVisible()
+    await expect(
+      popup.getByRole('option', { name: /Smoke Template/ })
+    ).toBeVisible()
+
+    await input.fill('+ smo')
+    await expect(
+      popup.getByRole('option', { name: /Smoke Template/ })
+    ).toBeVisible()
+
+    await input.fill('+ zzz')
+    await expect(popup.getByText('No templates')).toBeVisible()
   })
 })
