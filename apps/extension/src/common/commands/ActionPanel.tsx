@@ -1,4 +1,4 @@
-import { forwardRef, ReactNode } from 'react'
+import { ComponentProps, forwardRef, ReactNode } from 'react'
 import { Command } from '@internal/ui/components/command'
 
 import { ActionSearch } from './ActionSearch'
@@ -24,6 +24,7 @@ export interface CommandPanelProps {
   autoSelectSearchOnMount?: boolean
 
   shouldFilter?: boolean
+  filter?: ComponentProps<typeof Command>['filter']
 
   children?: ReactNode
 }
@@ -43,6 +44,7 @@ export const ActionPanel = forwardRef<HTMLDivElement, CommandPanelProps>(
       onSearchConfirm,
       autoSelectSearchOnMount,
       shouldFilter,
+      filter,
       children
     } = props
 
@@ -52,7 +54,8 @@ export const ActionPanel = forwardRef<HTMLDivElement, CommandPanelProps>(
         defaultValue={defaultValue}
         value={value}
         onValueChange={onValueChange}
-        shouldFilter={shouldFilter}>
+        shouldFilter={shouldFilter}
+        filter={filter}>
         <ActionSearch
           defaultSearch={defaultSearch}
           search={search}

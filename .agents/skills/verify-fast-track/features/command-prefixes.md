@@ -20,13 +20,14 @@ Preconditions:
 
 - **Commands.** `$S fill "getByRole('combobox', { name: 'Search or / for commands' })" "/"`. Options `Create Issue ...`, `Settings`, `Feedback` appear. Capture `$FT evidence <session> prefix-commands`.
 - **Settings command.** Select `getByRole('option', { name: 'Settings' })`. A tab with `options.html` opens (`$S tab-list`).
-- **Templates.** Fill `+`. With a template saved (see [Issue templates](./issue-templates.md)), its name must appear as an option. **Known bug (2026-10-27, v2.8.1): it does not.** The list shows `No templates` and hides `New issue` too. Report this step as failing until the bug is fixed.
+- **Templates.** Fill `+`. With a template saved (see [Issue templates](./issue-templates.md)), option `New issue` and group `Issue Templates` with the template name appear. Fill `+ <part of template name>`. Only the matching templates stay. Capture `$FT evidence <session> prefix-templates`.
 - **Templates via `c`/`C`.** Fill `C <part of template name>`. Group `Issue Templates` lists the template, and option `New issue` is present.
 - **Live search (real mode).** Fill a word from a known issue summary. An option with that issue key appears. Capture `$FT evidence <session> search-live`.
 
 ## Gotchas
 
 - Mock mode has no mock for free-text JQL, so a search shows only `Show more results`. Report live search as a mock gap.
-- The `+` bug: `MainMenu` passes the whole query, including the prefix, to cmdk's filter. A bare `+` matches no item, so the empty placeholder `No templates` shows even when templates exist. `c` works only because every template item has the keyword `create`. `No templates` is not proof that storage is empty: check `IssueTemplates`.
+- `MainMenu` removes a leading `+` before cmdk scores the items, because no item contains `+`. `c` and `/` are not removed: `c` matches the keyword `create`, and each `/` command value starts with `/`. In v2.8.1 and earlier, a bare `+` showed `No templates` even when templates existed. `No templates` is not proof that storage is empty: check `IssueTemplates`.
+- cmdk matching is fuzzy and includes the random template id. A query such as `+ zzz` can still match a template whose id contains `z`. To prove a no-match case, use letters that are not in the name or the id, for example `+ qqqq`.
 - `c` and `C` are also template prefixes, so a search query starting with `c` opens the templates list, not search.
 - Search is debounced. Poll the snapshot for the result instead of a fixed sleep.
