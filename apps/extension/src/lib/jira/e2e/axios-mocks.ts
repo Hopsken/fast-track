@@ -96,6 +96,9 @@ export function createJiraE2EMockAdapter(): AxiosAdapter {
     }
 
     const host = url.origin
+    // OAuth clients call https://api.atlassian.com/ex/jira/<cloudId>/rest/...;
+    // drop the gateway prefix so both auth types share the routes below.
+    url.pathname = url.pathname.replace(/^\/ex\/jira\/[^/]+/, '')
 
     // --- Search ---
     if (method === 'post' && url.pathname.startsWith('/rest/api/3/search')) {

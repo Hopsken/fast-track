@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# Run and probe the fast-track.work website (apps/website) for verification.
+# Run `ft-verify-website help` for usage.
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && git rev-parse --show-toplevel)"
+EVIDENCE_ROOT="${FT_VERIFY_EVIDENCE:-$REPO_ROOT/.amp/in/artifacts/verify-fast-track-website}"
+# The extension's dev build and the Atlassian callback URL both expect 4000.
+WEBSITE_PORT=4000
+
+usage() {
+  cat <<'EOF'
+Usage: ft-verify-website <command>
+
+  run       Run `next dev` on port 4000 in the foreground. Use it as an orb service command:
+              amp orb service start ft-verify-website --command "$PWD/.agents/skills/verify-fast-track-website/scripts/ft-verify-website run"
+  doctor    Read-only. Exit code 0 means port 4000 serves this website.
+  probe     Call the OAuth relay routes and save relay.txt as evidence.
+
+Environment:
+  FT_VERIFY_RUN   Evidence sub-directory name (default: today's date).
+EOF
+}
+
+die() { echo "ft-verify-website: $*" >&2; exit 1; }
+evidence_dir() { echo "$EVIDENCE_ROOT/${FT_VERIFY_RUN:-$(date +%Y-%m-%d)}"; }
+
+cmd_run() {
+  # Dummy OAuth values let the relay build its Atlassian redirect. Real values
+  # from the environment win. Never print them.
+  export NEXT_PUBLIC_WEBSITE_URL="${NEXT_PUBLIC_WEBSITE_URL:-http://localhost:$WEBSITE_PORT}"
+  export JIRA_CLIENT_ID="${JIRA_CLIENT_ID:-verify-dummy-client-id}"
+  export JIRA_CLIENT_SECRET="${JIRA_CLIENT_SECRET:-verify-dummy-client-secret}"
+  cd "$REPO_ROOT/apps/website"
+  exec pnpm exec next dev -p "$WEBSITE_PORT"
+}
+
+cmd_doctor() {
+  local body
+  body="$(curl -sf "http://localhost:$WEBSITE_PORT/api/hello")" || die "nothing answers on :$WEBSITE_PORT/api/hello"
+  [[ "$body" == "Hello, from API!" ]] || die "port $WEBSITE_PORT answers, but not with the Fast Track website: $body"
+  echo "website on :$WEBSITE_PORT OK"
+}
+
+cmd_probe() {
+  cmd_doctor >/dev/null
+  local out base="http://localhost:$WEBSITE_PORT"
+  out="$(evidence_dir)"
+  mkdir -p "$out"
+  {
+    echo "\$ GET /"; curl -s -o /dev/null -w "status=%{http_code}\n" "$base/"
+    echo "\$ GET /privacy"; curl -s -o /dev/null -w "status=%{http_code}\n" "$base/privacy"
+    echo "\$ GET /api/auth/jira (no extension_id)"; curl -s -w " status=%{http_code}\n" "$base/api/auth/jira"
+    echo "\$ GET /api/auth/jira?extension_id=verify-ext"
+    curl -s -D - -o /dev/null "$base/api/auth/jira?extension_id=verify-ext" \
+      | grep -iE '^HTTP|^location' | sed -E 's/(client_id=)[^&]*/\1<redacted>/' | cut -c1-160
+    echo "\$ POST /api/auth/jira/refresh {}"
+    curl -s -w " status=%{http_code}\n" -X POST -H 'content-type: application/json' -d '{}' "$base/api/auth/jira/refresh"
+  } | tee "$out/relay.txt"
+  echo "saved $out/relay.txt"
+}
+
+case "${1:-help}" in
+  run) cmd_run ;;
+  doctor) cmd_doctor ;;
+  probe) cmd_probe ;;
+  help | -h | --help) usage ;;
+  *) usage; exit 1 ;;
+esac
