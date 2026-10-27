@@ -1,15 +1,15 @@
 # Fast Track verification map
 
-This directory is the maintained source for verifying user-facing behavior of Fast Track. Read this index before driving the app, then use the matching feature file as the recipe.
+This directory is the maintained source for verifying user-facing behavior of the Fast Track extension. The website has its own map in `verify-fast-track-website`. Read this index before driving the app, then use the matching feature file as the recipe.
 
 ## Baseline preconditions
 
 - `FT=.agents/skills/verify-fast-track/scripts/ft-verify`, run from the repo root.
-- `$FT launch <session> mock` (or `real` with `JIRA_VERIFY_*` set) succeeded and printed `extension_id=...`.
+- `$FT launch <session> mock` (or `real` with `JIRA_VERIFY_*` set, or `mock-dev` for the OAuth handoff) succeeded and printed `extension_id=...`.
 - `$FT doctor <session>` prints `doctor: OK` and `version` equals `repo_version`.
 - Signed-in features also need `$FT sign-in <session>`, which must print `Connected to <host>`.
-- Website features need the `ft-verify-website` service and `$FT website-doctor` OK.
-- Never drive a session or website instance that this run did not start.
+- The OAuth handoff also needs the website from the `verify-fast-track-website` skill.
+- Never drive a session that this run did not start.
 
 ## Driving conventions
 
@@ -32,9 +32,8 @@ Each feature file starts with an H1 title and one paragraph describing the user-
 
 ## Features
 
-- [Connect Jira](./connect-jira.md) covers the options-page API key and OAuth sign-in, the connected card, and disconnect.
+- [Connect Jira](./connect-jira.md) covers API key sign-in, OAuth start, the OAuth token handoff, the connected card, and disconnect.
 - [Popup suggestions](./popup-suggestions.md) covers the unauthenticated notice and the grouped suggested issues.
 - [Issue actions](./issue-actions.md) covers the issue menu, copy actions, and status/assign/priority sub-menus.
 - [Command prefixes and search](./command-prefixes.md) covers `/` commands, `+` templates, and live search.
 - [Issue templates](./issue-templates.md) covers the options Templates tab and the template wizard.
-- [Website and OAuth relay](./website-oauth-relay.md) covers the landing page and the relay routes.

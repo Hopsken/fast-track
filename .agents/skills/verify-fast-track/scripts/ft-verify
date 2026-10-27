@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Drive the real Fast Track extension and website for verification.
+# Drive the real Fast Track browser extension for verification.
 # Run `ft-verify help` for usage. Every browser command goes through
 # playwright-cli (the agent CLI), not the @playwright/test package that the
 # repo's e2e suite uses.
@@ -10,8 +10,6 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && git rev-parse --show-topleve
 EXTENSION_APP="$REPO_ROOT/apps/extension"
 STATE_ROOT="${FT_VERIFY_ROOT:-/tmp/ft-verify}"
 EVIDENCE_ROOT="${FT_VERIFY_EVIDENCE:-$REPO_ROOT/.amp/in/artifacts/verify-fast-track}"
-WEBSITE_PORT="${FT_WEBSITE_PORT:-4000}"
-WEBSITE_SERVICE="ft-verify-website"
 
 # Same values as tests/e2e/fixtures/extension.ts; the mock /myself returns "Test User".
 MOCK_HOST="https://test.atlassian.net"
@@ -23,18 +21,15 @@ usage() {
 Usage: ft-verify <command> [args]
 
 Extension (one isolated browser per session name):
-  launch <session> [mock|real]   Build, copy, and open the extension. Default mode: mock.
+  launch <session> [mode]        Build, copy, and open the extension. Modes: mock (default), real, mock-dev.
   sign-in <session>              Connect Jira through the options page "API key" form.
-  arm-mocks <session>            Re-enable the mock Jira adapter in the service worker (mock mode).
+  arm-mocks <session>            Re-enable the mock Jira adapter in the service worker (mock modes).
   open <session> popup|options   Open popup.html or options.html in the current tab.
   doctor <session>               Read-only health check. Exit code 0 means "safe to drive".
   evidence <session> <name>      Save <name>.png and <name>.aria.md under the run's evidence dir.
+  oauth-handoff <session> <case> Send a fake OAuth token from the local website's callback page (mock-dev).
+                                 Cases: valid, bad-schema, wrong-origin, mocks-off. Saves oauth-handoff-<case>.json.
   cleanup <session>              Close the browser this session started and delete its scratch dir.
-
-Website (fast-track.work: landing page + Jira OAuth relay):
-  website-run                    Run `next dev` in the foreground (use it as a service command).
-  website-doctor                 Check that the website on $FT_WEBSITE_PORT answers.
-  website-probe                  Call the OAuth relay routes and save relay.txt as evidence.
 
 Environment:
   FT_VERIFY_RUN        Evidence sub-directory name (default: today's date).
@@ -66,19 +61,25 @@ extension_id_for_path() {
   printf %s "$1" | sha256sum | cut -c1-32 | tr 0-9a-f a-p
 }
 
+uses_mocks() { [[ "$1" == mock || "$1" == mock-dev ]]; }
+
+# Prints the build output directory for the mode.
 build_extension() {
   local mode="$1"
-  if [[ "$mode" == mock ]]; then
-    (cd "$EXTENSION_APP" && VITE_E2E_MOCKS=1 pnpm exec turbo run build --filter=extension... --output-logs=errors-only)
-  else
-    (cd "$EXTENSION_APP" && env -u VITE_E2E_MOCKS pnpm exec turbo run build --filter=extension... --output-logs=errors-only)
-  fi
+  case "$mode" in
+    mock) (cd "$EXTENSION_APP" && VITE_E2E_MOCKS=1 pnpm exec turbo run build --filter=extension... --output-logs=errors-only) >&2 ;;
+    real) (cd "$EXTENSION_APP" && env -u VITE_E2E_MOCKS pnpm exec turbo run build --filter=extension... --output-logs=errors-only) >&2 ;;
+    # A development build: the OAuth content script also runs on http://localhost
+    # and the extension talks to the local website. No turbo task builds it.
+    mock-dev) (cd "$EXTENSION_APP" && VITE_E2E_MOCKS=1 pnpm exec wxt build -b chromium --mode development >/dev/null) >&2 ;;
+  esac
+  if [[ "$mode" == mock-dev ]]; then echo "$EXTENSION_APP/.output/chromium-mv3-dev"; else echo "$EXTENSION_APP/.output/chromium-mv3"; fi
 }
 
 cmd_launch() {
   local session="${1:-}" mode="${2:-mock}"
   [[ -n "$session" ]] || die "missing <session>"
-  [[ "$mode" == mock || "$mode" == real ]] || die "mode must be mock or real"
+  [[ "$mode" == mock || "$mode" == real || "$mode" == mock-dev ]] || die "mode must be mock, real, or mock-dev"
   local dir; dir="$(session_dir "$session")"
   [[ ! -e "$dir" ]] || die "session '$session' already exists. Drive it, or run: ft-verify cleanup $session"
   if [[ "$mode" == real ]]; then
@@ -93,11 +94,11 @@ cmd_launch() {
   fi
 
   ensure_playwright_cli
-  build_extension "$mode"
+  local build_dir; build_dir="$(build_extension "$mode")"
 
   # A private copy keeps this session stable while other runs rebuild .output.
   mkdir -p "$dir/out"
-  cp -R "$EXTENSION_APP/.output/chromium-mv3" "$dir/extension"
+  cp -R "$build_dir" "$dir/extension"
   echo "$mode" > "$dir/mode"
   extension_id_for_path "$dir/extension" > "$dir/extension-id"
 
@@ -122,7 +123,7 @@ EOF
 
   pw "$session" open --config="$dir/cli.config.json" >/dev/null
   wait_for_service_worker "$session"
-  [[ "$mode" == mock ]] && cmd_arm_mocks "$session" >/dev/null
+  if uses_mocks "$mode"; then cmd_arm_mocks "$session" >/dev/null; fi
   echo "session=$session mode=$mode extension_id=$(cat "$dir/extension-id")"
   echo "popup:   chrome-extension://$(cat "$dir/extension-id")/popup.html"
   echo "options: chrome-extension://$(cat "$dir/extension-id")/options.html"
@@ -141,7 +142,7 @@ wait_for_service_worker() {
 # playwright-cli hides navigator.webdriver, so the flag is the only switch.
 cmd_arm_mocks() {
   require_session "${1:-}"
-  [[ "$(cat "$(session_dir "$1")/mode")" == mock ]] || die "session '$1' runs in real mode; mocks stay off"
+  uses_mocks "$(cat "$(session_dir "$1")/mode")" || die "session '$1' runs in real mode; mocks stay off"
   pw "$1" --raw run-code "async page => {
     const workers = page.context().serviceWorkers()
     await Promise.all(workers.map(w => w.evaluate(() => { globalThis.__JIRA_BOOST_E2E__ = true })))
@@ -164,7 +165,7 @@ cmd_sign_in() {
   require_session "${1:-}"
   local session="$1" dir host email token
   dir="$(session_dir "$session")"
-  if [[ "$(cat "$dir/mode")" == mock ]]; then
+  if uses_mocks "$(cat "$dir/mode")"; then
     cmd_arm_mocks "$session" >/dev/null
     host="$MOCK_HOST" email="$MOCK_EMAIL" token="$MOCK_TOKEN"
   else
@@ -217,7 +218,7 @@ cmd_doctor() {
   grep -rqs "No e2e Jira mock" "$dir/extension" && built_with_mocks=true
   echo "mode=$mode build_contains_mocks=$built_with_mocks repo_version=$(node -p "require('$REPO_ROOT/package.json').version")"
   if [[ "$mode" == real && "$built_with_mocks" == true ]]; then die "real-mode session was built with mocks"; fi
-  if [[ "$mode" == mock ]] && [[ "$(jq -r .mocksArmed "$dir/doctor.json")" != true ]]; then
+  if uses_mocks "$mode" && [[ "$(jq -r .mocksArmed "$dir/doctor.json")" != true ]]; then
     die "mock flag is off (service worker restarted?). Run: ft-verify arm-mocks $session"
   fi
   echo "doctor: OK"
@@ -244,40 +245,88 @@ cmd_cleanup() {
   echo "cleaned session '$1'. Evidence kept in $EVIDENCE_ROOT"
 }
 
-cmd_website_run() {
-  # Dummy OAuth values let the relay build its Atlassian redirect. Real values
-  # from the environment win. Never print them.
-  export NEXT_PUBLIC_WEBSITE_URL="${NEXT_PUBLIC_WEBSITE_URL:-http://localhost:$WEBSITE_PORT}"
-  export JIRA_CLIENT_ID="${JIRA_CLIENT_ID:-verify-dummy-client-id}"
-  export JIRA_CLIENT_SECRET="${JIRA_CLIENT_SECRET:-verify-dummy-client-secret}"
-  cd "$REPO_ROOT/apps/website"
-  exec pnpm exec next dev -p "$WEBSITE_PORT"
+# Read the stored credentials through the extension service worker.
+auth_snapshot() {
+  pw "$1" --raw run-code "async page => {
+    const worker = page.context().serviceWorkers().find(w => w.url().includes('$(cat "$(session_dir "$1")/extension-id")'))
+    return worker.evaluate(async () => {
+      const { AuthCredentials: c } = await chrome.storage.local.get('AuthCredentials')
+      return c ? { type: c.type, host: c.host, instanceId: c.oauth?.instance_id ?? null, user: c.userInfo?.name ?? null } : null
+    })
+  }"
 }
 
-# Exercise the OAuth relay contract and save the transcript as evidence.
-cmd_website_probe() {
-  cmd_website_doctor >/dev/null
-  local out base="http://localhost:$WEBSITE_PORT"
-  out="$(evidence_dir)/website"
-  mkdir -p "$out"
-  {
-    echo "\$ GET /"; curl -s -o /dev/null -w "status=%{http_code}\n" "$base/"
-    echo "\$ GET /privacy"; curl -s -o /dev/null -w "status=%{http_code}\n" "$base/privacy"
-    echo "\$ GET /api/auth/jira (no extension_id)"; curl -s -w " status=%{http_code}\n" "$base/api/auth/jira"
-    echo "\$ GET /api/auth/jira?extension_id=verify-ext"
-    curl -s -D - -o /dev/null "$base/api/auth/jira?extension_id=verify-ext" \
-      | grep -iE '^HTTP|^location' | sed -E 's/(client_id=)[^&]*/\1<redacted>/' | cut -c1-160
-    echo "\$ POST /api/auth/jira/refresh {}"
-    curl -s -w " status=%{http_code}\n" -X POST -H 'content-type: application/json' -d '{}' "$base/api/auth/jira/refresh"
-  } | tee "$out/relay.txt"
-  echo "saved $out/relay.txt"
+set_mock_flag() {
+  pw "$1" --raw run-code "async page => {
+    await Promise.all(page.context().serviceWorkers().map(w => w.evaluate(on => { globalThis.__JIRA_BOOST_E2E__ = on }, $2)))
+  }" >/dev/null
 }
 
-cmd_website_doctor() {
-  local body
-  body="$(curl -sf "http://localhost:$WEBSITE_PORT/api/hello")" || die "nothing answers on :$WEBSITE_PORT/api/hello"
-  [[ "$body" == "Hello, from API!" ]] || die "port $WEBSITE_PORT answers, but not with the Fast Track website: $body"
-  echo "website on :$WEBSITE_PORT OK"
+# Plays the website's half of the OAuth handoff. The callback page normally
+# dispatches `jira-oauth-tokens` after a real Atlassian code exchange; here a
+# fake token is dispatched on a localhost page, and the command reports what
+# the extension did: the `jira-oauth-confirmation` reply and the stored
+# credentials before and after.
+cmd_oauth_handoff() {
+  require_session "${1:-}"
+  local session="$1" case="${2:-}" dir page_url probe_pid=""
+  dir="$(session_dir "$session")"
+  [[ "$(cat "$dir/mode")" == mock-dev ]] || die "oauth-handoff needs a mock-dev session: the OAuth content script runs on localhost only in development builds"
+
+  local tokens="{ access_token: 'fake-access-token', refresh_token: 'fake-refresh-token', expires_at: new Date(Date.now() + 3600000).toISOString() }"
+  case "$case" in
+    valid | mocks-off) page_url="http://localhost:4000/auth/jira/callback" ;;
+    bad-schema)
+      page_url="http://localhost:4000/auth/jira/callback"
+      tokens="{ access_token: 'fake-access-token', expires_at: 'tomorrow' }" ;;
+    # The content script also runs on other localhost ports in dev builds, so
+    # this case exercises the origin allowlist, not the manifest match.
+    wrong-origin)
+      page_url="http://localhost:4001/auth/jira/callback"
+      mkdir -p "$dir/origin-probe"
+      python3 -m http.server 4001 --bind 127.0.0.1 --directory "$dir/origin-probe" >/dev/null 2>&1 &
+      probe_pid=$!
+      sleep 1 ;;
+    *) die "case must be valid, bad-schema, wrong-origin, or mocks-off" ;;
+  esac
+  if [[ "$page_url" == http://localhost:4000/* ]]; then
+    [[ "$(curl -sf http://localhost:4000/api/hello)" == "Hello, from API!" ]] \
+      || die "the website is not on :4000. Start it with the verify-fast-track-website skill"
+  fi
+
+  if [[ "$case" == mocks-off ]]; then set_mock_flag "$session" false; else set_mock_flag "$session" true; fi
+
+  local before confirmation after
+  before="$(auth_snapshot "$session")"
+  confirmation="$(pw "$session" --raw run-code "async page => {
+    await page.goto('$page_url')
+    return page.evaluate(() => new Promise(resolve => {
+      const timer = setTimeout(() => resolve('timeout'), 10000)
+      window.addEventListener('jira-oauth-confirmation', event => { clearTimeout(timer); resolve(event.detail) }, { once: true })
+      window.dispatchEvent(new CustomEvent('jira-oauth-tokens', { detail: { source: 'page', tokenData: $tokens } }))
+    }))
+  }")"
+  after="$(auth_snapshot "$session")"
+
+  [[ -n "$probe_pid" ]] && kill "$probe_pid"
+  set_mock_flag "$session" true
+
+  local out; out="$(evidence_dir)"; mkdir -p "$out"
+  jq -n --arg case "$case" --arg page "$page_url" --argjson confirmation "$confirmation" \
+    --argjson before "$before" --argjson after "$after" \
+    '{case: $case, page: $page, confirmation: $confirmation, authBefore: $before, authAfter: $after}' \
+    | tee "$out/oauth-handoff-$case.json"
+
+  local unchanged=false success
+  [[ "$before" == "$after" ]] && unchanged=true
+  success="$(jq -r 'if type == "object" then .success else . end' <<<"$confirmation")"
+  local pass=false
+  case "$case" in
+    valid) [[ "$success" == true && "$(jq -r .type <<<"$after")" == oauth && "$(jq -r .instanceId <<<"$after")" == test-cloud-id ]] && pass=true ;;
+    bad-schema | mocks-off) [[ "$success" == false && "$unchanged" == true ]] && pass=true ;;
+    wrong-origin) [[ "$success" == timeout && "$unchanged" == true ]] && pass=true ;;
+  esac
+  if [[ "$pass" == true ]]; then echo "oauth-handoff $case: PASS"; else die "oauth-handoff $case: FAIL (see $out/oauth-handoff-$case.json)"; fi
 }
 
 case "${1:-help}" in
@@ -287,10 +336,8 @@ case "${1:-help}" in
   open) cmd_open "${@:2}" ;;
   doctor) cmd_doctor "${@:2}" ;;
   evidence) cmd_evidence "${@:2}" ;;
+  oauth-handoff) cmd_oauth_handoff "${@:2}" ;;
   cleanup) cmd_cleanup "${@:2}" ;;
-  website-run) cmd_website_run ;;
-  website-doctor) cmd_website_doctor ;;
-  website-probe) cmd_website_probe ;;
   help | -h | --help) usage ;;
   *) usage; exit 1 ;;
 esac

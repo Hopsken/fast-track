@@ -19,15 +19,15 @@ fast-track.work serves the landing and privacy pages and relays the Jira OAuth 2
 
 Preconditions:
 
-- `amp orb service start ft-verify-website --command "$PWD/$FT website-run"` and `$FT website-doctor` OK.
+- The website runs per the skill Launch section, and `$FW doctor` is OK.
 
-- **Relay contract.** Run `$FT website-probe`. `website/relay.txt` shows `/` and `/privacy` `status=200`, the 400 for missing `extension_id`, `HTTP/1.1 307` with a `location: https://auth.atlassian.com/authorize?...` line, and the 400 for the empty refresh body.
-- **Landing page.** `playwright-cli -s=web open --browser=chromium http://localhost:4000`, then `playwright-cli -s=web screenshot --filename=$PWD/.amp/in/artifacts/verify-fast-track/<run>/website/landing.png`. Inspect the screenshot.
+- **Relay contract.** Run `$FW probe`. `relay.txt` shows `/` and `/privacy` `status=200`, the 400 for missing `extension_id`, `HTTP/1.1 307` with a `location: https://auth.atlassian.com/authorize?...` line, and the 400 for the empty refresh body.
+- **Landing page.** `playwright-cli -s=web open --browser=chromium http://localhost:4000`, then `playwright-cli -s=web screenshot --filename=$PWD/.amp/in/artifacts/verify-fast-track-website/<run>/landing.png`. Inspect the screenshot.
 - **Callback error.** `playwright-cli -s=web goto "http://localhost:4000/auth/jira/callback?error=access_denied"`. The snapshot has heading `Authentication Failed` and text `Authentication was cancelled or access was denied`. Then `playwright-cli -s=web close`.
 
 ## Gotchas
 
 - With dummy client values the redirect is built, but Atlassian rejects the client. A full sign-in needs real `JIRA_CLIENT_ID`/`JIRA_CLIENT_SECRET` and an Atlassian app whose callback is `http://localhost:4000/auth/jira/callback`, plus a human login. Report it as not verified otherwise.
-- The token handoff to the extension uses the content script, which matches `localhost` only in a dev build (`pnpm dev:extension`). `$FT launch` builds production, so the callback-to-extension step needs a dev build.
+- The token handoff to the extension is verified in the extension skill: `verify-fast-track`, `features/connect-jira.md`, step `OAuth handoff`. Run it whenever you change `/auth/jira/callback` or `ExtensionCommunicator.tsx` (event names, payload shape, origin).
 - Plain `playwright-cli open` defaults to Google Chrome, which the orb does not have. Always pass `--browser=chromium`.
-- Port 4000 is fixed. Check `website-doctor` before starting to see whether another instance already owns it.
+- Port 4000 is fixed. Check `$FW doctor` before starting to see whether another instance already owns it.
