@@ -1,0 +1,296 @@
+#!/usr/bin/env bash
+# Drive the real Fast Track extension and website for verification.
+# Run `ft-verify help` for usage. Every browser command goes through
+# playwright-cli (the agent CLI), not the @playwright/test package that the
+# repo's e2e suite uses.
+set -euo pipefail
+
+PLAYWRIGHT_CLI_VERSION="0.1.22"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && git rev-parse --show-toplevel)"
+EXTENSION_APP="$REPO_ROOT/apps/extension"
+STATE_ROOT="${FT_VERIFY_ROOT:-/tmp/ft-verify}"
+EVIDENCE_ROOT="${FT_VERIFY_EVIDENCE:-$REPO_ROOT/.amp/in/artifacts/verify-fast-track}"
+WEBSITE_PORT="${FT_WEBSITE_PORT:-4000}"
+WEBSITE_SERVICE="ft-verify-website"
+
+# Same values as tests/e2e/fixtures/extension.ts; the mock /myself returns "Test User".
+MOCK_HOST="https://test.atlassian.net"
+MOCK_EMAIL="test@example.com"
+MOCK_TOKEN="test-api-key"
+
+usage() {
+  cat <<'EOF'
+Usage: ft-verify <command> [args]
+
+Extension (one isolated browser per session name):
+  launch <session> [mock|real]   Build, copy, and open the extension. Default mode: mock.
+  sign-in <session>              Connect Jira through the options page "API key" form.
+  arm-mocks <session>            Re-enable the mock Jira adapter in the service worker (mock mode).
+  open <session> popup|options   Open popup.html or options.html in the current tab.
+  doctor <session>               Read-only health check. Exit code 0 means "safe to drive".
+  evidence <session> <name>      Save <name>.png and <name>.aria.md under the run's evidence dir.
+  cleanup <session>              Close the browser this session started and delete its scratch dir.
+
+Website (fast-track.work: landing page + Jira OAuth relay):
+  website-run                    Run `next dev` in the foreground (use it as a service command).
+  website-doctor                 Check that the website on $FT_WEBSITE_PORT answers.
+  website-probe                  Call the OAuth relay routes and save relay.txt as evidence.
+
+Environment:
+  FT_VERIFY_RUN        Evidence sub-directory name (default: today's date).
+  JIRA_VERIFY_HOST, JIRA_VERIFY_EMAIL, JIRA_VERIFY_API_TOKEN   Required for real mode.
+EOF
+}
+
+die() { echo "ft-verify: $*" >&2; exit 1; }
+
+session_dir() { echo "$STATE_ROOT/$1"; }
+evidence_dir() { echo "$EVIDENCE_ROOT/${FT_VERIFY_RUN:-$(date +%Y-%m-%d)}"; }
+pw() { playwright-cli -s="$1" "${@:2}"; }
+
+require_session() {
+  [[ -n "${1:-}" ]] || die "missing <session>"
+  [[ -d "$(session_dir "$1")" ]] || die "no session '$1' under $STATE_ROOT. Run: ft-verify launch $1"
+}
+
+ensure_playwright_cli() {
+  if [[ "$(playwright-cli --version 2>/dev/null)" != "$PLAYWRIGHT_CLI_VERSION" ]]; then
+    npm install -g "@playwright/cli@$PLAYWRIGHT_CLI_VERSION" >/dev/null
+  fi
+  # No-op when the browser is already downloaded.
+  playwright-cli install-browser chromium >/dev/null
+}
+
+# Chromium derives an unpacked extension's ID from its absolute path.
+extension_id_for_path() {
+  printf %s "$1" | sha256sum | cut -c1-32 | tr 0-9a-f a-p
+}
+
+build_extension() {
+  local mode="$1"
+  if [[ "$mode" == mock ]]; then
+    (cd "$EXTENSION_APP" && VITE_E2E_MOCKS=1 pnpm exec turbo run build --filter=extension... --output-logs=errors-only)
+  else
+    (cd "$EXTENSION_APP" && env -u VITE_E2E_MOCKS pnpm exec turbo run build --filter=extension... --output-logs=errors-only)
+  fi
+}
+
+cmd_launch() {
+  local session="${1:-}" mode="${2:-mock}"
+  [[ -n "$session" ]] || die "missing <session>"
+  [[ "$mode" == mock || "$mode" == real ]] || die "mode must be mock or real"
+  local dir; dir="$(session_dir "$session")"
+  [[ ! -e "$dir" ]] || die "session '$session' already exists. Drive it, or run: ft-verify cleanup $session"
+  if [[ "$mode" == real ]]; then
+    : "${JIRA_VERIFY_HOST:?real mode needs JIRA_VERIFY_HOST}"
+    : "${JIRA_VERIFY_EMAIL:?real mode needs JIRA_VERIFY_EMAIL}"
+    : "${JIRA_VERIFY_API_TOKEN:?real mode needs JIRA_VERIFY_API_TOKEN}"
+    # Fail before the build when Jira rejects the credentials, so a 401 is not
+    # mistaken for an extension bug.
+    local status
+    status="$(curl -s -o /dev/null -w '%{http_code}' -u "$JIRA_VERIFY_EMAIL:$JIRA_VERIFY_API_TOKEN" "${JIRA_VERIFY_HOST%/}/rest/api/3/myself")"
+    [[ "$status" == 200 ]] || die "Jira rejected JIRA_VERIFY_* credentials (GET /rest/api/3/myself -> $status). Check that the token is valid and belongs to JIRA_VERIFY_EMAIL."
+  fi
+
+  ensure_playwright_cli
+  build_extension "$mode"
+
+  # A private copy keeps this session stable while other runs rebuild .output.
+  mkdir -p "$dir/out"
+  cp -R "$EXTENSION_APP/.output/chromium-mv3" "$dir/extension"
+  echo "$mode" > "$dir/mode"
+  extension_id_for_path "$dir/extension" > "$dir/extension-id"
+
+  cat > "$dir/cli.config.json" <<EOF
+{
+  "browser": {
+    "browserName": "chromium",
+    "userDataDir": "$dir/profile",
+    "launchOptions": {
+      "channel": "chromium",
+      "headless": true,
+      "args": [
+        "--disable-extensions-except=$dir/extension",
+        "--load-extension=$dir/extension"
+      ]
+    },
+    "contextOptions": { "viewport": { "width": 1280, "height": 800 } }
+  },
+  "outputDir": "$dir/out"
+}
+EOF
+
+  pw "$session" open --config="$dir/cli.config.json" >/dev/null
+  wait_for_service_worker "$session"
+  [[ "$mode" == mock ]] && cmd_arm_mocks "$session" >/dev/null
+  echo "session=$session mode=$mode extension_id=$(cat "$dir/extension-id")"
+  echo "popup:   chrome-extension://$(cat "$dir/extension-id")/popup.html"
+  echo "options: chrome-extension://$(cat "$dir/extension-id")/options.html"
+}
+
+wait_for_service_worker() {
+  pw "$1" --raw run-code "async page => {
+    const context = page.context()
+    const worker = context.serviceWorkers()[0] ?? await context.waitForEvent('serviceworker', { timeout: 30000 })
+    return worker.url()
+  }" >/dev/null
+}
+
+# The mock adapter only activates when the build has VITE_E2E_MOCKS=1 AND the
+# service worker has this runtime flag (see apps/extension/src/lib/jira/index.ts).
+# playwright-cli hides navigator.webdriver, so the flag is the only switch.
+cmd_arm_mocks() {
+  require_session "${1:-}"
+  [[ "$(cat "$(session_dir "$1")/mode")" == mock ]] || die "session '$1' runs in real mode; mocks stay off"
+  pw "$1" --raw run-code "async page => {
+    const workers = page.context().serviceWorkers()
+    await Promise.all(workers.map(w => w.evaluate(() => { globalThis.__JIRA_BOOST_E2E__ = true })))
+    return workers.length
+  }"
+}
+
+cmd_open() {
+  require_session "${1:-}"
+  local page="${2:-}"
+  [[ "$page" == popup || "$page" == options ]] || die "open needs popup or options"
+  local url; url="chrome-extension://$(cat "$(session_dir "$1")/extension-id")/$page.html"
+  # Copy actions call window.close(), which closes the current tab like a real popup.
+  pw "$1" goto "$url" >/dev/null 2>&1 || pw "$1" tab-new "$url" >/dev/null
+  pw "$1" --raw eval "location.href" | grep -q "$page.html" || die "could not open $url"
+  echo "opened $page.html"
+}
+
+cmd_sign_in() {
+  require_session "${1:-}"
+  local session="$1" dir host email token
+  dir="$(session_dir "$session")"
+  if [[ "$(cat "$dir/mode")" == mock ]]; then
+    cmd_arm_mocks "$session" >/dev/null
+    host="$MOCK_HOST" email="$MOCK_EMAIL" token="$MOCK_TOKEN"
+  else
+    host="$JIRA_VERIFY_HOST" email="$JIRA_VERIFY_EMAIL" token="$JIRA_VERIFY_API_TOKEN"
+  fi
+
+  cmd_open "$session" options >/dev/null
+  pw "$session" click "getByRole('tab', { name: 'API key' })" >/dev/null
+  pw "$session" fill "getByRole('textbox', { name: 'Jira site URL' })" "$host" >/dev/null
+  pw "$session" fill "getByRole('textbox', { name: 'Jira account email' })" "$email" >/dev/null
+  # Output discarded so the token never reaches the agent transcript.
+  pw "$session" fill "getByRole('textbox', { name: 'API token' })" "$token" >/dev/null
+  pw "$session" click "getByRole('button', { name: 'Connect', exact: true })" >/dev/null
+
+  for _ in $(seq 1 30); do
+    if pw "$session" snapshot | grep -q '"Connected to '; then
+      pw "$session" snapshot | grep -E '"Connected to |heading .* \[level=3\]' | head -2
+      return 0
+    fi
+    sleep 1
+  done
+  die "options page never showed 'Connected to <host>'. Inspect: playwright-cli -s=$session snapshot; playwright-cli -s=$session console"
+}
+
+cmd_doctor() {
+  require_session "${1:-}"
+  local session="$1" dir id mode
+  dir="$(session_dir "$session")"
+  id="$(cat "$dir/extension-id")"
+  mode="$(cat "$dir/mode")"
+
+  playwright-cli list | grep -q -- "- $session:" || die "playwright-cli has no open browser '$session'"
+  pw "$session" --raw run-code "async page => {
+    const worker = page.context().serviceWorkers().find(w => w.url().includes('$id'))
+    if (!worker) return { ok: false, reason: 'extension service worker $id not running' }
+    return worker.evaluate(async () => {
+      const { AuthCredentials } = await chrome.storage.local.get('AuthCredentials')
+      return {
+        ok: true,
+        extensionId: chrome.runtime.id,
+        version: chrome.runtime.getManifest().version_name ?? chrome.runtime.getManifest().version,
+        mocksArmed: globalThis.__JIRA_BOOST_E2E__ === true,
+        signedInHost: AuthCredentials?.host ?? null
+      }
+    })
+  }" | tee "$dir/doctor.json"
+  [[ "$(jq -r .ok "$dir/doctor.json")" == true ]] || die "unhealthy: see $dir/doctor.json"
+
+  local built_with_mocks=false
+  grep -rqs "No e2e Jira mock" "$dir/extension" && built_with_mocks=true
+  echo "mode=$mode build_contains_mocks=$built_with_mocks repo_version=$(node -p "require('$REPO_ROOT/package.json').version")"
+  if [[ "$mode" == real && "$built_with_mocks" == true ]]; then die "real-mode session was built with mocks"; fi
+  if [[ "$mode" == mock ]] && [[ "$(jq -r .mocksArmed "$dir/doctor.json")" != true ]]; then
+    die "mock flag is off (service worker restarted?). Run: ft-verify arm-mocks $session"
+  fi
+  echo "doctor: OK"
+}
+
+cmd_evidence() {
+  require_session "${1:-}"
+  [[ -n "${2:-}" ]] || die "missing <name>"
+  local out; out="$(evidence_dir)"
+  mkdir -p "$out"
+  pw "$1" screenshot --filename="$out/$2.png" >/dev/null
+  pw "$1" snapshot --filename="$out/$2.aria.md" >/dev/null
+  echo "$out/$2.png"
+  echo "$out/$2.aria.md"
+}
+
+cmd_cleanup() {
+  [[ -n "${1:-}" ]] || die "missing <session>"
+  local dir; dir="$(session_dir "$1")"
+  if playwright-cli list | grep -q -- "- $1:"; then
+    pw "$1" close >/dev/null
+  fi
+  rm -rf "$dir"
+  echo "cleaned session '$1'. Evidence kept in $EVIDENCE_ROOT"
+}
+
+cmd_website_run() {
+  # Dummy OAuth values let the relay build its Atlassian redirect. Real values
+  # from the environment win. Never print them.
+  export NEXT_PUBLIC_WEBSITE_URL="${NEXT_PUBLIC_WEBSITE_URL:-http://localhost:$WEBSITE_PORT}"
+  export JIRA_CLIENT_ID="${JIRA_CLIENT_ID:-verify-dummy-client-id}"
+  export JIRA_CLIENT_SECRET="${JIRA_CLIENT_SECRET:-verify-dummy-client-secret}"
+  cd "$REPO_ROOT/apps/website"
+  exec pnpm exec next dev -p "$WEBSITE_PORT"
+}
+
+# Exercise the OAuth relay contract and save the transcript as evidence.
+cmd_website_probe() {
+  cmd_website_doctor >/dev/null
+  local out base="http://localhost:$WEBSITE_PORT"
+  out="$(evidence_dir)/website"
+  mkdir -p "$out"
+  {
+    echo "\$ GET /"; curl -s -o /dev/null -w "status=%{http_code}\n" "$base/"
+    echo "\$ GET /privacy"; curl -s -o /dev/null -w "status=%{http_code}\n" "$base/privacy"
+    echo "\$ GET /api/auth/jira (no extension_id)"; curl -s -w " status=%{http_code}\n" "$base/api/auth/jira"
+    echo "\$ GET /api/auth/jira?extension_id=verify-ext"
+    curl -s -D - -o /dev/null "$base/api/auth/jira?extension_id=verify-ext" \
+      | grep -iE '^HTTP|^location' | sed -E 's/(client_id=)[^&]*/\1<redacted>/' | cut -c1-160
+    echo "\$ POST /api/auth/jira/refresh {}"
+    curl -s -w " status=%{http_code}\n" -X POST -H 'content-type: application/json' -d '{}' "$base/api/auth/jira/refresh"
+  } | tee "$out/relay.txt"
+  echo "saved $out/relay.txt"
+}
+
+cmd_website_doctor() {
+  local body
+  body="$(curl -sf "http://localhost:$WEBSITE_PORT/api/hello")" || die "nothing answers on :$WEBSITE_PORT/api/hello"
+  [[ "$body" == "Hello, from API!" ]] || die "port $WEBSITE_PORT answers, but not with the Fast Track website: $body"
+  echo "website on :$WEBSITE_PORT OK"
+}
+
+case "${1:-help}" in
+  launch) cmd_launch "${@:2}" ;;
+  sign-in) cmd_sign_in "${@:2}" ;;
+  arm-mocks) cmd_arm_mocks "${@:2}" ;;
+  open) cmd_open "${@:2}" ;;
+  doctor) cmd_doctor "${@:2}" ;;
+  evidence) cmd_evidence "${@:2}" ;;
+  cleanup) cmd_cleanup "${@:2}" ;;
+  website-run) cmd_website_run ;;
+  website-doctor) cmd_website_doctor ;;
+  website-probe) cmd_website_probe ;;
+  help | -h | --help) usage ;;
+  *) usage; exit 1 ;;
+esac
