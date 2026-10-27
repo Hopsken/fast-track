@@ -7,6 +7,8 @@ import { isValidCredentials } from '@/utils/auth'
 import { boostApi } from '../api'
 import { fromStorage$, getStorageItem } from '../storage'
 
+import { isJiraE2ERuntimeEnabled } from './e2e/is-enabled'
+
 const log = getLogger('AuthManager')
 
 const TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000
@@ -84,7 +86,14 @@ export class AuthManager {
     }
   }
 
-  private static async getAccessibleResources(access_token: string) {
+  private static async getAccessibleResources(
+    access_token: string
+  ): Promise<AccessibleResource[]> {
+    if (import.meta.env.VITE_E2E_MOCKS === '1' && isJiraE2ERuntimeEnabled()) {
+      const { E2E_ACCESSIBLE_RESOURCES } = await import('./e2e/oauth-mocks')
+      return E2E_ACCESSIBLE_RESOURCES
+    }
+
     const response = await ky.get<AccessibleResource[]>(
       'https://api.atlassian.com/oauth/token/accessible-resources',
       {
